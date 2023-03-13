@@ -30,10 +30,11 @@ jobs:
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
         with:
           token_format: 'access_token'
+          credentials_json: ${{ secrets.HELM_RELEASE_CREDENTIALS }}
 
       - name: Login to Helm registry using Google Auth token
         run: |-
-          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://{{ env.ARTIFACT_REGISTRY }}
+          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
 
       - name: Read Helm Chart
         id: chart-info
@@ -46,4 +47,4 @@ jobs:
         run: helm package helm-charts/
 
       - name: Push Helm Charts to Google Artifact Registry
-        run: helm push {{ steps.chart-info.outputs.name }}-{{ steps.chart-info.outputs.version }}.tgz oci://{{ env.ARTIFACT_REGISTRY }}/{{ env.HELM_REPOSITORY }}/{{ env.HELM_CHART }}
+        run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}

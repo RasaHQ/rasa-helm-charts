@@ -22,7 +22,7 @@ jobs:
 
       - name: show github output
         run: |
-          echo "ajla=jugo" > $GITHUB_OUTPUT
+          echo "ajla=jugo" >> $GITHUB_OUTPUT
           echo "$GITHUB_OUTPUT"
 
       # - name: Install Helm 3

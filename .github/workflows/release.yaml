@@ -20,36 +20,31 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: show github output
-        run: |
-          echo "ajla=jugo" >> $GITHUB_OUTPUT
-          echo $GITHUB_OUTPUT
+      - name: Install Helm 3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        with:
+          version: v3.11.2
 
-      # - name: Install Helm 3
-      #   uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
-      #   with:
-      #     version: v3.11.2
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
+        with:
+          token_format: 'access_token'
+          credentials_json: ${{ secrets.HELM_RELEASE_CREDENTIALS }}
 
-      # - name: Authenticate to Google Cloud
-      #   id: auth
-      #   uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
-      #   with:
-      #     token_format: 'access_token'
-      #     credentials_json: ${{ secrets.HELM_RELEASE_CREDENTIALS }}
+      - name: Login to Helm registry using Google Auth token
+        run: |-
+          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
 
-      # - name: Login to Helm registry using Google Auth token
-      #   run: |-
-      #     echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
+      - name: Read Helm Chart
+        id: chart-info
+        uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+        with:
+          path: helm-charts/
 
-      # - name: Read Helm Chart
-      #   id: chart-info
-      #   uses: jacobtomlinson/gha-read-helm-chart@ca2f3b5038208efd3279dbe941e448d7ccdccbf6
-      #   with:
-      #     path: helm-charts/
+      - name: Package Helm release
+        id: package
+        run: helm package helm-charts/
 
-      # - name: Package Helm release
-      #   id: package
-      #   run: helm package helm-charts/
-
-      # - name: Push Helm Charts to Google Artifact Registry
-      #   run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
+      - name: Push Helm Charts to Google Artifact Registry
+        run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}

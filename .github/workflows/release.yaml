@@ -23,7 +23,7 @@ jobs:
       - name: show github output
         run: |
           echo "ajla=jugo" >> $GITHUB_OUTPUT
-          echo "$GITHUB_OUTPUT"
+          echo $GITHUB_OUTPUT
 
       # - name: Install Helm 3
       #   uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78

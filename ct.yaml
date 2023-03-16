@@ -1,4 +1,8 @@
 target-branch: main
+chart-repos:
+  - bitnami=https://charts.bitnami.com/bitnami
+  - rasa=https://helm.rasa.com
+helm-extra-args: --timeout 300s
 chart-dirs:
   - charts
 validate-maintainers: false

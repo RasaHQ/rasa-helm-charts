@@ -18,7 +18,7 @@ Rasa Action Server Helm chart for Kubernetes
 
 | Repository | Name | Version |
 |------------|------|---------|
-| https://helm.rasa.com | rasa-common | ~1.0.2 |
+| https://helm.rasa.com | rasa-common | 1.x.x |
 
 ## Values
 

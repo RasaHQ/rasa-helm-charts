@@ -9,8 +9,8 @@ A Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm repo add foo-bar http://charts.foo-bar.com
-$ helm install my-release foo-bar/greeting-service
+$ helm pull oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/IMAGE --version VERSION
+$ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/greeting-service --version VERSION
 ```
 
 ## Values
@@ -33,7 +33,7 @@ $ helm install my-release foo-bar/greeting-service
 | ingress.hosts[0] | object | `{"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}` | Ingress hosts |
 | ingress.hosts[0].paths[0] | object | `{"path":"/","pathType":"ImplementationSpecific"}` | Ingress hosts path |
 | ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` | Ingress hosts path type |
-| ingress.tls | list | `[]` | Ingress TLS |
+| ingress.tls | list | `[]` |  |
 | nameOverride | string | `"greeting-service"` | Chart name override |
 | nodeSelector | object | `{}` | Specifies node selector |
 | podAnnotations | object | `{}` | Annotations to add to the pods |
@@ -47,15 +47,14 @@ $ helm install my-release foo-bar/greeting-service
 | redis.image.pullPolicy | string | `"IfNotPresent"` | Redis image pull policy |
 | redis.image.repository | string | `"redis"` | Redis image repository |
 | redis.image.tag | string | `"alpine3.17"` | Redis image tag |
-| redis.imagePullSecrets | list | `[]` | Redis image pull secrets for private repositories |
-| redis.nodeSelector | object | `{}` | Specifies Redis node selector |
-| redis.podAnnotations | object | `{}` | Redis pod annotations |
+| redis.imagePullSecrets | list | `[]` |  |
+| redis.nodeSelector | object | `{}` |  |
+| redis.podAnnotations | object | `{}` |  |
 | redis.podSecurityContext | object | `{}` | Redis pod security context |
 | redis.replicaCount | int | `1` | Specifies Redis replica counts |
 | redis.resources.limits | object | `{"cpu":"100m","memory":"128Mi"}` | Redis resource limits |
 | redis.resources.limits.cpu | string | `"100m"` | Redis CPU resource limits |
 | redis.resources.limits.memory | string | `"128Mi"` | Redis Memory resource limits |
-| redis.resources.requests | object | `{"cpu":"100m","memory":"128Mi"}` | Redis resource requests |
 | redis.resources.requests.cpu | string | `"100m"` | Redis CPU resource requests |
 | redis.resources.requests.memory | string | `"128Mi"` | Redis Memory resource requests |
 | redis.securityContext | object | `{}` | Redis security context |
@@ -69,7 +68,6 @@ $ helm install my-release foo-bar/greeting-service
 | resources.limits | object | `{"cpu":"200m","memory":"128Mi"}` | Resource limits |
 | resources.limits.cpu | string | `"200m"` | Resource CPU limits |
 | resources.limits.memory | string | `"128Mi"` | Resource Memory limits |
-| resources.requests | object | `{"cpu":"100m","memory":"128Mi"}` | Resource requests |
 | resources.requests.cpu | string | `"100m"` | Resource CPU requests |
 | resources.requests.memory | string | `"128Mi"` | Resource Memory requests |
 | securityContext | object | `{}` | Security context |

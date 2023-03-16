@@ -8,8 +8,8 @@
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm repo add foo-bar http://charts.foo-bar.com
-$ helm install my-release foo-bar/{{ template "chart.name" . }}
+$ helm pull oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/IMAGE --version VERSION
+$ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/{{ template "chart.name" . }} --version VERSION
 ```
 
 {{ template "chart.requirementsSection" . }}

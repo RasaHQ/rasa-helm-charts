@@ -1,3 +1,4 @@
+---
 # Default values for helm.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
@@ -7,28 +8,28 @@ replicaCount: 1
 
 image:
   # -- URL to the image repository
-  repository: miraai/user-greeting-service
+    repository: miraai/user-greeting-service
   # -- Image pull policy
-  pullPolicy: IfNotPresent
+    pullPolicy: IfNotPresent
   # -- Image tag
   # Overrides the image tag whose default is the chart appVersion.
-  tag: v2
+    tag: v2
 
 # -- Image pull secrets for private repositories
 imagePullSecrets: []
 # -- Chart name override
-nameOverride: "greeting-service"
+nameOverride: greeting-service
 # -- Full chart name override
-fullnameOverride: "greeting-service"
+fullnameOverride: greeting-service
 
 serviceAccount:
   # -- Specifies whether a service account should be created
-  create: true
+    create: true
   # -- Annotations to add to the service account
-  annotations: {}
+    annotations: {}
   # -- The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
-  name: ""
+    name: ''
 
 # -- Annotations to add to the pods
 podAnnotations: {}
@@ -48,57 +49,57 @@ securityContext: {}
 
 service:
   # -- Service type
-  type: ClusterIP
+    type: ClusterIP
   # -- Service port
-  port: 9090
+    port: 9090
 
 ingress:
   # -- Specifies whether an ingress should be created
-  enabled: false
+    enabled: false
   # -- Ingress class name
-  className: ""
+    className: ''
   # -- Annotation to add to the ingress
-  annotations: {}
+    annotations: {}
     # kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
-  hosts:
+    hosts:
     # -- Ingress hosts
-    - host: chart-example.local
-      paths:
+        - host: chart-example.local
+          paths:
         # -- Ingress hosts path
-        - path: /
+              - path: /
           # -- Ingress hosts path type
-          pathType: ImplementationSpecific
+                pathType: ImplementationSpecific
   # -- Ingress TLS
-  tls: []
+    tls: []
   #  - secretName: chart-example-tls
   #    hosts:
   #      - chart-example.local
 
 resources:
   # -- Resource limits
-  limits:
+    limits:
     # -- Resource CPU limits
-    cpu: 200m
+        cpu: 200m
     # -- Resource Memory limits
-    memory: 128Mi
+        memory: 128Mi
   # -- Resource requests
-  requests:
+    requests:
     # -- Resource CPU requests
-    cpu: 100m
+        cpu: 100m
     # -- Resource Memory requests
-    memory: 128Mi
+        memory: 128Mi
 
 autoscaling:
   # -- Specifies whether to enable autoscaling
-  enabled: false
+    enabled: false
   # -- Specifies minimum number of replicas
-  minReplicas: 1
+    minReplicas: 1
   # -- Specifies maximum number of replicas
-  maxReplicas: 5
+    maxReplicas: 5
   # -- Specifies target CPU utilization in precentages when to start scaling based on CPU
   # Use `targetMemoryUtilizationPercentage` for scaling based on Memory utilization
-  targetCPUUtilizationPercentage: 80
+    targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 
 # -- Specifies node selector
@@ -112,74 +113,74 @@ affinity: {}
 
 redis:
   # -- Specifies Redis replica counts
-  replicaCount: 1
+    replicaCount: 1
 
-  image:
+    image:
     # -- Redis image repository
-    repository: redis
+        repository: redis
     # -- Redis image pull policy
-    pullPolicy: IfNotPresent
+        pullPolicy: IfNotPresent
     # -- Redis image tag
-    tag: alpine3.17
+        tag: alpine3.17
 
   # -- Redis image pull secrets for private repositories
-  imagePullSecrets: []
+    imagePullSecrets: []
 
-  serviceAccount:
+    serviceAccount:
     # -- Specifies whether to enable Redis service account creation
-    create: true
+        create: true
     # -- Specifies Redis service account annotations
-    annotations: 
+        annotations:
     # -- Specifies Redis service account name.
     # If left empty, default service account name will be used.
-    name: ""
+        name: ''
 
   # -- Redis pod annotations
-  podAnnotations: {}
+    podAnnotations: {}
   # -- Redis pod security context
-  podSecurityContext: {}
+    podSecurityContext: {}
   # -- Redis security context
-  securityContext: {}
+    securityContext: {}
 
-  service:
+    service:
     # -- Redis service type
-    type: ClusterIP
+        type: ClusterIP
     # -- Redis service port
-    port: 6379
+        port: 6379
 
-  container:
+    container:
     # -- Redis container port
-    port: 6379
+        port: 6379
 
-  resources:
+    resources:
     # -- Redis resource limits
-    limits:
+        limits:
       # -- Redis CPU resource limits
-      cpu: 100m
+            cpu: 100m
       # -- Redis Memory resource limits
-      memory: 128Mi
+            memory: 128Mi
     # -- Redis resource requests
-    requests:
+        requests:
       # -- Redis CPU resource requests
-      cpu: 100m
+            cpu: 100m
       # -- Redis Memory resource requests
-      memory: 128Mi
+            memory: 128Mi
 
-  autoscaling:
+    autoscaling:
     # -- Specifies whether to enable autoscaling
-    enabled: false
+        enabled: false
     # -- Specifies minimum number of replicas
-    minReplicas: 1
+        minReplicas: 1
     # -- Specifies maximum number of replicas
-    maxReplicas: 5
+        maxReplicas: 5
     # -- Specifies target CPU utilization in precentages when to start scaling based on CPU
     # Use `targetMemoryUtilizationPercentage` for scaling based on Memory utilization
-    targetCPUUtilizationPercentage: 80
+        targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
   # -- Specifies Redis node selector
-  nodeSelector: {}
+    nodeSelector: {}
   # -- Specifies Redis tolerations
-  tolerations: []
+    tolerations: []
   # -- Specifies Redis affinity
-  affinity: {}
+    affinity: {}

@@ -35,7 +35,7 @@ dependencies:
     repository: https://helm.rasa.com
     tags:
       - rasa-common
-    version: 1.x.x
+    version: ~1.0.2
 
 annotations:
   # See: https://artifacthub.io/docs/topics/annotations/helm/#supported-annotations

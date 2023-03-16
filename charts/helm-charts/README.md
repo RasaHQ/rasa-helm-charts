@@ -22,6 +22,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/greeting
 | autoscaling.maxReplicas | int | `5` | Specifies maximum number of replicas |
 | autoscaling.minReplicas | int | `1` | Specifies minimum number of replicas |
 | autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies target CPU utilization in precentages when to start scaling based on CPU Use `targetMemoryUtilizationPercentage` for scaling based on Memory utilization |
+| checkVersion.version | string | `"1.0.0"` |  |
 | fullnameOverride | string | `"greeting-service"` | Full chart name override |
 | image.pullPolicy | string | `"IfNotPresent"` | Image pull policy |
 | image.repository | string | `"miraai/user-greeting-service"` | URL to the image repository |

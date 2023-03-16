@@ -22,9 +22,6 @@ nameOverride: greeting-service
 # -- Full chart name override
 fullnameOverride: greeting-service
 
-checkVersion:
-  version: 1.0.0
-
 serviceAccount:
   # -- Specifies whether a service account should be created
     create: true

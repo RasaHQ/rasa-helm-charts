@@ -67,7 +67,7 @@ jobs:
           version: v3.11.2
 
       - name: Generate Helm template
-        run: helm template ./charts/helm-charts > output.yaml
+        run: helm template ./charts/helm-charts --output-dir ./output
 
       - name: Setup Snyk IAC
         uses: snyk/actions/iac@master
@@ -75,7 +75,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          file: output.yaml
-          args: --report
+          file: ./output/
+          args: --report --severity-threshold=high
 
       

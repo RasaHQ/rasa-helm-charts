@@ -48,3 +48,34 @@ jobs:
 
     # - name: Run chart-testing (install)
     #   run: ct install --config ct.yaml
+
+  snyk:
+    runs-on: ubuntu-22.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        with:
+          fetch-depth: 0
+
+      - name: Fetch history
+        run: git fetch --prune
+
+      - name: Install Helm 3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        with:
+          version: v3.11.2
+
+      - name: Generate Helm template
+        run: helm template ./charts/helm-charts --output-dir ./output
+
+      - name: Setup Snyk IAC
+        uses: snyk/actions/iac@master
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          file: ./output/
+          args: --report --severity-threshold=high
+
+      

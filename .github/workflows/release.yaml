@@ -40,11 +40,11 @@ jobs:
         id: chart-info
         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
         with:
-          path: charts/helm-charts/
+          path: charts/studio/
 
       - name: Package Helm release
         id: package
-        run: helm package charts/helm-charts/
+        run: helm package charts/studio/
 
       - name: Push Helm Charts to Google Artifact Registry
         run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}

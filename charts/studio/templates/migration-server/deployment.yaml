@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.migration-server.autoscaling.enabled }}
+  replicas: {{ .Values.migration-server.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.migration-server.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.migration-server.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "studio.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.migration-server.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.migration-server.securityContext | nindent 12 }}
+          image: "{{ .Values.migration-server.image.repository }}:{{ .Values.migration-server.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.migration-server.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.migration-server.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.migration-server.resources | nindent 12 }}
+      {{- with .Values.migration-server.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.migration-server.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.migration-server.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

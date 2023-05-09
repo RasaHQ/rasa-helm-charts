@@ -1,0 +1,28 @@
+{{- if .Values.event-ingestion.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: {{ include "studio.fullname" . }}
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: {{ include "studio.fullname" . }}
+  minReplicas: {{ .Values.event-ingestion.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.event-ingestion.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.event-ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.event-ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.event-ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.event-ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

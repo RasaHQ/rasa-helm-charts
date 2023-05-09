@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.web-client.autoscaling.enabled }}
+  replicas: {{ .Values.web-client.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.web-client.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.web-client.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "studio.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.web-client.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.web-client.securityContext | nindent 12 }}
+          image: "{{ .Values.web-client.image.repository }}:{{ .Values.web-client.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.web-client.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.web-client.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.web-client.resources | nindent 12 }}
+      {{- with .Values.web-client.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web-client.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.web-client.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

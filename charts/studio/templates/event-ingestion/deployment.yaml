@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.event-ingestion.autoscaling.enabled }}
+  replicas: {{ .Values.event-ingestion.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.event-ingestion.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.event-ingestion.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "studio.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.event-ingestion.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.event-ingestion.securityContext | nindent 12 }}
+          image: "{{ .Values.event-ingestion.image.repository }}:{{ .Values.event-ingestion.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.event-ingestion.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.event-ingestion.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.event-ingestion.resources | nindent 12 }}
+      {{- with .Values.event-ingestion.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.event-ingestion.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.event-ingestion.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

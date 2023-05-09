@@ -6,7 +6,7 @@ backend:
   replicaCount: 1
 
   image:
-  repository: nginx
+  repository: 
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -86,7 +86,7 @@ event-ingestion:
   replicaCount: 1
 
   image:
-  repository: nginx
+  repository: 
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -166,7 +166,7 @@ migration-server:
   replicaCount: 1
 
   image:
-  repository: nginx
+  repository: 
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -246,7 +246,7 @@ web-client:
   replicaCount: 1
 
   image:
-  repository: nginx
+  repository: 
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""
@@ -326,7 +326,7 @@ keycloak:
   replicaCount: 1
 
   image:
-  repository: nginx
+  repository: 
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: ""

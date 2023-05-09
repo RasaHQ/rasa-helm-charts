@@ -38,7 +38,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | backend.podSecurityContext | object | `{}` |  |
 | backend.pullPolicy | string | `"IfNotPresent"` |  |
 | backend.replicaCount | int | `1` |  |
-| backend.repository | string | `"nginx"` |  |
+| backend.repository | string | `nil` |  |
 | backend.resources | object | `{}` |  |
 | backend.securityContext | object | `{}` |  |
 | backend.service.port | int | `4000` |  |
@@ -69,7 +69,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | event-ingestion.podSecurityContext | object | `{}` |  |
 | event-ingestion.pullPolicy | string | `"IfNotPresent"` |  |
 | event-ingestion.replicaCount | int | `1` |  |
-| event-ingestion.repository | string | `"nginx"` |  |
+| event-ingestion.repository | string | `nil` |  |
 | event-ingestion.resources | object | `{}` |  |
 | event-ingestion.securityContext | object | `{}` |  |
 | event-ingestion.service.port | int | `80` |  |
@@ -100,7 +100,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | keycloak.podSecurityContext | object | `{}` |  |
 | keycloak.pullPolicy | string | `"IfNotPresent"` |  |
 | keycloak.replicaCount | int | `1` |  |
-| keycloak.repository | string | `"nginx"` |  |
+| keycloak.repository | string | `nil` |  |
 | keycloak.resources | object | `{}` |  |
 | keycloak.securityContext | object | `{}` |  |
 | keycloak.service.port | int | `8080` |  |
@@ -131,7 +131,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | migration-server.podSecurityContext | object | `{}` |  |
 | migration-server.pullPolicy | string | `"IfNotPresent"` |  |
 | migration-server.replicaCount | int | `1` |  |
-| migration-server.repository | string | `"nginx"` |  |
+| migration-server.repository | string | `nil` |  |
 | migration-server.resources | object | `{}` |  |
 | migration-server.securityContext | object | `{}` |  |
 | migration-server.service.port | int | `80` |  |
@@ -162,7 +162,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | web-client.podSecurityContext | object | `{}` |  |
 | web-client.pullPolicy | string | `"IfNotPresent"` |  |
 | web-client.replicaCount | int | `1` |  |
-| web-client.repository | string | `"nginx"` |  |
+| web-client.repository | string | `nil` |  |
 | web-client.resources | object | `{}` |  |
 | web-client.securityContext | object | `{}` |  |
 | web-client.service.port | int | `80` |  |

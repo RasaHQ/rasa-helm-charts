@@ -1,9 +1,9 @@
-{{- if .Values.event-ingestion.ingress.enabled -}}
+{{- if .Values.eventIngestion.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
-{{- $svcPort := .Values.event-ingestion.service.port -}}
-{{- if and .Values.event-ingestion.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.event-ingestion.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.event-ingestion.ingress.annotations "kubernetes.io/ingress.class" .Values.event-ingestion.ingress.className}}
+{{- $svcPort := .Values.eventIngestion.service.port -}}
+{{- if and .Values.eventIngestion.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.eventIngestion.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.eventIngestion.ingress.annotations "kubernetes.io/ingress.class" .Values.eventIngestion.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -18,17 +18,17 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "studio.labels" . | nindent 4 }}
-  {{- with .Values.event-ingestion.ingress.annotations }}
+  {{- with .Values.eventIngestion.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.event-ingestion.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.event-ingestion.ingress.className }}
+  {{- if and .Values.eventIngestion.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.eventIngestion.ingress.className }}
   {{- end }}
-  {{- if .Values.event-ingestion.ingress.tls }}
+  {{- if .Values.eventIngestion.ingress.tls }}
   tls:
-    {{- range .Values.event-ingestion.ingress.tls }}
+    {{- range .Values.eventIngestion.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -37,7 +37,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.event-ingestion.ingress.hosts }}
+    {{- range .Values.eventIngestion.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

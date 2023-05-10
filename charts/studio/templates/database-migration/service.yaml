@@ -5,9 +5,9 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.migration-server.service.type }}
+  type: {{ .Values.databaseMigration.service.type }}
   ports:
-    - port: {{ .Values.migration-server.service.port }}
+    - port: {{ .Values.databaseMigration.service.port }}
       targetPort: http
       protocol: TCP
       name: http

@@ -1,9 +1,9 @@
-{{- if .Values.web-client.ingress.enabled -}}
+{{- if .Values.databaseMigration.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
-{{- $svcPort := .Values.web-client.service.port -}}
-{{- if and .Values.web-client.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.web-client.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.web-client.ingress.annotations "kubernetes.io/ingress.class" .Values.web-client.ingress.className}}
+{{- $svcPort := .Values.databaseMigration.service.port -}}
+{{- if and .Values.databaseMigration.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.databaseMigration.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.databaseMigration.ingress.annotations "kubernetes.io/ingress.class" .Values.databaseMigration.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -18,17 +18,17 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "studio.labels" . | nindent 4 }}
-  {{- with .Values.web-client.ingress.annotations }}
+  {{- with .Values.databaseMigration.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.web-client.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.web-client.ingress.className }}
+  {{- if and .Values.databaseMigration.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.databaseMigration.ingress.className }}
   {{- end }}
-  {{- if .Values.web-client.ingress.tls }}
+  {{- if .Values.databaseMigration.ingress.tls }}
   tls:
-    {{- range .Values.web-client.ingress.tls }}
+    {{- range .Values.databaseMigration.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -37,7 +37,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.web-client.ingress.hosts }}
+    {{- range .Values.databaseMigration.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

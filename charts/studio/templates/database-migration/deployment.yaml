@@ -5,37 +5,37 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.web-client.autoscaling.enabled }}
-  replicas: {{ .Values.web-client.replicaCount }}
+  {{- if not .Values.databaseMigration.autoscaling.enabled }}
+  replicas: {{ .Values.databaseMigration.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.web-client.podAnnotations }}
+      {{- with .Values.databaseMigration.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.web-client.imagePullSecrets }}
+      {{- with .Values.databaseMigration.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.web-client.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.databaseMigration.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.web-client.securityContext | nindent 12 }}
-          image: "{{ .Values.web-client.image.repository }}:{{ .Values.web-client.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.web-client.image.pullPolicy }}
+            {{- toYaml .Values.databaseMigration.securityContext | nindent 12 }}
+          image: "{{ .Values.databaseMigration.image.repository }}:{{ .Values.databaseMigration.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.databaseMigration.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.web-client.service.port }}
+              containerPort: {{ .Values.databaseMigration.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -46,16 +46,16 @@ spec:
               path: /
               port: http
           resources:
-            {{- toYaml .Values.web-client.resources | nindent 12 }}
-      {{- with .Values.web-client.nodeSelector }}
+            {{- toYaml .Values.databaseMigration.resources | nindent 12 }}
+      {{- with .Values.databaseMigration.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.web-client.affinity }}
+      {{- with .Values.databaseMigration.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.web-client.tolerations }}
+      {{- with .Values.databaseMigration.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

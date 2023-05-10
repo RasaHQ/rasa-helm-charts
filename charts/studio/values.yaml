@@ -2,6 +2,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+# -- (string) Override name of app
+nameOverride: ""
+# -- (string) Override the full qualified app name
+fullnameOverride: ""
+
 backend:
   replicaCount: 1
 
@@ -12,8 +17,29 @@ backend:
   tag: ""
 
   imagePullSecrets: []
-  nameOverride: ""
-  fullnameOverride: ""
+
+  environmentVariables:  
+    - name: DATABASE_URL
+      valueFrom:
+        secretKeyRef:
+          name:
+          key:
+    - name: SECURITY_PROTOCOL
+      value: "SASL_SSL"
+    - name: SASL_MECHANISM
+    - name: SASL_USERNAME
+    - name: SASL_PASSWORD
+    - name: KAFKA_BROKER_ADDRESS
+    - name: KAFKA_TOPIC
+    - name: KAFKA_DLQ_TOPIC
+    - name: KAFKA_CLIENT_ID
+    - name: GROUP_ID
+    - name: KEYCLOAK_URL
+    - name: KEYCLOAK_REALM
+    - name: KEYCLOAK_API_USERNAME
+    - name: KEYCLOAK_API_PASSWORD
+    - name: KEYCLOAK_API_GRANTTYPE
+
 
   serviceAccount:
     # Specifies whether a service account should be created
@@ -41,6 +67,28 @@ backend:
     type: ClusterIP
     port: 4000
 
+  livenessProbe:
+    httpGet:
+      path: /
+      port: http
+      scheme: HTTP
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  readinessProbe:
+    httpGet:
+      path: /
+      port: http
+      scheme: HTTP
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 6
+
   ingress:
     enabled: false
     className: ""
@@ -82,7 +130,7 @@ backend:
 
   affinity: {}
 
-event-ingestion:
+frontend:
   replicaCount: 1
 
   image:
@@ -162,7 +210,7 @@ event-ingestion:
 
   affinity: {}
 
-migration-server:
+eventIngestion:
   replicaCount: 1
 
   image:
@@ -242,7 +290,7 @@ migration-server:
 
   affinity: {}
 
-web-client:
+databaseMigration:
   replicaCount: 1
 
   image:

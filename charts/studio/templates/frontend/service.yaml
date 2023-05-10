@@ -5,9 +5,9 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.web-client.service.type }}
+  type: {{ .Values.frontend.service.type }}
   ports:
-    - port: {{ .Values.web-client.service.port }}
+    - port: {{ .Values.frontend.service.port }}
       targetPort: http
       protocol: TCP
       name: http

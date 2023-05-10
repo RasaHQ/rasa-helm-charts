@@ -1,4 +1,4 @@
-{{- if .Values.event-ingestion.autoscaling.enabled }}
+{{- if .Values.eventIngestion.autoscaling.enabled }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
@@ -10,19 +10,19 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: {{ include "studio.fullname" . }}
-  minReplicas: {{ .Values.event-ingestion.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.event-ingestion.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.eventIngestion.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.eventIngestion.autoscaling.maxReplicas }}
   metrics:
-    {{- if .Values.event-ingestion.autoscaling.targetCPUUtilizationPercentage }}
+    {{- if .Values.eventIngestion.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.event-ingestion.autoscaling.targetCPUUtilizationPercentage }}
+        targetAverageUtilization: {{ .Values.eventIngestion.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
-    {{- if .Values.event-ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- if .Values.eventIngestion.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.event-ingestion.autoscaling.targetMemoryUtilizationPercentage }}
+        targetAverageUtilization: {{ .Values.eventIngestion.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

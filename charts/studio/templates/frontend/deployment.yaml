@@ -5,37 +5,37 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.migration-server.autoscaling.enabled }}
-  replicas: {{ .Values.migration-server.replicaCount }}
+  {{- if not .Values.frontend.autoscaling.enabled }}
+  replicas: {{ .Values.frontend.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.migration-server.podAnnotations }}
+      {{- with .Values.frontend.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
     spec:
-      {{- with .Values.migration-server.imagePullSecrets }}
+      {{- with .Values.frontend.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.migration-server.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
           securityContext:
-            {{- toYaml .Values.migration-server.securityContext | nindent 12 }}
-          image: "{{ .Values.migration-server.image.repository }}:{{ .Values.migration-server.image.tag | default .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.migration-server.image.pullPolicy }}
+            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
+          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.migration-server.service.port }}
+              containerPort: {{ .Values.frontend.service.port }}
               protocol: TCP
           livenessProbe:
             httpGet:
@@ -46,16 +46,16 @@ spec:
               path: /
               port: http
           resources:
-            {{- toYaml .Values.migration-server.resources | nindent 12 }}
-      {{- with .Values.migration-server.nodeSelector }}
+            {{- toYaml .Values.frontend.resources | nindent 12 }}
+      {{- with .Values.frontend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.migration-server.affinity }}
+      {{- with .Values.frontend.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.migration-server.tolerations }}
+      {{- with .Values.frontend.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

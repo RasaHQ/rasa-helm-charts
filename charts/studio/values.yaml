@@ -7,6 +7,9 @@ nameOverride: ""
 # -- (string) Override the full qualified app name
 fullnameOverride: ""
 
+############################
+# THIS IS WORK IN PROGRESS #
+############################
 backend:
   replicaCount: 1
 
@@ -103,6 +106,12 @@ backend:
     successThreshold: 1
     timeoutSeconds: 5
     failureThreshold: 6
+
+  migration:
+    image:
+      repository:
+      tag:
+    database_url:
 
   ingress:
     enabled: false

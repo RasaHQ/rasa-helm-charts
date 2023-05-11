@@ -11,7 +11,7 @@ backend:
   replicaCount: 1
 
   image:
-    repository: 
+    repository:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: ""
@@ -19,7 +19,7 @@ backend:
   imagePullSecrets:
     # - name: regcred
 
-  environmentVariables:  
+  environmentVariables:
     - name: DATABASE_URL
       value: ""
       # valueFrom:

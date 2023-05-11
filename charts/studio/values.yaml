@@ -112,7 +112,7 @@ backend:
       repository:
       tag:
     database_url:
-
+    
   ingress:
     enabled: false
     className: ""

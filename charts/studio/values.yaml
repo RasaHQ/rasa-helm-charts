@@ -17,7 +17,7 @@ backend:
     tag: ""
 
   imagePullSecrets:
-    #- name: regcred
+    # - name: regcred
 
   environmentVariables:  
     - name: DATABASE_URL

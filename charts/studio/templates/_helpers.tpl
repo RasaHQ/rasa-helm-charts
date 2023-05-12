@@ -71,3 +71,14 @@ Create the name of the eventIngestion service account to use
 {{- default "default" .Values.eventIngestion.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create the name of the keycloak service account to use
+*/}}
+{{- define "studio.keycloak.serviceAccountName" -}}
+{{- if .Values.keycloak.serviceAccount.create }}
+{{- default (include "studio.fullname" .) .Values.keycloak.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.keycloak.serviceAccount.name }}
+{{- end }}
+{{- end }}

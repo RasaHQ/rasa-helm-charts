@@ -119,7 +119,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | eventIngestion.environmentVariables[8].value | string | `""` |  |
 | eventIngestion.environmentVariables[9].name | string | `"GROUP_ID"` |  |
 | eventIngestion.environmentVariables[9].value | string | `""` |  |
-| eventIngestion.image.pullPolicy | string | `nil` |  |
+| eventIngestion.image.pullPolicy | string | `"IfNotPresent"` |  |
 | eventIngestion.image.repository | string | `nil` |  |
 | eventIngestion.image.tag | string | `""` |  |
 | eventIngestion.nodeSelector | object | `{}` |  |
@@ -135,5 +135,36 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | frontend | string | `nil` |  |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | imagePullSecrets | string | `nil` |  |
-| keycloak | string | `nil` |  |
+| keycloak.affinity | object | `{}` |  |
+| keycloak.image.pullPolicy | string | `"IfNotPresent"` |  |
+| keycloak.image.repository | string | `nil` |  |
+| keycloak.image.tag | string | `""` |  |
+| keycloak.livenessProbe.failureThreshold | int | `6` |  |
+| keycloak.livenessProbe.httpGet.path | string | `"/"` |  |
+| keycloak.livenessProbe.httpGet.port | string | `"http"` |  |
+| keycloak.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| keycloak.livenessProbe.initialDelaySeconds | int | `15` |  |
+| keycloak.livenessProbe.periodSeconds | int | `15` |  |
+| keycloak.livenessProbe.successThreshold | int | `1` |  |
+| keycloak.livenessProbe.timeoutSeconds | int | `5` |  |
+| keycloak.nodeSelector | object | `{}` |  |
+| keycloak.podAnnotations | object | `{}` |  |
+| keycloak.podSecurityContext | object | `{}` |  |
+| keycloak.readinessProbe.failureThreshold | int | `6` |  |
+| keycloak.readinessProbe.httpGet.path | string | `"/"` |  |
+| keycloak.readinessProbe.httpGet.port | string | `"http"` |  |
+| keycloak.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| keycloak.readinessProbe.initialDelaySeconds | int | `15` |  |
+| keycloak.readinessProbe.periodSeconds | int | `15` |  |
+| keycloak.readinessProbe.successThreshold | int | `1` |  |
+| keycloak.readinessProbe.timeoutSeconds | int | `5` |  |
+| keycloak.replicaCount | int | `1` |  |
+| keycloak.resources | object | `{}` |  |
+| keycloak.securityContext | object | `{}` |  |
+| keycloak.service.port | int | `8080` |  |
+| keycloak.service.type | string | `"ClusterIP"` |  |
+| keycloak.serviceAccount.annotations | object | `{}` |  |
+| keycloak.serviceAccount.create | bool | `false` |  |
+| keycloak.serviceAccount.name | string | `""` |  |
+| keycloak.tolerations | list | `[]` |  |
 | nameOverride | string | `""` | Override name of app |

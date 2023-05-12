@@ -167,9 +167,9 @@ eventIngestion:
   environmentVariables:
     - name: DATABASE_URL
       value: ""
-    - name: SECURITY_PROTOCOL 
+    - name: SECURITY_PROTOCOL
       value: "SASL_SSL"
-    - name: SASL_MECHANISM 
+    - name: SASL_MECHANISM
       value: "SCRAM-SHA-256"
     - name: SASL_USERNAME
       value: ""

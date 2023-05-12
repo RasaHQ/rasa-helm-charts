@@ -108,6 +108,7 @@ backend:
     failureThreshold: 6
 
   migration:
+    enable: false
     image:
       repository:
       tag:

@@ -1,7 +1,8 @@
+{{- if .Values.backend.migration.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "studio.fullname" . }}
+  name: {{ include "studio.fullname" . }}-database-migration
   labels:
     {{- include "studio.labels" . | nindent 4 }}
   annotations:
@@ -26,4 +27,5 @@ spec:
         image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag | default .Chart.AppVersion }}"
         envFrom:
         - configMapRef:
-            name: database-migration-configmap
+            name: {{ include "studio.fullname" . }}-database-migration-configmap
+{{- end }}

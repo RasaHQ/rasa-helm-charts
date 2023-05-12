@@ -71,6 +71,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | backend.livenessProbe.successThreshold | int | `1` |  |
 | backend.livenessProbe.timeoutSeconds | int | `5` |  |
 | backend.migration.database_url | string | `nil` |  |
+| backend.migration.enable | bool | `false` |  |
 | backend.migration.image.repository | string | `nil` |  |
 | backend.migration.image.tag | string | `nil` |  |
 | backend.nodeSelector | object | `{}` |  |

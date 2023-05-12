@@ -1,7 +1,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "studio.fullname" . }}
+  name: {{ include "studio.fullname" . }}-backend
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:

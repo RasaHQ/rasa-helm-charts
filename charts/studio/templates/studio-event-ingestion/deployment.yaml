@@ -1,0 +1,51 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.eventIngestion.autoscaling.enabled }}
+  replicas: {{ .Values.eventIngestion.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.eventIngestion.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "studio.eventIngestion.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.eventIngestion.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}-event-ingestion
+          securityContext:
+            {{- toYaml .Values.eventIngestion.securityContext | nindent 12 }}
+          image: "{{ .Values.eventIngestion.image.repository }}:{{ .Values.eventIngestion.image.tag }}"
+          imagePullPolicy: {{ .Values.eventIngestion.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.eventIngestion.resources | nindent 12 }}
+          env:
+            {{- toYaml .Values.eventIngestion.environmentVariables | nindent 12 }}
+      {{- with .Values.eventIngestion.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.eventIngestion.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.eventIngestion.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

@@ -1,0 +1,31 @@
+{{- if .Values.backend.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "studio.fullname" . }}-database-migration
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": hook-succeeded
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      restartPolicy: Never
+      containers:
+      - name: {{ .Chart.Name }}-database-migration
+        image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag | default .Chart.AppVersion }}"
+        envFrom:
+        - configMapRef:
+            name: {{ include "studio.fullname" . }}-database-migration-configmap
+{{- end }}

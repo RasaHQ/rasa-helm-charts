@@ -51,12 +51,34 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the service account to use
+Create the name of the backend service account to use
 */}}
 {{- define "studio.backend.serviceAccountName" -}}
 {{- if .Values.backend.serviceAccount.create }}
 {{- default (include "studio.fullname" .) .Values.backend.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.backend.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the eventIngestion service account to use
+*/}}
+{{- define "studio.eventIngestion.serviceAccountName" -}}
+{{- if .Values.eventIngestion.serviceAccount.create }}
+{{- default (include "studio.fullname" .) .Values.eventIngestion.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.eventIngestion.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the keycloak service account to use
+*/}}
+{{- define "studio.keycloak.serviceAccountName" -}}
+{{- if .Values.keycloak.serviceAccount.create }}
+{{- default (include "studio.fullname" .) .Values.keycloak.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.keycloak.serviceAccount.name }}
 {{- end }}
 {{- end }}

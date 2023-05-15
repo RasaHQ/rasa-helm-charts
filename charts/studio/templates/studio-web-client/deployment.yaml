@@ -9,7 +9,6 @@ spec:
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: studio
   template:
     metadata:
       {{- with .Values.frontend.podAnnotations }}

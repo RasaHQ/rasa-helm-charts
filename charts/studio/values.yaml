@@ -69,17 +69,22 @@ backend:
     name: ""
 
   podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
   podSecurityContext: {}
     # fsGroup: 2000
 
   securityContext: {}
+    # privileged: false
+    # allowPrivilegeEscalation: false
     # capabilities:
     #   drop:
     #   - ALL
     # readOnlyRootFilesystem: true
     # runAsNonRoot: true
     # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
 
   service:
     type: ClusterIP
@@ -193,10 +198,22 @@ eventIngestion:
     name: ""
 
   podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
   podSecurityContext: {}
+    # fsGroup: 2000
 
   securityContext: {}
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
 
   resources: {}
 
@@ -227,10 +244,22 @@ keycloak:
     name: ""
 
   podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
   podSecurityContext: {}
+    # fsGroup: 2000
 
   securityContext: {}
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
 
   service:
     type: ClusterIP
@@ -265,3 +294,7 @@ keycloak:
   tolerations: []
 
   affinity: {}
+
+networkPolicy:
+  enabled: false
+  denyAll: false

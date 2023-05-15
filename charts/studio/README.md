@@ -168,3 +168,5 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | keycloak.serviceAccount.name | string | `""` |  |
 | keycloak.tolerations | list | `[]` |  |
 | nameOverride | string | `""` | Override name of app |
+| networkPolicy.denyAll | bool | `false` |  |
+| networkPolicy.enabled | bool | `false` |  |

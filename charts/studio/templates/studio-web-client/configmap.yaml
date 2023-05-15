@@ -4,8 +4,7 @@ metadata:
   name: {{ include "studio.fullname" . }}-web-client-configmap
 data:
   windowVariables:
-    window.API_ENDPOINT: ""
-    window.KEYCLOAK_URL: ""
-    window.KEYCLOAK_REALM: ""
-    window.KEYCLOAK_CLIENT_ID: ""
-{{- end }}
+    window.API_ENDPOINT: example
+    window.KEYCLOAK_URL: example
+    window.KEYCLOAK_REALM: example
+    window.KEYCLOAK_CLIENT_ID: example

@@ -51,7 +51,10 @@ spec:
       volumes:
       - name: configmap
         configMap:
-          name: configmap
+          name: studio-web-client-configmap
+          items:
+          - key: "windowVariables"
+            path: "windowVariables"
       {{- with .Values.frontend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -9,14 +9,17 @@ spec:
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: studio
   template:
     metadata:
       {{- with .Values.frontend.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: studio
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -30,10 +33,6 @@ spec:
           securityContext:
             {{- toYaml .Values.frontend.securityContext | nindent 12 }}
           image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-          volumeMounts:
-          - name: configmap
-            mountPath: "/etc/data"
-            readOnly: true
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           ports:
             - name: http
@@ -45,6 +44,10 @@ spec:
             {{- toYaml .Values.frontend.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.frontend.resources | nindent 12 }}
+          volumeMounts:
+          - name: configmap
+            mountPath: "/etc/data"
+            readOnly: true
       volumes:
       - name: configmap
         configMap:

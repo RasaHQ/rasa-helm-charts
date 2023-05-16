@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "studio.fullname" . }}-database-migration
+  name: studio-database-migration
   labels:
     {{- include "studio.labels" . | nindent 4 }}
   annotations:
@@ -27,5 +27,5 @@ spec:
         image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag | default .Chart.AppVersion }}"
         envFrom:
         - configMapRef:
-            name: {{ include "studio.fullname" . }}-database-migration-configmap
+            name: studio-database-migration-configmap
 {{- end }}

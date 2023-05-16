@@ -1,0 +1,13 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.denyAll }}
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: {{ include "studio.fullname" . }}-deny-all
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels: {}
+  policyTypes:
+  - Ingress
+  - Egress
+{{- end }}

@@ -2,7 +2,7 @@
 
 A Helm chart for Kubernetes
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Installing the Chart
 
@@ -132,7 +132,38 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | eventIngestion.serviceAccount.create | bool | `false` |  |
 | eventIngestion.serviceAccount.name | string | `""` |  |
 | eventIngestion.tolerations | list | `[]` |  |
-| frontend | string | `nil` |  |
+| frontend.affinity | object | `{}` |  |
+| frontend.image.pullPolicy | string | `"IfNotPresent"` |  |
+| frontend.image.repository | string | `nil` |  |
+| frontend.image.tag | string | `""` |  |
+| frontend.livenessProbe.failureThreshold | int | `6` |  |
+| frontend.livenessProbe.httpGet.path | string | `"/"` |  |
+| frontend.livenessProbe.httpGet.port | string | `"http"` |  |
+| frontend.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| frontend.livenessProbe.initialDelaySeconds | int | `15` |  |
+| frontend.livenessProbe.periodSeconds | int | `15` |  |
+| frontend.livenessProbe.successThreshold | int | `1` |  |
+| frontend.livenessProbe.timeoutSeconds | int | `5` |  |
+| frontend.nodeSelector | object | `{}` |  |
+| frontend.podAnnotations | object | `{}` |  |
+| frontend.podSecurityContext | object | `{}` |  |
+| frontend.readinessProbe.failureThreshold | int | `6` |  |
+| frontend.readinessProbe.httpGet.path | string | `"/"` |  |
+| frontend.readinessProbe.httpGet.port | string | `"http"` |  |
+| frontend.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| frontend.readinessProbe.initialDelaySeconds | int | `15` |  |
+| frontend.readinessProbe.periodSeconds | int | `15` |  |
+| frontend.readinessProbe.successThreshold | int | `1` |  |
+| frontend.readinessProbe.timeoutSeconds | int | `5` |  |
+| frontend.replicaCount | int | `1` |  |
+| frontend.resources | object | `{}` |  |
+| frontend.securityContext | object | `{}` |  |
+| frontend.service.port | int | `80` |  |
+| frontend.service.type | string | `"ClusterIP"` |  |
+| frontend.serviceAccount.annotations | object | `{}` |  |
+| frontend.serviceAccount.create | bool | `false` |  |
+| frontend.serviceAccount.name | string | `""` |  |
+| frontend.tolerations | list | `[]` |  |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | imagePullSecrets | string | `nil` |  |
 | keycloak.affinity | object | `{}` |  |

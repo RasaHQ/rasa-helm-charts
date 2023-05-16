@@ -174,10 +174,22 @@ frontend:
     name: ""
 
   podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
   podSecurityContext: {}
+    # fsGroup: 2000
 
   securityContext: {}
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
 
   service:
     type: ClusterIP

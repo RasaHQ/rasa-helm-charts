@@ -14,6 +14,10 @@ metadata:
 spec:
   template:
     metadata:
+      {{- with .Values.backend.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+        checksum/config: {{ include (print $.Template.BasePath "/database-migration-configmap.yaml") . | sha256sum }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
     spec:
@@ -23,7 +27,7 @@ spec:
       {{- end }}
       restartPolicy: Never
       containers:
-      - name: {{ .Chart.Name }}-database-migration
+      - name: studio-database-migration
         image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag | default .Chart.AppVersion }}"
         envFrom:
         - configMapRef:

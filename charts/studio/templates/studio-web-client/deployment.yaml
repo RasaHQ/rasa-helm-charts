@@ -6,14 +6,14 @@ metadata:
     {{- include "studio.labels" . | nindent 4 }}
     app.kubernetes.io/component: studio-web-client
 spec:
-  replicas: {{ .Values.frontend.replicaCount }}
+  replicas: {{ .Values.webClient.replicaCount }}
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: studio-web-client
   template:
     metadata:
-      {{- with .Values.frontend.podAnnotations }}
+      {{- with .Values.webClient.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
@@ -32,25 +32,25 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "studio.frontend.serviceAccountName" . }}
+      serviceAccountName: {{ include "studio.webClient.serviceAccountName" . }}
       securityContext:
-        {{- toYaml .Values.frontend.podSecurityContext | nindent 8 }}
+        {{- toYaml .Values.webClient.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}-web-client
           securityContext:
-            {{- toYaml .Values.frontend.securityContext | nindent 12 }}
-          image: "{{ .Values.frontend.image.repository }}:{{ .Values.frontend.image.tag }}"
-          imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
+            {{- toYaml .Values.webClient.securityContext | nindent 12 }}
+          image: "{{ .Values.webClient.image.repository }}:{{ .Values.webClient.image.tag }}"
+          imagePullPolicy: {{ .Values.webClient.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.frontend.service.port }}
+              containerPort: {{ .Values.webClient.service.port }}
               protocol: TCP
           livenessProbe:
-            {{- toYaml .Values.frontend.livenessProbe | nindent 12 }}
+            {{- toYaml .Values.webClient.livenessProbe | nindent 12 }}
           readinessProbe:
-            {{- toYaml .Values.frontend.readinessProbe | nindent 12 }}
+            {{- toYaml .Values.webClient.readinessProbe | nindent 12 }}
           resources:
-            {{- toYaml .Values.frontend.resources | nindent 12 }}
+            {{- toYaml .Values.webClient.resources | nindent 12 }}
           volumeMounts:
           - name: configmap
             mountPath: "/etc/data"
@@ -62,15 +62,15 @@ spec:
           items:
           - key: "windowVariables"
             path: "windowVariables"
-      {{- with .Values.frontend.nodeSelector }}
+      {{- with .Values.webClient.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.frontend.affinity }}
+      {{- with .Values.webClient.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.frontend.tolerations }}
+      {{- with .Values.webClient.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

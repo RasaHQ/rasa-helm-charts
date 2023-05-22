@@ -90,11 +90,11 @@ Create the name of the keycloak service account to use
 {{/*
 Create the name of the frontend service account to use
 */}}
-{{- define "studio.frontend.serviceAccountName" -}}
-{{- if .Values.frontend.serviceAccount.create }}
-{{- default (include "studio.fullname" .) .Values.frontend.serviceAccount.name }}
+{{- define "studio.webClient.serviceAccountName" -}}
+{{- if .Values.webClient.serviceAccount.create }}
+{{- default (include "studio.fullname" .) .Values.webClient.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.frontend.serviceAccount.name }}
+{{- default "default" .Values.webClient.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

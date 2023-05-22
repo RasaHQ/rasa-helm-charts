@@ -63,5 +63,5 @@ spec:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.frontend.service.port }}
+        port: {{ .Values.webClient.service.port }}
 {{- end }}

@@ -1,0 +1,81 @@
+{{- if .Values.networkPolicy.enabled -}}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-from-web-client-to-backend
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-web-client
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: studio-backend
+      ports:
+      - protocol: TCP
+        port: {{ .Values.webClient.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: egress-from-web-client-to-backend
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-backend
+  egress:
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: studio-web-client
+      ports:
+      - protocol: TCP
+        port: {{ .Values.webClient.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-from-web-client-to-keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-web-client
+  ingress:
+    - from:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: studio-keycloak
+      ports:
+      - protocol: TCP
+        port: {{ .Values.webClient.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: egress-from-web-client-to-keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-keycloak
+  egress:
+    - to:
+      - podSelector:
+          matchLabels:
+            app.kubernetes.io/component: studio-web-client
+      ports:
+      - protocol: TCP
+        port: {{ .Values.webClient.service.port }}
+{{- end }}

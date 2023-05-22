@@ -173,7 +173,7 @@ backend:
 
   affinity: {}
 
-frontend:
+webClient:
   replicaCount: 1
 
   image:

@@ -15,9 +15,12 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}
+  name: {{ $fullName }}-api
   labels:
     {{- include "studio.labels" . | nindent 4 }}
+    {{- if .Values.backend.ingress.labels }}
+{{ toYaml .Values.backend.ingress.labels | indent 4 }}
+    {{- end }}
   {{- with .Values.backend.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -49,13 +52,31 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: {{ $fullName }}
+                name: {{ $fullName }}-backend
                 port:
                   number: {{ $svcPort }}
               {{- else }}
-              serviceName: {{ $fullName }}
+              serviceName: {{ $fullName }}-backend
               servicePort: {{ $svcPort }}
               {{- end }}
+          {{- end }}
+          {{- if .extraPaths }}
+          {{- range .extraPaths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .servicePort }}
+              {{- else }}
+              serviceName: {{ .serviceName }}
+              servicePort: {{ .servicePort }}
+              {{- end }}
+          {{- end }}
           {{- end }}
     {{- end }}
 {{- end }}

@@ -17,192 +17,120 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| backend.affinity | object | `{}` |  |
-| backend.autoscaling.enabled | bool | `false` |  |
-| backend.autoscaling.maxReplicas | int | `100` |  |
-| backend.autoscaling.minReplicas | int | `1` |  |
-| backend.autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
-| backend.environmentVariables[0].name | string | `"DATABASE_URL"` |  |
-| backend.environmentVariables[0].value | string | `""` |  |
-| backend.environmentVariables[10].name | string | `"KEYCLOAK_URL"` |  |
-| backend.environmentVariables[10].value | string | `""` |  |
-| backend.environmentVariables[11].name | string | `"KEYCLOAK_REALM"` |  |
-| backend.environmentVariables[11].value | string | `""` |  |
-| backend.environmentVariables[12].name | string | `"KEYCLOAK_API_USERNAME"` |  |
-| backend.environmentVariables[12].value | string | `""` |  |
-| backend.environmentVariables[13].name | string | `"KEYCLOAK_API_PASSWORD"` |  |
-| backend.environmentVariables[13].value | string | `""` |  |
-| backend.environmentVariables[14].name | string | `"KEYCLOAK_API_GRANTTYPE"` |  |
-| backend.environmentVariables[14].value | string | `""` |  |
-| backend.environmentVariables[1].name | string | `"SECURITY_PROTOCOL"` |  |
-| backend.environmentVariables[1].value | string | `"SASL_SSL"` |  |
-| backend.environmentVariables[2].name | string | `"SASL_MECHANISM"` |  |
-| backend.environmentVariables[2].value | string | `"SCRAM-SHA-256"` |  |
-| backend.environmentVariables[3].name | string | `"SASL_USERNAME"` |  |
-| backend.environmentVariables[3].value | string | `""` |  |
-| backend.environmentVariables[4].name | string | `"SASL_PASSWORD"` |  |
-| backend.environmentVariables[4].value | string | `""` |  |
-| backend.environmentVariables[5].name | string | `"KAFKA_BROKER_ADDRESS"` |  |
-| backend.environmentVariables[5].value | string | `""` |  |
-| backend.environmentVariables[6].name | string | `"KAFKA_TOPIC"` |  |
-| backend.environmentVariables[6].value | string | `""` |  |
-| backend.environmentVariables[7].name | string | `"KAFKA_DLQ_TOPIC"` |  |
-| backend.environmentVariables[7].value | string | `""` |  |
-| backend.environmentVariables[8].name | string | `"KAFKA_CLIENT_ID"` |  |
-| backend.environmentVariables[8].value | string | `""` |  |
-| backend.environmentVariables[9].name | string | `"GROUP_ID"` |  |
-| backend.environmentVariables[9].value | string | `""` |  |
-| backend.image.pullPolicy | string | `"IfNotPresent"` |  |
-| backend.image.repository | string | `nil` |  |
-| backend.image.tag | string | `""` |  |
-| backend.ingress.annotations | object | `{}` |  |
-| backend.ingress.className | string | `""` |  |
-| backend.ingress.enabled | bool | `false` |  |
-| backend.ingress.hosts[0].host | string | `"chart-example.local"` |  |
-| backend.ingress.hosts[0].paths[0].path | string | `"/"` |  |
-| backend.ingress.hosts[0].paths[0].pathType | string | `"ImplementationSpecific"` |  |
-| backend.ingress.tls | list | `[]` |  |
-| backend.livenessProbe.failureThreshold | int | `6` |  |
-| backend.livenessProbe.httpGet.path | string | `"/"` |  |
-| backend.livenessProbe.httpGet.port | string | `"http"` |  |
-| backend.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| backend.livenessProbe.initialDelaySeconds | int | `15` |  |
-| backend.livenessProbe.periodSeconds | int | `15` |  |
-| backend.livenessProbe.successThreshold | int | `1` |  |
-| backend.livenessProbe.timeoutSeconds | int | `5` |  |
-| backend.migration.database_url | string | `nil` |  |
-| backend.migration.enable | bool | `false` |  |
-| backend.migration.image.repository | string | `nil` |  |
-| backend.migration.image.tag | string | `nil` |  |
-| backend.nodeSelector | object | `{}` |  |
-| backend.podAnnotations | object | `{}` |  |
-| backend.podSecurityContext | object | `{}` |  |
-| backend.readinessProbe.failureThreshold | int | `6` |  |
-| backend.readinessProbe.httpGet.path | string | `"/"` |  |
-| backend.readinessProbe.httpGet.port | string | `"http"` |  |
-| backend.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| backend.readinessProbe.initialDelaySeconds | int | `15` |  |
-| backend.readinessProbe.periodSeconds | int | `15` |  |
-| backend.readinessProbe.successThreshold | int | `1` |  |
-| backend.readinessProbe.timeoutSeconds | int | `5` |  |
-| backend.replicaCount | int | `1` |  |
-| backend.resources | object | `{}` |  |
-| backend.securityContext | object | `{}` |  |
-| backend.service.port | int | `4000` |  |
-| backend.service.type | string | `"ClusterIP"` |  |
-| backend.serviceAccount.annotations | object | `{}` |  |
-| backend.serviceAccount.create | bool | `true` |  |
-| backend.serviceAccount.name | string | `""` |  |
-| backend.tolerations | list | `[]` |  |
-| dnsConfig | object | `{}` |  |
-| dnsPolicy | string | `""` |  |
-| eventIngestion.affinity | object | `{}` |  |
-| eventIngestion.autoscaling.enabled | bool | `false` |  |
-| eventIngestion.autoscaling.maxReplicas | int | `100` |  |
-| eventIngestion.autoscaling.minReplicas | int | `1` |  |
-| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` |  |
-| eventIngestion.environmentVariables[0].name | string | `"DATABASE_URL"` |  |
-| eventIngestion.environmentVariables[0].value | string | `""` |  |
-| eventIngestion.environmentVariables[1].name | string | `"SECURITY_PROTOCOL"` |  |
-| eventIngestion.environmentVariables[1].value | string | `"SASL_SSL"` |  |
-| eventIngestion.environmentVariables[2].name | string | `"SASL_MECHANISM"` |  |
-| eventIngestion.environmentVariables[2].value | string | `"SCRAM-SHA-256"` |  |
-| eventIngestion.environmentVariables[3].name | string | `"SASL_USERNAME"` |  |
-| eventIngestion.environmentVariables[3].value | string | `""` |  |
-| eventIngestion.environmentVariables[4].name | string | `"SASL_PASSWORD"` |  |
-| eventIngestion.environmentVariables[4].value | string | `""` |  |
-| eventIngestion.environmentVariables[5].name | string | `"KAFKA_BROKER_ADDRESS"` |  |
-| eventIngestion.environmentVariables[5].value | string | `""` |  |
-| eventIngestion.environmentVariables[6].name | string | `"KAFKA_TOPIC"` |  |
-| eventIngestion.environmentVariables[6].value | string | `""` |  |
-| eventIngestion.environmentVariables[7].name | string | `"KAFKA_DLQ_TOPIC"` |  |
-| eventIngestion.environmentVariables[7].value | string | `""` |  |
-| eventIngestion.environmentVariables[8].name | string | `"KAFKA_CLIENT_ID"` |  |
-| eventIngestion.environmentVariables[8].value | string | `""` |  |
-| eventIngestion.environmentVariables[9].name | string | `"GROUP_ID"` |  |
-| eventIngestion.environmentVariables[9].value | string | `""` |  |
-| eventIngestion.image.pullPolicy | string | `"IfNotPresent"` |  |
-| eventIngestion.image.repository | string | `nil` |  |
-| eventIngestion.image.tag | string | `""` |  |
-| eventIngestion.nodeSelector | object | `{}` |  |
-| eventIngestion.podAnnotations | object | `{}` |  |
-| eventIngestion.podSecurityContext | object | `{}` |  |
-| eventIngestion.replicaCount | int | `1` |  |
-| eventIngestion.resources | object | `{}` |  |
-| eventIngestion.securityContext | object | `{}` |  |
-| eventIngestion.serviceAccount.annotations | object | `{}` |  |
-| eventIngestion.serviceAccount.create | bool | `false` |  |
-| eventIngestion.serviceAccount.name | string | `""` |  |
-| eventIngestion.tolerations | list | `[]` |  |
+| backend | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"environmentVariables":[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""},{"name":"KEYCLOAK_URL","value":""},{"name":"KEYCLOAK_REALM","value":""},{"name":"KEYCLOAK_API_USERNAME","value":""},{"name":"KEYCLOAK_API_PASSWORD","value":""},{"name":"KEYCLOAK_API_GRANTTYPE","value":""}],"image":{"pullPolicy":"IfNotPresent","repository":null,"tag":""},"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}],"tls":[]},"livenessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"migration":{"database_url":null,"enable":false,"image":{"repository":null,"tag":null}},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{},"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{},"service":{"port":4000,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"name":""},"tolerations":[]}` | Studio Backend component specific configuration |
+| backend.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| backend.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
+| backend.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
+| backend.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
+| backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
+| backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
+| backend.environmentVariables | list | `[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""},{"name":"KEYCLOAK_URL","value":""},{"name":"KEYCLOAK_REALM","value":""},{"name":"KEYCLOAK_API_USERNAME","value":""},{"name":"KEYCLOAK_API_PASSWORD","value":""},{"name":"KEYCLOAK_API_GRANTTYPE","value":""}]` | Define environment variables for deployment |
+| backend.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
+| backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| backend.image.repository | string | `nil` | Specifies image repository |
+| backend.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| backend.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}],"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. Set up the URL. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| backend.ingress.annotations | object | `{}` | Annotations to add to the ingress |
+| backend.ingress.className | string | `""` | Specifies the ingress className to be used |
+| backend.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
+| backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
+| backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
+| backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| backend.migration | object | `{"database_url":null,"enable":false,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
+| backend.migration.database_url | string | `nil` | Specifies the database URL where migration should be done |
+| backend.migration.enable | bool | `false` | Specifies whether a database migration job should be created |
+| backend.migration.image | object | `{"repository":null,"tag":null}` | Specifies which image database migration job should use |
+| backend.migration.image.repository | string | `nil` | Specifies the repository of the image |
+| backend.migration.image.tag | string | `nil` | Specifies the tag of the image |
+| backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| backend.podAnnotations | object | `{}` | Annotations to add to the pod |
+| backend.podSecurityContext | object | `{}` | Define pod security context |
+| backend.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| backend.replicaCount | int | `1` | Specifies number of replicas |
+| backend.resources | object | `{}` | Specifies the resources limits and requests |
+| backend.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
+| backend.service | object | `{"port":4000,"type":"ClusterIP"}` | Define service |
+| backend.service.port | int | `4000` | Specify service port |
+| backend.service.type | string | `"ClusterIP"` | Specify service type |
+| backend.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| backend.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| backend.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| backend.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| backend.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| dnsConfig | object | `{}` | Specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
+| dnsPolicy | string | `""` | Specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
+| eventIngestion | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"environmentVariables":[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""}],"image":{"pullPolicy":"IfNotPresent","repository":null,"tag":""},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{},"replicaCount":1,"resources":{},"securityContext":{},"serviceAccount":{"annotations":{},"create":true,"name":""},"tolerations":[]}` | Studio Event Ingestion component specific configuration |
+| eventIngestion.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| eventIngestion.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
+| eventIngestion.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
+| eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
+| eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
+| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
+| eventIngestion.environmentVariables | list | `[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""}]` | Define environment variables for deployment |
+| eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
+| eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| eventIngestion.image.repository | string | `nil` | Specifies image repository |
+| eventIngestion.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| eventIngestion.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| eventIngestion.podAnnotations | object | `{}` | Annotations to add to the pod |
+| eventIngestion.podSecurityContext | object | `{}` | Define pod security context |
+| eventIngestion.replicaCount | int | `1` | Specifies number of replicas |
+| eventIngestion.resources | object | `{}` | Specifies the resources limits and requests |
+| eventIngestion.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
+| eventIngestion.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| eventIngestion.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| eventIngestion.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| eventIngestion.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| eventIngestion.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` |  |
-| hostNetwork | bool | `false` |  |
-| imagePullSecrets | string | `nil` |  |
-| keycloak.affinity | object | `{}` |  |
-| keycloak.image.pullPolicy | string | `"IfNotPresent"` |  |
-| keycloak.image.repository | string | `nil` |  |
-| keycloak.image.tag | string | `""` |  |
-| keycloak.livenessProbe.failureThreshold | int | `6` |  |
-| keycloak.livenessProbe.httpGet.path | string | `"/"` |  |
-| keycloak.livenessProbe.httpGet.port | string | `"http"` |  |
-| keycloak.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| keycloak.livenessProbe.initialDelaySeconds | int | `15` |  |
-| keycloak.livenessProbe.periodSeconds | int | `15` |  |
-| keycloak.livenessProbe.successThreshold | int | `1` |  |
-| keycloak.livenessProbe.timeoutSeconds | int | `5` |  |
-| keycloak.nodeSelector | object | `{}` |  |
-| keycloak.podAnnotations | object | `{}` |  |
-| keycloak.podSecurityContext | object | `{}` |  |
-| keycloak.readinessProbe.failureThreshold | int | `6` |  |
-| keycloak.readinessProbe.httpGet.path | string | `"/"` |  |
-| keycloak.readinessProbe.httpGet.port | string | `"http"` |  |
-| keycloak.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| keycloak.readinessProbe.initialDelaySeconds | int | `15` |  |
-| keycloak.readinessProbe.periodSeconds | int | `15` |  |
-| keycloak.readinessProbe.successThreshold | int | `1` |  |
-| keycloak.readinessProbe.timeoutSeconds | int | `5` |  |
-| keycloak.replicaCount | int | `1` |  |
-| keycloak.resources | object | `{}` |  |
-| keycloak.securityContext | object | `{}` |  |
-| keycloak.service.port | int | `8080` |  |
-| keycloak.service.type | string | `"ClusterIP"` |  |
-| keycloak.serviceAccount.annotations | object | `{}` |  |
-| keycloak.serviceAccount.create | bool | `false` |  |
-| keycloak.serviceAccount.name | string | `""` |  |
-| keycloak.tolerations | list | `[]` |  |
+| hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
+| imagePullSecrets | list | `[]` | Repository pull secrets |
+| keycloak | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":null,"tag":""},"livenessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{},"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{},"service":{"port":8080,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"name":""},"tolerations":[]}` | Studio Keycloak component specific configuration |
+| keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| keycloak.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
+| keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| keycloak.image.repository | string | `nil` | Specifies image repository |
+| keycloak.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| keycloak.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| keycloak.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| keycloak.podAnnotations | object | `{}` | Annotations to add to the pod |
+| keycloak.podSecurityContext | object | `{}` | Define pod security context |
+| keycloak.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| keycloak.replicaCount | int | `1` | Specifies number of replicas |
+| keycloak.resources | object | `{}` | Specifies the resources limits and requests |
+| keycloak.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
+| keycloak.service | object | `{"port":8080,"type":"ClusterIP"}` | Define service |
+| keycloak.service.port | int | `8080` | Specify service port |
+| keycloak.service.type | string | `"ClusterIP"` | Specify service type |
+| keycloak.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| keycloak.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| keycloak.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` |  |
 | networkPolicy.enabled | bool | `false` |  |
 | networkPolicy.nodeCIDR | list | `[]` |  |
-| webClient.affinity | object | `{}` |  |
-| webClient.image.pullPolicy | string | `"IfNotPresent"` |  |
-| webClient.image.repository | string | `nil` |  |
-| webClient.image.tag | string | `""` |  |
-| webClient.livenessProbe.failureThreshold | int | `6` |  |
-| webClient.livenessProbe.httpGet.path | string | `"/"` |  |
-| webClient.livenessProbe.httpGet.port | string | `"http"` |  |
-| webClient.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| webClient.livenessProbe.initialDelaySeconds | int | `15` |  |
-| webClient.livenessProbe.periodSeconds | int | `15` |  |
-| webClient.livenessProbe.successThreshold | int | `1` |  |
-| webClient.livenessProbe.timeoutSeconds | int | `5` |  |
-| webClient.nodeSelector | object | `{}` |  |
-| webClient.podAnnotations | object | `{}` |  |
-| webClient.podSecurityContext | object | `{}` |  |
-| webClient.readinessProbe.failureThreshold | int | `6` |  |
-| webClient.readinessProbe.httpGet.path | string | `"/"` |  |
-| webClient.readinessProbe.httpGet.port | string | `"http"` |  |
-| webClient.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| webClient.readinessProbe.initialDelaySeconds | int | `15` |  |
-| webClient.readinessProbe.periodSeconds | int | `15` |  |
-| webClient.readinessProbe.successThreshold | int | `1` |  |
-| webClient.readinessProbe.timeoutSeconds | int | `5` |  |
-| webClient.replicaCount | int | `1` |  |
-| webClient.resources | object | `{}` |  |
-| webClient.securityContext | object | `{}` |  |
-| webClient.service.port | int | `80` |  |
-| webClient.service.type | string | `"ClusterIP"` |  |
-| webClient.serviceAccount.annotations | object | `{}` |  |
-| webClient.serviceAccount.create | bool | `false` |  |
-| webClient.serviceAccount.name | string | `""` |  |
-| webClient.tolerations | list | `[]` |  |
+| webClient | object | `{"affinity":{},"image":{"pullPolicy":"IfNotPresent","repository":null,"tag":""},"livenessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{},"readinessProbe":{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{},"service":{"port":80,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"name":""},"tolerations":[]}` | Studio Web Client component specific configuration |
+| webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
+| webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| webClient.image.repository | string | `nil` | Specifies image repository |
+| webClient.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| webClient.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| webClient.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| webClient.podAnnotations | object | `{}` | Annotations to add to the pod |
+| webClient.podSecurityContext | object | `{}` | Define pod security context |
+| webClient.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| webClient.replicaCount | int | `1` | Specifies number of replicas |
+| webClient.resources | object | `{}` | Specifies the resources limits and requests |
+| webClient.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
+| webClient.service | object | `{"port":80,"type":"ClusterIP"}` | Define service |
+| webClient.service.port | int | `80` | Specify service port |
+| webClient.service.type | string | `"ClusterIP"` | Specify service type |
+| webClient.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| webClient.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| webClient.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| webClient.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| webClient.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |

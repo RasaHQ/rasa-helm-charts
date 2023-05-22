@@ -2,39 +2,34 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+############################
+# THIS IS WORK IN PROGRESS #
+############################
+
 # -- (string) Override name of app
 nameOverride: ""
 # -- (string) Override the full qualified app name
 fullnameOverride: ""
 
-imagePullSecrets:
+# -- Repository pull secrets
+imagePullSecrets: []
     # - name: regcred
 
-# hostNetwork controls whether the pod may use the node network namespace
-hostNetwork: false
-
-# dnsPolicy specifies Pod's DNS policy
-# ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
-dnsPolicy: ""
-
-## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-dnsConfig: {}
-  # options:
-  # - name: ndots
-  #   value: "1"
-
-############################
-# THIS IS WORK IN PROGRESS #
-############################
+# -- Studio Backend component specific configuration
 backend:
+  # -- Specifies number of replicas
   replicaCount: 1
-
+  # -- Define image settings
   image:
+    # -- Specifies image repository
     repository:
+    # -- Specifies image pull policy
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
+    # -- Specifies image tag
+    ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+  # -- Define environment variables for deployment
   environmentVariables:
     - name: DATABASE_URL
       value: ""
@@ -71,22 +66,25 @@ backend:
     - name: KEYCLOAK_API_GRANTTYPE
       value: ""
 
-
+  # -- Define service account
   serviceAccount:
-    # Specifies whether a service account should be created
+    # -- Specifies whether a service account should be created
     create: true
-    # Annotations to add to the service account
+    # -- Annotations to add to the service account
     annotations: {}
-    # The name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
+    # -- The name of the service account to use.
+    ## If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- Annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
+  # -- Define pod security context
   podSecurityContext: {}
     # fsGroup: 2000
 
+  # -- Define security context that allows you to overwrite the pod-level security context
   securityContext: {}
     # privileged: false
     # allowPrivilegeEscalation: false
@@ -99,10 +97,14 @@ backend:
     # seccompProfile:
     #   type: RuntimeDefault
 
+  # -- Define service
   service:
+    # -- Specify service type
     type: ClusterIP
+    # -- Specify service port
     port: 4000
 
+  # -- Override default liveness probe settings
   livenessProbe:
     httpGet:
       path: /
@@ -114,6 +116,7 @@ backend:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Override default readiness probe settings
   readinessProbe:
     httpGet:
       path: /
@@ -125,29 +128,44 @@ backend:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Define Studio Database Migration job settings
   migration:
+    # -- Specifies whether a database migration job should be created
     enable: false
+    # -- Specifies which image database migration job should use
     image:
+      # -- Specifies the repository of the image
       repository:
+      # -- Specifies the tag of the image
       tag:
+    # -- Specifies the database URL where migration should be done
     database_url:
 
+  # -- Configure the ingress resource that allows you to access the deployment installation. Set up the URL.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
+    # -- Specifies whether an ingress service should be created
     enabled: false
+    # -- Specifies the ingress className to be used
     className: ""
+    # -- Annotations to add to the ingress
     annotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
+    # -- Specifies the hosts for this ingress
     hosts:
       - host: chart-example.local
         paths:
-          - path: /
+          - path: /api
             pathType: ImplementationSpecific
+        extraPaths: []
+    # -- Spefices the TLS configuration for ingress
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
     #      - chart-example.local
 
+  # -- Specifies the resources limits and requests
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
@@ -160,38 +178,64 @@ backend:
     #   cpu: 100m
     #   memory: 128Mi
 
+  # -- Specifies the HPA settings
   autoscaling:
+    # -- Specifies whether autoscaling should be enabled
     enabled: false
+    # -- Specifies the minimum number of replicas
     minReplicas: 1
+    # -- Specifies the maximum number of replicas
     maxReplicas: 100
+    # -- Specifies the target CPU/Memory utilization percentage
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
+  # -- Allow the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
 
+  # -- Tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
+  # -- Allow the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+# -- Studio Web Client component specific configuration
 webClient:
+  # -- Specifies number of replicas
   replicaCount: 1
-
+  # -- Define image settings
   image:
+    # -- Specifies image repository
     repository:
+    # -- Specifies image pull policy
     pullPolicy: IfNotPresent
+    # -- Specifies image tag
+    ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+  # -- Define service account
   serviceAccount:
-    create: false
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
     annotations: {}
+    # -- The name of the service account to use.
+    ## If not set and create is true, a name is generated using the fullname template
     name: ""
-
+  
+  # -- Annotations to add to the pod
   podAnnotations: {}
-    # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+    # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
+  # -- Define pod security context
   podSecurityContext: {}
     # fsGroup: 2000
 
+  # -- Define security context that allows you to overwrite the pod-level security context
   securityContext: {}
     # privileged: false
     # allowPrivilegeEscalation: false
@@ -204,10 +248,14 @@ webClient:
     # seccompProfile:
     #   type: RuntimeDefault
 
+  # -- Define service
   service:
+    # -- Specify service type
     type: ClusterIP
+    # -- Specify service port
     port: 80
 
+  # -- Override default liveness probe settings
   livenessProbe:
     httpGet:
       path: /
@@ -219,6 +267,7 @@ webClient:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Override default readiness probe settings
   readinessProbe:
     httpGet:
       path: /
@@ -230,22 +279,47 @@ webClient:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Specifies the resources limits and requests
   resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
+  # -- Allow the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
 
+  # -- Tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
+  # -- Allow the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+# -- Studio Event Ingestion component specific configuration
 eventIngestion:
+  # -- Specifies number of replicas
   replicaCount: 1
-
+  # -- Define image settings
   image:
+    # -- Specifies image repository
     repository:
+    # -- Specifies image pull policy
     pullPolicy: IfNotPresent
+    # -- Specifies image tag
+    ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+  # -- Define environment variables for deployment
   environmentVariables:
     - name: DATABASE_URL
       value: ""
@@ -268,17 +342,25 @@ eventIngestion:
     - name: GROUP_ID
       value: ""
 
+  # -- Define service account
   serviceAccount:
-    create: false
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
     annotations: {}
+    # -- The name of the service account to use.
+    ## If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- Annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
+  # -- Define pod security context
   podSecurityContext: {}
     # fsGroup: 2000
 
+  # -- Define security context that allows you to overwrite the pod-level security context
   securityContext: {}
     # privileged: false
     # allowPrivilegeEscalation: false
@@ -291,40 +373,77 @@ eventIngestion:
     # seccompProfile:
     #   type: RuntimeDefault
 
+  # -- Specifies the resources limits and requests
   resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
+  # -- Specifies the HPA settings
   autoscaling:
+    # -- Specifies whether autoscaling should be enabled
     enabled: false
+    # -- Specifies the minimum number of replicas
     minReplicas: 1
+    # -- Specifies the maximum number of replicas
     maxReplicas: 100
+    # -- Specifies the target CPU/Memory utilization percentage
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
+  # -- Allow the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
 
+  # -- Tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
+  # -- Allow the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+# -- Studio Keycloak component specific configuration
 keycloak:
+  # -- Specifies number of replicas
   replicaCount: 1
-
+  # -- Define image settings
   image:
+    # -- Specifies image repository
     repository:
+    # -- Specifies image pull policy
     pullPolicy: IfNotPresent
+    # -- Specifies image tag
+    ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+  # -- Define service account
   serviceAccount:
-    create: false
+    # -- Specifies whether a service account should be created
+    create: true
+    # -- Annotations to add to the service account
     annotations: {}
+    # -- The name of the service account to use.
+    ## If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- Annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
+  # -- Define pod security context
   podSecurityContext: {}
     # fsGroup: 2000
 
+  # -- Define security context that allows you to overwrite the pod-level security context
   securityContext: {}
     # privileged: false
     # allowPrivilegeEscalation: false
@@ -337,10 +456,14 @@ keycloak:
     # seccompProfile:
     #   type: RuntimeDefault
 
+  # -- Define service
   service:
+    # -- Specify service type
     type: ClusterIP
+    # -- Specify service port
     port: 8080
 
+  # -- Override default liveness probe settings
   livenessProbe:
     httpGet:
       path: /
@@ -352,6 +475,7 @@ keycloak:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Override default readiness probe settings
   readinessProbe:
     httpGet:
       path: /
@@ -363,12 +487,30 @@ keycloak:
     timeoutSeconds: 5
     failureThreshold: 6
 
+  # -- Specifies the resources limits and requests
   resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
 
+  # -- Allow the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
 
+  # -- Tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
+  # -- Allow the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
 networkPolicy:
@@ -383,3 +525,17 @@ global:
   # additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+
+# -- Controls whether the pod may use the node network namespace
+hostNetwork: false
+
+# -- Specifies Pod's DNS policy
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+dnsPolicy: ""
+
+# -- Specifies Pod's DNS condig
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+dnsConfig: {}
+  # options:
+  # - name: ndots
+  #   value: "1"

@@ -14,8 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version VERSION
-$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version VERSION
+$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 ```
 
 ## Uninstalling the Chart
@@ -33,10 +32,8 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version VERSION
+$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 ```
-
-## Values
 
 ## Values
 

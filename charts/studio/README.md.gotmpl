@@ -13,8 +13,7 @@
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version VERSION
-$ helm install my-release oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version VERSION
+$ helm install my-release oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
 ## Uninstalling the Chart
@@ -32,9 +31,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version VERSION
+$ helm pull oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
-
-{{ template "chart.valuesHeader" . }}
 
 {{ template "chart.valuesSection" . }}

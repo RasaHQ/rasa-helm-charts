@@ -141,13 +141,15 @@ backend:
     # -- Specifies the database URL where migration should be done
     database_url:
 
-  # -- Configure the ingress resource that allows you to access the deployment installation. Set up the URL.
+  # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- Specifies whether an ingress service should be created
     enabled: false
     # -- Specifies the ingress className to be used
     className: ""
+    # -- Labels to add to the ingress
+    labels: {}
     # -- Annotations to add to the ingress
     annotations: {}
       # kubernetes.io/ingress.class: nginx
@@ -278,6 +280,32 @@ webClient:
     successThreshold: 1
     timeoutSeconds: 5
     failureThreshold: 6
+
+  # -- Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- Specifies whether an ingress service should be created
+    enabled: false
+    # -- Specifies the ingress className to be used
+    className: ""
+    # -- Labels to add to the ingress
+    labels: {}
+    # -- Annotations to add to the ingress
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- Specifies the hosts for this ingress
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+        extraPaths: []
+    # -- Spefices the TLS configuration for ingress
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
   # -- Specifies the resources limits and requests
   resources: {}
@@ -486,6 +514,32 @@ keycloak:
     successThreshold: 1
     timeoutSeconds: 5
     failureThreshold: 6
+
+  # -- Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- Specifies whether an ingress service should be created
+    enabled: false
+    # -- Specifies the ingress className to be used
+    className: ""
+    # -- Labels to add to the ingress
+    labels: {}
+    # -- Annotations to add to the ingress
+    annotations: {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- Specifies the hosts for this ingress
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /auth
+            pathType: ImplementationSpecific
+        extraPaths: []
+    # -- Spefices the TLS configuration for ingress
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
 
   # -- Specifies the resources limits and requests
   resources: {}

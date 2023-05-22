@@ -15,7 +15,7 @@ fullnameOverride: ""
 imagePullSecrets: []
     # - name: regcred
 
-# -- Studio Backend component specific configuration
+# Studio Backend component specific configuration
 backend:
   # -- Specifies number of replicas
   replicaCount: 1
@@ -203,7 +203,7 @@ backend:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# -- Studio Web Client component specific configuration
+# Studio Web Client component specific configuration
 webClient:
   # -- Specifies number of replicas
   replicaCount: 1
@@ -305,7 +305,7 @@ webClient:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# -- Studio Event Ingestion component specific configuration
+# Studio Event Ingestion component specific configuration
 eventIngestion:
   # -- Specifies number of replicas
   replicaCount: 1
@@ -411,7 +411,7 @@ eventIngestion:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# -- Studio Keycloak component specific configuration
+# Studio Keycloak component specific configuration
 keycloak:
   # -- Specifies number of replicas
   replicaCount: 1
@@ -513,16 +513,19 @@ keycloak:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+# Network policy settings
 networkPolicy:
+  # -- Specifies whether to enable network policies
   enabled: false
+  # -- Specifies whether to apply denyAll network policy
   denyAll: false
-  # Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes
+  # -- Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes
   nodeCIDR: []
   #  - ipBlock:
   #      cidr: 0.0.0.0/0
 
 global:
-  # additionalDeploymentLabels can be used to map organizational structures onto system objects
+  # -- additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
 

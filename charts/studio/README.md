@@ -58,8 +58,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"database_url":null,"enable":false,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
-| backend.migration.database_url | string | `nil` | Specifies the database URL where migration should be done |
+| backend.migration | object | `{"enable":false,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
 | backend.migration.enable | bool | `false` | Specifies whether a database migration job should be created |
 | backend.migration.image | object | `{"repository":null,"tag":null}` | Specifies which image database migration job should use |
 | backend.migration.image.repository | string | `nil` | Specifies the repository of the image |

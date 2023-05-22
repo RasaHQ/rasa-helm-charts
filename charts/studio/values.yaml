@@ -138,8 +138,6 @@ backend:
       repository:
       # -- Specifies the tag of the image
       tag:
-    # -- Specifies the database URL where migration should be done
-    database_url:
 
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/

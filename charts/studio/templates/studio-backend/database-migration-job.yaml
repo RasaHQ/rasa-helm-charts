@@ -2,7 +2,7 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: studio-database-migration
+  name: {{ include "studio.fullname" . }}-database-migration
   labels:
     {{- include "studio.labels" . | nindent 4 }}
   annotations:
@@ -28,9 +28,9 @@ spec:
       {{- end }}
       restartPolicy: Never
       containers:
-      - name: studio-database-migration
+      - name: {{ include "studio.fullname" . }}-database-migration
         image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag | default .Chart.AppVersion }}"
         envFrom:
         - configMapRef:
-            name: studio-database-migration-configmap
+            name: {{ include "studio.fullname" . }}-database-migration-configmap
 {{- end }}

@@ -1,0 +1,67 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-egress-from-kubelet-to-studio-backend
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-backend
+  egress:
+    - to:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+  ingress:
+    - from:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.backend.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-egress-from-kubelet-to-studio-keycloak
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-keycloak
+  egress:
+    - to:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+  ingress:
+    - from:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.keycloak.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-egress-from-kubelet-to-studio-web-client
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/component: studio-web-client
+  egress:
+    - to:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+  ingress:
+    - from:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.frontend.service.port }}
+{{- end }}

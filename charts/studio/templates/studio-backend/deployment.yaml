@@ -4,7 +4,7 @@ metadata:
   name: {{ include "studio.fullname" . }}-backend
   labels:
     {{- include "studio.labels" . | nindent 4 }}
-    app.kubernetes.io/component: studio
+    app.kubernetes.io/component: studio-backend
 spec:
   {{- if not .Values.backend.autoscaling.enabled }}
   replicas: {{ .Values.backend.replicaCount }}
@@ -12,7 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: studio
+      app.kubernetes.io/component: studio-backend
   template:
     metadata:
       {{- with .Values.backend.podAnnotations }}
@@ -21,8 +21,14 @@ spec:
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: studio
+        app.kubernetes.io/component: studio-backend
     spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml .Values.dnsConfig | indent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

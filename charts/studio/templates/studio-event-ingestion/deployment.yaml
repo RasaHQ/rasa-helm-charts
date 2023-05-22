@@ -4,6 +4,7 @@ metadata:
   name: {{ include "studio.fullname" . }}-event-ingestion
   labels:
     {{- include "studio.labels" . | nindent 4 }}
+    app.kubernetes.io/component: studio-event-ingestion
 spec:
   {{- if not .Values.eventIngestion.autoscaling.enabled }}
   replicas: {{ .Values.eventIngestion.replicaCount }}
@@ -11,6 +12,7 @@ spec:
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: studio-event-ingestion
   template:
     metadata:
       {{- with .Values.eventIngestion.podAnnotations }}
@@ -19,7 +21,14 @@ spec:
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: studio-event-ingestion
     spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml .Values.dnsConfig | indent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

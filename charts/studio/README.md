@@ -37,7 +37,7 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | backend.environmentVariables[1].name | string | `"SECURITY_PROTOCOL"` |  |
 | backend.environmentVariables[1].value | string | `"SASL_SSL"` |  |
 | backend.environmentVariables[2].name | string | `"SASL_MECHANISM"` |  |
-| backend.environmentVariables[2].value | string | `""` |  |
+| backend.environmentVariables[2].value | string | `"SCRAM-SHA-256"` |  |
 | backend.environmentVariables[3].name | string | `"SASL_USERNAME"` |  |
 | backend.environmentVariables[3].value | string | `""` |  |
 | backend.environmentVariables[4].name | string | `"SASL_PASSWORD"` |  |
@@ -94,6 +94,8 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | backend.serviceAccount.create | bool | `true` |  |
 | backend.serviceAccount.name | string | `""` |  |
 | backend.tolerations | list | `[]` |  |
+| dnsConfig | object | `{}` |  |
+| dnsPolicy | string | `""` |  |
 | eventIngestion.affinity | object | `{}` |  |
 | eventIngestion.autoscaling.enabled | bool | `false` |  |
 | eventIngestion.autoscaling.maxReplicas | int | `100` |  |
@@ -165,6 +167,8 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | frontend.serviceAccount.name | string | `""` |  |
 | frontend.tolerations | list | `[]` |  |
 | fullnameOverride | string | `""` | Override the full qualified app name |
+| global.additionalDeploymentLabels | object | `{}` |  |
+| hostNetwork | bool | `false` |  |
 | imagePullSecrets | string | `nil` |  |
 | keycloak.affinity | object | `{}` |  |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` |  |
@@ -201,3 +205,4 @@ $ helm install RELEASE oci://LOCATION-docker.pkg.dev/PROJECT/REPOSITORY/studio -
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` |  |
 | networkPolicy.enabled | bool | `false` |  |
+| networkPolicy.nodeCIDR | list | `[]` |  |

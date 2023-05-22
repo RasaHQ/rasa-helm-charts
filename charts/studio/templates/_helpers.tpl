@@ -40,6 +40,10 @@ helm.sh/chart: {{ include "studio.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/app: {{ .Chart.Name }}
+{{ if .Values.global.additionalDeploymentLabels -}}
+{{- $.Values.global.additionalDeploymentLabels | toYaml -}}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -91,5 +95,29 @@ Create the name of the frontend service account to use
 {{- default (include "studio.fullname" .) .Values.frontend.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.frontend.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return DNS policy depends on host network configuration
+*/}}
+{{- define "studio.dnsPolicy" -}}
+{{- if and .Values.hostNetwork (empty .Values.dnsPolicy) }}
+{{- print "ClusterFirstWithHostNet" }}
+{{- else if and (not .Values.hostNetwork) (empty .Values.dnsPolicy) }}
+{{- print "ClusterFirst" }}
+{{- else if .Values.dnsPolicy }}
+{{- .Values.dnsPolicy }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return the appropriate apiVersion for networkpolicy.
+*/}}
+{{- define "networkPolicy.apiVersion" -}}
+{{- if semverCompare ">=1.4-0, <1.7-0" .Capabilities.KubeVersion.GitVersion }}
+{{- print "extensions/v1beta1" }}
+{{- else }}
+{{- print "networking.k8s.io/v1" }}
 {{- end }}
 {{- end }}

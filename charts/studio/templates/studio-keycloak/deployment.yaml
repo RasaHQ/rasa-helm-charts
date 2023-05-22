@@ -4,11 +4,13 @@ metadata:
   name: {{ include "studio.fullname" . }}-keycloak
   labels:
     {{- include "studio.labels" . | nindent 4 }}
+    app.kubernetes.io/component: studio-keycloak
 spec:
   replicas: {{ .Values.keycloak.replicaCount }}
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: studio-keycloak
   template:
     metadata:
       {{- with .Values.keycloak.podAnnotations }}
@@ -17,7 +19,14 @@ spec:
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: studio-keycloak
     spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+{{ toYaml .Values.dnsConfig | indent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}

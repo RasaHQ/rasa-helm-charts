@@ -10,6 +10,19 @@ fullnameOverride: ""
 imagePullSecrets:
     # - name: regcred
 
+# hostNetwork controls whether the pod may use the node network namespace
+hostNetwork: false
+
+# dnsPolicy specifies Pod's DNS policy
+# ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+dnsPolicy: ""
+
+## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+dnsConfig: {}
+  # options:
+  # - name: ndots
+  #   value: "1"
+
 ############################
 # THIS IS WORK IN PROGRESS #
 ############################
@@ -32,7 +45,7 @@ backend:
     - name: SECURITY_PROTOCOL
       value: "SASL_SSL"
     - name: SASL_MECHANISM
-      value: ""
+      value: "SCRAM-SHA-256"
     - name: SASL_USERNAME
       value: ""
     - name: SASL_PASSWORD
@@ -361,3 +374,12 @@ keycloak:
 networkPolicy:
   enabled: false
   denyAll: false
+  # Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes
+  nodeCIDR: []
+  #  - ipBlock:
+  #      cidr: 0.0.0.0/0
+
+global:
+  # additionalDeploymentLabels can be used to map organizational structures onto system objects
+  # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  additionalDeploymentLabels: {}

@@ -57,7 +57,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
-| backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | backend.migration | object | `{"database_url":null,"enable":false,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
 | backend.migration.database_url | string | `nil` | Specifies the database URL where migration should be done |
 | backend.migration.enable | bool | `false` | Specifies whether a database migration job should be created |
@@ -67,7 +67,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | backend.podAnnotations | object | `{}` | Annotations to add to the pod |
 | backend.podSecurityContext | object | `{}` | Define pod security context |
-| backend.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| backend.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | backend.replicaCount | int | `1` | Specifies number of replicas |
 | backend.resources | object | `{}` | Specifies the resources limits and requests |
 | backend.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |

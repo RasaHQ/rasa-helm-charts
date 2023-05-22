@@ -15,7 +15,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-api
+  name: {{ $fullName }}-backend
   labels:
     {{- include "studio.labels" . | nindent 4 }}
     {{- if .Values.backend.ingress.labels }}

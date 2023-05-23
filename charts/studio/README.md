@@ -45,7 +45,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| backend.environmentVariables | list | `[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""},{"name":"KEYCLOAK_URL","value":""},{"name":"KEYCLOAK_REALM","value":""},{"name":"KEYCLOAK_API_USERNAME","value":""},{"name":"KEYCLOAK_API_PASSWORD","value":""},{"name":"KEYCLOAK_API_GRANTTYPE","value":""}]` | Define environment variables for deployment |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"KEYCLOAK_API_GRANTTYPE":{"value":""},"KEYCLOAK_API_PASSWORD":{"value":""},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":""},"KEYCLOAK_URL":{"value":""},"SASL_MECHANISM":{"value":""},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | backend.image.repository | string | `nil` | Specifies image repository |
@@ -86,7 +86,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| eventIngestion.environmentVariables | list | `[{"name":"DATABASE_URL","value":""},{"name":"SECURITY_PROTOCOL","value":"SASL_SSL"},{"name":"SASL_MECHANISM","value":"SCRAM-SHA-256"},{"name":"SASL_USERNAME","value":""},{"name":"SASL_PASSWORD","value":""},{"name":"KAFKA_BROKER_ADDRESS","value":""},{"name":"KAFKA_TOPIC","value":""},{"name":"KAFKA_DLQ_TOPIC","value":""},{"name":"KAFKA_CLIENT_ID","value":""},{"name":"GROUP_ID","value":""}]` | Define environment variables for deployment |
+| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | eventIngestion.image.repository | string | `nil` | Specifies image repository |
@@ -139,6 +139,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| webClient.environmentVariables.API_ENDPOINT | string | `"apiendpoint"` |  |
+| webClient.environmentVariables.KEYCLOAK_CLIENT_ID | string | `nil` |  |
+| webClient.environmentVariables.KEYCLOAK_REALM | string | `nil` |  |
+| webClient.environmentVariables.KEYCLOAK_URL | string | `nil` |  |
 | webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | webClient.image.repository | string | `nil` | Specifies image repository |

@@ -30,40 +30,46 @@ backend:
     tag: ""
 
   # -- Define environment variables for deployment
+  # Example: Specify the string value for variables
+  #   value: my-value
+  # Example: Specify the value for variables sourced from a Secret.
+  #   secret:
+  #     name: my-secret
+  #     key: my-secret-key
+  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    - name: DATABASE_URL
+    DATABASE_URL:
       value: ""
-      # valueFrom:
-      #   secretKeyRef:
-      #     name:
-      #     key:
-    - name: SECURITY_PROTOCOL
+      # secret:
+      #   name:
+      #   key:
+    SECURITY_PROTOCOL:
       value: "SASL_SSL"
-    - name: SASL_MECHANISM
-      value: "SCRAM-SHA-256"
-    - name: SASL_USERNAME
+    SASL_MECHANISM:
       value: ""
-    - name: SASL_PASSWORD
+    SASL_USERNAME:
       value: ""
-    - name: KAFKA_BROKER_ADDRESS
+    SASL_PASSWORD:
       value: ""
-    - name: KAFKA_TOPIC
+    KAFKA_BROKER_ADDRESS:
       value: ""
-    - name: KAFKA_DLQ_TOPIC
+    KAFKA_TOPIC:
       value: ""
-    - name: KAFKA_CLIENT_ID
+    KAFKA_DLQ_TOPIC:
       value: ""
-    - name: GROUP_ID
+    KAFKA_CLIENT_ID:
       value: ""
-    - name: KEYCLOAK_URL
+    GROUP_ID:
       value: ""
-    - name: KEYCLOAK_REALM
+    KEYCLOAK_URL:
       value: ""
-    - name: KEYCLOAK_API_USERNAME
+    KEYCLOAK_REALM:
       value: ""
-    - name: KEYCLOAK_API_PASSWORD
+    KEYCLOAK_API_USERNAME:
       value: ""
-    - name: KEYCLOAK_API_GRANTTYPE
+    KEYCLOAK_API_PASSWORD:
+      value: ""
+    KEYCLOAK_API_GRANTTYPE:
       value: ""
 
   # -- Define service account
@@ -217,6 +223,12 @@ webClient:
     ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
 
+  environmentVariables:
+    API_ENDPOINT: "apiendpoint"
+    KEYCLOAK_URL:
+    KEYCLOAK_REALM:
+    KEYCLOAK_CLIENT_ID:
+
   # -- Define service account
   serviceAccount:
     # -- Specifies whether a service account should be created
@@ -346,26 +358,33 @@ eventIngestion:
     tag: ""
 
   # -- Define environment variables for deployment
+  # Example: Specify the string value for variables
+  #   value: my-value
+  # Example: Specify the value for variables sourced from a Secret.
+  #   secret:
+  #     name: my-secret
+  #     key: my-secret-key
+  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    - name: DATABASE_URL
+    DATABASE_URL:
       value: ""
-    - name: SECURITY_PROTOCOL
+    SECURITY_PROTOCOL:
       value: "SASL_SSL"
-    - name: SASL_MECHANISM
+    SASL_MECHANISM:
       value: "SCRAM-SHA-256"
-    - name: SASL_USERNAME
+    SASL_USERNAME:
       value: ""
-    - name: SASL_PASSWORD
+    SASL_PASSWORD:
       value: ""
-    - name: KAFKA_BROKER_ADDRESS
+    KAFKA_BROKER_ADDRESS:
       value: ""
-    - name: KAFKA_TOPIC
+    KAFKA_TOPIC:
       value: ""
-    - name: KAFKA_DLQ_TOPIC
+    KAFKA_DLQ_TOPIC:
       value: ""
-    - name: KAFKA_CLIENT_ID
+    KAFKA_CLIENT_ID:
       value: ""
-    - name: GROUP_ID
+    GROUP_ID:
       value: ""
 
   # -- Define service account

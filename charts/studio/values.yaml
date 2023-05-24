@@ -119,7 +119,7 @@ backend:
   livenessProbe:
     httpGet:
       path: /api/health
-      port: http
+      port: 4000
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15
@@ -131,7 +131,7 @@ backend:
   readinessProbe:
     httpGet:
       path: /api/health
-      port: http
+      port: 4000
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15

@@ -231,8 +231,8 @@ webClient:
     tag: ""
 
   environmentVariables:
-    API_ENDPOINT: "apiendpoint"
-    KEYCLOAK_URL:
+    API_ENDPOINT: ""
+    KEYCLOAK_URL: ""
     KEYCLOAK_REALM: "rasa-local-dev"
     KEYCLOAK_CLIENT_ID: "kafka-python-rasa"
 
@@ -533,9 +533,9 @@ keycloak:
   livenessProbe:
     httpGet:
       path: /
-      port: http
+      port: 8080
       scheme: HTTP
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
     periodSeconds: 15
     successThreshold: 1
     timeoutSeconds: 5
@@ -545,9 +545,9 @@ keycloak:
   readinessProbe:
     httpGet:
       path: /
-      port: http
+      port: 8080
       scheme: HTTP
-    initialDelaySeconds: 15
+    initialDelaySeconds: 30
     periodSeconds: 15
     successThreshold: 1
     timeoutSeconds: 5

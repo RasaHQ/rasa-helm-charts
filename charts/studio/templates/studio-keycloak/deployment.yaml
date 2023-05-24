@@ -44,6 +44,10 @@ spec:
             - name: http
               containerPort: {{ .Values.keycloak.service.port }}
               protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.keycloak.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.keycloak.readinessProbe | nindent 12 }}
           resources:
             {{- toYaml .Values.keycloak.resources | nindent 12 }}
       {{- with .Values.keycloak.nodeSelector }}

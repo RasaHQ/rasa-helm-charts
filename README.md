@@ -1,20 +1,3 @@
-# Helm Charts Packaging and Distribution
-
-This repository repesents a guideline on how should we approach Helm Chart packaging and distribution of our charts to our users.
-Complete strategy can be found in [this](https://www.notion.so/rasa/Helm-Distribution-Strategy-a5bbd0c3722e44ee8baae16b08891175) document.
-
-## Overview
-- We are using Google Artifact Registry as Helm repository.
-- We are storying Helm Charts the same way we would approach storing Docker images.
-- We are using OCI to push or pull our charts.
-- We are building strong sense of versioning and safe distribution of our charts using short-lived Access Tokens or Service Account keys.
-- We are testing and linting our charts before the release following [Red Hat Community of Practice](https://redhat-cop.github.io/ci/linting-testing-helm-charts.html) guideliness.
-- We are introducting security scans of our Helm charts using Snyk.
-- We are generating Helm docs in pre-commit format.
-- We have the ability to enforce `Chart.yaml` schema configuration.
-- We have the ability to enforce YAML style standards across the projects.
-- We have the ability to centralize our charts in a form of a monorepo.
-
 # The Studio Library for Kubernetes
 
 Rasa Studio, ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
@@ -22,7 +5,7 @@ Rasa Studio, ready to launch on Kubernetes using [Kubernetes Helm](https://githu
 ## TL;DR
 
 ```bash
-helm install my-release oci://registry-1.docker.io/helm-charts/<chart>
+helm install <your release name> oci://registry-1.docker.io/helm-charts/studio
 ```
 
 ## Before you begin
@@ -50,5 +33,43 @@ Please refer to the [Quick Start guide](https://helm.sh/docs/intro/quickstart/) 
 
 Useful Helm Client Commands:
 
-- Install a chart: `helm install my-release oci://registry-1.docker.io/helm-charts/studio`
-- Upgrade your application: `helm upgrade my-release oci://registry-1.docker.io/helm-charts/studio`
+- Install a chart: `helm install <your release name> oci://registry-1.docker.io/helm-charts/studio`
+- Upgrade your application: `helm upgrade <your release name> oci://registry-1.docker.io/helm-charts/studio`
+- Install specific version: `helm install <your release name> oci://registry-1.docker.io/helm-charts/studio --version <desired version>`
+
+
+## Development Internals
+
+### Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+- [pre-commit](https://pre-commit.com/)
+- [helm-docs](https://github.com/norwoodj/helm-docs)
+
+Make sure to always check if `README.md` is valid and reflects your changes properly. Also, make sure to leave comments in `values.yaml` in form:
+
+```yaml
+    # -- This is a description showed in README.md
+    enabled: false
+```
+
+### Development
+
+This repository automatically release a new version of the Helm chart once new changes are merged. The only required steps are:
+
+1. Make the changes to the chart
+2. Run `helm lint --strict charts/studio`
+3. Increase the chart version in `charts/studio/Chart.yaml`
+## How To Contribute
+
+Contributions, issues and feature requests are welcome!
+
+For major changes, please open an [issue](https://github.com/RasaHQ/helm-packaging/issues), or:
+
+  1. Create a branch: `git checkout -b <branch_name>`.
+  2. Make your changes and commit them: `git commit -m "<commit_message>"`
+  3. Push to the original branch: `git push origin <branch_name>`
+  4. Create the pull request.
+
+Alternatively see the GitHub documentation on [creating a pull request](https://help.github.com/en/github/collaborating-with-issues-and-pull-requests/creating-a-pull-request).

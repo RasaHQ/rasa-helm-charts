@@ -4,4 +4,7 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    window.API_ENDPOINT = {{ .Values.webClient.environmentVariables.API_ENDPOINT | quote }}; window.KEYCLOAK_URL = {{ .Values.webClient.environmentVariables.KEYCLOAK_URL | quote }}; window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }}
+    window.API_ENDPOINT = {{ .Values.webClient.environmentVariables.API_ENDPOINT | quote }}; 
+    window.KEYCLOAK_URL = {{ .Values.webClient.environmentVariables.KEYCLOAK_URL | quote }}; 
+    window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; 
+    window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }}

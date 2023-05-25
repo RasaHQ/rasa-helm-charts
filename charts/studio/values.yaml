@@ -44,28 +44,12 @@ backend:
       # secret:
       #   name:
       #   key:
-    SECURITY_PROTOCOL:
-      value: "SASL_SSL"
-    SASL_MECHANISM:
-      value: "SCRAM-SHA-256"
-    SASL_USERNAME:
-      value: ""
-    SASL_PASSWORD:
-      value: ""
-    KAFKA_BROKER_ADDRESS:
-      value: ""
-    KAFKA_TOPIC:
-      value: ""
-    KAFKA_DLQ_TOPIC:
-      value: ""
-    KAFKA_CLIENT_ID:
-      value: "kafka-python-rasa"
-    GROUP_ID:
-      value: ""
     KEYCLOAK_URL:
       value: ""
     KEYCLOAK_REALM:
       value: "rasa-local-dev"
+    KEYCLOAK_API_CLIENT_ID:
+      value: "admin-cli"
     KEYCLOAK_API_USERNAME:
       value: ""
     KEYCLOAK_API_PASSWORD:

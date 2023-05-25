@@ -8,8 +8,9 @@ spec:
   type: {{ .Values.keycloak.service.type }}
   ports:
     - port: {{ .Values.keycloak.service.port }}
-      targetPort: http
+      targetPort: {{ .Values.keycloak.service.targetPort }}
       protocol: TCP
       name: http
   selector:
     {{- include "studio.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: studio-keycloak

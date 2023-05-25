@@ -234,7 +234,7 @@ webClient:
     API_ENDPOINT: ""
     KEYCLOAK_URL: ""
     KEYCLOAK_REALM: "rasa-local-dev"
-    KEYCLOAK_CLIENT_ID: "kafka-python-rasa"
+    KEYCLOAK_CLIENT_ID: "studio-local"
 
   # -- Define service account
   serviceAccount:

@@ -53,7 +53,8 @@ spec:
             {{- toYaml .Values.webClient.resources | nindent 12 }}
           volumeMounts:
           - name: configmap
-            mountPath: "/etc/data"
+            mountPath: "/usr/share/nginx/html/config.js"
+            subPath: "config.js"
             readOnly: true
       volumes:
       - name: configmap
@@ -61,7 +62,7 @@ spec:
           name: studio-web-client-configmap
           items:
           - key: "windowVariables"
-            path: "windowVariables"
+            path: "config.js"
       {{- with .Values.webClient.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

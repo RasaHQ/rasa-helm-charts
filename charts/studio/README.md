@@ -45,7 +45,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"KEYCLOAK_API_GRANTTYPE":{"value":""},"KEYCLOAK_API_PASSWORD":{"value":""},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":""},"KEYCLOAK_URL":{"value":""},"SASL_MECHANISM":{"value":""},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"value":""},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"value":""},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | backend.image.repository | string | `nil` | Specifies image repository |
@@ -57,25 +57,25 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
-| backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enable":false,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
-| backend.migration.enable | bool | `false` | Specifies whether a database migration job should be created |
+| backend.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| backend.migration | object | `{"enable":true,"image":{"repository":null,"tag":null}}` | Define Studio Database Migration job settings |
+| backend.migration.enable | bool | `true` | Specifies whether a database migration job should be created |
 | backend.migration.image | object | `{"repository":null,"tag":null}` | Specifies which image database migration job should use |
 | backend.migration.image.repository | string | `nil` | Specifies the repository of the image |
 | backend.migration.image.tag | string | `nil` | Specifies the tag of the image |
 | backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | backend.podAnnotations | object | `{}` | Annotations to add to the pod |
 | backend.podSecurityContext | object | `{}` | Define pod security context |
-| backend.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| backend.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | backend.replicaCount | int | `1` | Specifies number of replicas |
 | backend.resources | object | `{}` | Specifies the resources limits and requests |
 | backend.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
-| backend.service | object | `{"port":4000,"type":"ClusterIP"}` | Define service |
-| backend.service.port | int | `4000` | Specify service port |
+| backend.service | object | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` | Define service |
+| backend.service.port | int | `80` | Specify service port |
 | backend.service.type | string | `"ClusterIP"` | Specify service type |
-| backend.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| backend.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | backend.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| backend.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| backend.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | backend.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | dnsConfig | object | `{}` | Specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
@@ -86,7 +86,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | eventIngestion.image.repository | string | `nil` | Specifies image repository |
@@ -97,9 +97,9 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | eventIngestion.replicaCount | int | `1` | Specifies number of replicas |
 | eventIngestion.resources | object | `{}` | Specifies the resources limits and requests |
 | eventIngestion.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
-| eventIngestion.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| eventIngestion.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | eventIngestion.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| eventIngestion.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| eventIngestion.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | eventIngestion.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | eventIngestion.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | fullnameOverride | string | `""` | Override the full qualified app name |
@@ -118,20 +118,20 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | keycloak.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
 | keycloak.ingress.labels | object | `{}` | Labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
-| keycloak.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| keycloak.livenessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | keycloak.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | keycloak.podAnnotations | object | `{}` | Annotations to add to the pod |
 | keycloak.podSecurityContext | object | `{}` | Define pod security context |
-| keycloak.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| keycloak.readinessProbe | object | `{"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | keycloak.replicaCount | int | `1` | Specifies number of replicas |
 | keycloak.resources | object | `{}` | Specifies the resources limits and requests |
 | keycloak.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
-| keycloak.service | object | `{"port":8080,"type":"ClusterIP"}` | Define service |
-| keycloak.service.port | int | `8080` | Specify service port |
+| keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
+| keycloak.service.port | int | `80` | Specify service port |
 | keycloak.service.type | string | `"ClusterIP"` | Specify service type |
-| keycloak.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| keycloak.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | keycloak.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| keycloak.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | nameOverride | string | `""` | Override name of app |
@@ -139,10 +139,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| webClient.environmentVariables.API_ENDPOINT | string | `"apiendpoint"` |  |
-| webClient.environmentVariables.KEYCLOAK_CLIENT_ID | string | `nil` |  |
-| webClient.environmentVariables.KEYCLOAK_REALM | string | `nil` |  |
-| webClient.environmentVariables.KEYCLOAK_URL | string | `nil` |  |
+| webClient.environmentVariables.API_ENDPOINT | string | `""` |  |
+| webClient.environmentVariables.KEYCLOAK_CLIENT_ID | string | `"studio-local"` |  |
+| webClient.environmentVariables.KEYCLOAK_REALM | string | `"rasa-local-dev"` |  |
+| webClient.environmentVariables.KEYCLOAK_URL | string | `""` |  |
 | webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | webClient.image.repository | string | `nil` | Specifies image repository |
@@ -162,11 +162,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | webClient.replicaCount | int | `1` | Specifies number of replicas |
 | webClient.resources | object | `{}` | Specifies the resources limits and requests |
 | webClient.securityContext | object | `{}` | Define security context that allows you to overwrite the pod-level security context |
-| webClient.service | object | `{"port":80,"type":"ClusterIP"}` | Define service |
+| webClient.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
 | webClient.service.port | int | `80` | Specify service port |
 | webClient.service.type | string | `"ClusterIP"` | Specify service type |
-| webClient.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| webClient.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | webClient.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| webClient.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| webClient.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | webClient.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | webClient.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |

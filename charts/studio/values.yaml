@@ -207,7 +207,8 @@ webClient:
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
     tag: ""
-
+  
+  # -- Define environment variables for deployment
   environmentVariables:
     API_ENDPOINT: ""
     KEYCLOAK_URL: ""

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.7](https://img.shields.io/badge/Version-0.1.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
+$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.7
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
+$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.7
 ```
 
 ## Values
@@ -139,10 +139,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.6
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| webClient.environmentVariables.API_ENDPOINT | string | `""` |  |
-| webClient.environmentVariables.KEYCLOAK_CLIENT_ID | string | `"studio-local"` |  |
-| webClient.environmentVariables.KEYCLOAK_REALM | string | `"rasa-local-dev"` |  |
-| webClient.environmentVariables.KEYCLOAK_URL | string | `""` |  |
+| webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"studio-local","KEYCLOAK_REALM":"rasa-local-dev","KEYCLOAK_URL":""}` | Define environment variables for deployment |
 | webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":null,"tag":""}` | Define image settings |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | webClient.image.repository | string | `nil` | Specifies image repository |

@@ -12,7 +12,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- Repository pull secrets
-imagePullSecrets: []
+imagePullSecrets:
+  []
   # - name: regcred
 
 # Studio Backend component specific configuration
@@ -67,15 +68,18 @@ backend:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    {}
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    {}
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -140,7 +144,8 @@ backend:
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -157,7 +162,8 @@ backend:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -225,15 +231,18 @@ webClient:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    {}
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    {}
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -287,7 +296,8 @@ webClient:
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -304,7 +314,8 @@ webClient:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -384,15 +395,18 @@ eventIngestion:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    {}
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    {}
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -405,7 +419,8 @@ eventIngestion:
     #   type: RuntimeDefault
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -467,15 +482,18 @@ keycloak:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    {}
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    {}
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -498,7 +516,7 @@ keycloak:
   # -- Override default liveness probe settings
   livenessProbe:
     httpGet:
-      path: /
+      path: /auth
       port: 8080
       scheme: HTTP
     initialDelaySeconds: 30
@@ -510,7 +528,7 @@ keycloak:
   # -- Override default readiness probe settings
   readinessProbe:
     httpGet:
-      path: /
+      path: /auth
       port: 8080
       scheme: HTTP
     initialDelaySeconds: 30
@@ -529,7 +547,8 @@ keycloak:
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -546,7 +565,8 @@ keycloak:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -596,7 +616,8 @@ dnsPolicy: ""
 
 # -- Specifies Pod's DNS condig
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-dnsConfig: {}
+dnsConfig:
+  {}
   # options:
   # - name: ndots
   #   value: "1"

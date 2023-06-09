@@ -498,7 +498,7 @@ keycloak:
   # -- Override default liveness probe settings
   livenessProbe:
     httpGet:
-      path: /
+      path: /auth
       port: 8080
       scheme: HTTP
     initialDelaySeconds: 30
@@ -510,7 +510,7 @@ keycloak:
   # -- Override default readiness probe settings
   readinessProbe:
     httpGet:
-      path: /
+      path: /auth
       port: 8080
       scheme: HTTP
     initialDelaySeconds: 30

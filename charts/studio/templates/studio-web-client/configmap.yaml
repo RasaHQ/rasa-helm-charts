@@ -8,3 +8,4 @@ data:
     window.KEYCLOAK_URL = {{ .Values.webClient.environmentVariables.KEYCLOAK_URL | quote }}; 
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; 
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }}
+    window.FEATURE_FLAG_FLOWS = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_FLOWS | quote }}

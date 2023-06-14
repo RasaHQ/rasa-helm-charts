@@ -2,7 +2,7 @@
 
 Rasa Studio, ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
 
-Chart usage can be found [here](https://github.com/RasaHQ/helm-packaging/blob/main/charts/studio/README.md).
+Chart usage can be found [here](https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md).
 
 ## TL;DR
 
@@ -67,7 +67,7 @@ This repository automatically release a new version of the Helm chart once new c
 
 Contributions, issues and feature requests are welcome!
 
-For major changes, please open an [issue](https://github.com/RasaHQ/helm-packaging/issues), or:
+For major changes, please open an [issue](https://github.com/RasaHQ/rasa-helm-charts/issues), or:
 
   1. Create a branch: `git checkout -b <branch_name>`.
   2. Make your changes and commit them: `git commit -m "<commit_message>"`

@@ -2,6 +2,8 @@
 
 Rasa Studio, ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
 
+Chart usage can be found [here](https://github.com/RasaHQ/helm-packaging/blob/main/charts/studio/README.md).
+
 ## TL;DR
 
 ```bash

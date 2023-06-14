@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "studio.fullname" . }}-event-ingestion
   labels:
-    {{- include "studio.labels" . | nindent 4 }}
+    {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-event-ingestion
 spec:
   {{- if not .Values.eventIngestion.autoscaling.enabled }}
@@ -34,12 +34,16 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.eventIngestion.serviceAccountName" . }}
+      {{- if .Values.eventIngestion.podSecurityContext.enabled }}
       securityContext:
-        {{- toYaml .Values.eventIngestion.podSecurityContext | nindent 8 }}
+        {{- omit .Values.eventIngestion.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-event-ingestion
+          {{- if .Values.eventIngestion.securityContext.enabled }}
           securityContext:
-            {{- toYaml .Values.eventIngestion.securityContext | nindent 12 }}
+            {{- omit .Values.eventIngestion.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.eventIngestion.image.repository }}:{{ .Values.eventIngestion.image.tag }}"
           imagePullPolicy: {{ .Values.eventIngestion.image.pullPolicy }}
           resources:

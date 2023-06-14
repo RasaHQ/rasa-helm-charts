@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "studio.fullname" . }}-web-client
   labels:
-    {{- include "studio.labels" . | nindent 4 }}
+    {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-web-client
 spec:
   replicas: {{ .Values.webClient.replicaCount }}
@@ -33,22 +33,30 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.webClient.serviceAccountName" . }}
+      {{- if .Values.webClient.podSecurityContext.enabled }}
       securityContext:
-        {{- toYaml .Values.webClient.podSecurityContext | nindent 8 }}
+        {{- omit .Values.webClient.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-web-client
+          {{- if .Values.webClient.securityContext.enabled }}
           securityContext:
-            {{- toYaml .Values.webClient.securityContext | nindent 12 }}
+            {{- omit .Values.webClient.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.webClient.image.repository }}:{{ .Values.webClient.image.tag }}"
           imagePullPolicy: {{ .Values.webClient.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.webClient.service.port }}
               protocol: TCP
+          {{- if or .Values.webClient.livenessProbe.enabled (not (hasKey .Values.webClient.livenessProbe "enabled")) }}
           livenessProbe:
             {{- toYaml .Values.webClient.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.webClient.readinessProbe.enabled (not (hasKey .Values.webClient.readinessProbe "enabled")) }}
           readinessProbe:
             {{- toYaml .Values.webClient.readinessProbe | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.webClient.resources | nindent 12 }}
           volumeMounts:

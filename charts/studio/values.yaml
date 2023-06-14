@@ -71,11 +71,13 @@ backend:
     # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: true
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -97,6 +99,7 @@ backend:
 
   # -- Override default liveness probe settings
   livenessProbe:
+    enabled: true
     httpGet:
       path: /api/health
       port: 4000
@@ -109,6 +112,7 @@ backend:
 
   # -- Override default readiness probe settings
   readinessProbe:
+    enabled: true
     httpGet:
       path: /api/health
       port: 4000
@@ -230,11 +234,13 @@ webClient:
     # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: true
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -256,6 +262,7 @@ webClient:
 
   # -- Override default liveness probe settings
   livenessProbe:
+    enabled: true
     httpGet:
       path: /
       port: http
@@ -268,6 +275,7 @@ webClient:
 
   # -- Override default readiness probe settings
   readinessProbe:
+    enabled: true
     httpGet:
       path: /
       port: http
@@ -389,11 +397,13 @@ eventIngestion:
     # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: true
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -472,11 +482,13 @@ keycloak:
     # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
   # -- Define pod security context
-  podSecurityContext: {}
+  podSecurityContext:
+    enabled: true
     # fsGroup: 2000
 
   # -- Define security context that allows you to overwrite the pod-level security context
-  securityContext: {}
+  securityContext:
+    enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
@@ -498,6 +510,7 @@ keycloak:
 
   # -- Override default liveness probe settings
   livenessProbe:
+    enabled: true
     httpGet:
       path: /auth
       port: 8080
@@ -510,6 +523,7 @@ keycloak:
 
   # -- Override default readiness probe settings
   readinessProbe:
+    enabled: true
     httpGet:
       path: /auth
       port: 8080

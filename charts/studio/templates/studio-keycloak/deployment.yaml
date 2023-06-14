@@ -3,7 +3,7 @@ kind: Deployment
 metadata:
   name: {{ include "studio.fullname" . }}-keycloak
   labels:
-    {{- include "studio.labels" . | nindent 4 }}
+    {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-keycloak
 spec:
   replicas: {{ .Values.keycloak.replicaCount }}
@@ -32,22 +32,30 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.keycloak.serviceAccountName" . }}
+      {{- if .Values.keycloak.podSecurityContext.enabled }}
       securityContext:
-        {{- toYaml .Values.keycloak.podSecurityContext | nindent 8 }}
+        {{- omit .Values.keycloak.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}-keycloak
+          {{- if .Values.keycloak.securityContext.enabled }}
           securityContext:
-            {{- toYaml .Values.keycloak.securityContext | nindent 12 }}
+            {{- omit .Values.keycloak.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
           image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
           ports:
             - name: http
               containerPort: {{ .Values.keycloak.service.port }}
               protocol: TCP
+          {{- if or .Values.keycloak.livenessProbe.enabled (not (hasKey .Values.keycloak.livenessProbe "enabled")) }}
           livenessProbe:
             {{- toYaml .Values.keycloak.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.keycloak.readinessProbe.enabled (not (hasKey .Values.keycloak.readinessProbe "enabled")) }}
           readinessProbe:
             {{- toYaml .Values.keycloak.readinessProbe | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.keycloak.resources | nindent 12 }}
       {{- with .Values.keycloak.nodeSelector }}

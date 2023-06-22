@@ -50,11 +50,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.9
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | backend.image.repository | string | `nil` | Specifies image repository |
 | backend.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
-| backend.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| backend.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | backend.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | backend.ingress.className | string | `""` | Specifies the ingress className to be used |
 | backend.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
-| backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
+| backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -111,11 +111,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.9
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | keycloak.image.repository | string | `nil` | Specifies image repository |
 | keycloak.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
-| keycloak.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"ImplementationSpecific"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| keycloak.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | keycloak.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | keycloak.ingress.className | string | `""` | Specifies the ingress className to be used |
 | keycloak.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
-| keycloak.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
+| keycloak.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
 | keycloak.ingress.labels | object | `{}` | Labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | keycloak.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -144,11 +144,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.9
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | webClient.image.repository | string | `nil` | Specifies image repository |
 | webClient.image.tag | string | `""` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
-| webClient.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| webClient.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | webClient.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | webClient.ingress.className | string | `""` | Specifies the ingress className to be used |
 | webClient.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
-| webClient.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"ImplementationSpecific"}]}]` | Specifies the hosts for this ingress |
+| webClient.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
 | webClient.ingress.labels | object | `{}` | Labels to add to the ingress |
 | webClient.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | webClient.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |

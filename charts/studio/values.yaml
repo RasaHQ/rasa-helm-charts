@@ -22,12 +22,12 @@ backend:
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/studio-backend/studio-backend"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "v0.1.0-latest"
 
   # -- Define environment variables for deployment
   # Example: Specify the string value for variables
@@ -152,7 +152,7 @@ backend:
       - host: chart-example.local
         paths:
           - path: /api
-            pathType: ImplementationSpecific
+            pathType: Prefix
         extraPaths: []
     # -- Spefices the TLS configuration for ingress
     tls: []
@@ -205,12 +205,12 @@ webClient:
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/studio-web-client/studio-web-client"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "v0.1.0-latest"
 
   # -- Define environment variables for deployment
   environmentVariables:
@@ -304,7 +304,7 @@ webClient:
       - host: chart-example.local
         paths:
           - path: /
-            pathType: ImplementationSpecific
+            pathType: Prefix
         extraPaths: []
     # -- Spefices the TLS configuration for ingress
     tls: []
@@ -345,12 +345,12 @@ eventIngestion:
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "0.1.0-latest"
 
   # -- Define environment variables for deployment
   # Example: Specify the string value for variables
@@ -460,12 +460,12 @@ keycloak:
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "v0.1.0-latest"
 
   # -- Define service account
   serviceAccount:
@@ -552,7 +552,7 @@ keycloak:
       - host: chart-example.local
         paths:
           - path: /auth
-            pathType: ImplementationSpecific
+            pathType: Prefix
         extraPaths: []
     # -- Spefices the TLS configuration for ingress
     tls: []

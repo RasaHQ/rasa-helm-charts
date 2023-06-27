@@ -124,7 +124,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.11
 | keycloak.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | keycloak.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | keycloak.replicaCount | int | `1` | Specifies number of replicas |
-| keycloak.resources | object | `{"limits":{"cpu":"500m","memory":"512Mi"},"requests":{"cpu":"500m","memory":"512Mi"}}` | Specifies the resources limits and requests |
+| keycloak.resources | object | `{}` | Specifies the resources limits and requests |
 | keycloak.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
 | keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
 | keycloak.service.port | int | `80` | Specify service port |

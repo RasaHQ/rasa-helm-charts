@@ -12,7 +12,8 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- Repository pull secrets
-imagePullSecrets: []
+imagePullSecrets:
+  []
   # - name: regcred
 
 # Studio Backend component specific configuration
@@ -67,7 +68,8 @@ backend:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
   # -- Define pod security context
@@ -130,21 +132,22 @@ backend:
     # -- Specifies which image database migration job should use
     image:
       # -- Specifies the repository of the image
-      repository:
+      repository: "europe-west3-docker.pkg.dev/rasa-releases/studio-database-migration/studio-database-migration"
       # -- Specifies the tag of the image
-      tag:
+      tag: "v0.1.0-latest"
 
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- Specifies whether an ingress service should be created
-    enabled: false
+    enabled: true
     # -- Specifies the ingress className to be used
     className: ""
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -161,7 +164,8 @@ backend:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -230,7 +234,8 @@ webClient:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
   # -- Define pod security context
@@ -290,13 +295,14 @@ webClient:
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- Specifies whether an ingress service should be created
-    enabled: false
+    enabled: true
     # -- Specifies the ingress className to be used
     className: ""
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -313,7 +319,8 @@ webClient:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -350,7 +357,7 @@ eventIngestion:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "0.1.0-latest"
+    tag: "v0.1.0-latest"
 
   # -- Define environment variables for deployment
   # Example: Specify the string value for variables
@@ -393,7 +400,8 @@ eventIngestion:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
   # -- Define pod security context
@@ -416,7 +424,8 @@ eventIngestion:
     #   type: RuntimeDefault
 
   # -- Specifies the resources limits and requests
-  resources: {}
+  resources:
+    {}
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -478,7 +487,8 @@ keycloak:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
   # -- Define pod security context
@@ -538,13 +548,14 @@ keycloak:
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- Specifies whether an ingress service should be created
-    enabled: false
+    enabled: true
     # -- Specifies the ingress className to be used
     className: ""
     # -- Labels to add to the ingress
     labels: {}
     # -- Annotations to add to the ingress
-    annotations: {}
+    annotations:
+      {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
@@ -561,17 +572,13 @@ keycloak:
     #      - chart-example.local
 
   # -- Specifies the resources limits and requests
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 512Mi
 
   # -- Allow the deployment to be scheduled on selected nodes
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -611,7 +618,8 @@ dnsPolicy: ""
 
 # -- Specifies Pod's DNS condig
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-dnsConfig: {}
+dnsConfig:
+  {}
   # options:
   # - name: ndots
   #   value: "1"

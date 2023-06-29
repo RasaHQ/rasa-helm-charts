@@ -478,11 +478,16 @@ keycloak:
 
   # -- Define environment variables for deployment
   environmentVariables:
-    KC_DB_URL: ""
-    KEYCLOAK_ADMIN: ""
-    KEYCLOAK_ADMIN_PASSWORD: ""
-    KC_DB_USERNAME: ""
-    KC_DB_PASSWORD: ""
+    KC_DB_URL:
+      value: ""
+    KEYCLOAK_ADMIN:
+      value: ""
+    KEYCLOAK_ADMIN_PASSWORD:
+      value: ""
+    KC_DB_USERNAME:
+      value: ""
+    KC_DB_PASSWORD:
+      value: ""
 
   # -- Define service account
   serviceAccount:

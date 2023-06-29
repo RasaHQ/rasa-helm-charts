@@ -59,7 +59,7 @@ spec:
           resources:
             {{- toYaml .Values.keycloak.resources | nindent 12 }}
           env:
-            {{- range $key, $value := .Values.backend.environmentVariables }}
+            {{- range $key, $value := .Values.keycloak.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}

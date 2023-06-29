@@ -476,6 +476,19 @@ keycloak:
     ## Overrides the image tag whose default is the chart appVersion.
     tag: "v0.1.0-latest"
 
+  # -- Define environment variables for deployment
+  environmentVariables:
+    KC_DB_URL:
+      value: ""
+    KEYCLOAK_ADMIN:
+      value: ""
+    KEYCLOAK_ADMIN_PASSWORD:
+      value: ""
+    KC_DB_USERNAME:
+      value: ""
+    KC_DB_PASSWORD:
+      value: ""
+
   # -- Define service account
   serviceAccount:
     # -- Specifies whether a service account should be created

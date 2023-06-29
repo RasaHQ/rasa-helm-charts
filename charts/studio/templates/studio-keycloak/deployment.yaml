@@ -58,6 +58,18 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.keycloak.resources | nindent 12 }}
+          env:
+            {{- range $key, $value := .Values.backend.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
       {{- with .Values.keycloak.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

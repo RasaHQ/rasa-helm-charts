@@ -107,6 +107,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.11
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | Repository pull secrets |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":"","KC_DB_URL":"","KC_DB_USERNAME":"","KEYCLOAK_ADMIN":"","KEYCLOAK_ADMIN_PASSWORD":""}` | Define environment variables for deployment |
 | keycloak.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak","tag":"v0.1.0-latest"}` | Define image settings |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | keycloak.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak"` | Specifies image repository |

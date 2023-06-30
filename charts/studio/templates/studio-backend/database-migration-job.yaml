@@ -38,4 +38,10 @@ spec:
             secretKeyRef:
               name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
               key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
+        - name: KC_DB_URL
+          value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
+        - name: KC_DB_USERNAME
+          value: {{ .Values.keycloak.environmentVariables.KC_DB_USERNAME.value | quote }}
+        - name: KC_DB_PASSWORD
+          value: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value | quote }}
         {{- end }}

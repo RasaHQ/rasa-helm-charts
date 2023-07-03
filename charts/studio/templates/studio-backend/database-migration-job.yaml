@@ -29,19 +29,19 @@ spec:
       - name: {{ include "studio.fullname" . }}-database-migration
         image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag }}"
         env:
-        {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
-        - name: DATABASE_URL
-          value: {{ .Values.backend.environmentVariables.DATABASE_URL.value | quote }}
-        {{- else if .Values.backend.environmentVariables.DATABASE_URL.secret }}
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
-              key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
-        - name: KC_DB_URL
-          value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
-        - name: KC_DB_USERNAME
-          value: {{ .Values.keycloak.environmentVariables.KC_DB_USERNAME.value | quote }}
-        - name: KC_DB_PASSWORD
-          value: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value | quote }}
-        {{- end }}
+          {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
+          - name: DATABASE_URL
+            value: {{ .Values.backend.environmentVariables.DATABASE_URL.value | quote }}
+          {{- else if .Values.backend.environmentVariables.DATABASE_URL.secret }}
+          - name: DATABASE_URL
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
+                key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
+          {{- end }}
+          - name: KC_DB_URL
+            value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
+          - name: KC_DB_USERNAME
+            value: {{ .Values.keycloak.environmentVariables.KC_DB_USERNAME.value | quote }}
+          - name: KC_DB_PASSWORD
+            value: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value | quote }}

@@ -72,6 +72,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.15
 | backend.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
 | backend.service | object | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` | Define service |
 | backend.service.port | int | `80` | Specify service port |
+| backend.service.targetPort | int | `4000` | Specify service target port |
 | backend.service.type | string | `"ClusterIP"` | Specify service type |
 | backend.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | backend.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |

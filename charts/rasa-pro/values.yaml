@@ -261,7 +261,7 @@ dnsConfig:
   # - name: ndots
   #   value: "1"
 
-## Settings for Rasa Action Server
+## -- Settings for Rasa Action Server
 ## See: https://github.com/RasaHQ/helm-charts/tree/main/charts/rasa-action-server
 rasa-action-server:
   # -- Install Rasa Action Server
@@ -273,7 +273,7 @@ rasa-action-server:
     # -- External URL to Rasa Action Server
     url: ""
 
-## Settings for Duckling
+## -- Settings for Duckling
 ## See: https://github.com/RasaHQ/helm-charts/tree/main/charts/duckling
 duckling:
   # -- Install Duckling

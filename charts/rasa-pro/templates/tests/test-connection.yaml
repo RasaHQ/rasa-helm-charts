@@ -11,5 +11,5 @@ spec:
     - name: wget
       image: busybox
       command: ['wget']
-      args: ['{{ include "rasa-pro.fullname" . }}:{{ .Values.service.port }}']
+      args: ['{{ include "rasa-pro.fullname" . }}:{{ .Values.rasaPro.service.port }}']
   restartPolicy: Never

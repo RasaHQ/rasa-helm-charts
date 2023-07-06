@@ -54,9 +54,22 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "rasa-pro.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
-{{- default (include "rasa-pro.fullname" .) .Values.serviceAccount.name }}
+{{- if .Values.rasaPro.serviceAccount.create }}
+{{- default (include "rasa-pro.fullname" .) .Values.rasaPro.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.serviceAccount.name }}
+{{- default "default" .Values.rasaPro.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return DNS policy depends on host network configuration
+*/}}
+{{- define "rasaPro.dnsPolicy" -}}
+{{- if and .Values.hostNetwork (empty .Values.dnsPolicy) }}
+{{- print "ClusterFirstWithHostNet" }}
+{{- else if and (not .Values.hostNetwork) (empty .Values.dnsPolicy) }}
+{{- print "ClusterFirst" }}
+{{- else if .Values.dnsPolicy }}
+{{- .Values.dnsPolicy }}
 {{- end }}
 {{- end }}

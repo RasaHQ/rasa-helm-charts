@@ -40,10 +40,9 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      value: ""
-      # secret:
-      #   name:
-      #   key:
+      secret:
+        name: "studio-secrets"
+        key: "DATABASE_URL"
     KEYCLOAK_URL:
       value: ""
     KEYCLOAK_REALM:
@@ -53,7 +52,9 @@ backend:
     KEYCLOAK_API_USERNAME:
       value: ""
     KEYCLOAK_API_PASSWORD:
-      value: ""
+      secret:
+        name: "studio-secrets"
+        key: "KEYCLOAK_API_PASSWORD"
     KEYCLOAK_API_GRANT_TYPE:
       value: "password"
 
@@ -369,7 +370,9 @@ eventIngestion:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      value: ""
+      secret:
+        name: "studio-secrets"
+        key: "DATABASE_URL"
     SECURITY_PROTOCOL:
       value: "SASL_SSL"
     SASL_MECHANISM:
@@ -377,7 +380,9 @@ eventIngestion:
     SASL_USERNAME:
       value: ""
     SASL_PASSWORD:
-      value: ""
+      secret:
+        name: "studio-secrets"
+        key: "SASL_PASSWORD"
     KAFKA_BROKER_ADDRESS:
       value: ""
     KAFKA_TOPIC:
@@ -483,11 +488,15 @@ keycloak:
     KEYCLOAK_ADMIN:
       value: ""
     KEYCLOAK_ADMIN_PASSWORD:
-      value: ""
+      secret:
+        name: "studio-secrets"
+        key: "KEYCLOAK_ADMIN_PASSWORD"
     KC_DB_USERNAME:
       value: ""
     KC_DB_PASSWORD:
-      value: ""
+      secret:
+        name: "studio-secrets"
+        key: "KC_DB_PASSWORD"
 
   # -- Define service account
   serviceAccount:

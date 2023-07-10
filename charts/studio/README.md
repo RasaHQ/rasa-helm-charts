@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.14](https://img.shields.io/badge/Version-0.1.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.15](https://img.shields.io/badge/Version-0.1.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.14
+$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.15
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.14
+$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.15
 ```
 
 ## Values
@@ -45,7 +45,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.14
 | backend.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"value":""},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"value":""},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-backend/studio-backend","tag":"v0.1.0-latest"}` | Define image settings |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | backend.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-backend/studio-backend"` | Specifies image repository |
@@ -86,7 +86,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.14
 | eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"value":""},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"value":""},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"secret":{"key":"SASL_PASSWORD","name":"studio-secrets"}},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion","tag":"v0.1.0-latest"}` | Define image settings |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | eventIngestion.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion"` | Specifies image repository |
@@ -107,7 +107,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.14
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | Repository pull secrets |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"value":""},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"value":""}}` | Define environment variables for deployment |
+| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
 | keycloak.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak","tag":"v0.1.0-latest"}` | Define image settings |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | keycloak.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak"` | Specifies image repository |

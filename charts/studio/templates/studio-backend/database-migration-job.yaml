@@ -43,5 +43,13 @@ spec:
             value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
           - name: KC_DB_USERNAME
             value: {{ .Values.keycloak.environmentVariables.KC_DB_USERNAME.value | quote }}
+          {{- if .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value }}
           - name: KC_DB_PASSWORD
             value: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value | quote }}
+          {{- else if .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret }}
+          - name: KC_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.name }}
+                key: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.key }}
+          {{- end }}

@@ -1,0 +1,143 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "rasa.fullname" . }}
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.rasa.autoscaling.enabled }}
+  replicas: {{ .Values.rasa.replicaCount }}
+  {{- end }}
+  {{- if .Values.rasa.strategy }}
+  strategy:
+    {{- toYaml .Values.rasa.strategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.rasa.podAnnotations }}
+      annotations:
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rasa.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+          {{- toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "rasa.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "rasa.serviceAccountName" . }}
+      {{- if .Values.rasa.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if or .Values.rasa.initContainers (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
+      initContainers:
+        {{- if .Values.rasa.initContainers }}
+        {{- toYaml .Values.rasa.initContainers | nindent 8 }}
+        {{- end }}
+        {{- if eq (include "rasa.initialModel.download" .) "true" }}
+        {{- include "rasa.downloadInitialModel.initContainer" . | nindent 8 }}
+        {{- else if eq (include "rasa.initialModel.train" .) "true" }}
+        {{- include "rasa.trainInitialModel.initContainer" . | nindent 8 }}
+        {{- end }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- if .Values.rasa.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.rasa.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}"
+          imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}
+          {{- if .Values.rasa.args }}
+          args:
+            {{- toYaml .Values.rasa.args | nindent 12 }}
+          {{- else }}
+          args:
+            {{- include "rasa.serverType" . | nindent 12 }}
+            - --port
+            - "{{ .Values.rasa.settings.port }}"
+            - --cors
+            - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
+            - --jwt-method
+            - HS256
+            - --jwt-secret
+            - "$(JWT_SECRET)"
+            - --auth-token
+            - "$(RASA_TOKEN)"
+            {{- if .Values.rasa.settings.debugMode }}
+            - --debug
+            {{- end }}
+          {{- if .Values.rasa.extraArgs }}
+            {{- toYaml .Values.rasa.extraArgs | nindent 12 }}
+          {{- end }}
+          {{- end }}
+          {{- if .Values.rasa.command }}
+          command:
+            {{- toYaml .Values.rasa.command | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.rasa.service.port }}
+              protocol: TCP
+          env:
+          {{- include "rasa.containers.env" . | nindent 12 }}
+          {{- if or .Values.rasa.livenessProbe.enabled (not (hasKey .Values.rasa.livenessProbe "enabled")) }}
+          livenessProbe:
+            {{- toYaml .Values.rasa.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.rasa.readinessProbe.enabled (not (hasKey .Values.rasa.readinessProbe "enabled")) }}
+          readinessProbe:
+            {{- toYaml .Values.rasa.readinessProbe | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.rasa.resources | nindent 12 }}
+          volumeMounts:
+            {{- include "rasa.containers.volumeMounts" . | nindent 12 }}
+          {{- if or (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
+            {{- include "rasa.initialModel.initiContainer.volumeMounts" . | nindent 12 }}
+          {{- end }}
+          {{- if .Values.rasa.volumeMounts }}
+            {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
+          {{- end }}
+      volumes:
+        {{- include "rasa.containers.volumes" . | nindent 8 }}
+      {{- if or (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
+        {{- include "rasa.initialModel.initConttainer.volumes" . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.rasa.volumes }}
+        {{- toYaml .Values.rasa.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasa.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasa.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasa.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

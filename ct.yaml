@@ -1,6 +1,7 @@
 target-branch: main
 chart-dirs:
-  - charts
+  - charts/studio
+  - charts/rasa
 validate-maintainers: false
 check-version-increment: true
 debug: true

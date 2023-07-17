@@ -8,6 +8,8 @@ A Rasa Pro Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| deploymentAnnotations | object | `{}` | Annotations to add to the rasa-oss deployment |
+| deploymentLabels | object | `{}` | Labels to add to the rasa-oss deployment |
 | dnsConfig | object | `{}` | Specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | Specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
 | duckling | string | `nil` | Settings for Duckling |
@@ -19,7 +21,7 @@ A Rasa Pro Helm chart for Kubernetes
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
-| rasa-pro-services | string | `nil` | Settings for Rasa Pro Services |
+| podLabels | object | `{}` | Labels to add to the rasa-oss's pod(s) |
 | rasa.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasa.args | list | `[]` | Override the default arguments for the container |
 | rasa.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
@@ -28,8 +30,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | Override the default command for the container |
-| rasa.deploymentAnnotations | object | `{}` | Annotations to add to the rasa-oss deployment |
-| rasa.deploymentLabels | object | `{}` | Labels to add to the rasa-oss deployment |
+| rasa.enabled | bool | `true` |  |
 | rasa.extraArgs | list | `[]` | Add additional arguments to the default one |
 | rasa.extraContainers | list | `[]` | Allow to specify additional containers for the Rasa Open Source Deployment |
 | rasa.extraEnv | list | `[]` | Add extra environment variables |
@@ -47,8 +48,73 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.initContainers | list | `[]` | Allow to specify init containers for the Rasa Open Source Deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasa.plus.enabled | bool | `true` |  |
+| rasa.plus.settings.additionalSettings | object | `{}` |  |
+| rasa.plus.settings.cache.directory | string | `nil` |  |
+| rasa.plus.settings.cache.maxSize | int | `1000` |  |
+| rasa.plus.settings.cache.name | string | `"cache.db"` |  |
+| rasa.plus.settings.duckling.httpUrl | string | `nil` |  |
+| rasa.plus.settings.hashicorpSecretManager.secretManager | string | `"vault"` |  |
+| rasa.plus.settings.hashicorpSecretManager.vaultHost | string | `nil` |  |
+| rasa.plus.settings.hashicorpSecretManager.vaultRasaSecretsPath | string | `"rasa-secrets"` |  |
+| rasa.plus.settings.hashicorpSecretManager.vaultToken.secretKey | string | `nil` |  |
+| rasa.plus.settings.hashicorpSecretManager.vaultToken.secretName | string | `nil` |  |
+| rasa.plus.settings.hashicorpSecretManager.vaultTransitMountPoint | string | `nil` |  |
+| rasa.plus.settings.lockStore.ticketLockLifetime | int | `60` |  |
+| rasa.plus.settings.logging.forceJsonLogging | string | `nil` |  |
+| rasa.plus.settings.logging.logLevel | string | `"info"` |  |
+| rasa.plus.settings.logging.logLevelFaker | string | `"error"` |  |
+| rasa.plus.settings.logging.logLevelKafka | string | `"error"` |  |
+| rasa.plus.settings.logging.logLevelLibraries | string | `"error"` |  |
+| rasa.plus.settings.logging.logLevelPresidio | string | `"error"` |  |
+| rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` |  |
+| rasa.plus.settings.maxNumberOfPreditions | int | `10` |  |
+| rasa.plus.settings.modelStorage.aws.accessKeyId.secretKey | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.accessKeyId.secretName | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.bucketName | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.defaultRegion | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.endpointUrl | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.secretAccessKey.secretKey | string | `nil` |  |
+| rasa.plus.settings.modelStorage.aws.secretAccessKey.secretName | string | `nil` |  |
+| rasa.plus.settings.modelStorage.azure.accountKey.secretKey | string | `nil` |  |
+| rasa.plus.settings.modelStorage.azure.accountKey.secretName | string | `nil` |  |
+| rasa.plus.settings.modelStorage.azure.accountName | string | `nil` |  |
+| rasa.plus.settings.modelStorage.azure.container | string | `nil` |  |
+| rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretKey | string | `nil` |  |
+| rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretName | string | `nil` |  |
+| rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` |  |
+| rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` |  |
+| rasa.plus.settings.postgresTrackerStore.schema | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslCAFile.secretKey | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslCAFile.secretName | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslClientCertificate.secretKey | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslClientCertificate.secretName | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslClientKey.secretKey | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslClientKey.secretName | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslKeyPassword.secretKey | string | `nil` |  |
+| rasa.plus.settings.rabbitmq.sslKeyPassword.secretName | string | `nil` |  |
+| rasa.plus.settings.rasaEnvironment | string | `"production"` |  |
+| rasa.plus.settings.rasaProLicence.secretKey | string | `nil` |  |
+| rasa.plus.settings.rasaProLicence.secretName | string | `nil` |  |
+| rasa.plus.settings.sanicServer.backlog | int | `100` |  |
+| rasa.plus.settings.sanicServer.workers | int | `1` |  |
+| rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
+| rasa.plus.settings.studio.authServerUrl | string | `nil` |  |
+| rasa.plus.settings.studio.cliClientIdKey.secretKey | string | `nil` |  |
+| rasa.plus.settings.studio.cliClientIdKey.secretName | string | `nil` |  |
+| rasa.plus.settings.studio.cliRealmNameKey | string | `nil` |  |
+| rasa.plus.settings.studio.cliUrl | string | `nil` |  |
+| rasa.plus.settings.studio.enabled | bool | `true` |  |
+| rasa.plus.settings.telemetry.debug | bool | `false` |  |
+| rasa.plus.settings.telemetry.enabled | bool | `false` |  |
+| rasa.plus.settings.tensorflow.deterministicOps | bool | `false` |  |
+| rasa.plus.settings.tensorflow.gpuMemoryAlloc | string | `nil` |  |
+| rasa.plus.settings.tensorflow.interOpParallelismThreads | string | `nil` |  |
+| rasa.plus.settings.tensorflow.intraOpParallelismThreads | string | `nil` |  |
+| rasa.plus.settings.tracing.serviceName | string | `"rasa"` |  |
+| rasa.plus.volumes.models | string | `nil` |  |
+| rasa.plus.volumes.ssl | string | `nil` |  |
 | rasa.podAnnotations | object | `{}` | Annotations to add to the pod |
-| rasa.podLabels | object | `{}` | Labels to add to the rasa-oss's pod(s) |
 | rasa.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | rasa.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | rasa.replicaCount | int | `1` | Specifies number of replicas |
@@ -66,54 +132,53 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"action_endpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":false,"exchange_name":"exchange","password":"","port":"","queues":["rasa_production_events"],"type":"","url":"","username":""},"lockStore":{"db":"1","enabled":false,"key_prefix":"","password":"","port":"","type":"","url":""},"models":{"enabled":true,"token":"","url":"","waitTimeBetweenPulls":20},"trackerStore":{"db":"","enabled":true,"password":"","port":"","type":"","url":"","use_ssl":false,"username":""}},"initialModel":"","jwtToken":"","port":5005,"scheme":"http","telemetry":{"enabled":true},"token":"rasaToken","trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
 | rasa.settings.enableAPI | bool | `true` | Start the web server API in addition to the input channel |
-| rasa.settings.endpoints.action.endpointURL | string | `"/webhook"` |  |
-| rasa.settings.endpoints.additionalEndpoints | object | `{}` |  |
-| rasa.settings.endpoints.eventBroker.enabled | bool | `false` |  |
-| rasa.settings.endpoints.eventBroker.password | string | `""` |  |
-| rasa.settings.endpoints.eventBroker.port | string | `""` |  |
-| rasa.settings.endpoints.eventBroker.queues[0] | string | `"rasa_production_events"` |  |
-| rasa.settings.endpoints.eventBroker.type | string | `"pika"` |  |
-| rasa.settings.endpoints.eventBroker.url | string | `""` |  |
-| rasa.settings.endpoints.eventBroker.username | string | `""` |  |
-| rasa.settings.endpoints.lockStore.db | string | `"1"` |  |
-| rasa.settings.endpoints.lockStore.enabled | bool | `false` |  |
-| rasa.settings.endpoints.lockStore.password | string | `""` |  |
-| rasa.settings.endpoints.lockStore.port | string | `""` |  |
-| rasa.settings.endpoints.lockStore.type | string | `"redis"` |  |
-| rasa.settings.endpoints.lockStore.url | string | `""` |  |
-| rasa.settings.endpoints.models.enabled | bool | `false` |  |
-| rasa.settings.endpoints.models.token | string | `"token"` |  |
-| rasa.settings.endpoints.models.url | string | `""` |  |
-| rasa.settings.endpoints.models.useRasaXasModelServer.enabled | bool | `false` |  |
-| rasa.settings.endpoints.models.useRasaXasModelServer.tag | string | `"production"` |  |
-| rasa.settings.endpoints.models.waitTimeBetweenPulls | int | `20` |  |
-| rasa.settings.endpoints.trackerStore.db | string | `""` |  |
-| rasa.settings.endpoints.trackerStore.dialect | string | `"postgresql"` |  |
-| rasa.settings.endpoints.trackerStore.enabled | bool | `true` |  |
-| rasa.settings.endpoints.trackerStore.login_db | string | `""` |  |
-| rasa.settings.endpoints.trackerStore.password | string | `""` |  |
-| rasa.settings.endpoints.trackerStore.type | string | `"sql"` |  |
-| rasa.settings.endpoints.trackerStore.url | string | `""` |  |
-| rasa.settings.endpoints.trackerStore.username | string | `""` |  |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
+| rasa.settings.jwtToken | string | `""` | JWT Token TODO: determine if this should even exist |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
-| rasa.settings.rasaX.enabled | bool | `false` | Run Rasa X / Enterprise server |
-| rasa.settings.rasaX.token | string | `"rasaXToken"` | Token Rasa X / Enterprise accepts as authentication token from other Rasa services |
-| rasa.settings.rasaX.url | string | `""` | URL to Rasa X / Enterprise, e.g. http://rasa-x.mydomain.com:5002 |
-| rasa.settings.rasaX.useConfigEndpoint | bool | `false` | Rasa X / Enterprise endpoint URL from which to pull the runtime config |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
 | rasa.settings.telemetry.enabled | bool | `true` | Enable telemetry See: https://rasa.com/docs/rasa/telemetry/telemetry/ |
 | rasa.settings.token | string | `"rasaToken"` | Token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.trainInitialModel | bool | `false` | Train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
-| rasa.strategy | object | `{"rollingUpdate":{"maxSurge":1,"maxUnavailable":0},"type":"RollingUpdate"}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | Specify additional volumes to mount in the rasa-oss container |
 | rasa.volumes | list | `[]` | Specify additional volumes to mount in the rasa-oss container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| rasaProServices | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"enabled":false,"environmentVariables":{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SASL_MECHANISM":{"value":"PLAIN"},"KAFKA_SASL_PASSWORD":{"secret":{"key":null,"name":null}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":"PLAINTEXT"},"KAFKA_SSL_CA_LOCATION":{"value":""},"KAFKA_TOPIC":{"value":"rasa_core_events"},"LOGGING_LEVEL":{"value":"INFO"},"RASA_ANALYTICS_DB_URL":{"value":""},"RASA_PRO_LICENSE":{"secret":{"key":null,"name":null}}},"image":{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""},"livenessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"readinessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{"enabled":true},"service":{"annotations":{},"port":5005,"targetPort":5005,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":false,"name":""},"strategy":{"type":"RollingUpdate"},"tolerations":[]}` | Settings for Rasa Pro Services |
+| rasaProServices.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| rasaProServices.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
+| rasaProServices.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
+| rasaProServices.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
+| rasaProServices.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
+| rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
+| rasaProServices.enabled | bool | `false` | Enable Rasa Pro Services deployment |
+| rasaProServices.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""}` | Define image settings |
+| rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | Specifies image repository |
+| rasaProServices.image.tag | string | `""` | Specifies image tag Overrides the image tag whose default is the chart appVersion. |
+| rasaProServices.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| rasaProServices.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasaProServices.podAnnotations | object | `{}` | Annotations to add to the pod |
+| rasaProServices.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| rasaProServices.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| rasaProServices.replicaCount | int | `1` | Specifies number of replicas |
+| rasaProServices.resources | object | `{}` | Specifies the resources limits and requests |
+| rasaProServices.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| rasaProServices.service | object | `{"annotations":{},"port":5005,"targetPort":5005,"type":"ClusterIP"}` | Define service |
+| rasaProServices.service.annotations | object | `{}` | Annotations to add to the service |
+| rasaProServices.service.port | int | `5005` | Specify service port |
+| rasaProServices.service.targetPort | int | `5005` | Specify service target port |
+| rasaProServices.service.type | string | `"ClusterIP"` | Specify service type |
+| rasaProServices.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
+| rasaProServices.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| rasaProServices.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
+| rasaProServices.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| rasaProServices.strategy | object | `{"type":"RollingUpdate"}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| rasaProServices.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 
 ----------------------------------------------
 Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

@@ -1,4 +1,4 @@
-{{- if not .Values.rasa.settings.rasaX.useConfigEndpoint }}
+{{- if .Values.rasa.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -12,20 +12,10 @@ data:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
-{{- if and .Values.rasa.settings.rasaX.enabled .Values.rasa.settings.rasaX.url }}
-    rasa:
-      url: {{ .Values.rasa.settings.rasaX.url }}/api
-{{- end }}
   endpoints: |
 {{- if eq (include "rasa.endpoints.models.enabled" .) "true" }}
     models:
-      url: {{ .Values.rasa.settings.endpoints.model.url }}
-      token: ${MODEL_SERVER_TOKEN}
-      wait_time_between_pulls: {{ .Values.rasa.settings.endpoints.models.waitTimeBetweenPulls }}
-{{- else if and .Values.rasa.settings.rasaX.enabled .Values.rasa.settings.rasaX.url .Values.rasa.settings.endpoints.models.useRasaXasModelServer.enabled }}
-    models:
-      url: {{ .Values.rasa.settings.rasaX.url }}/api/projects/default/models/tags/{{ .Values.rasa.settings.endpoints.models.useRasaXasModelServer.tag }}
-      token: ${RASA_X_TOKEN}
+      url: {{ .Values.rasa.settings.endpoints.models.url }}
       wait_time_between_pulls: {{ .Values.rasa.settings.endpoints.models.waitTimeBetweenPulls }}
 {{- end }}
 {{- if eq (include "rasa.endpoints.trackerStore.enabled" .) "true"  }}

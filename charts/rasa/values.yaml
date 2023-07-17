@@ -17,6 +17,7 @@ imagePullSecrets:
   # - name: regcred
 
 rasa:
+  enabled: true #make sure that we can only deploy Rasa Pro
   # -- Specifies number of replicas
   replicaCount: 1
   # -- Define image settings
@@ -31,11 +32,11 @@ rasa:
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxSurge: 1
-      maxUnavailable: 0
+  # strategy:
+  #   type: RollingUpdate
+  #   rollingUpdate:
+  #     maxSurge: 1
+  #     maxUnavailable: 0
 
   settings:
     # -- Enable debug mode
@@ -50,6 +51,9 @@ rasa:
     scheme: http
     # -- Token Rasa accepts as authentication token from other Rasa services
     token: "rasaToken"
+    # -- JWT Token
+    # TODO: determine if this should even exist
+    jwtToken: ""
     # -- CORS for the passed origin. Default is * to allow all origins
     cors: '*'
     # -- Start the web server API in addition to the input channel
@@ -76,52 +80,150 @@ rasa:
 
     endpoints:
       models:
-        enabled: false
+        enabled: true
+        token: ""
         url: ""
-        token: "token"
         waitTimeBetweenPulls: 20
-        useRasaXasModelServer:
-          enabled: false
-          tag: "production"
       trackerStore:
         enabled: true
-        type: sql
-        dialect: "postgresql"
+        type: ""
         url: ""
+        port: ""
+        db: ""
         username: ""
         password: ""
-        db: ""
-        login_db: ""
+        use_ssl: false # ssl volume depends on this
+        #query:
+          # optional key-value pairs to be added as a query string to the connection URL
       lockStore:
         enabled: false
-        type: "redis"
+        type: ""
         url: ""
         port: ""
         password: ""
         db: "1"
+        key_prefix: "" # alphanumeric value to prepend to lock store keys
       eventBroker:
         enabled: false
-        type: "pika"
+        type: ""
         url: ""
         username: ""
         password: ""
         port: ""
         queues:
           - rasa_production_events
-      action:
-        endpointURL: /webhook
+        exchange_name: exchange
+      action_endpoint:
+        url: /webhook
       additionalEndpoints: {}
 
-    # Rasa X / Enterprise settings
-    rasaX:
-      # -- Run Rasa X / Enterprise server
-      enabled: false
-      # -- Token Rasa X / Enterprise accepts as authentication token from other Rasa services
-      token: "rasaXToken"
-      # -- URL to Rasa X / Enterprise, e.g. http://rasa-x.mydomain.com:5002
-      url: ""
-      # -- Rasa X / Enterprise endpoint URL from which to pull the runtime config
-      useConfigEndpoint: false
+  plus:
+    enabled: true
+
+    settings:
+      rasaProLicence:
+        secretName:
+        secretKey:
+      rasaEnvironment: production
+      studio:
+        enabled: true
+        authServerUrl: 
+        cliUrl:
+        cliRealmNameKey:
+        cliClientIdKey:
+          secretName:
+          secretKey:
+      lockStore:
+        ticketLockLifetime: 60
+      telemetry:
+        enabled: false
+        debug: false
+      tracing:
+        serviceName: rasa
+      sanicServer:
+        backlog: 100
+        workers: 1
+      postgresTrackerStore:
+        schema:
+        poolSize: 50
+        maxOverflow: 100
+      rabbitmq:
+        sslClientCertificate:
+          secretName:
+          secretKey:
+        sslClientKey:
+          secretName:
+          secretKey:
+        sslCAFile:
+          secretName:
+          secretKey:
+        sslKeyPassword:
+          secretName:
+          secretKey:
+      logging:
+        logLevel: info
+        logLevelLibraries: error
+        logLevelKafka: error
+        logLevelRabbitMq: error
+        logLevelPresidio: error
+        logLevelFaker: error
+        forceJsonLogging:
+      hashicorpSecretManager:
+        secretManager: vault
+        vaultHost:
+        vaultToken:
+          secretName:
+          secretKey:
+        vaultRasaSecretsPath: rasa-secrets
+        vaultTransitMountPoint:
+      modelStorage:
+        aws:
+          secretAccessKey:
+            secretName:
+            secretKey:
+          accessKeyId:
+            secretName:
+            secretKey:
+          defaultRegion:
+          bucketName:
+          endpointUrl:
+        azure:
+          accountKey:
+            secretName:
+            secretKey:
+          accountName:
+          container:
+        gcp:
+          applicationCredentials:
+            secretName:
+            secretKey:
+      cache:
+        maxSize: 1000
+        name: cache.db
+        # default is equivalent of Path(".rasa", "cache")
+        directory:
+      duckling:
+        httpUrl:
+      tensorflow:
+        gpuMemoryAlloc:
+        interOpParallelismThreads:
+        intraOpParallelismThreads:
+        deterministicOps: false
+      shellStreamReadingTimeoutInSeconds: 10
+      maxNumberOfPreditions: 10
+
+      additionalSettings: {}
+        # - name:
+        #   value:
+        # - name:
+        #   valueFrom:
+        #     secretKeyRef:
+        #       name:
+        #       key:
+      
+    volumes: # optional
+      models: # optional
+      ssl: #if ssl is enabled
 
   # -- Override the default arguments for the container
   args: []
@@ -176,23 +278,12 @@ rasa:
 
   # -- Annotations to add to the pod
   podAnnotations: {}
-    # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+    # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
   
-  # -- Labels to add to the rasa-oss's pod(s)
-  podLabels: {}
-  #  key: "value"
-
   # -- Define pod security context
   podSecurityContext:
     enabled: true
     # fsGroup: 2000
-
-  # -- Annotations to add to the rasa-oss deployment
-  deploymentAnnotations: {}
-  #  key: "value"
-
-  # -- Labels to add to the rasa-oss deployment
-  deploymentLabels: {}
 
   # -- Define security context that allows you to overwrite the pod-level security context
   securityContext:
@@ -320,7 +411,163 @@ rasa:
   affinity: {}
 
 # -- Settings for Rasa Pro Services
-rasa-pro-services:
+rasaProServices:
+  # -- Enable Rasa Pro Services deployment
+  enabled: false
+
+  # -- Specifies number of replicas
+  replicaCount: 1
+  # -- Define image settings
+  image:
+    # -- Specifies image repository
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    # -- Specifies image pull policy
+    pullPolicy: IfNotPresent
+    # -- Specifies image tag
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: ""
+  
+  # -- Allow the deployment to perform a rolling update
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy:
+    type: RollingUpdate
+    # rollingUpdate:
+    #   maxSurge: 1
+    #   maxUnavailable: 0
+
+  environmentVariables:
+    RASA_PRO_LICENSE:
+      secret:
+        name:
+        key:
+    KAFKA_BROKER_ADDRESS:
+      value: ""
+    KAFKA_TOPIC:
+      value: "rasa_core_events"
+    LOGGING_LEVEL:
+      value: "INFO"
+    RASA_ANALYTICS_DB_URL:
+      value: ""
+    KAFKA_SASL_MECHANISM:
+      value: "PLAIN"
+    KAFKA_SASL_USERNAME:
+      value: ""
+    KAFKA_SASL_PASSWORD:
+      secret:
+        name:
+        key:
+    KAFKA_SECURITY_PROTOCOL:
+      value: "PLAINTEXT"
+    KAFKA_SSL_CA_LOCATION:
+      value: ""
+      
+  # -- Define service account
+  serviceAccount:
+    # -- Specifies whether a service account should be created
+    create: false
+    # -- Annotations to add to the service account
+    annotations: {}
+    # -- The name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  # -- Annotations to add to the pod
+  podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
+
+  # -- Define pod security context
+  podSecurityContext:
+    enabled: true
+    # fsGroup: 2000
+
+  # -- Define security context that allows you to overwrite the pod-level security context
+  securityContext:
+    enabled: true
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  # -- Define service
+  service:
+    # -- Specify service type
+    type: ClusterIP
+    # -- Specify service port
+    port: 5005
+    # -- Specify service target port
+    targetPort: 5005
+    # -- Annotations to add to the service
+    annotations: {}
+
+  # -- Override default liveness probe settings
+  livenessProbe:
+    enabled: false
+    httpGet:
+      path: /
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  # -- Override default readiness probe settings
+  readinessProbe:
+    enabled: false
+    httpGet:
+      path: /
+      port: 80
+      scheme: HTTP
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 6
+
+  # -- Specifies the resources limits and requests
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # -- Specifies the HPA settings
+  autoscaling:
+    # -- Specifies whether autoscaling should be enabled
+    enabled: false
+    # -- Specifies the minimum number of replicas
+    minReplicas: 1
+    # -- Specifies the maximum number of replicas
+    maxReplicas: 100
+    # -- Specifies the target CPU/Memory utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- Allow the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  nodeSelector: {}
+
+  # -- Tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  # -- Allow the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}
 
 # -- Settings for Duckling
 duckling:
@@ -355,3 +602,14 @@ dnsConfig:
   # options:
   # - name: ndots
   #   value: "1"
+
+# -- Annotations to add to the rasa-oss deployment
+deploymentAnnotations: {}
+  #  key: "value"
+
+# -- Labels to add to the rasa-oss deployment
+deploymentLabels: {}
+
+# -- Labels to add to the rasa-oss's pod(s)
+podLabels: {}
+  #  key: "value"

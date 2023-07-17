@@ -1,4 +1,4 @@
-{{- if .Values.rasa.autoscaling.enabled }}
+{{- if and .Values.rasa.enabled .Values.rasa.autoscaling.enabled }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:

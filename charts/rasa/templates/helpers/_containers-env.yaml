@@ -1,35 +1,204 @@
+{{/*
+Environment Variables for Rasa Containers
+*/}}
 {{- define "rasa.containers.env" -}}
 {{- if and (eq (include "rasa.endpoints.models.enabled" .) "true") .Values.rasa.settings.endpoints.models.token }}
-- name: MODEL_SERVER_TOKEN
+- name: MODEL_SERVER_TOKEN # check if used in rasa plus
   valueFrom:
     secretKeyRef:
       name: {{ include "rasa.fullname" . }}-secrets
       key: model-server-token
 {{- end }}
-- name: "RASA_TELEMETRY_ENABLED"
+{{- if not .Values.rasa.plus.enabled }}
+- name: "RASA_TELEMETRY_ENABLED" #not required in rasa plus
   value: {{ .Values.rasa.settings.telemetry.enabled | quote }}
+{{- end -}}
 - name: "MPLCONFIGDIR"
   value: "/tmp/.matplotlib"
 - name: "TF_CPP_MIN_LOG_LEVEL"
   value: "2"
-{{- if .Values.rasa.settings.rasaX.enabled }}
-- name: "RASA_X_TOKEN"
-  valueFrom:
-    secretKeyRef:
-      name: {{ include "rasa.fullname" . }}-secrets
-      key: "rasa-x-token"
-{{- end }}
-- name: "RASA_TOKEN"
+- name: "RASA_TOKEN" # check if used in rasa plus
   valueFrom:
     secretKeyRef:
       name: {{ include "rasa.fullname" . }}-secrets
       key: "rasa-token"
-- name: "JWT_SECRET"
+- name: "JWT_SECRET" # used in rasa plus
   valueFrom:
     secretKeyRef:
       name: {{ include "rasa.fullname" . }}-secrets
       key: "jwt-secret"
-{{- if .Values.rasa.extraEnv }}
+{{- if and (not .Values.rasa.plus.enabled) .Values.rasa.extraEnv }} # not used in rasa plus
 {{ toYaml .Values.rasa.extraEnv }}
+{{- end }}
+
+{{- if .Values.rasa.plus.enabled }}
+- name: "RASA_PRO_LICENSE" 
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.rasaProLicence.secretName }}
+      key: {{ .Values.rasa.plus.settings.rasaProLicence.secretKey }}
+- name: "RASA_ENVIRONMENT"
+  value: {{ .Values.rasa.plus.settings.rasaEnvironment | quote }}
+# Studio
+{{- if .Values.rasa.plus.settings.studio.enabled }}
+- name: "RASA_STUDIO_AUTH_SERVER_URL"
+  value: {{ .Values.rasa.plus.settings.studio.authServerUrl | quote }}
+- name: "RASA_STUDIO_CLI_STUDIO_URL"
+  value: {{ .Values.rasa.plus.settings.studio.cliUrl | quote }}
+- name: "RASA_STUDIO_CLI_REALM_NAME_KEY"
+  value: {{ .Values.rasa.plus.settings.studio.cliRealmNameKey | quote }}
+- name: "RASA_STUDIO_CLI_CLIENT_ID_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretName }}
+      key: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretKey }}
+{{- end }}
+# Lock Store
+- name: "TICKET_LOCK_LIFETIME"
+  value: {{ .Values.rasa.plus.settings.lockStore.ticketLockLifetime | quote }}
+# Telemetry
+- name: "RASA_PRO_TELEMETRY_ENABLED"
+  value: {{ .Values.rasa.plus.settings.telemetry.enabled | quote }}
+- name: "RASA_PRO_TELEMETRY_DEBUG"
+  value: {{ .Values.rasa.plus.settings.telemetry.debug | quote }}
+# Tracing
+- name: "TRACING_SERVICE_NAME"
+  value: {{ .Values.rasa.plus.settings.tracing.serviceName | quote }}
+# Sanic Server
+- name: "SANIC_BACKLOG"
+  value: {{ .Values.rasa.plus.settings.tracing.backlog | quote }}
+- name: "SANIC_WORKERS"
+  value: {{ .Values.rasa.plus.settings.tracing.workers | quote }}
+# Postgres Tracker Store
+- name: "POSTGRESQL_SCHEMA"
+  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.schema | quote }}
+- name: "POSTGRESQL_POOL_SIZE"
+  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.poolSize | quote }}
+- name: "POSTGRESQL_MAX_OVERFLOW"
+  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.maxOverflow | quote }}
+# RabbitMQ
+- name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.rabbitmq.sslClientCertificate.secretName }}
+      key: {{ .Values.rasa.plus.settings.rabbitmq.sslClientCertificate.secretKey }}
+- name: "RABBITMQ_SSL_CLIENT_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.rabbitmq.sslClientKey.secretName }}
+      key: {{ .Values.rasa.plus.settings.rabbitmq.sslClientKey.secretKey }}
+- name: "RABBITMQ_SSL_CA_FILE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.rabbitmq.sslCAFile.secretName }}
+      key: {{ .Values.rasa.plus.settings.rabbitmq.sslCAFile.secretKey }}
+- name: "RABBITMQ_SSL_KEY_PASSWORD"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretName }}
+      key: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretKey }}
+# Logging
+- name: "LOG_LEVEL"
+  value: {{ .Values.rasa.plus.settings.logging.logLevel | quote | upper }}
+- name: "LOG_LEVEL_LIBRARIES"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelLibraries | quote | upper }}
+- name: "LOG_LEVEL_KAFKA"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelKafka | quote | upper }}
+- name: "LOG_LEVEL_RABBITMQ"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelRabbitMq | quote | upper }}
+- name: "LOG_LEVEL_PRESIDIO"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelPresidio | quote | upper }}
+- name: "LOG_LEVEL_FAKER"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelFaker | quote | upper }}
+- name: "FORCE_JSON_LOGGING"
+  value: {{ .Values.rasa.plus.settings.logging.forceJsonLogging | quote | upper }}
+# Hashicorp Secret Manager
+- name: "SECRET_MANAGER"
+  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.secretManager | quote }}
+- name: "VAULT_HOST"
+  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultHost | quote }}
+- name: "VAULT_TOKEN"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultToken.secretName }}
+      key: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultToken.secretKey }}
+- name: "VAULT_RASA_SECRETS_PATH"
+  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultRasaSecretsPath | quote }}
+- name: "VAULT_TRANSIT_MOUNT_POINT"
+  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultTransitMountPoint | quote }}
+# AWS Model Storage
+- name: "AWS_SECRET_ACCESS_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.modelStorage.aws.secretAccessKey.secretName }}
+      key: {{ .Values.rasa.plus.settings.modelStorage.aws.secretAccessKey.secretKey }}
+- name: "AWS_ACCESS_KEY_ID"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.modelStorage.aws.accessKeyId.secretName }}
+      key: {{ .Values.rasa.plus.settings.modelStorage.aws.accessKeyId.secretKey }}
+- name: "AWS_DEFAULT_REGION"
+  value: {{ .Values.rasa.plus.settings.modelStorage.aws.defaultRegion | quote }}
+- name: "BUCKET_NAME"
+  value: {{ .Values.rasa.plus.settings.modelStorage.aws.bucketName | quote }}
+- name: "AWS_ENDPOINT_URL"
+  value: {{ .Values.rasa.plus.settings.modelStorage.aws.endpointUrl | quote }}
+# Azure Model Storage
+- name: "AZURE_ACCOUNT_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.modelStorage.azure.accountKey.secretName }}
+      key: {{ .Values.rasa.plus.settings.modelStorage.azure.accountKey.secretKey }}
+- name: "AZURE_CONTAINER"
+  value: {{ .Values.rasa.plus.settings.modelStorage.azure.container | quote }}
+- name: "AZURE_ACCOUNT_NAME"
+  value: {{ .Values.rasa.plus.settings.modelStorage.azure.accountName | quote }}
+# GCP Model Storage
+- name: "GOOGLE_APPLICATION_CREDENTIALS"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretName }}
+      key: {{ .Values.rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretKey }}
+# Cache
+- name: "RASA_MAX_CACHE_SIZE"
+  value: {{ .Values.rasa.plus.settings.cache.maxSize | quote }}
+- name: "RASA_CACHE_NAME"
+  value: {{ .Values.rasa.plus.settings.cache.name | quote }}
+- name: "RASA_CACHE_DIRECTORY"
+  value: {{ .Values.rasa.plus.settings.cache.directory | quote }}
+# Duckling
+- name: "RASA_DUCKLING_HTTP_URL"
+  value: {{ .Values.rasa.plus.settings.duckling.httpUrl | quote }}
+# Tensorflow
+- name: "TF_GPU_MEMORY_ALLOC"
+  value: {{ .Values.rasa.plus.settings.tensorflow.gpuMemoryAlloc | quote }}
+- name: "TF_INTER_OP_PARALLELISM_THREADS"
+  value: {{ .Values.rasa.plus.settings.tensorflow.interOpParallelismThreads | quote }}
+- name: "TF_INTRA_OP_PARALLELISM_THREADS"
+  value: {{ .Values.rasa.plus.settings.tensorflow.intraOpParallelismThreads | quote }}
+- name: "TF_DETERMINISTIC_OPS"
+  value: {{ .Values.rasa.plus.settings.tensorflow.deterministicOps | quote }}
+
+- name: "RASA_SHELL_STREAM_READING_TIMEOUT_IN_SECONDS"
+  value: {{ .Values.rasa.plus.settings.shellStreamReadingTimeoutInSeconds | quote }}
+- name: "MAX_NUMBER_OF_PREDICTIONS"
+  value: {{ .Values.rasa.plus.settings.maxNumberOfPreditions | quote }}
+
+
+# Internal usage only
+- name: "RASA_TELEMETRY_WRITE_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: ""
+      key: ""
+- name: "RASA_EXCEPTION_WRITE_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: ""
+      key: ""
+
+{{- if .Values.rasa.plus.settings.additionalSettings }} # not used in rasa plus
+{{ toYaml .Values.rasa.plus.settings.additionalSettings }}
+{{- end }}
 {{- end }}
 {{- end -}}

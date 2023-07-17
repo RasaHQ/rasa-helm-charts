@@ -62,6 +62,17 @@ Create the name of the service account to use
 {{- end }}
 
 {{/*
+Create the name of the service account to use
+*/}}
+{{- define "rasa.rasaProServices.serviceAccountName" -}}
+{{- if .Values.rasaProServices.serviceAccount.create }}
+{{- default (include "rasa.fullname" .) .Values.rasaProServices.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.rasaProServices.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return DNS policy depends on host network configuration
 */}}
 {{- define "rasa.dnsPolicy" -}}
@@ -78,19 +89,9 @@ Return DNS policy depends on host network configuration
 Determine rasa server to run with arguments
 */}}
 {{- define "rasa.serverType" -}}
-{{- if .Values.rasa.settings.rasaX.enabled -}}
-- x
-- --no-prompt
-- --production
-{{- if .Values.rasa.settings.rasaX.useConfigEndpoint }}
-- --config-endpoint
-- {{ .Values.rasa.settings.rasaX.url }}/api/config?token=$(RASA_X_TOKEN)
-{{- end }}
-{{- else -}}
 - run
 {{- if .Values.rasa.settings.enableAPI }}
 - --enable-api
-{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -99,7 +100,7 @@ Determine rasa server to run with arguments
 Determine if a model server endpoint is used
 */}}
 {{- define "rasa.endpoints.models.enabled" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) .Values.rasa.settings.endpoints.models.enabled (not .Values.rasa.settings.endpoints.models.useRasaXasModelServer.enabled) -}}
+{{- if .Values.rasa.settings.endpoints.models.enabled -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -110,7 +111,7 @@ Determine if a model server endpoint is used
 Determine if Tracker Store is used
 */}}
 {{- define "rasa.endpoints.trackerStore.enabled" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) .Values.rasa.settings.endpoints.trackerStore.enabled  -}}
+{{- if .Values.rasa.settings.endpoints.trackerStore.enabled -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -121,7 +122,7 @@ Determine if Tracker Store is used
 Determine if Lock Store is used
 */}}
 {{- define "rasa.endpoints.lockStore.enabled" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) .Values.rasa.settings.endpoints.lockStore.enabled  -}}
+{{- if .Values.rasa.settings.endpoints.lockStore.enabled  -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -133,7 +134,7 @@ Determine if Lock Store is used
 Determine if Lock Store is used
 */}}
 {{- define "rasa.endpoints.eventBroker.enabled" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) .Values.rasa.settings.endpoints.eventBroker.enabled  -}}
+{{- if .Values.rasa.settings.endpoints.eventBroker.enabled  -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -144,7 +145,7 @@ Determine if Lock Store is used
 Determine if credential configuration for channel connectors is used
 */}}
 {{- define "rasa.credentials.enabled" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) .Values.rasa.settings.credentials.enabled  -}}
+{{- if .Values.rasa.settings.credentials.enabled  -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -155,7 +156,7 @@ Determine if credential configuration for channel connectors is used
 Determine if a initial model should be downloaded
 */}}
 {{- define "rasa.initialModel.download" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) (not .Values.rasa.settings.endpoints.models.enabled) (not (empty .Values.rasa.settings.initialModel)) (not .Values.applicationSettings.trainInitialModel) -}}
+{{- if and (not .Values.rasa.settings.endpoints.models.enabled) (not (empty .Values.rasa.settings.initialModel)) (not .Values.rasa.settings.trainInitialModel) -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}
@@ -166,7 +167,7 @@ Determine if a initial model should be downloaded
 Determine if a initial model should be trained
 */}}
 {{- define "rasa.initialModel.train" -}}
-{{- if and (not .Values.rasa.settings.rasaX.useConfigEndpoint) (not .Values.rasa.settings.endpoints.models.enabled) .Values.rasa.settings.trainInitialModel -}}
+{{- if and (not .Values.rasa.settings.endpoints.models.enabled) .Values.rasa.settings.trainInitialModel -}}
 {{- print "true" -}}
 {{- else -}}
 {{- print "false" -}}

@@ -1,7 +1,6 @@
 {{- define "rasa.containers.volumes" -}}
 - name: config-dir
   emptyDir: {}
-{{- if not .Values.rasa.settings.rasaX.useConfigEndpoint }}
 - name: "rasa-configuration"
   configMap:
     name: {{ include "rasa.fullname" . }}
@@ -10,14 +9,12 @@
         path: "endpoints.yml"
       - key: "credentials"
         path: "credentials.yml"
-{{- end }}
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}
 # Mount the temporary directory for the Rasa global configuration
 - name: "config-dir"
   mountPath: "/.config"
-{{- if not .Values.rasa.settings.rasaX.useConfigEndpoint }}
 - mountPath: "/app/endpoints.yml"
   subPath: "endpoints.yml"
   name: "rasa-configuration"
@@ -26,5 +23,4 @@
   subPath: "credentials.yml"
   name: "rasa-configuration"
   readOnly: true
-{{- end }}
 {{- end -}}

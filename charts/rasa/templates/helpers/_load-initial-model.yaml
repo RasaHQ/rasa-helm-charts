@@ -27,7 +27,7 @@
       value: "2"
     - name: "HOME"
       value: "/app"
-    - name: "RASA_TELEMETRY_ENABLED"
+    - name: "RASA_TELEMETRY_ENABLED" #change to rasa_pro_telemetry_enabled if rasa plus is enabled
       value: {{ .Values.rasa.settings.telemetry.enabled | quote }}
   args:
     - "if [ -z \"$(ls -A /app | grep -v models)\" ]; then echo \"Can't find data, creating a new project\"; rasa init --no-prompt; else rasa train; fi"

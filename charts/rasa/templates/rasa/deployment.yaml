@@ -28,7 +28,6 @@ spec:
       {{- with .Values.rasa.podAnnotations }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        checksum/secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -83,10 +82,10 @@ spec:
             - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
             - --jwt-method
             - HS256
-            - --jwt-secret
-            - "$(JWT_SECRET)"
+            - --jwt-secret 
+            - "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
             - --auth-token
-            - "$(RASA_TOKEN)"
+            - "$(cat /app/secrets/{{ .Values.rasa.settings.token.secretKey }})"
             {{- if .Values.rasa.settings.debugMode }}
             - --debug
             {{- end }}

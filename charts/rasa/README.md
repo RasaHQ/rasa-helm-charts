@@ -8,15 +8,21 @@ A Rasa Pro Helm chart for Kubernetes
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
+| actionServer.external.enabled | bool | `false` | Determine if external URL is used |
+| actionServer.external.url | string | `""` | External URL to Rasa Action Server |
+| actionServer.install | bool | `false` | Install Rasa Action Server |
 | deploymentAnnotations | object | `{}` | Annotations to add to the rasa-oss deployment |
 | deploymentLabels | object | `{}` | Labels to add to the rasa-oss deployment |
 | dnsConfig | object | `{}` | Specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | Specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling | string | `nil` | Settings for Duckling |
+| duckling.external.enabled | bool | `false` | Determine if external URL is used |
+| duckling.external.url | string | `""` | External URL to Duckling |
+| duckling.install | bool | `false` | Install Duckling |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` | additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | Repository pull secrets |
+| internal | bool | `false` |  |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
@@ -53,7 +59,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.cache.directory | string | `nil` |  |
 | rasa.plus.settings.cache.maxSize | int | `1000` |  |
 | rasa.plus.settings.cache.name | string | `"cache.db"` |  |
-| rasa.plus.settings.duckling.httpUrl | string | `nil` |  |
+| rasa.plus.settings.ducklingHttpUrl | string | `nil` |  |
 | rasa.plus.settings.hashicorpSecretManager.secretManager | string | `"vault"` |  |
 | rasa.plus.settings.hashicorpSecretManager.vaultHost | string | `nil` |  |
 | rasa.plus.settings.hashicorpSecretManager.vaultRasaSecretsPath | string | `"rasa-secrets"` |  |
@@ -104,7 +110,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.studio.cliClientIdKey.secretName | string | `nil` |  |
 | rasa.plus.settings.studio.cliRealmNameKey | string | `nil` |  |
 | rasa.plus.settings.studio.cliUrl | string | `nil` |  |
-| rasa.plus.settings.studio.enabled | bool | `true` |  |
 | rasa.plus.settings.telemetry.debug | bool | `false` |  |
 | rasa.plus.settings.telemetry.enabled | bool | `false` |  |
 | rasa.plus.settings.tensorflow.deterministicOps | bool | `false` |  |
@@ -132,46 +137,46 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"action_endpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":false,"exchange_name":"exchange","password":"","port":"","queues":["rasa_production_events"],"type":"","url":"","username":""},"lockStore":{"db":"1","enabled":false,"key_prefix":"","password":"","port":"","type":"","url":""},"models":{"enabled":true,"token":"","url":"","waitTimeBetweenPulls":20},"trackerStore":{"db":"","enabled":true,"password":"","port":"","type":"","url":"","use_ssl":false,"username":""}},"initialModel":"","jwtToken":"","port":5005,"scheme":"http","telemetry":{"enabled":true},"token":"rasaToken","trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
+| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"action_endpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":false,"exchange_name":"exchange","password":"","port":"","queues":["rasa_production_events"],"url":"","username":""},"lockStore":{"db":"1","enabled":false,"key_prefix":"","password":"","port":"","type":"","url":""},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"db":"","enabled":true,"key_prefix":"","password":"","port":"","record_exp":"","type":"redis","url":"","use_ssl":false}},"initialModel":"","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
 | rasa.settings.enableAPI | bool | `true` | Start the web server API in addition to the input channel |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
-| rasa.settings.jwtToken | string | `""` | JWT Token TODO: determine if this should even exist |
+| rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token TODO: determine if this should even exist |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
 | rasa.settings.telemetry.enabled | bool | `true` | Enable telemetry See: https://rasa.com/docs/rasa/telemetry/telemetry/ |
-| rasa.settings.token | string | `"rasaToken"` | Token Rasa accepts as authentication token from other Rasa services |
+| rasa.settings.token | object | `{"secretKey":"","secretName":""}` | Token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.trainInitialModel | bool | `false` | Train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | Specify additional volumes to mount in the rasa-oss container |
 | rasa.volumes | list | `[]` | Specify additional volumes to mount in the rasa-oss container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| rasaProServices | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"enabled":false,"environmentVariables":{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SASL_MECHANISM":{"value":"PLAIN"},"KAFKA_SASL_PASSWORD":{"secret":{"key":null,"name":null}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":"PLAINTEXT"},"KAFKA_SSL_CA_LOCATION":{"value":""},"KAFKA_TOPIC":{"value":"rasa_core_events"},"LOGGING_LEVEL":{"value":"INFO"},"RASA_ANALYTICS_DB_URL":{"value":""},"RASA_PRO_LICENSE":{"secret":{"key":null,"name":null}}},"image":{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""},"livenessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"readinessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{"enabled":true},"service":{"annotations":{},"port":5005,"targetPort":5005,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":false,"name":""},"strategy":{"type":"RollingUpdate"},"tolerations":[]}` | Settings for Rasa Pro Services |
+| rasaProServices | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"enabled":true,"environmentVariables":{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SASL_MECHANISM":{"value":"PLAIN"},"KAFKA_SASL_PASSWORD":{"secret":{"key":null,"name":null}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":"PLAINTEXT"},"KAFKA_SSL_CA_LOCATION":{"value":""},"KAFKA_TOPIC":{"value":"rasa_core_events"},"LOGGING_LEVEL":{"value":"INFO"},"RASA_ANALYTICS_DB_URL":{"value":""},"RASA_PRO_LICENSE":{"secret":{"key":null,"name":null}}},"image":{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""},"livenessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"readinessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{"enabled":true},"service":{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":false,"name":""},"strategy":{"type":"RollingUpdate"},"tolerations":[]}` | Settings for Rasa Pro Services |
 | rasaProServices.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
 | rasaProServices.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
 | rasaProServices.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | rasaProServices.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| rasaProServices.enabled | bool | `false` | Enable Rasa Pro Services deployment |
+| rasaProServices.enabled | bool | `true` | Enable Rasa Pro Services deployment |
 | rasaProServices.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""}` | Define image settings |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | Specifies image repository |
 | rasaProServices.image.tag | string | `""` | Specifies image tag Overrides the image tag whose default is the chart appVersion. |
-| rasaProServices.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| rasaProServices.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasaProServices.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasaProServices.podAnnotations | object | `{}` | Annotations to add to the pod |
 | rasaProServices.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
-| rasaProServices.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| rasaProServices.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | rasaProServices.replicaCount | int | `1` | Specifies number of replicas |
 | rasaProServices.resources | object | `{}` | Specifies the resources limits and requests |
 | rasaProServices.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
-| rasaProServices.service | object | `{"annotations":{},"port":5005,"targetPort":5005,"type":"ClusterIP"}` | Define service |
+| rasaProServices.service | object | `{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"}` | Define service |
 | rasaProServices.service.annotations | object | `{}` | Annotations to add to the service |
-| rasaProServices.service.port | int | `5005` | Specify service port |
-| rasaProServices.service.targetPort | int | `5005` | Specify service target port |
+| rasaProServices.service.port | int | `8732` | Specify service port |
+| rasaProServices.service.targetPort | int | `8732` | Specify service target port |
 | rasaProServices.service.type | string | `"ClusterIP"` | Specify service type |
 | rasaProServices.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | rasaProServices.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |

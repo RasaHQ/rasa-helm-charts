@@ -9,6 +9,12 @@
         path: "endpoints.yml"
       - key: "credentials"
         path: "credentials.yml"
+- name: jwtSecret
+  secret:
+    secretName: {{ .Values.rasa.settings.jwtSecret.secretName }}
+- name: rasaToken
+  secret:
+    secretName: {{ .Values.rasa.settings.token.secretName }}
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}
@@ -23,4 +29,8 @@
   subPath: "credentials.yml"
   name: "rasa-configuration"
   readOnly: true
+- mountPath: "/app/secrets"
+  name: jwtSecret
+- mountPath: "/app/secrets"
+  name: rasaToken
 {{- end -}}

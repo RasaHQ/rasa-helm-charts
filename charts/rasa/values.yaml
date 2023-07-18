@@ -50,10 +50,14 @@ rasa:
     # -- Scheme by which the service are accessible
     scheme: http
     # -- Token Rasa accepts as authentication token from other Rasa services
-    token: "rasaToken"
+    token: # "rasaToken"
+      secretName: ""
+      secretKey: ""
     # -- JWT Token
     # TODO: determine if this should even exist
-    jwtToken: ""
+    jwtSecret:
+      secretName: ""
+      secretKey: ""
     # -- CORS for the passed origin. Default is * to allow all origins
     cors: '*'
     # -- Start the web server API in addition to the input channel
@@ -77,24 +81,27 @@ rasa:
       # -- Enable telemetry
       # See: https://rasa.com/docs/rasa/telemetry/telemetry/
       enabled: true
+      debug: false
 
     endpoints:
       models:
         enabled: true
-        token: ""
+        token:
+          enabled: true
+          secretName: ""
+          secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
       trackerStore:
         enabled: true
-        type: ""
+        type: "redis"
         url: ""
         port: ""
+        key_prefix: ""
         db: ""
-        username: ""
         password: ""
+        record_exp: ""
         use_ssl: false # ssl volume depends on this
-        #query:
-          # optional key-value pairs to be added as a query string to the connection URL
       lockStore:
         enabled: false
         type: ""
@@ -105,7 +112,6 @@ rasa:
         key_prefix: "" # alphanumeric value to prepend to lock store keys
       eventBroker:
         enabled: false
-        type: ""
         url: ""
         username: ""
         password: ""
@@ -126,7 +132,6 @@ rasa:
         secretKey:
       rasaEnvironment: production
       studio:
-        enabled: true
         authServerUrl: 
         cliUrl:
         cliRealmNameKey:
@@ -202,8 +207,7 @@ rasa:
         name: cache.db
         # default is equivalent of Path(".rasa", "cache")
         directory:
-      duckling:
-        httpUrl:
+      ducklingHttpUrl:
       tensorflow:
         gpuMemoryAlloc:
         interOpParallelismThreads:
@@ -413,7 +417,7 @@ rasa:
 # -- Settings for Rasa Pro Services
 rasaProServices:
   # -- Enable Rasa Pro Services deployment
-  enabled: false
+  enabled: true
 
   # -- Specifies number of replicas
   replicaCount: 1
@@ -499,9 +503,9 @@ rasaProServices:
     # -- Specify service type
     type: ClusterIP
     # -- Specify service port
-    port: 5005
+    port: 8732
     # -- Specify service target port
-    targetPort: 5005
+    targetPort: 8732
     # -- Annotations to add to the service
     annotations: {}
 
@@ -509,8 +513,8 @@ rasaProServices:
   livenessProbe:
     enabled: false
     httpGet:
-      path: /
-      port: 80
+      path: /healthcheck
+      port: 8732
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15
@@ -522,8 +526,8 @@ rasaProServices:
   readinessProbe:
     enabled: false
     httpGet:
-      path: /
-      port: 80
+      path: /healthcheck
+      port: 8732
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15
@@ -569,9 +573,6 @@ rasaProServices:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# -- Settings for Duckling
-duckling:
-
 # Network policy settings
 networkPolicy:
   # -- Specifies whether to enable network policies
@@ -613,3 +614,29 @@ deploymentLabels: {}
 # -- Labels to add to the rasa-oss's pod(s)
 podLabels: {}
   #  key: "value"
+
+## Settings for Rasa Action Server
+actionServer:
+  # -- Install Rasa Action Server
+  install: false
+
+  external:
+    # -- Determine if external URL is used
+    enabled: false
+    # -- External URL to Rasa Action Server
+    url: ""
+
+## Settings for Duckling
+duckling:
+  # -- Install Duckling
+  install: false
+
+  external:
+    # -- Determine if external URL is used
+    enabled: false
+    # -- External URL to Duckling
+    url: ""
+
+internal: false
+  # secretName:
+  # secretKey:

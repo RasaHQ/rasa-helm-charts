@@ -58,6 +58,7 @@ rasa:
     jwtSecret:
       secretName: ""
       secretKey: ""
+    jwtMethod: HS256
     # -- CORS for the passed origin. Default is * to allow all origins
     cors: '*'
     # -- Start the web server API in addition to the input channel
@@ -97,23 +98,30 @@ rasa:
       # TODO: Define trackerStore settings depending on type
       trackerStore:
         enabled: true
-        type: "redis"
-        url: ""
-        port: ""
-        key_prefix: ""
-        db: ""
-        password: ""
-        record_exp: ""
-        use_ssl: false # ssl volume depends on this
+        type: "dynamo"
+        # dialect: ""
+        # url: ""
+        # port: ""
+        # keyPrefix: ""
+        # db: 0
+        # password: ""
+        # username: ""
+        # domain: ""
+        # recordExp: ""
+        # loginDb: ""
+        # useSsl: false # ssl volume depends on this
+        # query: ""
       # TODO: Define lock store type if `rasa.plus.enabled: true`
       lockStore:
-        enabled: false
+        enabled: true
         type: ""
         url: ""
         port: ""
         password: ""
         db: "1"
-        key_prefix: "" # alphanumeric value to prepend to lock store keys
+        keyPrefix: "" # alphanumeric value to prepend to lock store keys
+        useSsl: false
+        socketTimeout: ""
       eventBroker:
         enabled: false
         url: ""
@@ -121,10 +129,9 @@ rasa:
         password: ""
         port: ""
         # TODO: Check if `queue` or `queues` and input type
-        queues:
-          - rasa_production_events
-        exchange_name: exchange
-      action_endpoint:
+        queue: rasa_production_events
+        exchangeName: exchange
+      actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
 
@@ -232,7 +239,7 @@ rasa:
         #     secretKeyRef:
         #       name:
         #       key:
-      
+    # TODO: Define volumes, path and mountPaths
     volumes: # optional
       models: # optional
       ssl: #if ssl is enabled
@@ -621,7 +628,6 @@ deploymentLabels: {}
 
 # -- Labels to add to the rasa-oss's pod(s)
 podLabels: {}
-  #  key: "value"
 
 ## Settings for Rasa Action Server
 actionServer:

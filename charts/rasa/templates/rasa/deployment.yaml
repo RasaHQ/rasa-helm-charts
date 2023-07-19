@@ -27,7 +27,6 @@ spec:
     metadata:
       {{- with .Values.rasa.podAnnotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
@@ -51,7 +50,6 @@ spec:
       securityContext:
         {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      # TODO: Get better understanding of these initContainers and their purpose, is this something we want to keep?
       {{- if or .Values.rasa.initContainers (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
       initContainers:
         {{- if .Values.rasa.initContainers }}
@@ -81,9 +79,8 @@ spec:
             - "{{ .Values.rasa.settings.port }}"
             - --cors
             - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
-            # TODO: Do we only support this JWT method, if now, why is it hardcoded?
             - --jwt-method
-            - HS256
+            - {{ .Values.rasa.settings.jwtMethod }}
             - --jwt-secret 
             - "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
             - --auth-token
@@ -104,7 +101,7 @@ spec:
               containerPort: {{ .Values.rasa.service.port }}
               protocol: TCP
           env:
-          {{- include "rasa.containers.env" . | nindent 12 }}
+            {{- include "rasa.containers.env" . | nindent 12 }}
           {{- if or .Values.rasa.livenessProbe.enabled (not (hasKey .Values.rasa.livenessProbe "enabled")) }}
           livenessProbe:
             {{- toYaml .Values.rasa.livenessProbe | nindent 12 }}

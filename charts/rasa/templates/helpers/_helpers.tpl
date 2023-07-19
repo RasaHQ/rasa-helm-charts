@@ -85,6 +85,7 @@ Return DNS policy depends on host network configuration
 {{- end }}
 {{- end }}
 
+# TODO: Check if this is really needed
 {{/*
 Determine rasa server to run with arguments
 */}}
@@ -95,6 +96,18 @@ Determine rasa server to run with arguments
 {{- end -}}
 {{- end -}}
 
+# TODO: Refactor this for better configuration, just a placeholder for now
+{{/*
+Return Lock store configuration if `rasa.plus.enabled: true`
+*/}}
+{{- define "rasa.lockStore" -}}
+{{- if and .Values.rasa.plus .Values.rasa.settings.endpoints.lockStore.enabled }}
+type: "rasa_plus.components.concurrent_lock_store.ConcurrentRedisLockStore"
+host: {{ .Values.rasa.settings.endpoints.lockStore.url }}
+{{- else -}}
+type: "redis"
+url: {{ .Values.rasa.settings.endpoints.lockStore.url }}
+{{- end -}}
 
 {{/*
 Determine if a model server endpoint is used

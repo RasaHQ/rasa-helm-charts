@@ -12,6 +12,8 @@ data:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 {{- end }}
+  # TODO: Re-evaluate the way we populate `endpoints.yml`
+  # TODO: Maybe populating specific values like in `rasa-x-configmap` would be simpler
   endpoints: |
 {{- if eq (include "rasa.endpoints.models.enabled" .) "true" }}
     models:

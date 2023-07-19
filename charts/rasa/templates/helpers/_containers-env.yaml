@@ -2,8 +2,9 @@
 Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
-{{- if and (eq (include "rasa.endpoints.models.enabled" .) "true") .Values.rasa.settings.endpoints.models.token.enabled }}
-- name: MODEL_SERVER_TOKEN # check if used in rasa plus
+# TODO: Define if this is necessary if `rasa.plus.enabled: true`
+{{- if and (eq (include "rasa.endpoints.models.enabled" .) "true") .Values.rasa.settings.endpoints.models.token.enabled -}}
+- name: MODEL_SERVER_TOKEN
   valueFrom:
     secretKeyRef:
       name: {{ .Values.rasa.settings.endpoints.models.token.secretName }}
@@ -19,12 +20,13 @@ Environment Variables for Rasa Containers
   value: "/tmp/.matplotlib"
 - name: "TF_CPP_MIN_LOG_LEVEL"
   value: "2"
-- name: "RASA_TOKEN" # check if used in rasa plus
+# TODO: Define if this is necessary if `rasa.plus.enabled: true`
+- name: "RASA_TOKEN"
   valueFrom:
     secretKeyRef:
       name: {{ .Values.rasa.settings.token.secretName }}
       key: {{ .Values.rasa.settings.token.secretKey }}
-- name: "JWT_SECRET" # used in rasa plus
+- name: "JWT_SECRET"
   valueFrom:
     secretKeyRef:
       name: {{ .Values.rasa.settings.jwtSecret.secretName }}
@@ -32,14 +34,12 @@ Environment Variables for Rasa Containers
 {{- if and (not .Values.rasa.plus.enabled) .Values.rasa.extraEnv }} # not used in rasa plus
 {{ toYaml .Values.rasa.extraEnv }}
 {{- end }}
-
 {{- if .Values.rasaProServices.enabled }}
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.rasaProLicence.secretName }}
       key: {{ .Values.rasa.plus.settings.rasaProLicence.secretKey }}
-
 # Studio
 - name: "RASA_STUDIO_AUTH_SERVER_URL"
   value: {{ .Values.rasa.plus.settings.studio.authServerUrl | quote }}
@@ -52,13 +52,11 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretName }}
       key: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretKey }}
-
 # Telemetry
 - name: "RASA_PRO_TELEMETRY_ENABLED"
   value: {{ .Values.rasa.plus.settings.telemetry.enabled | quote }}
 - name: "RASA_PRO_TELEMETRY_DEBUG"
   value: {{ .Values.rasa.plus.settings.telemetry.debug | quote }}
-
 # Hashicorp Secret Manager
 - name: "SECRET_MANAGER"
   value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.secretManager | quote }}
@@ -74,24 +72,20 @@ Environment Variables for Rasa Containers
 - name: "VAULT_TRANSIT_MOUNT_POINT"
   value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultTransitMountPoint | quote }}
 {{- end }}
-
 {{- if or .Values.rasa.enabled .Values.rasa.plus.enabled }}
 - name: "RASA_ENVIRONMENT"
   value: {{ .Values.rasa.plus.settings.rasaEnvironment | quote }}
 # Lock Store
 - name: "TICKET_LOCK_LIFETIME"
   value: {{ .Values.rasa.plus.settings.lockStore.ticketLockLifetime | quote }}
-
 # Tracing
 - name: "TRACING_SERVICE_NAME"
   value: {{ .Values.rasa.plus.settings.tracing.serviceName | quote }}
-
 # Sanic Server
 - name: "SANIC_BACKLOG"
   value: {{ .Values.rasa.plus.settings.tracing.backlog | quote }}
 - name: "SANIC_WORKERS"
   value: {{ .Values.rasa.plus.settings.tracing.workers | quote }}
-
 # Postgres Tracker Store
 - name: "POSTGRESQL_SCHEMA"
   value: {{ .Values.rasa.plus.settings.postgresTrackerStore.schema | quote }}
@@ -99,7 +93,6 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.postgresTrackerStore.poolSize | quote }}
 - name: "POSTGRESQL_MAX_OVERFLOW"
   value: {{ .Values.rasa.plus.settings.postgresTrackerStore.maxOverflow | quote }}
-
 # RabbitMQ
 - name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"
   valueFrom:
@@ -121,7 +114,6 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretName }}
       key: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretKey }}
-
 # Logging
 - name: "LOG_LEVEL"
   value: {{ .Values.rasa.plus.settings.logging.logLevel | quote | upper }}
@@ -137,7 +129,6 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.logging.logLevelFaker | quote | upper }}
 - name: "FORCE_JSON_LOGGING"
   value: {{ .Values.rasa.plus.settings.logging.forceJsonLogging | quote | upper }}
-
 # AWS Model Storage
 - name: "AWS_SECRET_ACCESS_KEY"
   valueFrom:
@@ -155,7 +146,6 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.modelStorage.aws.bucketName | quote }}
 - name: "AWS_ENDPOINT_URL"
   value: {{ .Values.rasa.plus.settings.modelStorage.aws.endpointUrl | quote }}
-
 # Azure Model Storage
 - name: "AZURE_ACCOUNT_KEY"
   valueFrom:
@@ -166,14 +156,12 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.modelStorage.azure.container | quote }}
 - name: "AZURE_ACCOUNT_NAME"
   value: {{ .Values.rasa.plus.settings.modelStorage.azure.accountName | quote }}
-
 # GCP Model Storage
 - name: "GOOGLE_APPLICATION_CREDENTIALS"
   valueFrom:
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretName }}
       key: {{ .Values.rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretKey }}
-
 # Cache
 - name: "RASA_MAX_CACHE_SIZE"
   value: {{ .Values.rasa.plus.settings.cache.maxSize | quote }}
@@ -181,11 +169,9 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.cache.name | quote }}
 - name: "RASA_CACHE_DIRECTORY"
   value: {{ .Values.rasa.plus.settings.cache.directory | quote }}
-
 # Duckling
 - name: "RASA_DUCKLING_HTTP_URL"
   value: {{ .Values.rasa.plus.settings.ducklingHttpUrl | quote }}
-
 # Tensorflow
 - name: "TF_GPU_MEMORY_ALLOC"
   value: {{ .Values.rasa.plus.settings.tensorflow.gpuMemoryAlloc | quote }}
@@ -195,12 +181,10 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.tensorflow.intraOpParallelismThreads | quote }}
 - name: "TF_DETERMINISTIC_OPS"
   value: {{ .Values.rasa.plus.settings.tensorflow.deterministicOps | quote }}
-
 - name: "RASA_SHELL_STREAM_READING_TIMEOUT_IN_SECONDS"
   value: {{ .Values.rasa.plus.settings.shellStreamReadingTimeoutInSeconds | quote }}
 - name: "MAX_NUMBER_OF_PREDICTIONS"
   value: {{ .Values.rasa.plus.settings.maxNumberOfPreditions | quote }}
-
 {{- if .Values.internal }}
 # Internal usage only
 - name: "RASA_TELEMETRY_WRITE_KEY"
@@ -217,6 +201,5 @@ Environment Variables for Rasa Containers
 {{- if .Values.rasa.plus.settings.additionalSettings }} # not used in rasa plus
 {{ toYaml .Values.rasa.plus.settings.additionalSettings }}
 {{- end }}
-
 {{- end }}
 {{- end -}}

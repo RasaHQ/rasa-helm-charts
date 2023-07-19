@@ -49,12 +49,12 @@ rasa:
     port: 5005
     # -- Scheme by which the service are accessible
     scheme: http
+    # TODO: Define if this is necessary and in which cases
     # -- Token Rasa accepts as authentication token from other Rasa services
     token: # "rasaToken"
       secretName: ""
       secretKey: ""
     # -- JWT Token
-    # TODO: determine if this should even exist
     jwtSecret:
       secretName: ""
       secretKey: ""
@@ -67,6 +67,7 @@ rasa:
     credentials:
       # -- Enable credentials configuration for channel connectors
       enabled: true
+      # TODO: Check if this is the right way for credentials.yml or we want to change it
       # -- Additional channel credentials which should be used by Rasa to connect to various
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
@@ -86,12 +87,14 @@ rasa:
     endpoints:
       models:
         enabled: true
+        # TODO: Define if this is necessary and in which cases
         token:
           enabled: true
           secretName: ""
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
+      # TODO: Define trackerStore settings depending on type
       trackerStore:
         enabled: true
         type: "redis"
@@ -102,6 +105,7 @@ rasa:
         password: ""
         record_exp: ""
         use_ssl: false # ssl volume depends on this
+      # TODO: Define lock store type if `rasa.plus.enabled: true`
       lockStore:
         enabled: false
         type: ""
@@ -116,6 +120,7 @@ rasa:
         username: ""
         password: ""
         port: ""
+        # TODO: Check if `queue` or `queues` and input type
         queues:
           - rasa_production_events
         exchange_name: exchange
@@ -152,6 +157,7 @@ rasa:
         schema:
         poolSize: 50
         maxOverflow: 100
+      # TODO: Determine if this should have `enabled` flag
       rabbitmq:
         sslClientCertificate:
           secretName:
@@ -173,6 +179,7 @@ rasa:
         logLevelPresidio: error
         logLevelFaker: error
         forceJsonLogging:
+      # TODO: Determine if this should have `enabled` flag
       hashicorpSecretManager:
         secretManager: vault
         vaultHost:
@@ -181,6 +188,7 @@ rasa:
           secretKey:
         vaultRasaSecretsPath: rasa-secrets
         vaultTransitMountPoint:
+      # TODO: Determine how this configuration works, if it supports multiple storage models or just one can be present
       modelStorage:
         aws:
           secretAccessKey:

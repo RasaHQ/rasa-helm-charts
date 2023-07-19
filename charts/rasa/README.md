@@ -144,7 +144,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
 | rasa.settings.enableAPI | bool | `true` | Start the web server API in addition to the input channel |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
-| rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token TODO: determine if this should even exist |
+| rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
 | rasa.settings.telemetry.enabled | bool | `true` | Enable telemetry See: https://rasa.com/docs/rasa/telemetry/telemetry/ |

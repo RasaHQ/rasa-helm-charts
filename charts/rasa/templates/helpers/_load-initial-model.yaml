@@ -1,3 +1,4 @@
+# TODO: Determine if these settings are correct
 {{- define "rasa.downloadInitialModel.initContainer" -}}
 - name: download-initial-model
   {{- if .Values.rasa.podSecurityContext.enabled }}

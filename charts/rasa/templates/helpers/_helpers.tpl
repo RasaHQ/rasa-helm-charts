@@ -96,62 +96,6 @@ Determine rasa server to run with arguments
 {{- end -}}
 
 {{/*
-Determine if a model server endpoint is used
-*/}}
-{{- define "rasa.endpoints.models.enabled" -}}
-{{- if .Values.rasa.settings.endpoints.models.enabled -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Determine if Tracker Store is used
-*/}}
-{{- define "rasa.endpoints.trackerStore.enabled" -}}
-{{- if .Values.rasa.settings.endpoints.trackerStore.enabled -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Determine if Lock Store is used
-*/}}
-{{- define "rasa.endpoints.lockStore.enabled" -}}
-{{- if .Values.rasa.settings.endpoints.lockStore.enabled  -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-
-{{/*
-Determine if Lock Store is used
-*/}}
-{{- define "rasa.endpoints.eventBroker.enabled" -}}
-{{- if .Values.rasa.settings.endpoints.eventBroker.enabled  -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Determine if credential configuration for channel connectors is used
-*/}}
-{{- define "rasa.credentials.enabled" -}}
-{{- if .Values.rasa.settings.credentials.enabled  -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Determine if a initial model should be downloaded
 */}}
 {{- define "rasa.initialModel.download" -}}

@@ -2,7 +2,7 @@
 Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
-{{- if and (eq (include "rasa.endpoints.models.enabled" .) "true") .Values.rasa.settings.endpoints.models.token.enabled -}}
+{{- if and .Values.rasa.settings.endpoints.models.enabled .Values.rasa.settings.endpoints.models.token.enabled -}}
 - name: MODEL_SERVER_TOKEN
   valueFrom:
     secretKeyRef:

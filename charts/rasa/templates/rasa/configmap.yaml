@@ -28,9 +28,9 @@ data:
       db: {{ .trackerStore.db | default "rasa.db" }}
       username: {{ .trackerStore.username }}
       password: {{ .trackerStore.password }}
-			domain: {{ .trackerStore.domain }}
-			port: {{ .trackerStore.port }}
-			login_db: {{ .trackerStore.loginDb }}
+      domain: {{ .trackerStore.domain }}
+      port: {{ .trackerStore.port }}
+      login_db: {{ .trackerStore.loginDb }}
       query: {{ .trackerStore.query }}
       {{- end }}
       {{- if eq .trackerStore.type "redis" }}

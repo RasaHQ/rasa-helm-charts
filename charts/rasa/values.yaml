@@ -96,6 +96,7 @@ rasa:
         url: ""
         waitTimeBetweenPulls: 20
       # TODO: Define trackerStore settings depending on type
+      # TODO: Leave instructions for which vars to use depending on the type
       trackerStore:
         enabled: true
         type: "dynamo"
@@ -111,7 +112,6 @@ rasa:
         # loginDb: ""
         # useSsl: false # ssl volume depends on this
         # query: ""
-      # TODO: Define lock store type if `rasa.plus.enabled: true`
       lockStore:
         enabled: true
         type: ""
@@ -122,14 +122,28 @@ rasa:
         keyPrefix: "" # alphanumeric value to prepend to lock store keys
         useSsl: false
         socketTimeout: ""
+      # TODO: Leave instructions for which vars to use depending on the type
       eventBroker:
+        type: ""
         enabled: false
         url: ""
         username: ""
         password: ""
         port: ""
         # TODO: Check if `queue` or `queues` and input type
-        queue: rasa_production_events
+        queues: 
+          - rasa_production_events
+        db: ""
+        dialect: ""
+        securityProtocol: SASL_SSL
+        topic: topic
+        saslUsername: username
+        saslPassword: password
+        saslMechanism: PLAIN
+        sslCaFile: CARoot.pem
+        sslCertFile: certificate.pem
+        sslKeyFile: key.pem
+        sslCheckHostname: True
         exchangeName: exchange
       actionEndpoint:
         url: /webhook
@@ -143,13 +157,6 @@ rasa:
         secretName:
         secretKey:
       rasaEnvironment: production
-      studio:
-        authServerUrl: 
-        cliUrl:
-        cliRealmNameKey:
-        cliClientIdKey:
-          secretName:
-          secretKey:
       lockStore:
         ticketLockLifetime: 60
       telemetry:

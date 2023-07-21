@@ -38,18 +38,6 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.rasaProLicence.secretName }}
       key: {{ .Values.rasa.plus.settings.rasaProLicence.secretKey }}
-# Studio
-- name: "RASA_STUDIO_AUTH_SERVER_URL"
-  value: {{ .Values.rasa.plus.settings.studio.authServerUrl | quote }}
-- name: "RASA_STUDIO_CLI_STUDIO_URL"
-  value: {{ .Values.rasa.plus.settings.studio.cliUrl | quote }}
-- name: "RASA_STUDIO_CLI_REALM_NAME_KEY"
-  value: {{ .Values.rasa.plus.settings.studio.cliRealmNameKey | quote }}
-- name: "RASA_STUDIO_CLI_CLIENT_ID_KEY"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretName }}
-      key: {{ .Values.rasa.plus.settings.studio.cliClientIdKey.secretKey }}
 # Telemetry
 - name: "RASA_PRO_TELEMETRY_ENABLED"
   value: {{ .Values.rasa.plus.settings.telemetry.enabled | quote }}
@@ -75,7 +63,7 @@ Environment Variables for Rasa Containers
   value: {{ .Values.rasa.plus.settings.rasaEnvironment | quote }}
 # Lock Store
 - name: "TICKET_LOCK_LIFETIME"
-  value: {{ .Values.rasa.plus.settings.lockStore.ticketLockLifetime | quote }}
+  value: {{ .Values.rasa.plus.settings.lockStore.ticketLockLifetime }}
 # Tracing
 - name: "TRACING_SERVICE_NAME"
   value: {{ .Values.rasa.plus.settings.tracing.serviceName | quote }}
@@ -83,14 +71,14 @@ Environment Variables for Rasa Containers
 - name: "SANIC_BACKLOG"
   value: {{ .Values.rasa.plus.settings.tracing.backlog | quote }}
 - name: "SANIC_WORKERS"
-  value: {{ .Values.rasa.plus.settings.tracing.workers | quote }}
+  value: {{ .Values.rasa.plus.settings.tracing.workers }}
 # Postgres Tracker Store
 - name: "POSTGRESQL_SCHEMA"
   value: {{ .Values.rasa.plus.settings.postgresTrackerStore.schema | quote }}
 - name: "POSTGRESQL_POOL_SIZE"
-  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.poolSize | quote }}
+  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.poolSize }}
 - name: "POSTGRESQL_MAX_OVERFLOW"
-  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.maxOverflow | quote }}
+  value: {{ .Values.rasa.plus.settings.postgresTrackerStore.maxOverflow }}
 # RabbitMQ
 - name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"
   valueFrom:

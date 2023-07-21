@@ -105,11 +105,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.sanicServer.backlog | int | `100` |  |
 | rasa.plus.settings.sanicServer.workers | int | `1` |  |
 | rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
-| rasa.plus.settings.studio.authServerUrl | string | `nil` |  |
-| rasa.plus.settings.studio.cliClientIdKey.secretKey | string | `nil` |  |
-| rasa.plus.settings.studio.cliClientIdKey.secretName | string | `nil` |  |
-| rasa.plus.settings.studio.cliRealmNameKey | string | `nil` |  |
-| rasa.plus.settings.studio.cliUrl | string | `nil` |  |
 | rasa.plus.settings.telemetry.debug | bool | `false` |  |
 | rasa.plus.settings.telemetry.enabled | bool | `false` |  |
 | rasa.plus.settings.tensorflow.deterministicOps | bool | `false` |  |
@@ -137,7 +132,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":false,"exchangeName":"exchange","password":"","port":"","queue":"rasa_production_events","url":"","username":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","type":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
+| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"db":"","dialect":"","enabled":false,"exchangeName":"exchange","password":"","port":"","queues":["rasa_production_events"],"saslMechanism":"PLAIN","saslPassword":"password","saslUsername":"username","securityProtocol":"SASL_SSL","sslCaFile":"CARoot.pem","sslCertFile":"certificate.pem","sslCheckHostname":true,"sslKeyFile":"key.pem","topic":"topic","type":"","url":"","username":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","type":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |

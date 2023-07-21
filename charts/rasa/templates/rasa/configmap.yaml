@@ -73,11 +73,36 @@ data:
 {{- end }}
 {{- if .eventBroker.enabled }}
     eventBroker:
+      type: {{ .eventBroker.type }}
+      {{- if eq .eventBroker.type "pika" }}
       url: {{ .eventBroker.url }}
       username: {{ .eventBroker.username }}
       password: {{ .eventBroker.password }}
+      queues: 
+        {{ toYaml .eventBroker.queues | nindent 8 }}
+      {{- end }}
+      {{- if eq .eventBroker.type "kafka" }}
+      security_protocol: {{ .eventBroker.securityProtocol }}
+      topic: {{ .eventBroker.topic }}
+      url: {{ .eventBroker.url }}
+      sasl_username: {{ .eventBroker.saslUsername }}
+      sasl_password: {{ .eventBroker.saslPassword }}
+      sasl_mechanism: {{ .eventBroker.saslMechanism }}
+      ssl_cafile: {{ .eventBroker.sslCaFile }}
+      ssl_certfile: {{ .eventBroker.sslCertFile }}
+      ssl_keyfile: {{ .eventBroker.sslKeyFile }}
+      ssl_check_hostname: {{ .eventBroker.sslCheckHostname }}
+      {{- end }}
+      {{- if eq .eventBroker.type "sql" }}
+      url: {{ .eventBroker.url }}
       port: {{ .eventBroker.port }}
-      queue: {{ .eventBroker.queue }}
+      dialect: {{ .eventBroker.dialect }}
+      username: {{ .eventBroker.username }}
+      password: {{ .eventBroker.password }}
+      db: {{ .eventBroker.db }}
+      {{- end }}
+      {{- if eq .eventBroker.type "file" }}
+      {{- end }}
       exchange_name: {{ .eventBroker.exchangeName }}
 {{- end }}
     action_endpoint:

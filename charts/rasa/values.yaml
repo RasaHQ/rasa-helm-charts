@@ -194,7 +194,8 @@ rasa:
         logLevelFaker: error
         forceJsonLogging:
       # TODO: Determine if this should have `enabled` flag
-      hashicorpSecretManager:
+      secretsManager:
+        enabled: true
         secretManager: vault
         vaultHost:
         vaultToken:

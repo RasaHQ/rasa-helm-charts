@@ -44,19 +44,21 @@ Environment Variables for Rasa Containers
 - name: "RASA_PRO_TELEMETRY_DEBUG"
   value: {{ .Values.rasa.plus.settings.telemetry.debug | quote }}
 # Hashicorp Secret Manager
+{{- if .Values.rasa.plus.settings.secretsManager.enabled }}
 - name: "SECRET_MANAGER"
-  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.secretManager | quote }}
+  value: {{ .Values.rasa.plus.settings.secretsManager.secretManager | quote }}
 - name: "VAULT_HOST"
-  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultHost | quote }}
+  value: {{ .Values.rasa.plus.settings.secretsManager.vaultHost | quote }}
 - name: "VAULT_TOKEN"
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultToken.secretName }}
-      key: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultToken.secretKey }}
+      name: {{ .Values.rasa.plus.settings.secretsManager.vaultToken.secretName }}
+      key: {{ .Values.rasa.plus.settings.secretsManager.vaultToken.secretKey }}
 - name: "VAULT_RASA_SECRETS_PATH"
-  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultRasaSecretsPath | quote }}
+  value: {{ .Values.rasa.plus.settings.secretsManager.vaultRasaSecretsPath | quote }}
 - name: "VAULT_TRANSIT_MOUNT_POINT"
-  value: {{ .Values.rasa.plus.settings.hashicorpSecretManager.vaultTransitMountPoint | quote }}
+  value: {{ .Values.rasa.plus.settings.secretsManager.vaultTransitMountPoint | quote }}
+{{- end }}
 {{- end }}
 {{- if or .Values.rasa.enabled .Values.rasa.plus.enabled }}
 - name: "RASA_ENVIRONMENT"

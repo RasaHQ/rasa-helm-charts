@@ -60,12 +60,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.cache.maxSize | int | `1000` |  |
 | rasa.plus.settings.cache.name | string | `"cache.db"` |  |
 | rasa.plus.settings.ducklingHttpUrl | string | `nil` |  |
-| rasa.plus.settings.hashicorpSecretManager.secretManager | string | `"vault"` |  |
-| rasa.plus.settings.hashicorpSecretManager.vaultHost | string | `nil` |  |
-| rasa.plus.settings.hashicorpSecretManager.vaultRasaSecretsPath | string | `"rasa-secrets"` |  |
-| rasa.plus.settings.hashicorpSecretManager.vaultToken.secretKey | string | `nil` |  |
-| rasa.plus.settings.hashicorpSecretManager.vaultToken.secretName | string | `nil` |  |
-| rasa.plus.settings.hashicorpSecretManager.vaultTransitMountPoint | string | `nil` |  |
 | rasa.plus.settings.lockStore.ticketLockLifetime | int | `60` |  |
 | rasa.plus.settings.logging.forceJsonLogging | string | `nil` |  |
 | rasa.plus.settings.logging.logLevel | string | `"info"` |  |
@@ -104,6 +98,13 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.rasaProLicence.secretName | string | `nil` |  |
 | rasa.plus.settings.sanicServer.backlog | int | `100` |  |
 | rasa.plus.settings.sanicServer.workers | int | `1` |  |
+| rasa.plus.settings.secretsManager.enabled | bool | `true` |  |
+| rasa.plus.settings.secretsManager.secretManager | string | `"vault"` |  |
+| rasa.plus.settings.secretsManager.vaultHost | string | `nil` |  |
+| rasa.plus.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` |  |
+| rasa.plus.settings.secretsManager.vaultToken.secretKey | string | `nil` |  |
+| rasa.plus.settings.secretsManager.vaultToken.secretName | string | `nil` |  |
+| rasa.plus.settings.secretsManager.vaultTransitMountPoint | string | `nil` |  |
 | rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
 | rasa.plus.settings.telemetry.debug | bool | `false` |  |
 | rasa.plus.settings.telemetry.enabled | bool | `false` |  |

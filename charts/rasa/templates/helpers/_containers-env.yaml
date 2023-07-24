@@ -35,7 +35,7 @@ Environment Variables for Rasa Containers
 {{ toYaml .Values.rasa.extraEnv }}
 {{- end }}
 {{- with .Values.rasa.plus.settings }}
-{{- if $.Values.rasaProServices.enabled }}
+{{- if or $.Values.rasaProServices.enabled $.Values.rasa.plus.enabled }}
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
     secretKeyRef:

@@ -117,39 +117,6 @@ Environment Variables for Rasa Containers
   value: {{ .logging.logLevelFaker | quote | upper }}
 - name: "FORCE_JSON_LOGGING"
   value: {{ .logging.forceJsonLogging | quote | upper }}
-# AWS Model Storage
-- name: "AWS_SECRET_ACCESS_KEY"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .modelStorage.aws.secretAccessKey.secretName }}
-      key: {{ .modelStorage.aws.secretAccessKey.secretKey }}
-- name: "AWS_ACCESS_KEY_ID"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .modelStorage.aws.accessKeyId.secretName }}
-      key: {{ .modelStorage.aws.accessKeyId.secretKey }}
-- name: "AWS_DEFAULT_REGION"
-  value: {{ .modelStorage.aws.defaultRegion | quote }}
-- name: "BUCKET_NAME"
-  value: {{ .modelStorage.aws.bucketName | quote }}
-- name: "AWS_ENDPOINT_URL"
-  value: {{ .modelStorage.aws.endpointUrl | quote }}
-# Azure Model Storage
-- name: "AZURE_ACCOUNT_KEY"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .modelStorage.azure.accountKey.secretName }}
-      key: {{ .modelStorage.azure.accountKey.secretKey }}
-- name: "AZURE_CONTAINER"
-  value: {{ .modelStorage.azure.container | quote }}
-- name: "AZURE_ACCOUNT_NAME"
-  value: {{ .modelStorage.azure.accountName | quote }}
-# GCP Model Storage
-- name: "GOOGLE_APPLICATION_CREDENTIALS"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .modelStorage.gcp.applicationCredentials.secretName }}
-      key: {{ .modelStorage.gcp.applicationCredentials.secretKey }}
 # Cache
 - name: "RASA_MAX_CACHE_SIZE"
   value: {{ .cache.maxSize | quote }}

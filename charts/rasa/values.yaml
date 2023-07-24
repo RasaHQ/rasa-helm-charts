@@ -200,29 +200,6 @@ rasa:
           secretKey:
         vaultRasaSecretsPath: rasa-secrets
         vaultTransitMountPoint:
-      # TODO: Determine how this configuration works, if it supports multiple storage models or just one can be present
-      # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
-      modelStorage:
-        aws:
-          secretAccessKey:
-            secretName:
-            secretKey:
-          accessKeyId:
-            secretName:
-            secretKey:
-          defaultRegion:
-          bucketName:
-          endpointUrl:
-        azure:
-          accountKey:
-            secretName:
-            secretKey:
-          accountName:
-          container:
-        gcp:
-          applicationCredentials:
-            secretName:
-            secretKey:
       cache:
         maxSize: 1000
         name: cache.db

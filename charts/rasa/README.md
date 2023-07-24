@@ -1,8 +1,39 @@
 # rasa
 
+A Rasa Pro Helm chart for Kubernetes
+
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
-A Rasa Pro Helm chart for Kubernetes
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```console
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+```
+
+## Uninstalling the Chart
+
+To uninstall/delete the `my-release` deployment:
+
+```console
+$ helm delete my-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Pull the Chart
+
+To pull chart contents for your own convenience:
+
+```console
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+```
 
 ## Values
 
@@ -27,7 +58,6 @@ A Rasa Pro Helm chart for Kubernetes
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | Labels to add to the rasa-oss's pod(s) |
-| rasa | object | `{"affinity":{},"args":[],"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"command":[],"enabled":true,"extraArgs":[],"extraContainers":[],"extraEnv":[],"image":{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""},"ingress":{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}],"labels":{},"tls":[]},"initContainers":[],"livenessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"plus":{"enabled":true,"settings":{"cache":{"directory":null,"maxSize":1000,"name":"cache.db"},"ducklingHttpUrl":null,"lockStore":{"ticketLockLifetime":60},"logging":{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"},"maxNumberOfPreditions":10,"postgresTrackerStore":{"maxOverflow":100,"poolSize":50,"schema":"public"},"rabbitmq":{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}},"rasaEnvironment":"development","rasaProLicence":{"secretKey":null,"secretName":null},"sanicServer":{"backlog":100,"workers":1},"secretsManager":{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null},"shellStreamReadingTimeoutInSeconds":10,"telemetry":{"debug":false,"enabled":true},"tensorflow":{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null},"tracing":{"serviceName":"rasa"}},"volumes":{"models":null,"ssl":null}},"podAnnotations":{},"podSecurityContext":{"enabled":true},"readinessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{"enabled":true},"service":{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":5005,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":true,"name":""},"settings":{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":true,"type":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false},"tolerations":[],"volumeMounts":[],"volumes":[]}` | Rasa Open Source |
 | rasa.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasa.args | list | `[]` | Override the default arguments for the container |
 | rasa.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
@@ -36,6 +66,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | Override the default command for the container |
+| rasa.enabled | bool | `true` |  |
 | rasa.extraArgs | list | `[]` | Add additional arguments to the default one |
 | rasa.extraContainers | list | `[]` | Allow to specify additional containers for the Rasa Open Source Deployment |
 | rasa.extraEnv | list | `[]` | Add extra environment variables |
@@ -53,6 +84,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.initContainers | list | `[]` | Allow to specify init containers for the Rasa Open Source Deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasa.plus.enabled | bool | `true` |  |
 | rasa.plus.settings | object | `{"cache":{"directory":null,"maxSize":1000,"name":"cache.db"},"ducklingHttpUrl":null,"lockStore":{"ticketLockLifetime":60},"logging":{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"},"maxNumberOfPreditions":10,"postgresTrackerStore":{"maxOverflow":100,"poolSize":50,"schema":"public"},"rabbitmq":{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}},"rasaEnvironment":"development","rasaProLicence":{"secretKey":null,"secretName":null},"sanicServer":{"backlog":100,"workers":1},"secretsManager":{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null},"shellStreamReadingTimeoutInSeconds":10,"telemetry":{"debug":false,"enabled":true},"tensorflow":{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null},"tracing":{"serviceName":"rasa"}}` | Optional settings to customize Rasa Pro |
 | rasa.plus.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
 | rasa.plus.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
@@ -171,6 +203,3 @@ A Rasa Pro Helm chart for Kubernetes
 | rasaProServices.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasaProServices.strategy | object | `{"type":"RollingUpdate"}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasaProServices.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

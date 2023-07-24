@@ -16,9 +16,9 @@ imagePullSecrets:
   []
   # - name: regcred
 
-# -- Rasa Open Source
+# Rasa Open Source
 rasa:
-  enabled: true #make sure that we can only deploy Rasa Pro
+  enabled: true
   # -- Specifies number of replicas
   replicaCount: 1
   # -- Define image settings
@@ -71,7 +71,6 @@ rasa:
     credentials:
       # -- Enable credentials configuration for channel connectors
       enabled: true
-      # TODO: Check if this is the right way for credentials.yml or we want to change it
       # -- Additional channel credentials which should be used by Rasa to connect to various
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
@@ -100,7 +99,6 @@ rasa:
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
-      # TODO: Leave instructions for which vars to use depending on the type
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
@@ -128,7 +126,6 @@ rasa:
         keyPrefix: "" # alphanumeric value to prepend to lock store keys
         useSsl: false
         socketTimeout: ""
-      # TODO: Leave instructions for which vars to use depending on the type
       # -- See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:
         enabled: true
@@ -260,11 +257,6 @@ rasa:
         deterministicOps: false
       shellStreamReadingTimeoutInSeconds: 10
       maxNumberOfPreditions: 10
-
-    # TODO: Define volumes, path and mountPaths
-    volumes: # optional
-      models: # optional
-      ssl: #if ssl is enabled
 
   # -- Override the default arguments for the container
   args: []

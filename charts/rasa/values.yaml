@@ -190,6 +190,7 @@ rasa:
         logLevelPresidio: error
         logLevelFaker: error
         forceJsonLogging:
+      # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
       secretsManager:
         enabled: true
         secretManager: vault
@@ -200,6 +201,7 @@ rasa:
         vaultRasaSecretsPath: rasa-secrets
         vaultTransitMountPoint:
       # TODO: Determine how this configuration works, if it supports multiple storage models or just one can be present
+      # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
       modelStorage:
         aws:
           secretAccessKey:

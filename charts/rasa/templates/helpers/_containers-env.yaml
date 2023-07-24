@@ -92,25 +92,17 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .Values.rasa.plus.settings.rabbitmq.sslClientKey.secretName }}
       key: {{ .Values.rasa.plus.settings.rabbitmq.sslClientKey.secretKey }}
-- name: "RABBITMQ_SSL_CA_FILE"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.rasa.plus.settings.rabbitmq.sslCAFile.secretName }}
-      key: {{ .Values.rasa.plus.settings.rabbitmq.sslCAFile.secretKey }}
-- name: "RABBITMQ_SSL_KEY_PASSWORD"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretName }}
-      key: {{ .Values.rasa.plus.settings.rabbitmq.sslKeyPassword.secretKey }}
 # Logging
 - name: "LOG_LEVEL"
   value: {{ .Values.rasa.plus.settings.logging.logLevel | quote | upper }}
 - name: "LOG_LEVEL_LIBRARIES"
   value: {{ .Values.rasa.plus.settings.logging.logLevelLibraries | quote | upper }}
-- name: "LOG_LEVEL_KAFKA"
-  value: {{ .Values.rasa.plus.settings.logging.logLevelKafka | quote | upper }}
+- name: "LOG_LEVEL_MATPLOTLIB"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelMatplotlib | quote | upper }}
 - name: "LOG_LEVEL_RABBITMQ"
   value: {{ .Values.rasa.plus.settings.logging.logLevelRabbitMq | quote | upper }}
+- name: "LOG_LEVEL_KAFKA"
+  value: {{ .Values.rasa.plus.settings.logging.logLevelKafka | quote | upper }}
 - name: "LOG_LEVEL_PRESIDIO"
   value: {{ .Values.rasa.plus.settings.logging.logLevelPresidio | quote | upper }}
 - name: "LOG_LEVEL_FAKER"

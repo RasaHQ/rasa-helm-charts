@@ -16,6 +16,7 @@ imagePullSecrets:
   []
   # - name: regcred
 
+# -- Rasa Open Source
 rasa:
   enabled: true #make sure that we can only deploy Rasa Pro
   # -- Specifies number of replicas
@@ -49,7 +50,10 @@ rasa:
     port: 5005
     # -- Scheme by which the service are accessible
     scheme: http
-    # TODO: Define if this is necessary and in which cases
+    # -- Start the web server API in addition to the input channel
+    # -- Rasa API supports two authentication methods, Token based Auth or JWT
+    # -- Enter details in token or (jwtSecret, jwtMethod) to enable either of them
+    enableAPI: true
     # -- Token Rasa accepts as authentication token from other Rasa services
     token: # "rasaToken"
       secretName: ""
@@ -58,11 +62,10 @@ rasa:
     jwtSecret:
       secretName: ""
       secretKey: ""
+    # -- JWT Algorithm
     jwtMethod: HS256
     # -- CORS for the passed origin. Default is * to allow all origins
     cors: '*'
-    # -- Start the web server API in addition to the input channel
-    enableAPI: true
 
     ## Note: this credentials configuration is ignored if `applicationSettings.rasaX.useConfigEndpoint=true`
     credentials:
@@ -86,6 +89,8 @@ rasa:
       debug: false
 
     endpoints:
+      # -- Not all parameters are mandatory
+      # -- See: https://rasa.com/docs/rasa/model-storage
       models:
         enabled: true
         # TODO: Define if this is necessary and in which cases
@@ -97,6 +102,8 @@ rasa:
         waitTimeBetweenPulls: 20
       # TODO: Define trackerStore settings depending on type
       # TODO: Leave instructions for which vars to use depending on the type
+      # -- Not all parameters are mandatory
+      # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
         enabled: true
         type: "dynamo"
@@ -112,6 +119,7 @@ rasa:
         # loginDb: ""
         # useSsl: false # ssl volume depends on this
         # query: ""
+      # -- See: https://rasa.com/docs/rasa/lock-stores
       lockStore:
         enabled: true
         type: ""
@@ -123,6 +131,7 @@ rasa:
         useSsl: false
         socketTimeout: ""
       # TODO: Leave instructions for which vars to use depending on the type
+      # -- See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:
         type: ""
         enabled: false
@@ -145,92 +154,141 @@ rasa:
         sslKeyFile: key.pem
         sslCheckHostname: True
         exchangeName: exchange
+      # -- Endpoint of the Custom Actions Server
       actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
 
+  # Rasa Plus is the drop-in replacement of Rasa
   plus:
     enabled: true
 
+    # -- Optional settings to customize Rasa Pro
     settings:
+      # -- Rasa Pro License
+      # See: https://rasa.com/connect-with-rasa/
       rasaProLicence:
         secretName:
         secretKey:
-      rasaEnvironment: production
+      # -- Environment: development or production
+      rasaEnvironment: development
+      # -- Synchronization mechanism used by Rasa
       lockStore:
+        # -- Lifetime of the ticket associated with a lock
         ticketLockLifetime: 60
+      # See: https://rasa.com/docs/rasa/telemetry/telemetry/
       telemetry:
-        enabled: false
+        # -- Allow Rasa to collect anonymous usage details
+        enabled: true
+        # -- Print telemetry data to stdout
         debug: false
       tracing:
         serviceName: rasa
       sanicServer:
+        # -- Number of unaccepted connections the server allows before refusing new connections
         backlog: 100
+        # -- Number of Sanic worker processes in the HTTP Server and Input Channel Server
         workers: 1
+      # -- Settings to customize connections to Postgres
       postgresTrackerStore:
-        schema:
+        # -- PostgreSQL schema to access
+        schema: public
+        # -- Pool Size configuration
         poolSize: 50
+        # -- Maximum overflow size of the pool
         maxOverflow: 100
       # TODO: Determine if this should have `enabled` flag
+      # -- Settings to setup RabbitMQ SSL
       rabbitmq:
+        # -- path to the SSL client certificate
         sslClientCertificate:
           secretName:
           secretKey:
+        # -- path to the SSL client key
         sslClientKey:
           secretName:
           secretKey:
-        sslCAFile:
-          secretName:
-          secretKey:
-        sslKeyPassword:
-          secretName:
-          secretKey:
+      # -- Set log levels for Rasa and external libraries
+      # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
       logging:
+        # -- Rasa Log Level
         logLevel: info
+        # -- Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
         logLevelLibraries: error
-        logLevelKafka: error
+        # -- Configure log level for Matplotlib
+        logLevelMatplotlib: error
+        # -- Configure log level for RabbitMQ
         logLevelRabbitMq: error
+        # -- Configrue log level for Kafka
+        logLevelKafka: error
+        # -- Configure log level for Presidio
         logLevelPresidio: error
+        # -- Configure log level for Faker
         logLevelFaker: error
-        forceJsonLogging:
-      # TODO: Determine if this should have `enabled` flag
+        # -- Force logging in JSON
+        forceJsonLogging: false
+      # -- Store your assistant's secrets in an external credentials manager
+      # See: https://rasa.com/docs/rasa/secrets-managers/
       secretsManager:
-        enabled: true
+        # -- Enabled if a Secret Manager is used
+        enabled: false
+        # -- Secrets manager to use. Currently only "vault" is supported
         secretManager: vault
+        # -- Address of the vault server
         vaultHost:
+        # -- Token to authenticate to the vault server
         vaultToken:
           secretName:
           secretKey:
+        # -- Path to the secrets in the vault server
         vaultRasaSecretsPath: rasa-secrets
+        # -- If transit secrets engine is enabled set this to mount point of the transit engine
         vaultTransitMountPoint:
-      # TODO: Determine how this configuration works, if it supports multiple storage models or just one can be present
+      # Models can be stored in different places after you trained your assistant.
+      # Only one of the cloud providers can be used at a time
+      # See: https://rasa.com/docs/rasa/model-storage
       modelStorage:
         aws:
+          # -- AWS S3 secret access key
           secretAccessKey:
             secretName:
             secretKey:
+          # -- AWS S3 access key ID
           accessKeyId:
             secretName:
             secretKey:
+          # -- region of your AWS S3 bucket
           defaultRegion:
+          # -- Name of S3 bucket
           bucketName:
-          endpointUrl:
+          # -- URL to use for the AWS S3 requests, without bucket name
+          endpointUrl: https://s3.amazonaws.com
         azure:
+          # -- Azure account key
           accountKey:
             secretName:
             secretKey:
+          # -- Azure account name
           accountName:
+          # -- Azure container name
           container:
         gcp:
+          # -- Path of a service account key file with access to your GCS
           applicationCredentials:
             secretName:
             secretKey:
+      # -- cache for `rasa train` command
       cache:
+        # -- maximum size for the cache
         maxSize: 1000
+        # -- name of the cache file
         name: cache.db
-        # default is equivalent of Path(".rasa", "cache")
+        # -- default location of the cache
+        # -- default is equivalent of Path(".rasa", "cache")
         directory:
+      # -- HTTP URL to the duckling service
       ducklingHttpUrl:
+      # -- Tensorflow parameters
       tensorflow:
         gpuMemoryAlloc:
         interOpParallelismThreads:
@@ -462,29 +520,40 @@ rasaProServices:
     #   maxSurge: 1
     #   maxUnavailable: 0
 
+  # See: https://rasa.com/docs/rasa/deploy/deploy-rasa-pro-services#docker-container-configuration-reference
   environmentVariables:
+    # -- license key for Rasa Pro Services.
     RASA_PRO_LICENSE:
       secret:
         name:
         key:
+    # -- address of the Kafka broker.
     KAFKA_BROKER_ADDRESS:
       value: ""
+    # -- topic Rasa Plus publishes events to and Rasa Pro consumes from
     KAFKA_TOPIC:
       value: "rasa_core_events"
+    # -- Set the log level of the application
     LOGGING_LEVEL:
       value: "INFO"
+    # -- URL of the data lake to store analytics data in
     RASA_ANALYTICS_DB_URL:
       value: ""
+    # -- SASL mechanism to use for authentication.
     KAFKA_SASL_MECHANISM:
       value: "PLAIN"
+    # -- username for SASL authentication.
     KAFKA_SASL_USERNAME:
       value: ""
+    # -- password for SASL authentication
     KAFKA_SASL_PASSWORD:
       secret:
         name:
         key:
+    # -- security protocol to use for communication with Kafka
     KAFKA_SECURITY_PROTOCOL:
       value: "PLAINTEXT"
+    # -- filepath for SSL CA Certificate that will be used to connect with Kafka
     KAFKA_SSL_CA_LOCATION:
       value: ""
       

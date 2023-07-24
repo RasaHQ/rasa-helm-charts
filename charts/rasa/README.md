@@ -1,8 +1,39 @@
 # rasa
 
+A Rasa Pro Helm chart for Kubernetes
+
 ![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
-A Rasa Pro Helm chart for Kubernetes
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```console
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+```
+
+## Uninstalling the Chart
+
+To uninstall/delete the `my-release` deployment:
+
+```console
+$ helm delete my-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Pull the Chart
+
+To pull chart contents for your own convenience:
+
+```console
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+```
 
 ## Values
 
@@ -54,52 +85,44 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.plus.enabled | bool | `true` |  |
-| rasa.plus.settings.cache.directory | string | `nil` |  |
-| rasa.plus.settings.cache.maxSize | int | `1000` |  |
-| rasa.plus.settings.cache.name | string | `"cache.db"` |  |
-| rasa.plus.settings.ducklingHttpUrl | string | `nil` |  |
-| rasa.plus.settings.lockStore.ticketLockLifetime | int | `60` |  |
-| rasa.plus.settings.logging.forceJsonLogging | string | `nil` |  |
-| rasa.plus.settings.logging.logLevel | string | `"info"` |  |
-| rasa.plus.settings.logging.logLevelFaker | string | `"error"` |  |
-| rasa.plus.settings.logging.logLevelKafka | string | `"error"` |  |
-| rasa.plus.settings.logging.logLevelLibraries | string | `"error"` |  |
-| rasa.plus.settings.logging.logLevelPresidio | string | `"error"` |  |
-| rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` |  |
-| rasa.plus.settings.maxNumberOfPreditions | int | `10` |  |
-| rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` |  |
-| rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` |  |
-| rasa.plus.settings.postgresTrackerStore.schema | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslCAFile.secretKey | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslCAFile.secretName | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslClientCertificate.secretKey | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslClientCertificate.secretName | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslClientKey.secretKey | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslClientKey.secretName | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslKeyPassword.secretKey | string | `nil` |  |
-| rasa.plus.settings.rabbitmq.sslKeyPassword.secretName | string | `nil` |  |
-| rasa.plus.settings.rasaEnvironment | string | `"production"` |  |
-| rasa.plus.settings.rasaProLicence.secretKey | string | `nil` |  |
-| rasa.plus.settings.rasaProLicence.secretName | string | `nil` |  |
-| rasa.plus.settings.sanicServer.backlog | int | `100` |  |
-| rasa.plus.settings.sanicServer.workers | int | `1` |  |
-| rasa.plus.settings.secretsManager.enabled | bool | `true` |  |
-| rasa.plus.settings.secretsManager.secretManager | string | `"vault"` |  |
-| rasa.plus.settings.secretsManager.vaultHost | string | `nil` |  |
-| rasa.plus.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` |  |
-| rasa.plus.settings.secretsManager.vaultToken.secretKey | string | `nil` |  |
-| rasa.plus.settings.secretsManager.vaultToken.secretName | string | `nil` |  |
-| rasa.plus.settings.secretsManager.vaultTransitMountPoint | string | `nil` |  |
-| rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
-| rasa.plus.settings.telemetry.debug | bool | `false` |  |
-| rasa.plus.settings.telemetry.enabled | bool | `false` |  |
-| rasa.plus.settings.tensorflow.deterministicOps | bool | `false` |  |
-| rasa.plus.settings.tensorflow.gpuMemoryAlloc | string | `nil` |  |
-| rasa.plus.settings.tensorflow.interOpParallelismThreads | string | `nil` |  |
-| rasa.plus.settings.tensorflow.intraOpParallelismThreads | string | `nil` |  |
-| rasa.plus.settings.tracing.serviceName | string | `"rasa"` |  |
-| rasa.plus.volumes.models | string | `nil` |  |
-| rasa.plus.volumes.ssl | string | `nil` |  |
+| rasa.plus.settings | object | `{"cache":{"directory":null,"maxSize":1000,"name":"cache.db"},"ducklingHttpUrl":null,"lockStore":{"ticketLockLifetime":60},"logging":{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"},"maxNumberOfPreditions":10,"postgresTrackerStore":{"maxOverflow":100,"poolSize":50,"schema":"public"},"rabbitmq":{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}},"rasaEnvironment":"development","rasaProLicence":{"secretKey":null,"secretName":null},"sanicServer":{"backlog":100,"workers":1},"secretsManager":{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null},"shellStreamReadingTimeoutInSeconds":10,"telemetry":{"debug":false,"enabled":true},"tensorflow":{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null},"tracing":{"serviceName":"rasa"}}` | Optional settings to customize Rasa Pro |
+| rasa.plus.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
+| rasa.plus.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
+| rasa.plus.settings.cache.maxSize | int | `1000` | maximum size for the cache |
+| rasa.plus.settings.cache.name | string | `"cache.db"` | name of the cache file |
+| rasa.plus.settings.ducklingHttpUrl | string | `nil` | HTTP URL to the duckling service |
+| rasa.plus.settings.lockStore | object | `{"ticketLockLifetime":60}` | Synchronization mechanism used by Rasa |
+| rasa.plus.settings.lockStore.ticketLockLifetime | int | `60` | Lifetime of the ticket associated with a lock |
+| rasa.plus.settings.logging | object | `{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"}` | Set log levels for Rasa and external libraries See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level |
+| rasa.plus.settings.logging.forceJsonLogging | bool | `false` | Force logging in JSON |
+| rasa.plus.settings.logging.logLevel | string | `"info"` | Rasa Log Level |
+| rasa.plus.settings.logging.logLevelFaker | string | `"error"` | Configure log level for Faker |
+| rasa.plus.settings.logging.logLevelKafka | string | `"error"` | Configrue log level for Kafka |
+| rasa.plus.settings.logging.logLevelLibraries | string | `"error"` | Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka |
+| rasa.plus.settings.logging.logLevelMatplotlib | string | `"error"` | Configure log level for Matplotlib |
+| rasa.plus.settings.logging.logLevelPresidio | string | `"error"` | Configure log level for Presidio |
+| rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` | Configure log level for RabbitMQ |
+| rasa.plus.settings.postgresTrackerStore | object | `{"maxOverflow":100,"poolSize":50,"schema":"public"}` | Settings to customize connections to Postgres |
+| rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` | Maximum overflow size of the pool |
+| rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` | Pool Size configuration |
+| rasa.plus.settings.postgresTrackerStore.schema | string | `"public"` | PostgreSQL schema to access |
+| rasa.plus.settings.rabbitmq | object | `{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | Settings to setup RabbitMQ SSL |
+| rasa.plus.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":null,"secretName":null}` | path to the SSL client certificate |
+| rasa.plus.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | path to the SSL client key |
+| rasa.plus.settings.rasaEnvironment | string | `"development"` | Environment: development or production |
+| rasa.plus.settings.rasaProLicence | object | `{"secretKey":null,"secretName":null}` | Rasa Pro License See: https://rasa.com/connect-with-rasa/ |
+| rasa.plus.settings.sanicServer.backlog | int | `100` | Number of unaccepted connections the server allows before refusing new connections |
+| rasa.plus.settings.sanicServer.workers | int | `1` | Number of Sanic worker processes in the HTTP Server and Input Channel Server |
+| rasa.plus.settings.secretsManager | object | `{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null}` | Store your assistant's secrets in an external credentials manager See: https://rasa.com/docs/rasa/secrets-managers/ TODO: Define if this should be part of values or it should be passed through `additionalSettings` |
+| rasa.plus.settings.secretsManager.enabled | bool | `false` | Enabled if a Secret Manager is used |
+| rasa.plus.settings.secretsManager.secretManager | string | `"vault"` | Secrets manager to use. Currently only "vault" is supported |
+| rasa.plus.settings.secretsManager.vaultHost | string | `nil` | Address of the vault server |
+| rasa.plus.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` | Path to the secrets in the vault server |
+| rasa.plus.settings.secretsManager.vaultToken | object | `{"secretKey":null,"secretName":null}` | Token to authenticate to the vault server |
+| rasa.plus.settings.secretsManager.vaultTransitMountPoint | string | `nil` | If transit secrets engine is enabled set this to mount point of the transit engine |
+| rasa.plus.settings.telemetry.debug | bool | `false` | Print telemetry data to stdout |
+| rasa.plus.settings.telemetry.enabled | bool | `true` | Allow Rasa to collect anonymous usage details |
+| rasa.plus.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | Tensorflow parameters |
 | rasa.podAnnotations | object | `{}` | Annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | rasa.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
@@ -123,8 +146,13 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
-| rasa.settings.enableAPI | bool | `true` | Start the web server API in addition to the input channel |
+| rasa.settings.enableAPI | bool | `true` | Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
+| rasa.settings.endpoints.eventBroker | object | `{"enabled":true,"type":""}` | See: https://rasa.com/docs/rasa/event-brokers |
+| rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | See: https://rasa.com/docs/rasa/lock-stores |
+| rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | See: https://rasa.com/docs/rasa/model-storage |
+| rasa.settings.endpoints.trackerStore | object | `{"enabled":true,"type":"dynamo"}` | See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
+| rasa.settings.jwtMethod | string | `"HS256"` | JWT Algorithm |
 | rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
@@ -142,6 +170,16 @@ A Rasa Pro Helm chart for Kubernetes
 | rasaProServices.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | rasaProServices.enabled | bool | `true` | Enable Rasa Pro Services deployment |
+| rasaProServices.environmentVariables.KAFKA_BROKER_ADDRESS | object | `{"value":""}` | address of the Kafka broker. |
+| rasaProServices.environmentVariables.KAFKA_SASL_MECHANISM | object | `{"value":"PLAIN"}` | SASL mechanism to use for authentication. |
+| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD | object | `{"secret":{"key":null,"name":null}}` | password for SASL authentication |
+| rasaProServices.environmentVariables.KAFKA_SASL_USERNAME | object | `{"value":""}` | username for SASL authentication. |
+| rasaProServices.environmentVariables.KAFKA_SECURITY_PROTOCOL | object | `{"value":"PLAINTEXT"}` | security protocol to use for communication with Kafka |
+| rasaProServices.environmentVariables.KAFKA_SSL_CA_LOCATION | object | `{"value":""}` | filepath for SSL CA Certificate that will be used to connect with Kafka |
+| rasaProServices.environmentVariables.KAFKA_TOPIC | object | `{"value":"rasa_core_events"}` | topic Rasa Plus publishes events to and Rasa Pro consumes from |
+| rasaProServices.environmentVariables.LOGGING_LEVEL | object | `{"value":"INFO"}` | Set the log level of the application |
+| rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL | object | `{"value":""}` | URL of the data lake to store analytics data in |
+| rasaProServices.environmentVariables.RASA_PRO_LICENSE | object | `{"secret":{"key":null,"name":null}}` | license key for Rasa Pro Services. |
 | rasaProServices.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""}` | Define image settings |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | Specifies image repository |
@@ -165,6 +203,3 @@ A Rasa Pro Helm chart for Kubernetes
 | rasaProServices.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasaProServices.strategy | object | `{"type":"RollingUpdate"}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasaProServices.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-
-----------------------------------------------
-Autogenerated from chart metadata using [helm-docs v1.11.0](https://github.com/norwoodj/helm-docs/releases/v1.11.0)

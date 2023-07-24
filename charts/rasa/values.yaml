@@ -16,9 +16,9 @@ imagePullSecrets:
   []
   # - name: regcred
 
-# -- Rasa Open Source
+# Rasa Open Source
 rasa:
-  enabled: true #make sure that we can only deploy Rasa Pro
+  enabled: true
   # -- Specifies number of replicas
   replicaCount: 1
   # -- Define image settings
@@ -71,7 +71,6 @@ rasa:
     credentials:
       # -- Enable credentials configuration for channel connectors
       enabled: true
-      # TODO: Check if this is the right way for credentials.yml or we want to change it
       # -- Additional channel credentials which should be used by Rasa to connect to various
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
@@ -100,7 +99,6 @@ rasa:
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
-      # TODO: Leave instructions for which vars to use depending on the type
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
@@ -128,7 +126,6 @@ rasa:
         keyPrefix: "" # alphanumeric value to prepend to lock store keys
         useSsl: false
         socketTimeout: ""
-      # TODO: Leave instructions for which vars to use depending on the type
       # -- See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:
         enabled: true
@@ -241,39 +238,6 @@ rasa:
         vaultRasaSecretsPath: rasa-secrets
         # -- If transit secrets engine is enabled set this to mount point of the transit engine
         vaultTransitMountPoint:
-      # Models can be stored in different places after you trained your assistant.
-      # Only one of the cloud providers can be used at a time
-      # See: https://rasa.com/docs/rasa/model-storage
-      modelStorage:
-        aws:
-          # -- AWS S3 secret access key
-          secretAccessKey:
-            secretName:
-            secretKey:
-          # -- AWS S3 access key ID
-          accessKeyId:
-            secretName:
-            secretKey:
-          # -- region of your AWS S3 bucket
-          defaultRegion:
-          # -- Name of S3 bucket
-          bucketName:
-          # -- URL to use for the AWS S3 requests, without bucket name
-          endpointUrl: https://s3.amazonaws.com
-        azure:
-          # -- Azure account key
-          accountKey:
-            secretName:
-            secretKey:
-          # -- Azure account name
-          accountName:
-          # -- Azure container name
-          container:
-        gcp:
-          # -- Path of a service account key file with access to your GCS
-          applicationCredentials:
-            secretName:
-            secretKey:
       # -- cache for `rasa train` command
       cache:
         # -- maximum size for the cache
@@ -293,11 +257,6 @@ rasa:
         deterministicOps: false
       shellStreamReadingTimeoutInSeconds: 10
       maxNumberOfPreditions: 10
-
-    # TODO: Define volumes, path and mountPaths
-    volumes: # optional
-      models: # optional
-      ssl: #if ssl is enabled
 
   # -- Override the default arguments for the container
   args: []
@@ -533,6 +492,9 @@ rasaProServices:
     # -- URL of the data lake to store analytics data in
     RASA_ANALYTICS_DB_URL:
       value: ""
+      # secret:
+      #   name:
+      #   key:
     # -- SASL mechanism to use for authentication.
     KAFKA_SASL_MECHANISM:
       value: "PLAIN"

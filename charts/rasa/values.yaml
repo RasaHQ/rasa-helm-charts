@@ -100,7 +100,6 @@ rasa:
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
-      # TODO: Define trackerStore settings depending on type
       # TODO: Leave instructions for which vars to use depending on the type
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
@@ -122,7 +121,6 @@ rasa:
       # -- See: https://rasa.com/docs/rasa/lock-stores
       lockStore:
         enabled: true
-        type: ""
         url: ""
         port: ""
         password: ""
@@ -133,28 +131,26 @@ rasa:
       # TODO: Leave instructions for which vars to use depending on the type
       # -- See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:
+        enabled: true
         type: ""
-        enabled: false
-        url: ""
-        username: ""
-        password: ""
-        port: ""
-        # TODO: Check if `queue` or `queues` and input type
-        queues: 
-          - rasa_production_events
-        db: ""
-        dialect: ""
-        securityProtocol: SASL_SSL
-        topic: topic
-        saslUsername: username
-        saslPassword: password
-        saslMechanism: PLAIN
-        sslCaFile: CARoot.pem
-        sslCertFile: certificate.pem
-        sslKeyFile: key.pem
-        sslCheckHostname: True
-        exchangeName: exchange
-      # -- Endpoint of the Custom Actions Server
+        # url: ""
+        # username: ""
+        # password: ""
+        # port: ""
+        # queues: 
+        #   - rasa_production_events
+        # db: ""
+        # dialect: ""
+        # securityProtocol: SASL_SSL
+        # topic: topic
+        # saslUsername: username
+        # saslPassword: password
+        # saslMechanism: PLAIN
+        # sslCaFile: CARoot.pem
+        # sslCertFile: certificate.pem
+        # sslKeyFile: key.pem
+        # sslCheckHostname: True
+        # exchangeName: exchange
       actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
@@ -229,6 +225,7 @@ rasa:
         forceJsonLogging: false
       # -- Store your assistant's secrets in an external credentials manager
       # See: https://rasa.com/docs/rasa/secrets-managers/
+      # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
       secretsManager:
         # -- Enabled if a Secret Manager is used
         enabled: false
@@ -244,39 +241,6 @@ rasa:
         vaultRasaSecretsPath: rasa-secrets
         # -- If transit secrets engine is enabled set this to mount point of the transit engine
         vaultTransitMountPoint:
-      # Models can be stored in different places after you trained your assistant.
-      # Only one of the cloud providers can be used at a time
-      # See: https://rasa.com/docs/rasa/model-storage
-      modelStorage:
-        aws:
-          # -- AWS S3 secret access key
-          secretAccessKey:
-            secretName:
-            secretKey:
-          # -- AWS S3 access key ID
-          accessKeyId:
-            secretName:
-            secretKey:
-          # -- region of your AWS S3 bucket
-          defaultRegion:
-          # -- Name of S3 bucket
-          bucketName:
-          # -- URL to use for the AWS S3 requests, without bucket name
-          endpointUrl: https://s3.amazonaws.com
-        azure:
-          # -- Azure account key
-          accountKey:
-            secretName:
-            secretKey:
-          # -- Azure account name
-          accountName:
-          # -- Azure container name
-          container:
-        gcp:
-          # -- Path of a service account key file with access to your GCS
-          applicationCredentials:
-            secretName:
-            secretKey:
       # -- cache for `rasa train` command
       cache:
         # -- maximum size for the cache
@@ -297,14 +261,6 @@ rasa:
       shellStreamReadingTimeoutInSeconds: 10
       maxNumberOfPreditions: 10
 
-      additionalSettings: {}
-        # - name:
-        #   value:
-        # - name:
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name:
-        #       key:
     # TODO: Define volumes, path and mountPaths
     volumes: # optional
       models: # optional
@@ -320,6 +276,11 @@ rasa:
   extraEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"
+    # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name:
+    #       key:
 
   # -- Allow to specify init containers for the Rasa Open Source Deployment
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -539,6 +500,9 @@ rasaProServices:
     # -- URL of the data lake to store analytics data in
     RASA_ANALYTICS_DB_URL:
       value: ""
+      # secret:
+      #   name:
+      #   key:
     # -- SASL mechanism to use for authentication.
     KAFKA_SASL_MECHANISM:
       value: "PLAIN"
@@ -727,7 +691,3 @@ duckling:
     enabled: false
     # -- External URL to Duckling
     url: ""
-
-internal: false
-  # secretName:
-  # secretKey:

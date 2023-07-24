@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "rasa.fullname" . }}-configmap-v2
+  name: {{ include "rasa.fullname" . }}-configmap
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 data:
@@ -21,39 +21,7 @@ data:
 {{- end }}
 {{- if .trackerStore.enabled }}
     tracker_store:
-      type: {{ .trackerStore.type }}
-      {{- if eq .trackerStore.type "SQL"}}
-      dialect: {{ .trackerStore.dialect }}
-      url: {{ .trackerStore.url }}
-      db: {{ .trackerStore.db | default "rasa.db" }}
-      username: {{ .trackerStore.username }}
-      password: {{ .trackerStore.password }}
-      domain: {{ .trackerStore.domain }}
-      port: {{ .trackerStore.port }}
-      login_db: {{ .trackerStore.loginDb }}
-      query: {{ .trackerStore.query }}
-      {{- end }}
-      {{- if eq .trackerStore.type "redis" }}
-      url: {{ .trackerStore.url }}
-      port: {{ .trackerStore.port }}
-      key_prefix: {{ .trackerStore.keyPrefix }}
-      db: {{ .trackerStore.db }}
-      password: {{ .trackerStore.password }}
-      use_ssl: {{ .trackerStore.useSsl }}
-      record_exp: {{ .trackerStore.recordExp }}
-      {{- end }}
-      {{- if eq .trackerStore.type "mongod" }}
-      url: {{ .trackerStore.url }}
-      db: {{.trackerStore.db }}
-      username: {{ .trackerStore.username }}
-      password: {{ .trackerStore.password }}
-      auth_source: {{ .trackerStore.authSource }}
-      collection: {{ .trackerStore.collection }}
-      {{- end }}
-      {{- if eq .trackerStore.type "dynamo" }}
-      table_name: {{ .trackerStore.tableName }}
-      region: {{ .trackerStore.region }}
-      {{- end }}
+      {{- toYaml .trackerStore | nindent 6 }}
 {{- end }}
 {{- if .lockStore.enabled }}
     lock_store:
@@ -73,37 +41,7 @@ data:
 {{- end }}
 {{- if .eventBroker.enabled }}
     eventBroker:
-      type: {{ .eventBroker.type }}
-      {{- if eq .eventBroker.type "pika" }}
-      url: {{ .eventBroker.url }}
-      username: {{ .eventBroker.username }}
-      password: {{ .eventBroker.password }}
-      queues: 
-        {{ toYaml .eventBroker.queues | nindent 8 }}
-      {{- end }}
-      {{- if eq .eventBroker.type "kafka" }}
-      security_protocol: {{ .eventBroker.securityProtocol }}
-      topic: {{ .eventBroker.topic }}
-      url: {{ .eventBroker.url }}
-      sasl_username: {{ .eventBroker.saslUsername }}
-      sasl_password: {{ .eventBroker.saslPassword }}
-      sasl_mechanism: {{ .eventBroker.saslMechanism }}
-      ssl_cafile: {{ .eventBroker.sslCaFile }}
-      ssl_certfile: {{ .eventBroker.sslCertFile }}
-      ssl_keyfile: {{ .eventBroker.sslKeyFile }}
-      ssl_check_hostname: {{ .eventBroker.sslCheckHostname }}
-      {{- end }}
-      {{- if eq .eventBroker.type "sql" }}
-      url: {{ .eventBroker.url }}
-      port: {{ .eventBroker.port }}
-      dialect: {{ .eventBroker.dialect }}
-      username: {{ .eventBroker.username }}
-      password: {{ .eventBroker.password }}
-      db: {{ .eventBroker.db }}
-      {{- end }}
-      {{- if eq .eventBroker.type "file" }}
-      {{- end }}
-      exchange_name: {{ .eventBroker.exchangeName }}
+      {{- toYaml .eventBroker | nindent 6 }}
 {{- end }}
     action_endpoint:
       url: {{ .actionEndpoint.url }}

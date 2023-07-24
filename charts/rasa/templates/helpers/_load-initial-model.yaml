@@ -4,10 +4,10 @@
   securityContext:
     {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 4 }}
   {{- end }}
-  image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}"
+  image: "alpine"
   command: ["/bin/sh", "-c"]
   args:
-    - cd /app/models/ && rasa run --model {{ .Values.rasa.settings.initialModel }}
+    - cd /app/models/ && wget {{ .Values.rasa.settings.initialModel }} -O model.tar.gz
   volumeMounts:
     - mountPath: /app/models
       name: models

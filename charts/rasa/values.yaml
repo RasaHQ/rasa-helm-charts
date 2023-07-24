@@ -95,7 +95,6 @@ rasa:
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
-      # TODO: Define trackerStore settings depending on type
       # TODO: Leave instructions for which vars to use depending on the type
       trackerStore:
         enabled: true
@@ -114,7 +113,6 @@ rasa:
         # query: ""
       lockStore:
         enabled: true
-        type: ""
         url: ""
         port: ""
         password: ""
@@ -124,27 +122,26 @@ rasa:
         socketTimeout: ""
       # TODO: Leave instructions for which vars to use depending on the type
       eventBroker:
+        enabled: true
         type: ""
-        enabled: false
-        url: ""
-        username: ""
-        password: ""
-        port: ""
-        # TODO: Check if `queue` or `queues` and input type
-        queues: 
-          - rasa_production_events
-        db: ""
-        dialect: ""
-        securityProtocol: SASL_SSL
-        topic: topic
-        saslUsername: username
-        saslPassword: password
-        saslMechanism: PLAIN
-        sslCaFile: CARoot.pem
-        sslCertFile: certificate.pem
-        sslKeyFile: key.pem
-        sslCheckHostname: True
-        exchangeName: exchange
+        # url: ""
+        # username: ""
+        # password: ""
+        # port: ""
+        # queues: 
+        #   - rasa_production_events
+        # db: ""
+        # dialect: ""
+        # securityProtocol: SASL_SSL
+        # topic: topic
+        # saslUsername: username
+        # saslPassword: password
+        # saslMechanism: PLAIN
+        # sslCaFile: CARoot.pem
+        # sslCertFile: certificate.pem
+        # sslKeyFile: key.pem
+        # sslCheckHostname: True
+        # exchangeName: exchange
       actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
@@ -193,7 +190,6 @@ rasa:
         logLevelPresidio: error
         logLevelFaker: error
         forceJsonLogging:
-      # TODO: Determine if this should have `enabled` flag
       secretsManager:
         enabled: true
         secretManager: vault

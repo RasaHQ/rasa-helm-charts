@@ -237,14 +237,6 @@ rasa:
       shellStreamReadingTimeoutInSeconds: 10
       maxNumberOfPreditions: 10
 
-      additionalSettings: {}
-        # - name:
-        #   value:
-        # - name:
-        #   valueFrom:
-        #     secretKeyRef:
-        #       name:
-        #       key:
     # TODO: Define volumes, path and mountPaths
     volumes: # optional
       models: # optional
@@ -260,6 +252,11 @@ rasa:
   extraEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"
+    # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name:
+    #       key:
 
   # -- Allow to specify init containers for the Rasa Open Source Deployment
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
@@ -656,7 +653,3 @@ duckling:
     enabled: false
     # -- External URL to Duckling
     url: ""
-
-internal: false
-  # secretName:
-  # secretKey:

@@ -22,7 +22,6 @@ A Rasa Pro Helm chart for Kubernetes
 | global.additionalDeploymentLabels | object | `{}` | additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | Repository pull secrets |
-| internal | bool | `false` |  |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
@@ -55,7 +54,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.plus.enabled | bool | `true` |  |
-| rasa.plus.settings.additionalSettings | object | `{}` |  |
 | rasa.plus.settings.cache.directory | string | `nil` |  |
 | rasa.plus.settings.cache.maxSize | int | `1000` |  |
 | rasa.plus.settings.cache.name | string | `"cache.db"` |  |

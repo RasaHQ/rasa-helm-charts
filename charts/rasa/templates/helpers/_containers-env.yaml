@@ -31,9 +31,6 @@ Environment Variables for Rasa Containers
       name: {{ .jwtSecret.secretName }}
       key: {{ .jwtSecret.secretKey }}
 {{- end }}
-{{- if and (not .Values.rasa.plus.enabled) .Values.rasa.extraEnv }} # not used in rasa plus
-{{ toYaml .Values.rasa.extraEnv }}
-{{- end }}
 {{- with .Values.rasa.plus.settings }}
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.plus.enabled }}
 - name: "RASA_PRO_LICENSE" 
@@ -176,22 +173,9 @@ Environment Variables for Rasa Containers
   value: {{ .shellStreamReadingTimeoutInSeconds | quote }}
 - name: "MAX_NUMBER_OF_PREDICTIONS"
   value: {{.maxNumberOfPreditions | quote }}
-{{- if $.Values.internal }}
-# Internal usage only
-- name: "RASA_TELEMETRY_WRITE_KEY"
-  valueFrom:
-    secretKeyRef:
-      name: {{ $.Values.internal.secretName }}
-      key: {{ $.Values.internal.secretKey }}
-- name: "RASA_EXCEPTION_WRITE_KEY"
-  valueFrom:
-    secretKeyRef:
-      name: {{ $.Values.internal.secretName }}
-      key: {{ $.Values.internal.secretKey }}
-{{- end }}
-{{- if .additionalSettings }} # not used in rasa plus
-{{ toYaml .additionalSettings }}
 {{- end }}
 {{- end }}
+{{- if .Values.rasa.extraEnv }}
+{{ toYaml .Values.rasa.extraEnv }}
 {{- end }}
 {{- end -}}

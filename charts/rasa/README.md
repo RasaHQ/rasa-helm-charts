@@ -22,7 +22,6 @@ A Rasa Pro Helm chart for Kubernetes
 | global.additionalDeploymentLabels | object | `{}` | additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | Repository pull secrets |
-| internal | bool | `false` |  |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
@@ -55,7 +54,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.plus.enabled | bool | `true` |  |
-| rasa.plus.settings.additionalSettings | object | `{}` |  |
 | rasa.plus.settings.cache.directory | string | `nil` |  |
 | rasa.plus.settings.cache.maxSize | int | `1000` |  |
 | rasa.plus.settings.cache.name | string | `"cache.db"` |  |
@@ -69,19 +67,6 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.plus.settings.logging.logLevelPresidio | string | `"error"` |  |
 | rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` |  |
 | rasa.plus.settings.maxNumberOfPreditions | int | `10` |  |
-| rasa.plus.settings.modelStorage.aws.accessKeyId.secretKey | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.accessKeyId.secretName | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.bucketName | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.defaultRegion | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.endpointUrl | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.secretAccessKey.secretKey | string | `nil` |  |
-| rasa.plus.settings.modelStorage.aws.secretAccessKey.secretName | string | `nil` |  |
-| rasa.plus.settings.modelStorage.azure.accountKey.secretKey | string | `nil` |  |
-| rasa.plus.settings.modelStorage.azure.accountKey.secretName | string | `nil` |  |
-| rasa.plus.settings.modelStorage.azure.accountName | string | `nil` |  |
-| rasa.plus.settings.modelStorage.azure.container | string | `nil` |  |
-| rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretKey | string | `nil` |  |
-| rasa.plus.settings.modelStorage.gcp.applicationCredentials.secretName | string | `nil` |  |
 | rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` |  |
 | rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` |  |
 | rasa.plus.settings.postgresTrackerStore.schema | string | `nil` |  |
@@ -133,7 +118,7 @@ A Rasa Pro Helm chart for Kubernetes
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"db":"","dialect":"","enabled":false,"exchangeName":"exchange","password":"","port":"","queues":["rasa_production_events"],"saslMechanism":"PLAIN","saslPassword":"password","saslUsername":"username","securityProtocol":"SASL_SSL","sslCaFile":"CARoot.pem","sslCertFile":"certificate.pem","sslCheckHostname":true,"sslKeyFile":"key.pem","topic":"topic","type":"","url":"","username":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","type":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
+| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":true,"type":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |

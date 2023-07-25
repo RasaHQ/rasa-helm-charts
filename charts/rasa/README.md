@@ -85,7 +85,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.plus.enabled | bool | `true` |  |
-| rasa.plus.settings | object | `{"cache":{"directory":null,"maxSize":1000,"name":"cache.db"},"ducklingHttpUrl":null,"lockStore":{"ticketLockLifetime":60},"logging":{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"},"maxNumberOfPreditions":10,"postgresTrackerStore":{"maxOverflow":100,"poolSize":50,"schema":"public"},"rabbitmq":{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}},"rasaEnvironment":"development","rasaProLicence":{"secretKey":null,"secretName":null},"sanicServer":{"backlog":100,"workers":1},"secretsManager":{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null},"shellStreamReadingTimeoutInSeconds":10,"telemetry":{"debug":false,"enabled":true},"tensorflow":{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null},"tracing":{"serviceName":"rasa"}}` | Optional settings to customize Rasa Pro |
 | rasa.plus.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
 | rasa.plus.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
 | rasa.plus.settings.cache.maxSize | int | `1000` | maximum size for the cache |
@@ -102,6 +101,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.plus.settings.logging.logLevelMatplotlib | string | `"error"` | Configure log level for Matplotlib |
 | rasa.plus.settings.logging.logLevelPresidio | string | `"error"` | Configure log level for Presidio |
 | rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` | Configure log level for RabbitMQ |
+| rasa.plus.settings.maxNumberOfPreditions | int | `10` |  |
 | rasa.plus.settings.postgresTrackerStore | object | `{"maxOverflow":100,"poolSize":50,"schema":"public"}` | Settings to customize connections to Postgres |
 | rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` | Maximum overflow size of the pool |
 | rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` | Pool Size configuration |
@@ -120,9 +120,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.plus.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` | Path to the secrets in the vault server |
 | rasa.plus.settings.secretsManager.vaultToken | object | `{"secretKey":null,"secretName":null}` | Token to authenticate to the vault server |
 | rasa.plus.settings.secretsManager.vaultTransitMountPoint | string | `nil` | If transit secrets engine is enabled set this to mount point of the transit engine |
+| rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
 | rasa.plus.settings.telemetry.debug | bool | `false` | Print telemetry data to stdout |
 | rasa.plus.settings.telemetry.enabled | bool | `true` | Allow Rasa to collect anonymous usage details |
 | rasa.plus.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | Tensorflow parameters |
+| rasa.plus.settings.tracing.serviceName | string | `"rasa"` |  |
 | rasa.podAnnotations | object | `{}` | Annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | rasa.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
@@ -162,7 +164,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | Specify additional volumes to mount in the rasa-oss container |
 | rasa.volumes | list | `[]` | Specify additional volumes to mount in the rasa-oss container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| rasaProServices | object | `{"affinity":{},"autoscaling":{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80},"enabled":true,"environmentVariables":{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SASL_MECHANISM":{"value":"PLAIN"},"KAFKA_SASL_PASSWORD":{"secret":{"key":null,"name":null}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":"PLAINTEXT"},"KAFKA_SSL_CA_LOCATION":{"value":""},"KAFKA_TOPIC":{"value":"rasa_core_events"},"LOGGING_LEVEL":{"value":"INFO"},"RASA_ANALYTICS_DB_URL":{"value":""},"RASA_PRO_LICENSE":{"secret":{"key":null,"name":null}}},"image":{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""},"livenessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"readinessProbe":{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/healthcheck","port":8732,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"securityContext":{"enabled":true},"service":{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"},"serviceAccount":{"annotations":{},"create":false,"name":""},"strategy":{"type":"RollingUpdate"},"tolerations":[]}` | Settings for Rasa Pro Services |
 | rasaProServices.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
 | rasaProServices.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |

@@ -156,7 +156,7 @@ rasa:
   plus:
     enabled: true
 
-    # -- Optional settings to customize Rasa Pro
+    # Optional settings to customize Rasa Pro
     settings:
       # -- Rasa Pro License
       # See: https://rasa.com/connect-with-rasa/
@@ -448,7 +448,7 @@ rasa:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# -- Settings for Rasa Pro Services
+# Settings for Rasa Pro Services
 rasaProServices:
   # -- Enable Rasa Pro Services deployment
   enabled: true

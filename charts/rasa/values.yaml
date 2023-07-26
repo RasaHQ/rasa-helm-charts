@@ -39,6 +39,10 @@ rasa:
   #     maxSurge: 1
   #     maxUnavailable: 0
 
+  # Rasa Plus is the drop-in replacement of Rasa
+  plus:
+    enabled: true
+
   settings:
     # -- Enable debug mode
     debugMode: false
@@ -81,11 +85,12 @@ rasa:
       #    secret: "<SECRET>"
       #    page-access-token: "<PAGE-ACCESS-TOKEN>"
 
+    # See: https://rasa.com/docs/rasa/telemetry/telemetry/
     telemetry:
-      # -- Enable telemetry
-      # See: https://rasa.com/docs/rasa/telemetry/telemetry/
+      # -- Allow Rasa to collect anonymous usage details
       enabled: true
-      debug: false
+      # -- Print telemetry data to stdout
+      debug: falseh
 
     endpoints:
       # -- Not all parameters are mandatory
@@ -152,111 +157,99 @@ rasa:
         url: /webhook
       additionalEndpoints: {}
 
-  # Rasa Plus is the drop-in replacement of Rasa
-  plus:
-    enabled: true
-
-    # Optional settings to customize Rasa Pro
-    settings:
-      # -- Rasa Pro License
-      # See: https://rasa.com/connect-with-rasa/
-      rasaProLicence:
+    # -- Rasa Pro License
+    # See: https://rasa.com/connect-with-rasa/
+    rasaProLicence:
+      secretName:
+      secretKey:
+    # -- Environment: development or production
+    rasaEnvironment: development
+    # -- Synchronization mechanism used by Rasa
+    lockStore:
+      # -- Lifetime of the ticket associated with a lock
+      ticketLockLifetime: 60
+    tracing:
+      serviceName: rasa
+    sanicServer:
+      # -- Number of unaccepted connections the server allows before refusing new connections
+      backlog: 100
+      # -- Number of Sanic worker processes in the HTTP Server and Input Channel Server
+      workers: 1
+    # -- Settings to customize connections to Postgres
+    postgresTrackerStore:
+      # -- PostgreSQL schema to access
+      schema: public
+      # -- Pool Size configuration
+      poolSize: 50
+      # -- Maximum overflow size of the pool
+      maxOverflow: 100
+    # TODO: Determine if this should have `enabled` flag
+    # -- Settings to setup RabbitMQ SSL
+    rabbitmq:
+      # -- path to the SSL client certificate
+      sslClientCertificate:
         secretName:
         secretKey:
-      # -- Environment: development or production
-      rasaEnvironment: development
-      # -- Synchronization mechanism used by Rasa
-      lockStore:
-        # -- Lifetime of the ticket associated with a lock
-        ticketLockLifetime: 60
-      # See: https://rasa.com/docs/rasa/telemetry/telemetry/
-      telemetry:
-        # -- Allow Rasa to collect anonymous usage details
-        enabled: true
-        # -- Print telemetry data to stdout
-        debug: false
-      tracing:
-        serviceName: rasa
-      sanicServer:
-        # -- Number of unaccepted connections the server allows before refusing new connections
-        backlog: 100
-        # -- Number of Sanic worker processes in the HTTP Server and Input Channel Server
-        workers: 1
-      # -- Settings to customize connections to Postgres
-      postgresTrackerStore:
-        # -- PostgreSQL schema to access
-        schema: public
-        # -- Pool Size configuration
-        poolSize: 50
-        # -- Maximum overflow size of the pool
-        maxOverflow: 100
-      # TODO: Determine if this should have `enabled` flag
-      # -- Settings to setup RabbitMQ SSL
-      rabbitmq:
-        # -- path to the SSL client certificate
-        sslClientCertificate:
-          secretName:
-          secretKey:
-        # -- path to the SSL client key
-        sslClientKey:
-          secretName:
-          secretKey:
-      # -- Set log levels for Rasa and external libraries
-      # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
-      logging:
-        # -- Rasa Log Level
-        logLevel: info
-        # -- Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
-        logLevelLibraries: error
-        # -- Configure log level for Matplotlib
-        logLevelMatplotlib: error
-        # -- Configure log level for RabbitMQ
-        logLevelRabbitMq: error
-        # -- Configrue log level for Kafka
-        logLevelKafka: error
-        # -- Configure log level for Presidio
-        logLevelPresidio: error
-        # -- Configure log level for Faker
-        logLevelFaker: error
-        # -- Force logging in JSON
-        forceJsonLogging: false
-      # -- Store your assistant's secrets in an external credentials manager
-      # See: https://rasa.com/docs/rasa/secrets-managers/
-      # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
-      secretsManager:
-        # -- Enabled if a Secret Manager is used
-        enabled: false
-        # -- Secrets manager to use. Currently only "vault" is supported
-        secretManager: vault
-        # -- Address of the vault server
-        vaultHost:
-        # -- Token to authenticate to the vault server
-        vaultToken:
-          secretName:
-          secretKey:
-        # -- Path to the secrets in the vault server
-        vaultRasaSecretsPath: rasa-secrets
-        # -- If transit secrets engine is enabled set this to mount point of the transit engine
-        vaultTransitMountPoint:
-      # -- cache for `rasa train` command
-      cache:
-        # -- maximum size for the cache
-        maxSize: 1000
-        # -- name of the cache file
-        name: cache.db
-        # -- default location of the cache
-        # -- default is equivalent of Path(".rasa", "cache")
-        directory:
-      # -- HTTP URL to the duckling service
-      ducklingHttpUrl:
-      # -- Tensorflow parameters
-      tensorflow:
-        gpuMemoryAlloc:
-        interOpParallelismThreads:
-        intraOpParallelismThreads:
-        deterministicOps: false
-      shellStreamReadingTimeoutInSeconds: 10
-      maxNumberOfPreditions: 10
+      # -- path to the SSL client key
+      sslClientKey:
+        secretName:
+        secretKey:
+    # -- Set log levels for Rasa and external libraries
+    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
+    logging:
+      # -- Rasa Log Level
+      logLevel: info
+      # -- Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
+      logLevelLibraries: error
+      # -- Configure log level for Matplotlib
+      logLevelMatplotlib: error
+      # -- Configure log level for RabbitMQ
+      logLevelRabbitMq: error
+      # -- Configrue log level for Kafka
+      logLevelKafka: error
+      # -- Configure log level for Presidio
+      logLevelPresidio: error
+      # -- Configure log level for Faker
+      logLevelFaker: error
+      # -- Force logging in JSON
+      forceJsonLogging: false
+    # -- Store your assistant's secrets in an external credentials manager
+    # See: https://rasa.com/docs/rasa/secrets-managers/
+    # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
+    secretsManager:
+      # -- Enabled if a Secret Manager is used
+      enabled: false
+      # -- Secrets manager to use. Currently only "vault" is supported
+      secretManager: vault
+      # -- Address of the vault server
+      vaultHost:
+      # -- Token to authenticate to the vault server
+      vaultToken:
+        secretName:
+        secretKey:
+      # -- Path to the secrets in the vault server
+      vaultRasaSecretsPath: rasa-secrets
+      # -- If transit secrets engine is enabled set this to mount point of the transit engine
+      vaultTransitMountPoint:
+    # -- cache for `rasa train` command
+    cache:
+      # -- maximum size for the cache
+      maxSize: 1000
+      # -- name of the cache file
+      name: cache.db
+      # -- default location of the cache
+      # -- default is equivalent of Path(".rasa", "cache")
+      directory:
+    # -- HTTP URL to the duckling service
+    ducklingHttpUrl:
+    # -- Tensorflow parameters
+    tensorflow:
+      gpuMemoryAlloc:
+      interOpParallelismThreads:
+      intraOpParallelismThreads:
+      deterministicOps: false
+    shellStreamReadingTimeoutInSeconds: 10
+    maxNumberOfPreditions: 10
 
   # -- Override the default arguments for the container
   args: []
@@ -467,8 +460,8 @@ rasaProServices:
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-  strategy:
-    type: RollingUpdate
+  strategy: {}
+    # type: RollingUpdate
     # rollingUpdate:
     #   maxSurge: 1
     #   maxUnavailable: 0

@@ -30,8 +30,6 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .jwtSecret.secretName }}
       key: {{ .jwtSecret.secretKey }}
-{{- end }}
-{{- with .Values.rasa.plus.settings }}
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.plus.enabled }}
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
@@ -131,7 +129,7 @@ Environment Variables for Rasa Containers
 - name: "RASA_SHELL_STREAM_READING_TIMEOUT_IN_SECONDS"
   value: {{ .shellStreamReadingTimeoutInSeconds | quote }}
 - name: "MAX_NUMBER_OF_PREDICTIONS"
-  value: {{.maxNumberOfPreditions | quote }}
+  value: {{ .maxNumberOfPreditions | quote }}
 {{- end }}
 {{- end }}
 {{- if .Values.rasa.extraEnv }}

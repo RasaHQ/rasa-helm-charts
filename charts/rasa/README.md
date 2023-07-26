@@ -85,46 +85,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.livenessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasa.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.plus.enabled | bool | `true` |  |
-| rasa.plus.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
-| rasa.plus.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
-| rasa.plus.settings.cache.maxSize | int | `1000` | maximum size for the cache |
-| rasa.plus.settings.cache.name | string | `"cache.db"` | name of the cache file |
-| rasa.plus.settings.ducklingHttpUrl | string | `nil` | HTTP URL to the duckling service |
-| rasa.plus.settings.lockStore | object | `{"ticketLockLifetime":60}` | Synchronization mechanism used by Rasa |
-| rasa.plus.settings.lockStore.ticketLockLifetime | int | `60` | Lifetime of the ticket associated with a lock |
-| rasa.plus.settings.logging | object | `{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"}` | Set log levels for Rasa and external libraries See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level |
-| rasa.plus.settings.logging.forceJsonLogging | bool | `false` | Force logging in JSON |
-| rasa.plus.settings.logging.logLevel | string | `"info"` | Rasa Log Level |
-| rasa.plus.settings.logging.logLevelFaker | string | `"error"` | Configure log level for Faker |
-| rasa.plus.settings.logging.logLevelKafka | string | `"error"` | Configrue log level for Kafka |
-| rasa.plus.settings.logging.logLevelLibraries | string | `"error"` | Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka |
-| rasa.plus.settings.logging.logLevelMatplotlib | string | `"error"` | Configure log level for Matplotlib |
-| rasa.plus.settings.logging.logLevelPresidio | string | `"error"` | Configure log level for Presidio |
-| rasa.plus.settings.logging.logLevelRabbitMq | string | `"error"` | Configure log level for RabbitMQ |
-| rasa.plus.settings.maxNumberOfPreditions | int | `10` |  |
-| rasa.plus.settings.postgresTrackerStore | object | `{"maxOverflow":100,"poolSize":50,"schema":"public"}` | Settings to customize connections to Postgres |
-| rasa.plus.settings.postgresTrackerStore.maxOverflow | int | `100` | Maximum overflow size of the pool |
-| rasa.plus.settings.postgresTrackerStore.poolSize | int | `50` | Pool Size configuration |
-| rasa.plus.settings.postgresTrackerStore.schema | string | `"public"` | PostgreSQL schema to access |
-| rasa.plus.settings.rabbitmq | object | `{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | Settings to setup RabbitMQ SSL |
-| rasa.plus.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":null,"secretName":null}` | path to the SSL client certificate |
-| rasa.plus.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | path to the SSL client key |
-| rasa.plus.settings.rasaEnvironment | string | `"development"` | Environment: development or production |
-| rasa.plus.settings.rasaProLicence | object | `{"secretKey":null,"secretName":null}` | Rasa Pro License See: https://rasa.com/connect-with-rasa/ |
-| rasa.plus.settings.sanicServer.backlog | int | `100` | Number of unaccepted connections the server allows before refusing new connections |
-| rasa.plus.settings.sanicServer.workers | int | `1` | Number of Sanic worker processes in the HTTP Server and Input Channel Server |
-| rasa.plus.settings.secretsManager | object | `{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null}` | Store your assistant's secrets in an external credentials manager See: https://rasa.com/docs/rasa/secrets-managers/ TODO: Define if this should be part of values or it should be passed through `additionalSettings` |
-| rasa.plus.settings.secretsManager.enabled | bool | `false` | Enabled if a Secret Manager is used |
-| rasa.plus.settings.secretsManager.secretManager | string | `"vault"` | Secrets manager to use. Currently only "vault" is supported |
-| rasa.plus.settings.secretsManager.vaultHost | string | `nil` | Address of the vault server |
-| rasa.plus.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` | Path to the secrets in the vault server |
-| rasa.plus.settings.secretsManager.vaultToken | object | `{"secretKey":null,"secretName":null}` | Token to authenticate to the vault server |
-| rasa.plus.settings.secretsManager.vaultTransitMountPoint | string | `nil` | If transit secrets engine is enabled set this to mount point of the transit engine |
-| rasa.plus.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
-| rasa.plus.settings.telemetry.debug | bool | `false` | Print telemetry data to stdout |
-| rasa.plus.settings.telemetry.enabled | bool | `true` | Allow Rasa to collect anonymous usage details |
-| rasa.plus.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | Tensorflow parameters |
-| rasa.plus.settings.tracing.serviceName | string | `"rasa"` |  |
 | rasa.podAnnotations | object | `{}` | Annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | rasa.readinessProbe | object | `{"enabled":false,"failureThreshold":6,"httpGet":{"path":"/","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
@@ -143,10 +103,15 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| rasa.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
+| rasa.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
+| rasa.settings.cache.maxSize | int | `1000` | maximum size for the cache |
+| rasa.settings.cache.name | string | `"cache.db"` | name of the cache file |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
+| rasa.settings.ducklingHttpUrl | string | `nil` | HTTP URL to the duckling service |
 | rasa.settings.enableAPI | bool | `true` | Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
 | rasa.settings.endpoints.actionEndpoint.url | string | `"/webhook"` |  |
 | rasa.settings.endpoints.additionalEndpoints | object | `{}` |  |
@@ -157,11 +122,44 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
 | rasa.settings.jwtMethod | string | `"HS256"` | JWT Algorithm |
 | rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token |
+| rasa.settings.lockStore | object | `{"ticketLockLifetime":60}` | Synchronization mechanism used by Rasa |
+| rasa.settings.lockStore.ticketLockLifetime | int | `60` | Lifetime of the ticket associated with a lock |
+| rasa.settings.logging | object | `{"forceJsonLogging":false,"logLevel":"info","logLevelFaker":"error","logLevelKafka":"error","logLevelLibraries":"error","logLevelMatplotlib":"error","logLevelPresidio":"error","logLevelRabbitMq":"error"}` | Set log levels for Rasa and external libraries See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level |
+| rasa.settings.logging.forceJsonLogging | bool | `false` | Force logging in JSON |
+| rasa.settings.logging.logLevel | string | `"info"` | Rasa Log Level |
+| rasa.settings.logging.logLevelFaker | string | `"error"` | Configure log level for Faker |
+| rasa.settings.logging.logLevelKafka | string | `"error"` | Configrue log level for Kafka |
+| rasa.settings.logging.logLevelLibraries | string | `"error"` | Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka |
+| rasa.settings.logging.logLevelMatplotlib | string | `"error"` | Configure log level for Matplotlib |
+| rasa.settings.logging.logLevelPresidio | string | `"error"` | Configure log level for Presidio |
+| rasa.settings.logging.logLevelRabbitMq | string | `"error"` | Configure log level for RabbitMQ |
+| rasa.settings.maxNumberOfPreditions | int | `10` |  |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
+| rasa.settings.postgresTrackerStore | object | `{"maxOverflow":100,"poolSize":50,"schema":"public"}` | Settings to customize connections to Postgres |
+| rasa.settings.postgresTrackerStore.maxOverflow | int | `100` | Maximum overflow size of the pool |
+| rasa.settings.postgresTrackerStore.poolSize | int | `50` | Pool Size configuration |
+| rasa.settings.postgresTrackerStore.schema | string | `"public"` | PostgreSQL schema to access |
+| rasa.settings.rabbitmq | object | `{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | Settings to setup RabbitMQ SSL |
+| rasa.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":null,"secretName":null}` | path to the SSL client certificate |
+| rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | path to the SSL client key |
+| rasa.settings.rasaEnvironment | string | `"development"` | Environment: development or production |
+| rasa.settings.rasaProLicence | object | `{"secretKey":null,"secretName":null}` | Rasa Pro License See: https://rasa.com/connect-with-rasa/ |
+| rasa.settings.sanicServer.backlog | int | `100` | Number of unaccepted connections the server allows before refusing new connections |
+| rasa.settings.sanicServer.workers | int | `1` | Number of Sanic worker processes in the HTTP Server and Input Channel Server |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
-| rasa.settings.telemetry.debug | bool | `false` |  |
-| rasa.settings.telemetry.enabled | bool | `true` | Enable telemetry See: https://rasa.com/docs/rasa/telemetry/telemetry/ |
+| rasa.settings.secretsManager | object | `{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null}` | Store your assistant's secrets in an external credentials manager See: https://rasa.com/docs/rasa/secrets-managers/ TODO: Define if this should be part of values or it should be passed through `additionalSettings` |
+| rasa.settings.secretsManager.enabled | bool | `false` | Enabled if a Secret Manager is used |
+| rasa.settings.secretsManager.secretManager | string | `"vault"` | Secrets manager to use. Currently only "vault" is supported |
+| rasa.settings.secretsManager.vaultHost | string | `nil` | Address of the vault server |
+| rasa.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` | Path to the secrets in the vault server |
+| rasa.settings.secretsManager.vaultToken | object | `{"secretKey":null,"secretName":null}` | Token to authenticate to the vault server |
+| rasa.settings.secretsManager.vaultTransitMountPoint | string | `nil` | If transit secrets engine is enabled set this to mount point of the transit engine |
+| rasa.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
+| rasa.settings.telemetry.debug | string | `"falseh"` | Print telemetry data to stdout |
+| rasa.settings.telemetry.enabled | bool | `true` | Allow Rasa to collect anonymous usage details |
+| rasa.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | Tensorflow parameters |
 | rasa.settings.token | object | `{"secretKey":"","secretName":""}` | Token Rasa accepts as authentication token from other Rasa services |
+| rasa.settings.tracing.serviceName | string | `"rasa"` |  |
 | rasa.settings.trainInitialModel | bool | `false` | Train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
 | rasa.strategy | object | `{}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
@@ -205,5 +203,5 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasaProServices.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasaProServices.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | rasaProServices.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasaProServices.strategy | object | `{"type":"RollingUpdate"}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| rasaProServices.strategy | object | `{}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasaProServices.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |

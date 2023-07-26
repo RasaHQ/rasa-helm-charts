@@ -82,10 +82,6 @@ spec:
             - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
             - --jwt-method
             - {{ .Values.rasa.settings.jwtMethod }}
-            - --jwt-secret 
-            - "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
-            - --auth-token
-            - "$(cat /app/secrets/{{ .Values.rasa.settings.token.secretKey }})"
             {{- if .Values.rasa.settings.debugMode }}
             - --debug
             {{- end }}

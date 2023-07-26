@@ -33,7 +33,7 @@ rasa:
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-  # strategy:
+  strategy: {}
   #   type: RollingUpdate
   #   rollingUpdate:
   #     maxSurge: 1

@@ -143,12 +143,13 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings | object | `{"cors":"*","credentials":{"additionalChannelCredentials":{},"enabled":true},"debugMode":false,"enableAPI":true,"endpoints":{"actionEndpoint":{"url":"/webhook"},"additionalEndpoints":{},"eventBroker":{"enabled":true,"type":""},"lockStore":{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false},"models":{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20},"trackerStore":{"enabled":true,"type":"dynamo"}},"initialModel":"","jwtMethod":"HS256","jwtSecret":{"secretKey":"","secretName":""},"port":5005,"scheme":"http","telemetry":{"debug":false,"enabled":true},"token":{"secretKey":"","secretName":""},"trainInitialModel":false}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy strategy:   type: RollingUpdate   rollingUpdate:     maxSurge: 1     maxUnavailable: 0 |
 | rasa.settings.cors | string | `"*"` | CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | Additional channel credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `true` | Enable credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | Enable debug mode |
 | rasa.settings.enableAPI | bool | `true` | Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
+| rasa.settings.endpoints.actionEndpoint.url | string | `"/webhook"` |  |
+| rasa.settings.endpoints.additionalEndpoints | object | `{}` |  |
 | rasa.settings.endpoints.eventBroker | object | `{"enabled":true,"type":""}` | See: https://rasa.com/docs/rasa/event-brokers |
 | rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | See: https://rasa.com/docs/rasa/lock-stores |
 | rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | See: https://rasa.com/docs/rasa/model-storage |
@@ -158,9 +159,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | JWT Token |
 | rasa.settings.port | int | `5005` | Port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
+| rasa.settings.telemetry.debug | bool | `false` |  |
 | rasa.settings.telemetry.enabled | bool | `true` | Enable telemetry See: https://rasa.com/docs/rasa/telemetry/telemetry/ |
 | rasa.settings.token | object | `{"secretKey":"","secretName":""}` | Token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.trainInitialModel | bool | `false` | Train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
+| rasa.strategy | object | `{}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | Specify additional volumes to mount in the rasa-oss container |
 | rasa.volumes | list | `[]` | Specify additional volumes to mount in the rasa-oss container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |

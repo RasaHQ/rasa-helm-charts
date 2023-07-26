@@ -10,7 +10,7 @@ Environment Variables for Rasa Containers
       name: {{ .endpoints.models.token.secretName }}
       key: {{ .endpoints.models.token.secretKey }}
 {{- end }}
-{{- if and (not $.Values.rasa.plus.enabled) (not $.Values.rasaProServices.enabled) }}
+{{- if and $.Values.rasa.enabled (not $.Values.rasa.plus.enabled) (not $.Values.rasaProServices.enabled) }}
 - name: "RASA_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}
 - name: "RASA_TELEMETRY_DEBUG"

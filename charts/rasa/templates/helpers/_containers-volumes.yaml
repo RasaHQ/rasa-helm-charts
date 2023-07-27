@@ -3,7 +3,7 @@
   emptyDir: {}
 - name: "rasa-configuration"
   configMap:
-    name: {{ include "rasa.fullname" . }}
+    name: {{ include "rasa.fullname" . }}-configmap
     items:
       - key: "endpoints"
         path: "endpoints.yml"
@@ -14,7 +14,7 @@
     secretName: {{ .Values.rasa.settings.jwtSecret.secretName }}
 - name: rasaToken
   secret:
-    secretName: {{ .Values.rasa.settings.token.secretName }}
+    secretName: {{ .Values.rasa.settings.authToken.secretName }}
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}

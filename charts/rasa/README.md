@@ -103,6 +103,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| rasa.settings.authToken | object | `{"secretKey":"","secretName":""}` | Token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | cache for `rasa train` command |
 | rasa.settings.cache.directory | string | `nil` | default is equivalent of Path(".rasa", "cache") |
 | rasa.settings.cache.maxSize | int | `1000` | maximum size for the cache |
@@ -117,7 +118,8 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.endpoints.additionalEndpoints | object | `{}` |  |
 | rasa.settings.endpoints.eventBroker | object | `{"enabled":true,"type":""}` | See: https://rasa.com/docs/rasa/event-brokers |
 | rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | See: https://rasa.com/docs/rasa/lock-stores |
-| rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":true,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | See: https://rasa.com/docs/rasa/model-storage |
+| rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":false,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | See: https://rasa.com/docs/rasa/model-storage |
+| rasa.settings.endpoints.tracing | object | `{}` |  |
 | rasa.settings.endpoints.trackerStore | object | `{"enabled":true,"type":"dynamo"}` | See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
 | rasa.settings.jwtMethod | string | `"HS256"` | JWT Algorithm |
@@ -139,32 +141,25 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.postgresTrackerStore.maxOverflow | int | `100` | Maximum overflow size of the pool |
 | rasa.settings.postgresTrackerStore.poolSize | int | `50` | Pool Size configuration |
 | rasa.settings.postgresTrackerStore.schema | string | `"public"` | PostgreSQL schema to access |
-| rasa.settings.rabbitmq | object | `{"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | Settings to setup RabbitMQ SSL |
+| rasa.settings.rabbitmq | object | `{"enabled":false,"sslClientCertificate":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | Settings to setup RabbitMQ SSL |
 | rasa.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":null,"secretName":null}` | path to the SSL client certificate |
 | rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | path to the SSL client key |
 | rasa.settings.rasaEnvironment | string | `"development"` | Environment: development or production |
-| rasa.settings.rasaProLicence | object | `{"secretKey":null,"secretName":null}` | Rasa Pro License See: https://rasa.com/connect-with-rasa/ |
+| rasa.settings.rasaProLicence | object | `{"secretKey":null,"secretName":null}` | Rasa Pro License See: https://rasa.com/connect-with-rasa/ Make this global |
 | rasa.settings.sanicServer.backlog | int | `100` | Number of unaccepted connections the server allows before refusing new connections |
 | rasa.settings.sanicServer.workers | int | `1` | Number of Sanic worker processes in the HTTP Server and Input Channel Server |
 | rasa.settings.scheme | string | `"http"` | Scheme by which the service are accessible |
-| rasa.settings.secretsManager | object | `{"enabled":false,"secretManager":"vault","vaultHost":null,"vaultRasaSecretsPath":"rasa-secrets","vaultToken":{"secretKey":null,"secretName":null},"vaultTransitMountPoint":null}` | Store your assistant's secrets in an external credentials manager See: https://rasa.com/docs/rasa/secrets-managers/ TODO: Define if this should be part of values or it should be passed through `additionalSettings` |
-| rasa.settings.secretsManager.enabled | bool | `false` | Enabled if a Secret Manager is used |
-| rasa.settings.secretsManager.secretManager | string | `"vault"` | Secrets manager to use. Currently only "vault" is supported |
-| rasa.settings.secretsManager.vaultHost | string | `nil` | Address of the vault server |
-| rasa.settings.secretsManager.vaultRasaSecretsPath | string | `"rasa-secrets"` | Path to the secrets in the vault server |
-| rasa.settings.secretsManager.vaultToken | object | `{"secretKey":null,"secretName":null}` | Token to authenticate to the vault server |
-| rasa.settings.secretsManager.vaultTransitMountPoint | string | `nil` | If transit secrets engine is enabled set this to mount point of the transit engine |
 | rasa.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
 | rasa.settings.telemetry.debug | string | `"falseh"` | Print telemetry data to stdout |
 | rasa.settings.telemetry.enabled | bool | `true` | Allow Rasa to collect anonymous usage details |
 | rasa.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | Tensorflow parameters |
-| rasa.settings.token | object | `{"secretKey":"","secretName":""}` | Token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.tracing.serviceName | string | `"rasa"` |  |
 | rasa.settings.trainInitialModel | bool | `false` | Train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
 | rasa.strategy | object | `{}` | Allow the deployment to perform a rolling update # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | Specify additional volumes to mount in the rasa-oss container |
 | rasa.volumes | list | `[]` | Specify additional volumes to mount in the rasa-oss container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| rasaProLicence | object | `{"secretKey":null,"secretName":null}` | license key for Rasa Pro Services. |
 | rasaProServices.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
 | rasaProServices.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
@@ -181,7 +176,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasaProServices.environmentVariables.KAFKA_TOPIC | object | `{"value":"rasa_core_events"}` | topic Rasa Plus publishes events to and Rasa Pro consumes from |
 | rasaProServices.environmentVariables.LOGGING_LEVEL | object | `{"value":"INFO"}` | Set the log level of the application |
 | rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL | object | `{"value":""}` | URL of the data lake to store analytics data in |
-| rasaProServices.environmentVariables.RASA_PRO_LICENSE | object | `{"secret":{"key":null,"name":null}}` | license key for Rasa Pro Services. |
 | rasaProServices.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":""}` | Define image settings |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | Specifies image repository |

@@ -63,6 +63,11 @@ spec:
               containerPort: {{ .Values.rasaProServices.service.port }}
               protocol: TCP
           env:
+            - name: "RASA_PRO_LICENSE"
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rasaProLicence.secretName }}
+                  key: {{ .Values.rasaProLicence.secretKey }}
             {{- range $key, $value := .Values.rasaProServices.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

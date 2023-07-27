@@ -23,8 +23,8 @@ Environment Variables for Rasa Containers
 - name: "RASA_TOKEN"
   valueFrom:
     secretKeyRef:
-      name: {{ .token.secretName }}
-      key: {{ .token.secretKey }}
+      name: {{ .authToken.secretName }}
+      key: {{ .authToken.secretKey }}
 - name: "JWT_SECRET"
   valueFrom:
     secretKeyRef:
@@ -34,29 +34,13 @@ Environment Variables for Rasa Containers
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
     secretKeyRef:
-      name: {{ .rasaProLicence.secretName }}
-      key: {{ .rasaProLicence.secretKey }}
+      name: {{ $.Values.rasaProLicence.secretName }}
+      key: {{ $.Values.rasaProLicence.secretKey }}
 # Telemetry
 - name: "RASA_PRO_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}
 - name: "RASA_PRO_TELEMETRY_DEBUG"
   value: {{ .telemetry.debug | quote }}
-# Hashicorp Secret Manager
-{{- if .secretsManager.enabled }}
-- name: "SECRET_MANAGER"
-  value: {{ .secretsManager.secretManager | quote }}
-- name: "VAULT_HOST"
-  value: {{ .secretsManager.vaultHost | quote }}
-- name: "VAULT_TOKEN"
-  valueFrom:
-    secretKeyRef:
-      name: {{ .secretsManager.vaultToken.secretName }}
-      key: {{ .secretsManager.vaultToken.secretKey }}
-- name: "VAULT_RASA_SECRETS_PATH"
-  value: {{ .secretsManager.vaultRasaSecretsPath | quote }}
-- name: "VAULT_TRANSIT_MOUNT_POINT"
-  value: {{ .secretsManager.vaultTransitMountPoint | quote }}
-{{- end }}
 {{- end }}
 {{- if or $.Values.rasa.enabled $.Values.rasa.plus.enabled }}
 - name: "RASA_ENVIRONMENT"
@@ -80,6 +64,7 @@ Environment Variables for Rasa Containers
 - name: "POSTGRESQL_MAX_OVERFLOW"
   value: {{ .postgresTrackerStore.maxOverflow }}
 # RabbitMQ
+{{- if .rabbitmq.enabled }}
 - name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"
   valueFrom:
     secretKeyRef:
@@ -90,6 +75,7 @@ Environment Variables for Rasa Containers
     secretKeyRef:
       name: {{ .rabbitmq.sslClientKey.secretName }}
       key: {{ .rabbitmq.sslClientKey.secretKey }}
+{{- end }}
 # Logging
 - name: "LOG_LEVEL"
   value: {{ .logging.logLevel | quote | upper }}
@@ -106,7 +92,7 @@ Environment Variables for Rasa Containers
 - name: "LOG_LEVEL_FAKER"
   value: {{ .logging.logLevelFaker | quote | upper }}
 - name: "FORCE_JSON_LOGGING"
-  value: {{ .logging.forceJsonLogging | quote | upper }}
+  value: {{ .logging.forceJsonLogging | quote }}
 # Cache
 - name: "RASA_MAX_CACHE_SIZE"
   value: {{ .cache.maxSize | quote }}

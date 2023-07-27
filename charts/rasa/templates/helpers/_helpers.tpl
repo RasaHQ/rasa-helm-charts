@@ -40,6 +40,9 @@ helm.sh/chart: {{ include "rasa.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+{{ if .Values.global.additionalDeploymentLabels -}}
+{{- $.Values.global.additionalDeploymentLabels | toYaml -}}
+{{- end }}
 {{- end }}
 
 {{/*
@@ -94,10 +97,14 @@ Determine rasa server to run with arguments
 - --enable-api
 - --jwt-method
 - {{ .Values.rasa.settings.jwtMethod }}
-- --jwt-secret 
+{{- if and .Values.rasa.settings.jwtSecret.secretName .Values.rasa.settings.jwtSecret.secretKey }}
+- --jwt-secret
 - "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
+{{- end }}
+{{- if and .Values.rasa.settings.authToken.secretName .Values.rasa.settings.authToken.secretKey }}
 - --auth-token
-- "$(cat /app/secrets/{{ .Values.rasa.settings.token.secretKey }})"
+- "$(cat /app/secrets/{{ .Values.rasa.settings.authToken.secretKey }})"
+{{- end }}
 {{- end -}}
 {{- end -}}
 

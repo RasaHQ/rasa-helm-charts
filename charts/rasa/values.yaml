@@ -16,6 +16,11 @@ imagePullSecrets:
   []
   # - name: regcred
 
+# -- license key for Rasa Pro Services.
+rasaProLicence:
+  secretName:
+  secretKey:
+
 # Rasa Open Source
 rasa:
   enabled: true
@@ -59,7 +64,7 @@ rasa:
     # -- Enter details in token or (jwtSecret, jwtMethod) to enable either of them
     enableAPI: true
     # -- Token Rasa accepts as authentication token from other Rasa services
-    token: # "rasaToken"
+    authToken: # "rasaToken"
       secretName: ""
       secretKey: ""
     # -- JWT Token
@@ -99,11 +104,12 @@ rasa:
         enabled: true
         # TODO: Define if this is necessary and in which cases
         token:
-          enabled: true
+          enabled: false
           secretName: ""
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
+      tracing: {} # NOTE: This is only for Rasa Pro (rasa plus)
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
@@ -159,6 +165,7 @@ rasa:
 
     # -- Rasa Pro License
     # See: https://rasa.com/connect-with-rasa/
+    # Make this global
     rasaProLicence:
       secretName:
       secretKey:
@@ -168,6 +175,7 @@ rasa:
     lockStore:
       # -- Lifetime of the ticket associated with a lock
       ticketLockLifetime: 60
+    # TODO: add additional settings
     tracing:
       serviceName: rasa
     sanicServer:
@@ -183,9 +191,9 @@ rasa:
       poolSize: 50
       # -- Maximum overflow size of the pool
       maxOverflow: 100
-    # TODO: Determine if this should have `enabled` flag
     # -- Settings to setup RabbitMQ SSL
     rabbitmq:
+      enabled: false
       # -- path to the SSL client certificate
       sslClientCertificate:
         secretName:
@@ -213,24 +221,6 @@ rasa:
       logLevelFaker: error
       # -- Force logging in JSON
       forceJsonLogging: false
-    # -- Store your assistant's secrets in an external credentials manager
-    # See: https://rasa.com/docs/rasa/secrets-managers/
-    # TODO: Define if this should be part of values or it should be passed through `additionalSettings`
-    secretsManager:
-      # -- Enabled if a Secret Manager is used
-      enabled: false
-      # -- Secrets manager to use. Currently only "vault" is supported
-      secretManager: vault
-      # -- Address of the vault server
-      vaultHost:
-      # -- Token to authenticate to the vault server
-      vaultToken:
-        secretName:
-        secretKey:
-      # -- Path to the secrets in the vault server
-      vaultRasaSecretsPath: rasa-secrets
-      # -- If transit secrets engine is enabled set this to mount point of the transit engine
-      vaultTransitMountPoint:
     # -- cache for `rasa train` command
     cache:
       # -- maximum size for the cache
@@ -468,11 +458,6 @@ rasaProServices:
 
   # See: https://rasa.com/docs/rasa/deploy/deploy-rasa-pro-services#docker-container-configuration-reference
   environmentVariables:
-    # -- license key for Rasa Pro Services.
-    RASA_PRO_LICENSE:
-      secret:
-        name:
-        key:
     # -- address of the Kafka broker.
     KAFKA_BROKER_ADDRESS:
       value: ""

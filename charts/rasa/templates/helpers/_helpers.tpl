@@ -92,6 +92,8 @@ Determine rasa server to run with arguments
 - run
 {{- if .Values.rasa.settings.enableAPI }}
 - --enable-api
+- --jwt-method
+- {{ .Values.rasa.settings.jwtMethod }}
 - --jwt-secret 
 - "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
 - --auth-token

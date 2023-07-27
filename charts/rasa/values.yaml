@@ -159,6 +159,17 @@ rasa:
         # sslKeyFile: key.pem
         # sslCheckHostname: True
         # exchangeName: exchange
+      # -- See: https://rasa.com/docs/rasa/monitoring/tracing/
+      setTracing:
+        enabled: true
+        type: jaeger
+        # host: localhost
+        # port: 6831
+        # service_name: rasa
+        # sync_export: ~
+        # endpoint: my-otlp-host:4318
+        # insecure: false
+        # root_certificates: ./tests/unit/tracing/fixtures/ca.pem
       actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
@@ -175,7 +186,6 @@ rasa:
     lockStore:
       # -- Lifetime of the ticket associated with a lock
       ticketLockLifetime: 60
-    # TODO: add additional settings
     tracing:
       serviceName: rasa
     sanicServer:

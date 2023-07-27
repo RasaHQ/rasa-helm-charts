@@ -43,6 +43,10 @@ data:
     eventBroker:
       {{- toYaml .eventBroker | nindent 6 }}
 {{- end }}
+{{- if .setTracing.enabled }}
+    tracing:
+      {{- toYaml .setTracing | nindent 6 }}
+{{- end }}
     action_endpoint:
       url: {{ .actionEndpoint.url }}
 {{- with .additionalEndpoints }}

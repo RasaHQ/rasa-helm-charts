@@ -43,7 +43,7 @@ data:
     eventBroker:
       {{- toYaml .eventBroker | nindent 6 }}
 {{- end }}
-{{- if .setTracing.enabled }}
+{{- if and .tracing.enabled $.Values.rasa.plus.enabled }}
     tracing:
       {{- toYaml .setTracing | nindent 6 }}
 {{- end }}

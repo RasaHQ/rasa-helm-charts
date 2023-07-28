@@ -119,8 +119,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.endpoints.eventBroker | object | `{"enabled":true,"type":""}` | See: https://rasa.com/docs/rasa/event-brokers |
 | rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | See: https://rasa.com/docs/rasa/lock-stores |
 | rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":false,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | See: https://rasa.com/docs/rasa/model-storage |
-| rasa.settings.endpoints.setTracing | object | `{"enabled":true,"type":"jaeger"}` | See: https://rasa.com/docs/rasa/monitoring/tracing/ |
-| rasa.settings.endpoints.tracing | object | `{}` |  |
+| rasa.settings.endpoints.tracing | object | `{"enabled":true,"type":"jaeger"}` | See: https://rasa.com/docs/rasa/monitoring/tracing/ |
 | rasa.settings.endpoints.trackerStore | object | `{"enabled":true,"type":"dynamo"}` | See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.initialModel | string | `""` | Initial model to download and load if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
 | rasa.settings.jwtMethod | string | `"HS256"` | JWT Algorithm |

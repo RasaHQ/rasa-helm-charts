@@ -109,7 +109,6 @@ rasa:
           secretKey: ""
         url: ""
         waitTimeBetweenPulls: 20
-      tracing: {} # NOTE: This is only for Rasa Pro (rasa plus)
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
@@ -160,7 +159,7 @@ rasa:
         # sslCheckHostname: True
         # exchangeName: exchange
       # -- See: https://rasa.com/docs/rasa/monitoring/tracing/
-      setTracing:
+      tracing:
         enabled: true
         type: jaeger
         # host: localhost

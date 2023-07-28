@@ -29,12 +29,12 @@ rasa:
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository: "rasa/rasa"
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "3.6.4"
+    tag: "3.6.4-latest"
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

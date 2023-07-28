@@ -23,18 +23,18 @@ rasaProLicence:
 
 # Rasa Open Source
 rasa:
-  enabled: true
+  enabled: false
   # -- Specifies number of replicas
   replicaCount: 1
   # -- Define image settings
   image:
     # -- Specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    repository: "rasa/rasa"
     # -- Specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "3.6.4"
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -45,6 +45,7 @@ rasa:
   #     maxUnavailable: 0
 
   # Rasa Plus is the drop-in replacement of Rasa
+  # TODO: set image europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus:3.6.4-latest
   plus:
     enabled: true
 
@@ -62,7 +63,7 @@ rasa:
     # -- Start the web server API in addition to the input channel
     # -- Rasa API supports two authentication methods, Token based Auth or JWT
     # -- Enter details in token or (jwtSecret, jwtMethod) to enable either of them
-    enableAPI: true
+    enableAPI: false
     # -- Token Rasa accepts as authentication token from other Rasa services
     authToken: # "rasaToken"
       secretName: ""
@@ -79,7 +80,7 @@ rasa:
     ## Note: this credentials configuration is ignored if `applicationSettings.rasaX.useConfigEndpoint=true`
     credentials:
       # -- Enable credentials configuration for channel connectors
-      enabled: true
+      enabled: false
       # -- Additional channel credentials which should be used by Rasa to connect to various
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
@@ -95,25 +96,20 @@ rasa:
       # -- Allow Rasa to collect anonymous usage details
       enabled: true
       # -- Print telemetry data to stdout
-      debug: falseh
+      debug: false
 
     endpoints:
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/model-storage
       models:
-        enabled: true
-        # TODO: Define if this is necessary and in which cases
-        token:
-          enabled: false
-          secretName: ""
-          secretKey: ""
-        url: ""
-        waitTimeBetweenPulls: 20
+        enabled: false
+        # url: ""
+        # waitTimeBetweenPulls: 20
       # -- Not all parameters are mandatory
       # -- See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
-        enabled: true
-        type: "dynamo"
+        enabled: false
+        # type: "dynamo"
         # dialect: ""
         # url: ""
         # port: ""
@@ -128,18 +124,19 @@ rasa:
         # query: ""
       # -- See: https://rasa.com/docs/rasa/lock-stores
       lockStore:
-        enabled: true
-        url: ""
-        port: ""
-        password: ""
-        db: "1"
-        keyPrefix: "" # alphanumeric value to prepend to lock store keys
-        useSsl: false
-        socketTimeout: ""
+        enabled: false
+        # url: ""
+        # port: ""
+        # password: ""
+        # db: "1"
+        # # -- alphanumeric value to prepend to lock store keys
+        # keyPrefix: "" 
+        # useSsl: false
+        # socketTimeout: ""
       # -- See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:
-        enabled: true
-        type: ""
+        enabled: false
+        # type: ""
         # url: ""
         # username: ""
         # password: ""
@@ -160,8 +157,8 @@ rasa:
         # exchangeName: exchange
       # -- See: https://rasa.com/docs/rasa/monitoring/tracing/
       tracing:
-        enabled: true
-        type: jaeger
+        enabled: false
+        # type: jaeger
         # host: localhost
         # port: 6831
         # service_name: rasa
@@ -181,12 +178,27 @@ rasa:
       secretKey:
     # -- Environment: development or production
     rasaEnvironment: development
-    # -- Synchronization mechanism used by Rasa
-    lockStore:
-      # -- Lifetime of the ticket associated with a lock
-      ticketLockLifetime: 60
-    tracing:
-      serviceName: rasa
+    # -- Set log levels for Rasa and external libraries
+    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
+    logging:
+      # -- Rasa Log Level
+      logLevel: info
+      # -- Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
+      logLevelLibraries: error
+      # -- Configure log level for Matplotlib
+      logLevelMatplotlib: error
+      # -- Configure log level for RabbitMQ
+      logLevelRabbitMq: error
+      # -- Configrue log level for Kafka
+      logLevelKafka: error
+      # -- Configure log level for Presidio
+      logLevelPresidio: error
+      # -- Configure log level for Faker
+      logLevelFaker: error
+      # -- Force logging in JSON
+      forceJsonLogging: false
+    # -- HTTP URL to the duckling service
+    ducklingHttpUrl:
     sanicServer:
       # -- Number of unaccepted connections the server allows before refusing new connections
       backlog: 100
@@ -211,25 +223,6 @@ rasa:
       sslClientKey:
         secretName:
         secretKey:
-    # -- Set log levels for Rasa and external libraries
-    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
-    logging:
-      # -- Rasa Log Level
-      logLevel: info
-      # -- Configure log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
-      logLevelLibraries: error
-      # -- Configure log level for Matplotlib
-      logLevelMatplotlib: error
-      # -- Configure log level for RabbitMQ
-      logLevelRabbitMq: error
-      # -- Configrue log level for Kafka
-      logLevelKafka: error
-      # -- Configure log level for Presidio
-      logLevelPresidio: error
-      # -- Configure log level for Faker
-      logLevelFaker: error
-      # -- Force logging in JSON
-      forceJsonLogging: false
     # -- cache for `rasa train` command
     cache:
       # -- maximum size for the cache
@@ -239,13 +232,19 @@ rasa:
       # -- default location of the cache
       # -- default is equivalent of Path(".rasa", "cache")
       directory:
-    # -- HTTP URL to the duckling service
-    ducklingHttpUrl:
-    # -- Tensorflow parameters
+    # -- Synchronization mechanism used by Rasa
+    lockStore:
+      # -- Lifetime of the ticket associated with a lock
+      ticketLockLifetime: 60
+    # -- Tensorflow parameters for tuning NLU
     tensorflow:
-      gpuMemoryAlloc:
-      interOpParallelismThreads:
-      intraOpParallelismThreads:
+      # -- limit the absolute amount of GPU memory that can be used by a Rasa process
+      gpuMemoryAlloc: "0:1024, 1:2048"
+      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation
+      interOpParallelismThreads: "3"
+      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-multiple-operations
+      intraOpParallelismThreads: "2"
+      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#deterministic-operations
       deterministicOps: false
     shellStreamReadingTimeoutInSeconds: 10
     maxNumberOfPreditions: 10
@@ -443,7 +442,7 @@ rasa:
 # Settings for Rasa Pro Services
 rasaProServices:
   # -- Enable Rasa Pro Services deployment
-  enabled: true
+  enabled: false
 
   # -- Specifies number of replicas
   replicaCount: 1
@@ -455,7 +454,7 @@ rasaProServices:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # Overrides the image tag whose default is the chart appVersion.
-    tag: ""
+    tag: "3.1.1-latest"
   
   # -- Allow the deployment to perform a rolling update
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

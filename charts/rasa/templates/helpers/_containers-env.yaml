@@ -3,13 +3,6 @@ Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
 {{- with .Values.rasa.settings }}
-{{- if and .endpoints.models.enabled .endpoints.models.token.enabled -}}
-- name: MODEL_SERVER_TOKEN
-  valueFrom:
-    secretKeyRef:
-      name: {{ .endpoints.models.token.secretName }}
-      key: {{ .endpoints.models.token.secretKey }}
-{{- end }}
 {{- if and $.Values.rasa.enabled (not $.Values.rasa.plus.enabled) (not $.Values.rasaProServices.enabled) }}
 - name: "RASA_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}
@@ -48,9 +41,6 @@ Environment Variables for Rasa Containers
 # Lock Store
 - name: "TICKET_LOCK_LIFETIME"
   value: {{ .lockStore.ticketLockLifetime }}
-# Tracing
-- name: "TRACING_SERVICE_NAME"
-  value: {{ .tracing.serviceName | quote }}
 # Sanic Server
 - name: "SANIC_BACKLOG"
   value: {{ .tracing.backlog | quote }}

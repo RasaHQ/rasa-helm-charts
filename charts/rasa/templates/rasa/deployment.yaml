@@ -85,8 +85,8 @@ spec:
             {{- if .Values.rasa.settings.debugMode }}
             - --debug
             {{- end }}
-          {{- if .Values.rasa.extraArgs }}
-            {{- toYaml .Values.rasa.extraArgs | nindent 12 }}
+          {{- if .Values.rasa.additionalArgs }}
+            {{- toYaml .Values.rasa.additionalArgs | nindent 12 }}
           {{- end }}
           {{- end }}
           {{- if .Values.rasa.command }}
@@ -99,6 +99,10 @@ spec:
               protocol: TCP
           env:
             {{- include "rasa.containers.env" . | nindent 12 }}
+          {{- if .Values.rasa.envFrom }}
+          envFrom:
+            {{- toYaml .Values.rasa.envFrom | nindent 12 }}
+          {{- end }}
           {{- if or .Values.rasa.livenessProbe.enabled (not (hasKey .Values.rasa.livenessProbe "enabled")) }}
           livenessProbe:
             {{- toYaml .Values.rasa.livenessProbe | nindent 12 }}
@@ -117,6 +121,9 @@ spec:
           {{- if .Values.rasa.volumeMounts }}
             {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
           {{- end }}
+      {{- if .Values.rasa.additionalContainers }}
+        {{- .Values.rasa.additionalContainers | nindent 8 }}
+      {{- end }}
       volumes:
         {{- include "rasa.containers.volumes" . | nindent 8 }}
       {{- if or (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}

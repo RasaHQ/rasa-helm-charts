@@ -79,6 +79,10 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
+          {{- if .Values.rasaProServices.envFrom }}
+          envFrom:
+            {{- toYaml .Values.rasaProServices.envFrom | nindent 12 }}
+          {{- end }}
           {{- if or .Values.rasaProServices.livenessProbe.enabled (not (hasKey .Values.rasaProServices.livenessProbe "enabled")) }}
           livenessProbe:
             {{- toYaml .Values.rasaProServices.livenessProbe | nindent 12 }}

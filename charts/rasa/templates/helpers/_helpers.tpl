@@ -36,10 +36,13 @@ Common labels
 {{- define "rasa.labels" -}}
 helm.sh/chart: {{ include "rasa.chart" . }}
 {{ include "rasa.selectorLabels" . }}
+app.kubernetes.io/name: {{ template "rasa.name" . }}
+helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
+app.kubernetes.io/managed-by: {{ .Release.Service }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{ if .Values.global.additionalDeploymentLabels -}}
 {{- $.Values.global.additionalDeploymentLabels | toYaml -}}
 {{- end }}
@@ -93,7 +96,7 @@ Determine rasa server to run with arguments
 */}}
 {{- define "rasa.serverType" -}}
 - run
-{{- if .Values.rasa.settings.enableAPI }}
+{{- if .Values.rasa.settings.enableApi }}
 - --enable-api
 - --jwt-method
 - {{ .Values.rasa.settings.jwtMethod }}

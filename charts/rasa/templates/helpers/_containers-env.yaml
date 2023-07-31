@@ -37,7 +37,7 @@ Environment Variables for Rasa Containers
 {{- end }}
 {{- if or $.Values.rasa.enabled $.Values.rasa.plus.enabled }}
 - name: "RASA_ENVIRONMENT"
-  value: {{ .rasaEnvironment | quote }}
+  value: {{ .environment | quote }}
 # Lock Store
 - name: "TICKET_LOCK_LIFETIME"
   value: {{ .lockStore.ticketLockLifetime }}
@@ -108,7 +108,7 @@ Environment Variables for Rasa Containers
   value: {{ .maxNumberOfPreditions | quote }}
 {{- end }}
 {{- end }}
-{{- if .Values.rasa.extraEnv }}
-{{ toYaml .Values.rasa.extraEnv }}
+{{- if .Values.rasa.additionalEnv }}
+{{ toYaml .Values.rasa.additionalEnv }}
 {{- end }}
 {{- end -}}

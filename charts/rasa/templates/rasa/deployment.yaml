@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rasa.fullname" . }}
+  name: {{ include "rasa.fullname" . }}-deployment
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
@@ -103,11 +103,11 @@ spec:
           envFrom:
             {{- toYaml .Values.rasa.envFrom | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.livenessProbe.enabled (not (hasKey .Values.rasa.livenessProbe "enabled")) }}
+          {{- if or .Values.rasa.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml .Values.rasa.livenessProbe | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.readinessProbe.enabled (not (hasKey .Values.rasa.readinessProbe "enabled")) }}
+          {{- if or .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
             {{- toYaml .Values.rasa.readinessProbe | nindent 12 }}
           {{- end }}
@@ -122,7 +122,7 @@ spec:
             {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
           {{- end }}
       {{- if .Values.rasa.additionalContainers }}
-        {{- .Values.rasa.additionalContainers | nindent 8 }}
+        {{- toYaml .Values.rasa.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
         {{- include "rasa.containers.volumes" . | nindent 8 }}

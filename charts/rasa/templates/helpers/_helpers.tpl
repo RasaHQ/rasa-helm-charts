@@ -36,10 +36,7 @@ Common labels
 {{- define "rasa.labels" -}}
 helm.sh/chart: {{ include "rasa.chart" . }}
 {{ include "rasa.selectorLabels" . }}
-app.kubernetes.io/name: {{ template "rasa.name" . }}
-helm.sh/chart: "{{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}"
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/instance: {{ .Release.Name }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -72,7 +69,7 @@ Create the name of the service account to use
 */}}
 {{- define "rasa.rasaProServices.serviceAccountName" -}}
 {{- if .Values.rasaProServices.serviceAccount.create }}
-{{- default (include "rasa.fullname" .) .Values.rasaProServices.serviceAccount.name }}
+{{- default "rasa-pro-services" .Values.rasaProServices.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasaProServices.serviceAccount.name }}
 {{- end }}

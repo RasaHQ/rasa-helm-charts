@@ -43,9 +43,9 @@ Environment Variables for Rasa Containers
   value: {{ .lockStore.ticketLockLifetime }}
 # Sanic Server
 - name: "SANIC_BACKLOG"
-  value: {{ .tracing.backlog | quote }}
+  value: {{ .sanicServer.backlog | quote }}
 - name: "SANIC_WORKERS"
-  value: {{ .tracing.workers }}
+  value: {{ .sanicServer.workers }}
 # Postgres Tracker Store
 - name: "POSTGRESQL_SCHEMA"
   value: {{ .postgresTrackerStore.schema | quote }}

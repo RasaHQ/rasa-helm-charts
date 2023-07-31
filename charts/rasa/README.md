@@ -68,11 +68,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | rasa.command overrides the default command for the container |
-| rasa.enabled | bool | `true` | rasa.enabled enables Rasa OSS/Plus deployment |
+| rasa.enabled | bool | `true` | rasa.enabled enables Rasa OSS/Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `""` | Specifies image tag image.tag specifies image tag |
+| rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"` | image.repository specifies image repository |
+| rasa.image.tag | string | `"3.6.4-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -80,7 +80,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
 | rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
-| rasa.livenessProbe.enabled | bool | `false` | livenessProbe.enabled is used to enable or disable liveness probe |
+| rasa.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasa.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasa.livenessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
 | rasa.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
@@ -92,7 +92,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.plus.enabled | bool | `true` | plus.enabled enabled Rasa Plus drop-in replacement of Rasa |
 | rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
-| rasa.readinessProbe.enabled | bool | `false` | readinessProbe.enabled is used to enable or disable readinessProbe |
+| rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
 | rasa.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasa.readinessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
 | rasa.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
@@ -122,17 +122,17 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.cache.name | string | `"cache.db"` | cache.name is the name of the cache file |
 | rasa.settings.cors | string | `"*"` | settings.cors is CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
-| rasa.settings.credentials.enabled | bool | `true` | credentials.enabled enables credentials configuration for channel connectors |
+| rasa.settings.credentials.enabled | bool | `false` | credentials.enabled enables credentials configuration for channel connectors |
 | rasa.settings.debugMode | bool | `false` | settings.debugMode enables debug mode |
 | rasa.settings.ducklingHttpUrl | string | `nil` | settings.ducklingHttpUrl is HTTP URL to the duckling service |
 | rasa.settings.enableApi | bool | `true` | settings.enableApi start the web server API in addition to the input channel Rasa API supports two authentication methods, Token based Auth or JWT Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
 | rasa.settings.endpoints.actionEndpoint.url | string | `"/webhook"` |  |
 | rasa.settings.endpoints.additionalEndpoints | object | `{}` | `endpoints.additionalEndpoints` to add more settings to `endpoints.yml` |
-| rasa.settings.endpoints.eventBroker | object | `{"enabled":true,"type":""}` | endpoints.eventBroker allows you to connect your running assistant to other services that process the data See: https://rasa.com/docs/rasa/event-brokers |
-| rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":true,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order See: https://rasa.com/docs/rasa/lock-stores |
-| rasa.settings.endpoints.models | object | `{"enabled":true,"token":{"enabled":false,"secretKey":"","secretName":""},"url":"","waitTimeBetweenPulls":20}` | endpoints.models provides loading models from the storage See: https://rasa.com/docs/rasa/model-storage |
-| rasa.settings.endpoints.tracing | object | `{"enabled":true,"type":"jaeger"}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
-| rasa.settings.endpoints.trackerStore | object | `{"enabled":true,"type":"dynamo"}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
+| rasa.settings.endpoints.eventBroker | object | `{"enabled":false}` | endpoints.eventBroker allows you to connect your running assistant to other services that process the data See: https://rasa.com/docs/rasa/event-brokers |
+| rasa.settings.endpoints.lockStore | object | `{"db":"1","enabled":false,"keyPrefix":"","password":"","port":"","socketTimeout":"","url":"","useSsl":false}` | endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order See: https://rasa.com/docs/rasa/lock-stores |
+| rasa.settings.endpoints.models | object | `{"enabled":false}` | endpoints.models provides loading models from the storage See: https://rasa.com/docs/rasa/model-storage |
+| rasa.settings.endpoints.tracing | object | `{"enabled":false}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
+| rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
 | rasa.settings.initialModel | string | `""` | settings.initialModel downloads and loads if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
@@ -157,21 +157,25 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.rabbitmq.enabled | bool | `false` | rabbitmq.enabled defines if RabbitMq will be used |
 | rasa.settings.rabbitmq.postgresTrackerStore | object | `{"secretKey":null,"secretName":null}` | rabbitmq.postgresTrackerStore is path to the SSL client certificate |
 | rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | rabbitmq.sslClientKey is path to the SSL client key |
+| rasa.settings.sanicServer | object | `{"backlog":100,"workers":1}` | settings.sanicServer defines sanicServer settings |
 | rasa.settings.sanicServer.backlog | int | `100` | sanicServer.backlog is number of unaccepted connections the server allows before refusing new connections |
 | rasa.settings.sanicServer.workers | int | `1` | sanicServer.workers is number of Sanic worker processes in the HTTP Server and Input Channel Server |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
-| rasa.settings.telemetry.debug | string | `"falseh"` | telemetry.debug prints telemetry data to stdout |
+| rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |
 | rasa.settings.telemetry.enabled | bool | `true` | telemetry.enabled allow Rasa to collect anonymous usage details |
-| rasa.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":null,"interOpParallelismThreads":null,"intraOpParallelismThreads":null}` | settings.tensorflow defines Tensorflow parameters |
-| rasa.settings.tracing | object | `{"serviceName":"rasa"}` | settings.tracing used if `rasa.plus` is `enabled` |
-| rasa.settings.tracing.serviceName | string | `"rasa"` | tracing.serviceName defines service name for tracing |
+| rasa.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":"0:1024, 1:2048","interOpParallelismThreads":"3","intraOpParallelismThreads":"2"}` | settings.tensorflow defines Tensorflow parameters |
+| rasa.settings.tensorflow.deterministicOps | bool | `false` | See: https://rasa.com/docs/rasa/tuning-your-model/#deterministic-operations |
+| rasa.settings.tensorflow.gpuMemoryAlloc | string | `"0:1024, 1:2048"` | tensorflow.gpuMemoryAlloc is used to limit the absolute amount of GPU memory that can be used by a Rasa process |
+| rasa.settings.tensorflow.interOpParallelismThreads | string | `"3"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation |
+| rasa.settings.tensorflow.intraOpParallelismThreads | string | `"2"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-multiple-operations |
 | rasa.settings.trainInitialModel | bool | `false` | settings.trainInitialModel train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
 | rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |
 | rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | rasaProLicence | object | `{"secretKey":null,"secretName":null}` | rasaProLicence is license key for Rasa Pro Services. |
+| rasaProServices.additionalContainers | list | `[]` | rasa.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
 | rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
 | rasaProServices.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
@@ -191,8 +195,8 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL.value | string | `""` |  |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `""` | Specifies image tag image.tag specifies image tag |
-| rasaProServices.livenessProbe.enabled | bool | `false` | livenessProbe.enabled is used to enable or disable liveness probe |
+| rasaProServices.image.tag | string | `"3.1.1-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasaProServices.livenessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
 | rasaProServices.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
@@ -203,7 +207,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasaProServices.nodeSelector | object | `{}` | rasaProServices.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasaProServices.podAnnotations | object | `{}` | rasaProServices.podAnnotations defines annotations to add to the pod |
 | rasaProServices.podSecurityContext | object | `{"enabled":true}` | rasaProServices.podSecurityContext defines pod security context |
-| rasaProServices.readinessProbe.enabled | bool | `false` | readinessProbe.enabled is used to enable or disable readinessProbe |
+| rasaProServices.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
 | rasaProServices.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasaProServices.readinessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
 | rasaProServices.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |

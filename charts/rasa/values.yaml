@@ -24,18 +24,18 @@ rasaProLicence:
 # Rasa Open Source
 rasa:
   # -- rasa.enabled enables Rasa OSS/Plus deployment
+  # Disable this if you want to deploy ONLY Rasa Pro Services
   enabled: true
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
   # rasa.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
-    # -- Specifies image tag
-    # image.tag specifies image tag
-    tag: ""
+    # -- image.tag specifies image tag
+    tag: "3.6.4-latest"
   
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -46,7 +46,6 @@ rasa:
   #     maxUnavailable: 0
 
   # Rasa Plus is the drop-in replacement of Rasa
-  # TODO: set image europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus:3.6.4-latest
   plus:
     # -- plus.enabled enabled Rasa Plus drop-in replacement of Rasa
     enabled: true
@@ -82,7 +81,7 @@ rasa:
     # settings.credentials enables credentials configuration for channel connectors
     credentials:
       # -- credentials.enabled enables credentials configuration for channel connectors
-      enabled: true
+      enabled: false
       # -- credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
@@ -98,20 +97,16 @@ rasa:
       # -- telemetry.enabled allow Rasa to collect anonymous usage details
       enabled: true
       # -- telemetry.debug prints telemetry data to stdout
-      debug: falseh
+      debug: false
 
     # Not all parameters are mandatory
     endpoints:
       # -- endpoints.models provides loading models from the storage
       # See: https://rasa.com/docs/rasa/model-storage
       models:
-        enabled: true
-        token:
-          enabled: false
-          secretName: ""
-          secretKey: ""
-        url: ""
-        waitTimeBetweenPulls: 20
+        enabled: false
+        # url: ""
+        # waitTimeBetweenPulls: 20
       # -- endpoints.trackerStore assistant's conversations are stored within a tracker store
       # See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:
@@ -126,7 +121,7 @@ rasa:
       # -- endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order
       # See: https://rasa.com/docs/rasa/lock-stores
       lockStore:
-        enabled: true
+        enabled: false
         url: ""
         port: ""
         password: ""
@@ -165,14 +160,28 @@ rasa:
 
     # -- settings.environment: development or production
     environment: development
-    # -- settings.lockStore provides synchronization mechanism used by Rasa
-    lockStore:
-      # -- lockStore.ticketLockLifetime is lifetime of the ticket associated with a lock
-      ticketLockLifetime: 60
-    # -- settings.tracing used if `rasa.plus` is `enabled`
-    tracing:
-      # -- tracing.serviceName defines service name for tracing
-      serviceName: rasa
+    # settings.logging sets log levels for Rasa and external libraries
+    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
+    logging:
+      # -- logging.logLevel is Rasa Log Level
+      logLevel: info
+      # -- logging.logLevelLibraries configures log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
+      logLevelLibraries: error
+      # -- logging.logLevelMatplotlib configures log level for Matplotlib
+      logLevelMatplotlib: error
+      # -- logging.logLevelRabbitMq configures log level for RabbitMQ
+      logLevelRabbitMq: error
+      # -- logging.logLevelKafka configures log level for Kafka
+      logLevelKafka: error
+      # -- logging.logLevelPresidio configures log level for Presidio
+      logLevelPresidio: error
+      # -- logging.logLevelFaker configures log level for Faker
+      logLevelFaker: error
+      # -- logging.forceJsonLogging forces logging in JSON
+      forceJsonLogging: false
+    # -- settings.ducklingHttpUrl is HTTP URL to the duckling service
+    ducklingHttpUrl:
+    # -- settings.sanicServer defines sanicServer settings
     sanicServer:
       # -- sanicServer.backlog is number of unaccepted connections the server allows before refusing new connections
       backlog: 100
@@ -198,25 +207,6 @@ rasa:
       sslClientKey:
         secretName:
         secretKey:
-    # settings.logging sets log levels for Rasa and external libraries
-    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
-    logging:
-      # -- logging.logLevel is Rasa Log Level
-      logLevel: info
-      # -- logging.logLevelLibraries configures log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
-      logLevelLibraries: error
-      # -- logging.logLevelMatplotlib configures log level for Matplotlib
-      logLevelMatplotlib: error
-      # -- logging.logLevelRabbitMq configures log level for RabbitMQ
-      logLevelRabbitMq: error
-      # -- logging.logLevelKafka configures log level for Kafka
-      logLevelKafka: error
-      # -- logging.logLevelPresidio configures log level for Presidio
-      logLevelPresidio: error
-      # -- logging.logLevelFaker configures log level for Faker
-      logLevelFaker: error
-      # -- logging.forceJsonLogging forces logging in JSON
-      forceJsonLogging: false
     # -- settings.cache is used for `rasa train` command
     cache:
       # -- cache.maxSize is maximum size for the cache
@@ -226,11 +216,13 @@ rasa:
       # -- cache.default is location of the cache
       # default is equivalent of Path(".rasa", "cache")
       directory:
-    # -- settings.ducklingHttpUrl is HTTP URL to the duckling service
-    ducklingHttpUrl:
+    # -- settings.lockStore provides synchronization mechanism used by Rasa
+    lockStore:
+      # -- lockStore.ticketLockLifetime is lifetime of the ticket associated with a lock
+      ticketLockLifetime: 60
     # -- settings.tensorflow defines Tensorflow parameters
     tensorflow:
-      # -- limit the absolute amount of GPU memory that can be used by a Rasa process
+      # -- tensorflow.gpuMemoryAlloc is used to limit the absolute amount of GPU memory that can be used by a Rasa process
       gpuMemoryAlloc: "0:1024, 1:2048"
       # -- See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation
       interOpParallelismThreads: "3"
@@ -273,11 +265,9 @@ rasa:
 
   # -- rasa.additionalContainers allows to specify additional containers for the Rasa Deployment
   additionalContainers: []
-  #  - name: extra
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
-  #    args:
-  #      - echo "init container"
+    # - name: extra
+    #   image: "busybox"
+    #   command: ["bash", "-c"]
 
   # -- rasa.volumes specify additional volumes to mount in the Rasa container
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
@@ -348,7 +338,7 @@ rasa:
   # rasa.livenessProbe is used to override default liveness probe settings
   livenessProbe:
     # -- livenessProbe.enabled is used to enable or disable liveness probe
-    enabled: false
+    enabled: true
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
@@ -370,7 +360,7 @@ rasa:
   # rasa.readinessProbe is used to override default readiness probe settings
   readinessProbe:
     # -- readinessProbe.enabled is used to enable or disable readinessProbe
-    enabled: false
+    enabled: true
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
@@ -468,7 +458,7 @@ rasaProServices:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # image.tag specifies image tag
-    tag: ""
+    tag: "3.1.1-latest"
   
   # -- rasaProServices.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -526,6 +516,12 @@ rasaProServices:
     # - configMapRef:
     #     name: my-configmap
 
+  # -- rasa.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
   # -- rasaProServices.serviceAccount defines service account
   serviceAccount:
     # -- serviceAccount.create specifies whether a service account should be created
@@ -574,7 +570,7 @@ rasaProServices:
   # rasaProServices.livenessProbe is used to override default liveness probe settings
   livenessProbe:
     # -- livenessProbe.enabled is used to enable or disable liveness probe
-    enabled: false
+    enabled: true
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
@@ -596,7 +592,7 @@ rasaProServices:
   # rasaProServices.readinessProbe is used to override default readiness probe settings
   readinessProbe:
     # -- readinessProbe.enabled is used to enable or disable readinessProbe
-    enabled: false
+    enabled: true
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /

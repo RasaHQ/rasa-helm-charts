@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rasa.fullname" . }}-pro-services
+  name: {{ include "rasa.fullname" . }}-pro-services-deployment
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
@@ -51,7 +51,7 @@ spec:
         {{- omit .Values.rasaProServices.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Chart.Name }}-pro-services
           {{- if .Values.rasaProServices.securityContext.enabled }}
           securityContext:
             {{- omit .Values.rasaProServices.securityContext "enabled" | toYaml | nindent 12 }}
@@ -83,16 +83,19 @@ spec:
           envFrom:
             {{- toYaml .Values.rasaProServices.envFrom | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasaProServices.livenessProbe.enabled (not (hasKey .Values.rasaProServices.livenessProbe "enabled")) }}
+          {{- if .Values.rasaProServices.livenessProbe.enabled }}
           livenessProbe:
             {{- toYaml .Values.rasaProServices.livenessProbe | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasaProServices.readinessProbe.enabled (not (hasKey .Values.rasaProServices.readinessProbe "enabled")) }}
+          {{- if .Values.rasaProServices.readinessProbe.enabled }}
           readinessProbe:
             {{- toYaml .Values.rasaProServices.readinessProbe | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.rasaProServices.resources | nindent 12 }}
+      {{- if .Values.rasaProServices.additionalContainers }}
+        {{- toYaml .Values.rasaProServices.additionalContainers | nindent 8 }}
+      {{- end }}
       {{- with .Values.rasaProServices.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

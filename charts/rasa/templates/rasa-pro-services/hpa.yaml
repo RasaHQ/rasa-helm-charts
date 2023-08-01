@@ -1,0 +1,28 @@
+{{- if and .Values.rasaProServices.enabled .Values.rasaProServices.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: rasa-pro-services-hpa
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: rasa-pro-services-deployment
+  minReplicas: {{ .Values.rasaProServices.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.rasaProServices.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.rasaProServices.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.rasaProServices.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.rasaProServices.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.rasaProServices.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

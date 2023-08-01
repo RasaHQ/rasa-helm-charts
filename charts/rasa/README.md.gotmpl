@@ -1,0 +1,37 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}{{ template "chart.appVersionBadge" . }}
+
+## Prerequisites
+
+- Kubernetes 1.19+
+- Helm 3.2.0+
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```console
+$ helm install my-release oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+```
+
+## Uninstalling the Chart
+
+To uninstall/delete the `my-release` deployment:
+
+```console
+$ helm delete my-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Pull the Chart
+
+To pull chart contents for your own convenience:
+
+```console
+$ helm pull oci://registry-1.docker.io/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+```
+
+{{ template "chart.valuesSection" . }}

@@ -1,0 +1,56 @@
+{{- if .Values.rasa.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: rasa-configmap
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+data:
+  credentials: |
+{{- if .Values.rasa.settings.credentials.enabled }}
+  {{- with .Values.rasa.settings.credentials.additionalChannelCredentials }}
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+  endpoints: |
+{{- with .Values.rasa.settings.endpoints }}
+{{- if .models.enabled }}
+    models:
+      url: {{ .models.url }}
+      wait_time_between_pulls: {{ .models.waitTimeBetweenPulls }}
+{{- end }}
+{{- if .trackerStore.enabled }}
+    tracker_store:
+      {{- toYaml .trackerStore | nindent 6 }}
+{{- end }}
+{{- if .lockStore.enabled }}
+    lock_store:
+      {{- if $.Values.rasa.plus.enabled }}
+      type: "rasa_plus.components.concurrent_lock_store.ConcurrentRedisLockStore"
+      host: {{ .lockStore.url }}
+      {{- else }}
+      type: "redis"
+      url: {{ .lockStore.url }}
+      {{- end }}
+      port: {{ .lockStore.port }}
+      password: {{ .lockStore.password }}
+      db: {{ .lockStore.db }}
+      key_prefix: {{ .lockStore.keyPrefix }}
+      use_ssl: {{ .lockStore.useSsl }}
+      socket_timeout: {{ .lockStore.socketTimeout }}
+{{- end }}
+{{- if .eventBroker.enabled }}
+    eventBroker:
+      {{- toYaml .eventBroker | nindent 6 }}
+{{- end }}
+{{- if and .tracing.enabled $.Values.rasa.plus.enabled }}
+    tracing:
+      {{- toYaml .setTracing | nindent 6 }}
+{{- end }}
+    action_endpoint:
+      url: {{ .actionEndpoint.url }}
+{{- with .additionalEndpoints }}
+    {{- toYaml . | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -53,10 +53,6 @@ rasa:
   settings:
     # -- settings.debugMode enables debug mode
     debugMode: false
-    # -- settings.initialModel downloads and loads if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file
-    initialModel: ""
-    # -- settings.trainInitialModel train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined
-    trainInitialModel: false
     # -- settings.port defines port on which Rasa runs
     port: 5005
     # -- settings.scheme defines scheme by which the service are accessible
@@ -256,12 +252,17 @@ rasa:
 
   # -- rasa.initContainers allows to specify init containers for the Rasa deployment
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  ## <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file
   initContainers: []
-  #  - name: init
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
-  #    args:
-  #      - echo "init container"
+    # - name: initial-model
+    #   image: "alpine"
+    #   command: ["/bin/sh", "-c"]
+    #   args:
+    #     - cd /app/models/ && wget <PATH_TO_INITIAL_MODEL> -O model.tar.gz
+    #   volumeMounts:
+    #     - mountPath: /app/models
+    #       name: models
+
 
   # -- rasa.additionalContainers allows to specify additional containers for the Rasa Deployment
   additionalContainers: []

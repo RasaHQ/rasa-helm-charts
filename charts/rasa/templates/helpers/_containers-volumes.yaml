@@ -3,12 +3,16 @@
   emptyDir: {}
 - name: "rasa-configuration"
   configMap:
-    name: {{ include "rasa.fullname" . }}-configmap
+    name: rasa-configmap
     items:
       - key: "endpoints"
         path: "endpoints.yml"
       - key: "credentials"
         path: "credentials.yml"
+- name: models
+  emptyDir: {}
+- name: app-dir
+  emptyDir: {}
 - name: jwtSecret
   secret:
     secretName: {{ .Values.rasa.settings.jwtSecret.secretName }}

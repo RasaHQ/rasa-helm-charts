@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rasa.fullname" . }}-pro-services-deployment
+  name: rasa-pro-services-deployment
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
@@ -22,7 +22,7 @@ spec:
   {{- end }}
   selector:
     matchLabels:
-      {{- include "rasa.selectorLabels" . | nindent 6 }}
+      {{- include "rasa.rasaProServices.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.rasaProServices.podAnnotations }}
@@ -30,7 +30,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "rasa.selectorLabels" . | nindent 8 }}
+        {{- include "rasa.rasaProServices.selectorLabels" . | nindent 8 }}
         {{- if .Values.podLabels }}
           {{- toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
@@ -51,7 +51,7 @@ spec:
         {{- omit .Values.rasaProServices.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}-pro-services
+        - name: rasa-pro-services
           {{- if .Values.rasaProServices.securityContext.enabled }}
           securityContext:
             {{- omit .Values.rasaProServices.securityContext "enabled" | toYaml | nindent 12 }}

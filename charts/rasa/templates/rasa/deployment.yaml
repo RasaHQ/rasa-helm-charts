@@ -51,19 +51,12 @@ spec:
       securityContext:
         {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
-      {{- if or .Values.rasa.initContainers (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
+      {{- if .Values.rasa.initContainers }}
       initContainers:
-        {{- if .Values.rasa.initContainers }}
         {{- toYaml .Values.rasa.initContainers | nindent 8 }}
-        {{- end }}
-        {{- if eq (include "rasa.initialModel.download" .) "true" }}
-        {{- include "rasa.downloadInitialModel.initContainer" . | nindent 8 }}
-        {{- else if eq (include "rasa.initialModel.train" .) "true" }}
-        {{- include "rasa.trainInitialModel.initContainer" . | nindent 8 }}
-        {{- end }}
       {{- end }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: rasa
           {{- if .Values.rasa.securityContext.enabled }}
           securityContext:
             {{- omit .Values.rasa.securityContext "enabled" | toYaml | nindent 12 }}
@@ -80,8 +73,6 @@ spec:
             - "{{ .Values.rasa.settings.port }}"
             - --cors
             - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
-            - --jwt-method
-            - {{ .Values.rasa.settings.jwtMethod }}
             {{- if .Values.rasa.settings.debugMode }}
             - --debug
             {{- end }}
@@ -115,9 +106,6 @@ spec:
             {{- toYaml .Values.rasa.resources | nindent 12 }}
           volumeMounts:
             {{- include "rasa.containers.volumeMounts" . | nindent 12 }}
-          {{- if or (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
-            {{- include "rasa.initialModel.initiContainer.volumeMounts" . | nindent 12 }}
-          {{- end }}
           {{- if .Values.rasa.volumeMounts }}
             {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
           {{- end }}
@@ -126,9 +114,6 @@ spec:
       {{- end }}
       volumes:
         {{- include "rasa.containers.volumes" . | nindent 8 }}
-      {{- if or (eq (include "rasa.initialModel.download" .) "true") (eq (include "rasa.initialModel.train" .) "true") }}
-        {{- include "rasa.initialModel.initConttainer.volumes" . | nindent 8 }}
-      {{- end }}
       {{- if .Values.rasa.volumes }}
         {{- toYaml .Values.rasa.volumes | nindent 8 }}
       {{- end }}

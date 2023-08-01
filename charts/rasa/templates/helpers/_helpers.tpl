@@ -46,10 +46,18 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 
 {{/*
-Selector labels
+Selector labels for Rasa OSS/Plus
 */}}
 {{- define "rasa.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "rasa.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Selector labels for Rasa Pro Services
+*/}}
+{{- define "rasa.rasaProServices.selectorLabels" -}}
+app.kubernetes.io/name: rasa-pro-services
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -105,27 +113,5 @@ Determine rasa server to run with arguments
 - --auth-token
 - "$(cat /app/secrets/{{ .Values.rasa.settings.authToken.secretKey }})"
 {{- end }}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Determine if a initial model should be downloaded
-*/}}
-{{- define "rasa.initialModel.download" -}}
-{{- if and (not .Values.rasa.settings.endpoints.models.enabled) (not (empty .Values.rasa.settings.initialModel)) (not .Values.rasa.settings.trainInitialModel) -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Determine if a initial model should be trained
-*/}}
-{{- define "rasa.initialModel.train" -}}
-{{- if and (not .Values.rasa.settings.endpoints.models.enabled) .Values.rasa.settings.trainInitialModel -}}
-{{- print "true" -}}
-{{- else -}}
-{{- print "false" -}}
 {{- end -}}
 {{- end -}}

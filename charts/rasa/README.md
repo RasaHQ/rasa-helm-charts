@@ -79,7 +79,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
 | rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
 | rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
+| rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file |
 | rasa.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasa.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasa.livenessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
@@ -134,7 +134,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.endpoints.tracing | object | `{"enabled":false}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
 | rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
-| rasa.settings.initialModel | string | `""` | settings.initialModel downloads and loads if a model server or remote storage is not used. It has to be a URL (without auth) that points to a tar.gz file |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.lockStore | object | `{"ticketLockLifetime":60}` | settings.lockStore provides synchronization mechanism used by Rasa |
@@ -169,7 +168,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasa.settings.tensorflow.gpuMemoryAlloc | string | `"0:1024, 1:2048"` | tensorflow.gpuMemoryAlloc is used to limit the absolute amount of GPU memory that can be used by a Rasa process |
 | rasa.settings.tensorflow.interOpParallelismThreads | string | `"3"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation |
 | rasa.settings.tensorflow.intraOpParallelismThreads | string | `"2"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-multiple-operations |
-| rasa.settings.trainInitialModel | bool | `false` | settings.trainInitialModel train a model if an initial model is not defined. This parameter is ignored if the `applicationSettings.initialModel` is defined |
 | rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |

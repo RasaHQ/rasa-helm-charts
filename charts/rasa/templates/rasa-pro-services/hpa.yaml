@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "rasa.fullname" . }}-pro-services-hpa
+  name: rasa-pro-services-hpa
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "rasa.fullname" . }}-pro-services-deployment
+    name: rasa-pro-services-deployment
   minReplicas: {{ .Values.rasaProServices.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.rasaProServices.autoscaling.maxReplicas }}
   metrics:

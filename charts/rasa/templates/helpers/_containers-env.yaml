@@ -8,7 +8,7 @@ Environment Variables for Rasa Containers
   value: {{ .telemetry.enabled | quote }}
 - name: "RASA_TELEMETRY_DEBUG"
   value: {{ .telemetry.debug | quote }}
-{{- end }}
+{{- end -}}
 - name: "MPLCONFIGDIR"
   value: "/tmp/.matplotlib"
 - name: "TF_CPP_MIN_LOG_LEVEL"

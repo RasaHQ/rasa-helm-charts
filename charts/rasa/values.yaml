@@ -36,7 +36,7 @@ rasa:
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
     tag: "3.6.4-latest"
-  
+
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   strategy: {}
@@ -62,7 +62,7 @@ rasa:
     # Enter details in token or (jwtSecret, jwtMethod) to enable either of them
     enableApi: true
     # -- settings.authToken is token Rasa accepts as authentication token from other Rasa services
-    authToken: # "rasaToken"
+    authToken:
       secretName: ""
       secretKey: ""
     # -- settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services
@@ -122,7 +122,7 @@ rasa:
         port: ""
         password: ""
         db: "1"
-        keyPrefix: "" # alphanumeric value to prepend to lock store keys
+        keyPrefix: ""
         useSsl: false
         socketTimeout: ""
       # -- endpoints.eventBroker allows you to connect your running assistant to other services that process the data
@@ -134,7 +134,7 @@ rasa:
         # username: ""
         # password: ""
         # port: ""
-        # queues: 
+        # queues:
         #   - rasa_production_events
         # exchangeName: exchange
       # -- endpoints.tracing tracks requests as they flow through a distributed system
@@ -244,7 +244,7 @@ rasa:
     #     secretKeyRef:
     #       name:
     #       key:
-  
+
   # -- rasa.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []
     # - configMapRef:
@@ -296,7 +296,7 @@ rasa:
   # -- rasa.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
-  
+
   # -- rasa.podSecurityContext defines pod security context
   podSecurityContext:
     enabled: true
@@ -460,7 +460,7 @@ rasaProServices:
     # -- Specifies image tag
     # image.tag specifies image tag
     tag: "3.1.1-latest"
-  
+
   # -- rasaProServices.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
   strategy: {}
@@ -511,7 +511,7 @@ rasaProServices:
     # Filepath for SSL CA Certificate that will be used to connect with Kafka
     KAFKA_SSL_CA_LOCATION:
       value: ""
-      
+
   # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []
     # - configMapRef:
@@ -536,7 +536,7 @@ rasaProServices:
   # -- rasaProServices.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
-  
+
   # -- rasaProServices.podSecurityContext defines pod security context
   podSecurityContext:
     enabled: true

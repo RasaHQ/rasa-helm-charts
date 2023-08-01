@@ -48,7 +48,7 @@ jobs:
 
       - name: Package Helm release
         id: package
-        run: helm package charts/studio/
+        run: helm package charts/${{ matrix.charts }}/
 
       - name: Push Helm Charts to Google Artifact Registry
         run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}

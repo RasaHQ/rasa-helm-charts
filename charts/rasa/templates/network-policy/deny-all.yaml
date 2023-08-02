@@ -1,0 +1,12 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.denyAll }}
+kind: NetworkPolicy
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+metadata:
+  name: {{ include "rasa.fullname" . }}-deny-all
+spec:
+  podSelector:
+    matchLabels: {}
+  policyTypes:
+  - Ingress
+  - Egress
+{{- end }}

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.16](https://img.shields.io/badge/Version-0.1.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.17](https://img.shields.io/badge/Version-0.1.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.16
+$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.17
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.16
+$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.17
 ```
 
 ## Values
@@ -87,7 +87,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.16
 | eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
 | eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
-| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"GROUP_ID":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_TOPIC":{"value":""},"SASL_MECHANISM":{"value":"SCRAM-SHA-256"},"SASL_PASSWORD":{"secret":{"key":"SASL_PASSWORD","name":"studio-secrets"}},"SASL_USERNAME":{"value":""},"SECURITY_PROTOCOL":{"value":"SASL_SSL"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":""},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":""},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion","tag":"v0.1.0-latest"}` | Define image settings |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | eventIngestion.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion"` | Specifies image repository |

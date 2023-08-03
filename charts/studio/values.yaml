@@ -374,16 +374,36 @@ eventIngestion:
       secret:
         name: "studio-secrets"
         key: "DATABASE_URL"
-    SECURITY_PROTOCOL:
-      value: "SASL_SSL"
-    SASL_MECHANISM:
-      value: "SCRAM-SHA-256"
-    SASL_USERNAME:
+    # Set to true if you want to use SSL
+    KAFKA_ENABLE_SSL:
       value: ""
-    SASL_PASSWORD:
+    # Set to true if you want to use SSL with custom certs
+    KAFKA_CUSTOM_SSL:
+      value: ""
+    # Path to the CA file
+    KAFKA_CA_FILE:
+      value: ""
+    # Path to the client key file
+    KAFKA_KEY_FILE:
+      value: ""
+    # Path to the client certificate file
+    KAFKA_CERT_FILE:
+      value: ""
+    # Defaults to true, the server certificate is verified against the list of supplied CA
+    KAFKA_REJECT_UNAUTHORIZED:
+      value: ""
+    # Instructs the application to allow untrusted certificates. Set this to 0 if using untrusted certificates for Kafka.
+    NODE_TLS_REJECT_UNAUTHORIZED:
+      value: ""
+    # Supported values are plain, scram-sha-256 or scram-sha-512. You can leave it empty if you are not using SASL.
+    KAFKA_SASL_MECHANISM:
+      value: ""
+    KAFKA_SASL_USERNAME:
+      value: ""
+    KAFKA_SASL_PASSWORD:
       secret:
         name: "studio-secrets"
-        key: "SASL_PASSWORD"
+        key: "KAFKA_SASL_PASSWORD"
     KAFKA_BROKER_ADDRESS:
       value: ""
     KAFKA_TOPIC:
@@ -392,7 +412,7 @@ eventIngestion:
       value: ""
     KAFKA_CLIENT_ID:
       value: "kafka-python-rasa"
-    GROUP_ID:
+    KAFKA_GROUP_ID:
       value: ""
 
   # -- Define service account

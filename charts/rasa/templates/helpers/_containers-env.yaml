@@ -1,0 +1,114 @@
+{{/*
+Environment Variables for Rasa Containers
+*/}}
+{{- define "rasa.containers.env" -}}
+{{- with .Values.rasa.settings }}
+{{- if and $.Values.rasa.enabled (not $.Values.rasa.plus.enabled) (not $.Values.rasaProServices.enabled) }}
+- name: "RASA_TELEMETRY_ENABLED"
+  value: {{ .telemetry.enabled | quote }}
+- name: "RASA_TELEMETRY_DEBUG"
+  value: {{ .telemetry.debug | quote }}
+{{- end -}}
+- name: "MPLCONFIGDIR"
+  value: "/tmp/.matplotlib"
+- name: "TF_CPP_MIN_LOG_LEVEL"
+  value: "2"
+- name: "RASA_TOKEN"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .authToken.secretName }}
+      key: {{ .authToken.secretKey }}
+- name: "JWT_SECRET"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .jwtSecret.secretName }}
+      key: {{ .jwtSecret.secretKey }}
+{{- if or $.Values.rasaProServices.enabled $.Values.rasa.plus.enabled }}
+- name: "RASA_PRO_LICENSE" 
+  valueFrom:
+    secretKeyRef:
+      name: {{ $.Values.rasaProLicence.secretName }}
+      key: {{ $.Values.rasaProLicence.secretKey }}
+# Telemetry
+- name: "RASA_PRO_TELEMETRY_ENABLED"
+  value: {{ .telemetry.enabled | quote }}
+- name: "RASA_PRO_TELEMETRY_DEBUG"
+  value: {{ .telemetry.debug | quote }}
+{{- end }}
+{{- if or $.Values.rasa.enabled $.Values.rasa.plus.enabled }}
+- name: "RASA_ENVIRONMENT"
+  value: {{ .environment | quote }}
+# Lock Store
+- name: "TICKET_LOCK_LIFETIME"
+  value: {{ .lockStore.ticketLockLifetime }}
+# Sanic Server
+- name: "SANIC_BACKLOG"
+  value: {{ .sanicServer.backlog | quote }}
+- name: "SANIC_WORKERS"
+  value: {{ .sanicServer.workers }}
+# Postgres Tracker Store
+- name: "POSTGRESQL_SCHEMA"
+  value: {{ .postgresTrackerStore.schema | quote }}
+- name: "POSTGRESQL_POOL_SIZE"
+  value: {{ .postgresTrackerStore.poolSize }}
+- name: "POSTGRESQL_MAX_OVERFLOW"
+  value: {{ .postgresTrackerStore.maxOverflow }}
+# RabbitMQ
+{{- if .rabbitmq.enabled }}
+- name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .rabbitmq.sslClientCertificate.secretName }}
+      key: {{ .rabbitmq.sslClientCertificate.secretKey }}
+- name: "RABBITMQ_SSL_CLIENT_KEY"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .rabbitmq.sslClientKey.secretName }}
+      key: {{ .rabbitmq.sslClientKey.secretKey }}
+{{- end }}
+# Logging
+- name: "LOG_LEVEL"
+  value: {{ .logging.logLevel | quote | upper }}
+- name: "LOG_LEVEL_LIBRARIES"
+  value: {{ .logging.logLevelLibraries | quote | upper }}
+- name: "LOG_LEVEL_MATPLOTLIB"
+  value: {{ .logging.logLevelMatplotlib | quote | upper }}
+- name: "LOG_LEVEL_KAFKA"
+  value: {{ .logging.logLevelKafka | quote | upper }}
+- name: "LOG_LEVEL_RABBITMQ"
+  value: {{ .logging.logLevelRabbitMq | quote | upper }}
+- name: "LOG_LEVEL_PRESIDIO"
+  value: {{ .logging.logLevelPresidio | quote | upper }}
+- name: "LOG_LEVEL_FAKER"
+  value: {{ .logging.logLevelFaker | quote | upper }}
+- name: "FORCE_JSON_LOGGING"
+  value: {{ .logging.forceJsonLogging | quote }}
+# Cache
+- name: "RASA_MAX_CACHE_SIZE"
+  value: {{ .cache.maxSize | quote }}
+- name: "RASA_CACHE_NAME"
+  value: {{ .cache.name | quote }}
+- name: "RASA_CACHE_DIRECTORY"
+  value: {{ .cache.directory | quote }}
+# Duckling
+- name: "RASA_DUCKLING_HTTP_URL"
+  value: {{ .ducklingHttpUrl | quote }}
+# Tensorflow
+- name: "TF_GPU_MEMORY_ALLOC"
+  value: {{ .tensorflow.gpuMemoryAlloc | quote }}
+- name: "TF_INTER_OP_PARALLELISM_THREADS"
+  value: {{ .tensorflow.interOpParallelismThreads | quote }}
+- name: "TF_INTRA_OP_PARALLELISM_THREADS"
+  value: {{ .tensorflow.intraOpParallelismThreads | quote }}
+- name: "TF_DETERMINISTIC_OPS"
+  value: {{ .tensorflow.deterministicOps | quote }}
+- name: "RASA_SHELL_STREAM_READING_TIMEOUT_IN_SECONDS"
+  value: {{ .shellStreamReadingTimeoutInSeconds | quote }}
+- name: "MAX_NUMBER_OF_PREDICTIONS"
+  value: {{ .maxNumberOfPreditions | quote }}
+{{- end }}
+{{- end }}
+{{- if .Values.rasa.additionalEnv }}
+{{ toYaml .Values.rasa.additionalEnv }}
+{{- end }}
+{{- end -}}

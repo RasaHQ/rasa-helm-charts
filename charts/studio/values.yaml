@@ -98,6 +98,7 @@ backend:
     type: ClusterIP
     # -- Specify service port
     port: 80
+    # -- Specify service target port
     targetPort: 4000
 
   # -- Override default liveness probe settings

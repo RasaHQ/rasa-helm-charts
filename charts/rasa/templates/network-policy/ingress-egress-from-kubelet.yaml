@@ -1,0 +1,45 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-egress-from-kubelet-to-rasa
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rasa.name" . }}
+  egress:
+    - to:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+  ingress:
+    - from:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.rasa.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: ingress-egress-from-kubelet-to-rasa-pro-services
+  namespace: {{ .Release.Namespace }}
+spec:
+  policyTypes:
+    - Ingress
+    - Egress
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: rasa-pro-services
+  egress:
+    - to:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+  ingress:
+    - from:
+    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
+      ports:
+      - protocol: TCP
+        port: {{ .Values.rasaProServices.service.port }}
+{{- end }}

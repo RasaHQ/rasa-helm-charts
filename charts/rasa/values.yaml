@@ -517,11 +517,24 @@ rasaProServices:
     # - configMapRef:
     #     name: my-configmap
 
-  # -- rasa.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment
+  # -- rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment
   additionalContainers: []
   #  - name: extra
   #    image: "busybox"
   #    command: ["bash", "-c"]
+
+  # -- rasaProServices.volumes specify additional volumes for the Rasa Pro Services container
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  volumes: []
+    # - hostPath:
+    #   path: <HOST_PATH>
+    #   name: <VOLUME_NAME>
+
+  # -- rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container
+  volumeMounts: []
+    # - name: <VOLUME_NAME>
+    #   mountPath: <CONTAINER_PATH>
+    #   readOnly: true
 
   # -- rasaProServices.serviceAccount defines service account
   serviceAccount:

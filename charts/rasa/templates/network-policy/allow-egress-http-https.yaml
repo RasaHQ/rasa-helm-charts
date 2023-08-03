@@ -1,0 +1,18 @@
+{{- if .Values.networkPolicy.enabled }}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-egress-http-https
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rasa.name" . }}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    - protocol: TCP
+      port: 443
+    - protocol: TCP
+      port: 80
+{{- end }}

@@ -561,9 +561,9 @@ rasaProServices:
     # -- service.type is used to specify service type
     type: ClusterIP
     # -- service.port is used to specify service port
-    port: 5005
+    port: 8732
     # -- service.targetPort is ued to specify service target port
-    targetPort: 5005
+    targetPort: 8732
     # -- service.annotations defines annotations to add to the service
     annotations: {}
     # -- service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types
@@ -658,8 +658,8 @@ networkPolicy:
   denyAll: false
   # -- Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes
   nodeCIDR: []
-  #  - ipBlock:
-  #      cidr: 0.0.0.0/0
+    # - ipBlock:
+    #     cidr: 0.0.0.0/0
 
 # Defines global settings for all resources
 global:

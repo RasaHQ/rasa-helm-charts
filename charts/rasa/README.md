@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.0](https://img.shields.io/badge/Version-0.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.1](https://img.shields.io/badge/Version-0.1.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.1
 ```
 
 ## Values
@@ -216,10 +216,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.0
 | rasaProServices.replicaCount | int | `1` | rasaProServices.replicaCount specifies number of replicas |
 | rasaProServices.resources | object | `{}` | rasaProServices.resources specifies the resources limits and requests |
 | rasaProServices.securityContext | object | `{"enabled":true}` | rasaProServices.securityContext defines security context that allows you to overwrite the pod-level security context |
-| rasaProServices.service | object | `{"annotations":{},"port":5005,"targetPort":5005,"type":"ClusterIP"}` | rasaProServices.service define service for Rasa OSS/Plus |
+| rasaProServices.service | object | `{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"}` | rasaProServices.service define service for Rasa OSS/Plus |
 | rasaProServices.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
-| rasaProServices.service.port | int | `5005` | service.port is used to specify service port |
-| rasaProServices.service.targetPort | int | `5005` | service.targetPort is ued to specify service target port |
+| rasaProServices.service.port | int | `8732` | service.port is used to specify service port |
+| rasaProServices.service.targetPort | int | `8732` | service.targetPort is ued to specify service target port |
 | rasaProServices.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
 | rasaProServices.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | rasaProServices.serviceAccount defines service account |
 | rasaProServices.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |

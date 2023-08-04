@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 ```
 
 ## Values
@@ -53,7 +53,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
 | duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | duckling.command | list | `[]` | duckling.command overrides the default command for the container |
-| duckling.enabled | bool | `true` | duckling.enabled enables Duckling deployment |
+| duckling.enabled | bool | `false` | duckling.enabled enables Duckling deployment |
 | duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
 | duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | duckling.image.repository | string | `"rasa/duckling"` | image.repository specifies image repository |
@@ -99,7 +99,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
 | duckling.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
 | duckling.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | duckling.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| duckling.settings.externalUrl | string | `""` | settings.externalUrl set if Duckling is deployed outside these charts Make sure to set `duckling.enabled: false` |
 | duckling.settings.port | int | `8000` | settings.port defines port on which Duckling runs |
 | duckling.settings.scheme | string | `"http"` | settings.scheme defines sheme by which the service are accessible |
 | duckling.strategy | object | `{}` | duckling.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |

@@ -415,6 +415,21 @@ eventIngestion:
     KAFKA_GROUP_ID:
       value: ""
 
+  # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  volumes:
+    []
+    # - hostPath:
+    #   path: <HOST_PATH>
+    #   name: <VOLUME_NAME>
+
+  # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+  volumeMounts:
+    []
+    # - name: <VOLUME_NAME>
+    #   mountPath: <CONTAINER_PATH>
+    #   readOnly: true
+
   # -- Define service account
   serviceAccount:
     # -- Specifies whether a service account should be created

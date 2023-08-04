@@ -707,7 +707,7 @@ podLabels: {}
 ## Settings for Duckling
 duckling:
   # -- duckling.enabled enables Duckling deployment
-  enabled: true
+  enabled: false
   # -- duckling.replicaCount specifies number of replicas
   replicaCount: 1
   # duckling.image defines image settings
@@ -732,9 +732,6 @@ duckling:
     port: 8000
     # -- settings.scheme defines sheme by which the service are accessible
     scheme: http
-    # -- settings.externalUrl set if Duckling is deployed outside these charts
-    # Make sure to set `duckling.enabled: false`
-    externalUrl: ""
 
   # -- duckling.args overrides the default arguments for the container
   args: []

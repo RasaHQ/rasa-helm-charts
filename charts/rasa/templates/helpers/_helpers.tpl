@@ -126,3 +126,14 @@ Determine rasa server to run with arguments
 {{- end }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Return Duckling URL
+*/}}
+{{- define "rasa.ducklingUrl" -}}
+{{- if and .Values.duckling.enabled (empty .Values.duckling.settings.externalUrl) -}}
+{{- printf "%s://%s-duckling.%s.svc:%d" .Values.duckling.settings.scheme "duckling-service" .Release.Namespace (.Values.duckling.service.port | int) -}}
+{{- else if and (not .Values.duckling.enabled) (not (empty .Values.duckling.settings.externalUrl))  -}}
+{{- print .Values.duckling.settings.externalUrl -}}
+{{- end -}}
+{{- end -}}

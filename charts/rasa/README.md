@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
 ```
 
 ## Uninstalling the Chart
@@ -32,23 +32,80 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.3
 ```
 
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| actionServer.external.enabled | bool | `false` | Determine if external URL is used |
-| actionServer.external.url | string | `""` | External URL to Rasa Action Server |
-| actionServer.install | bool | `false` | Install Rasa Action Server |
 | deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Rasa deployments |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Rasa deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling.external.enabled | bool | `false` | Determine if external URL is used |
-| duckling.external.url | string | `""` | External URL to Duckling |
-| duckling.install | bool | `false` | Install Duckling |
+| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args |
+| duckling.additionalContainers | list | `[]` | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment |
+| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables |
+| duckling.affinity | object | `{}` | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| duckling.args | list | `[]` | duckling.args overrides the default arguments for the container |
+| duckling.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
+| duckling.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
+| duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
+| duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
+| duckling.command | list | `[]` | duckling.command overrides the default command for the container |
+| duckling.enabled | bool | `true` | duckling.enabled enables Duckling deployment |
+| duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
+| duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
+| duckling.image.repository | string | `"rasa/duckling"` | image.repository specifies image repository |
+| duckling.image.tag | string | `"0.2.0.2-r0"` | image.tag specifies image tag |
+| duckling.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
+| duckling.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
+| duckling.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
+| duckling.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
+| duckling.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
+| duckling.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
+| duckling.initContainers | list | `[]` | duckling.initContainers allows to specify init containers for the Duckling deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
+| duckling.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
+| duckling.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
+| duckling.livenessProbe.httpGet | object | `{"path":"/","port":8000,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
+| duckling.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
+| duckling.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
+| duckling.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
+| duckling.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
+| duckling.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
+| duckling.nodeSelector | object | `{}` | duckling.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| duckling.podAnnotations | object | `{}` | duckling.podAnnotations defines annotations to add to the pod |
+| duckling.podSecurityContext | object | `{"enabled":true}` | duckling.podSecurityContext defines pod security context |
+| duckling.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
+| duckling.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
+| duckling.readinessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
+| duckling.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
+| duckling.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
+| duckling.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
+| duckling.readinessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
+| duckling.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
+| duckling.replicaCount | int | `1` | duckling.replicaCount specifies number of replicas |
+| duckling.resources | object | `{}` | duckling.resources specifies the resources limits and requests |
+| duckling.securityContext | object | `{"enabled":true}` | duckling.securityContext defines security context that allows you to overwrite the pod-level security context |
+| duckling.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":8000,"targetPort":8000,"type":"ClusterIP"}` | duckling.service define service for Duckling |
+| duckling.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
+| duckling.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
+| duckling.service.loadBalancerIP | string | `nil` | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer |
+| duckling.service.nodePort | string | `nil` | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport |
+| duckling.service.port | int | `8000` | service.port is used to specify service port |
+| duckling.service.targetPort | int | `8000` | service.targetPort is ued to specify service target port |
+| duckling.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
+| duckling.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | duckling.serviceAccount defines service account |
+| duckling.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| duckling.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
+| duckling.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
+| duckling.settings.externalUrl | string | `""` | settings.externalUrl set if Duckling is deployed outside these charts Make sure to set `duckling.enabled: false` |
+| duckling.settings.port | int | `8000` | settings.port defines port on which Duckling runs |
+| duckling.settings.scheme | string | `"http"` | settings.scheme defines sheme by which the service are accessible |
+| duckling.strategy | object | `{}` | duckling.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
+| duckling.tolerations | list | `[]` | duckling.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| duckling.volumeMounts | list | `[]` | duckling.volumeMounts specifies additional volumes to mount in the Duckling container |
+| duckling.volumes | list | `[]` | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | fullnameOverride | string | `""` | fullnameOverride overrides the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | hostNetwork | bool | `false` | hostNetwork controls whether the pod may use the node network namespace |
@@ -115,7 +172,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
 | rasa.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
 | rasa.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings.authToken | object | `{"secretKey":"","secretName":""}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
+| rasa.settings.authToken | object | `{"secretKey":"authToken","secretName":"rasa-secrets"}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | settings.cache is used for `rasa train` command |
 | rasa.settings.cache.directory | string | `nil` | cache.default is location of the cache default is equivalent of Path(".rasa", "cache") |
 | rasa.settings.cache.maxSize | int | `1000` | cache.maxSize is maximum size for the cache |
@@ -135,7 +192,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
 | rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
-| rasa.settings.jwtSecret | object | `{"secretKey":"","secretName":""}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
+| rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.lockStore | object | `{"ticketLockLifetime":60}` | settings.lockStore provides synchronization mechanism used by Rasa |
 | rasa.settings.lockStore.ticketLockLifetime | int | `60` | lockStore.ticketLockLifetime is lifetime of the ticket associated with a lock |
 | rasa.settings.logging.forceJsonLogging | bool | `false` | logging.forceJsonLogging forces logging in JSON |
@@ -152,10 +209,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
 | rasa.settings.postgresTrackerStore.maxOverflow | int | `100` | postgresTrackerStore.maxOverflow defines maximum overflow size of the pool |
 | rasa.settings.postgresTrackerStore.poolSize | int | `50` | postgresTrackerStore.poolSize defines Pool Size configuration |
 | rasa.settings.postgresTrackerStore.schema | string | `"public"` | postgresTrackerStore.shema is PostgreSQL schema to access |
-| rasa.settings.rabbitmq | object | `{"enabled":false,"postgresTrackerStore":{"secretKey":null,"secretName":null},"sslClientKey":{"secretKey":null,"secretName":null}}` | settings.rabbitmq defines settings to setup RabbitMQ SSL |
+| rasa.settings.rabbitmq | object | `{"enabled":false,"sslClientCertificate":{"secretKey":"sslClientCertificate","secretName":"rasa-secrets"},"sslClientKey":{"secretKey":"sslClientKey","secretName":"rasa-secrets"}}` | settings.rabbitmq defines settings to setup RabbitMQ SSL |
 | rasa.settings.rabbitmq.enabled | bool | `false` | rabbitmq.enabled defines if RabbitMq will be used |
-| rasa.settings.rabbitmq.postgresTrackerStore | object | `{"secretKey":null,"secretName":null}` | rabbitmq.postgresTrackerStore is path to the SSL client certificate |
-| rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":null,"secretName":null}` | rabbitmq.sslClientKey is path to the SSL client key |
+| rasa.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":"sslClientCertificate","secretName":"rasa-secrets"}` | rabbitmq.sslClientCertificate is path to the SSL client certificate |
+| rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":"sslClientKey","secretName":"rasa-secrets"}` | rabbitmq.sslClientKey is path to the SSL client key |
 | rasa.settings.sanicServer | object | `{"backlog":100,"workers":1}` | settings.sanicServer defines sanicServer settings |
 | rasa.settings.sanicServer.backlog | int | `100` | sanicServer.backlog is number of unaccepted connections the server allows before refusing new connections |
 | rasa.settings.sanicServer.workers | int | `1` | sanicServer.workers is number of Sanic worker processes in the HTTP Server and Input Channel Server |
@@ -172,7 +229,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |
 | rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| rasaProLicence | object | `{"secretKey":null,"secretName":null}` | rasaProLicence is license key for Rasa Pro Services. |
+| rasaProLicence | object | `{"secretKey":"rasaProLicence","secretName":"rasa-secrets"}` | rasaProLicence is license key for Rasa Pro Services. |
 | rasaProServices.additionalContainers | list | `[]` | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
 | rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
@@ -183,8 +240,8 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.2
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasaProServices.environmentVariables.KAFKA_BROKER_ADDRESS.value | string | `""` |  |
 | rasaProServices.environmentVariables.KAFKA_SASL_MECHANISM.value | string | `"PLAIN"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.key | string | `nil` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.name | string | `nil` |  |
+| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.key | string | `"kafkaSslPassword"` |  |
+| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.name | string | `"rasa-secrets"` |  |
 | rasaProServices.environmentVariables.KAFKA_SASL_USERNAME.value | string | `""` |  |
 | rasaProServices.environmentVariables.KAFKA_SECURITY_PROTOCOL.value | string | `"PLAINTEXT"` |  |
 | rasaProServices.environmentVariables.KAFKA_SSL_CA_LOCATION.value | string | `""` |  |

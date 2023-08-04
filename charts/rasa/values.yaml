@@ -12,14 +12,13 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- imagePullSecrets is used for private repository pull secrets
-imagePullSecrets:
-  []
+imagePullSecrets: []
   # - name: regcred
 
 # -- rasaProLicence is license key for Rasa Pro Services.
 rasaProLicence:
-  secretName:
-  secretKey:
+  secretName: "rasa-secrets"
+  secretKey: "rasaProLicence"
 
 # Rasa Open Source
 rasa:
@@ -63,12 +62,12 @@ rasa:
     enableApi: true
     # -- settings.authToken is token Rasa accepts as authentication token from other Rasa services
     authToken:
-      secretName: ""
-      secretKey: ""
+      secretName: "rasa-secrets"
+      secretKey: "authToken"
     # -- settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services
     jwtSecret:
-      secretName: ""
-      secretKey: ""
+      secretName: "rasa-secrets"
+      secretKey: "jwtSecret"
     # -- settings.jwtMethod is JWT algorithm to be used
     jwtMethod: HS256
     # -- settings.cors is CORS for the passed origin. Default is * to allow all origins
@@ -195,14 +194,14 @@ rasa:
     rabbitmq:
       # -- rabbitmq.enabled defines if RabbitMq will be used
       enabled: false
-      # -- rabbitmq.postgresTrackerStore is path to the SSL client certificate
-      postgresTrackerStore:
-        secretName:
-        secretKey:
+      # -- rabbitmq.sslClientCertificate is path to the SSL client certificate
+      sslClientCertificate:
+        secretName: "rasa-secrets"
+        secretKey: "sslClientCertificate"
       # -- rabbitmq.sslClientKey is path to the SSL client key
       sslClientKey:
-        secretName:
-        secretKey:
+        secretName: "rasa-secrets"
+        secretKey: "sslClientKey"
     # -- settings.cache is used for `rasa train` command
     cache:
       # -- cache.maxSize is maximum size for the cache
@@ -503,8 +502,8 @@ rasaProServices:
     # Password for SASL authentication
     KAFKA_SASL_PASSWORD:
       secret:
-        name:
-        key:
+        name: "rasa-secrets"
+        key: "kafkaSslPassword"
     # Security protocol to use for communication with Kafka
     KAFKA_SECURITY_PROTOCOL:
       value: "PLAINTEXT"
@@ -705,24 +704,245 @@ deploymentLabels: {}
 # -- podLabels defines labels to add to all Rasa pod(s)
 podLabels: {}
 
-## Settings for Rasa Action Server
-actionServer:
-  # -- Install Rasa Action Server
-  install: false
-
-  external:
-    # -- Determine if external URL is used
-    enabled: false
-    # -- External URL to Rasa Action Server
-    url: ""
-
 ## Settings for Duckling
 duckling:
-  # -- Install Duckling
-  install: false
+  # -- duckling.enabled enables Duckling deployment
+  enabled: true
+  # -- duckling.replicaCount specifies number of replicas
+  replicaCount: 1
+  # duckling.image defines image settings
+  image:
+    # -- image.repository specifies image repository
+    repository: "rasa/duckling"
+    # -- image.pullPolicy specifies image pull policy
+    pullPolicy: IfNotPresent
+    # -- image.tag specifies image tag
+    tag: "0.2.0.2-r0"
 
-  external:
-    # -- Determine if external URL is used
+  # -- duckling.strategy specifies deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+  #   type: RollingUpdate
+  #   rollingUpdate:
+  #     maxSurge: 1
+  #     maxUnavailable: 0
+
+  settings:
+    # -- settings.port defines port on which Duckling runs
+    port: 8000
+    # -- settings.scheme defines sheme by which the service are accessible
+    scheme: http
+    # -- settings.externalUrl set if Duckling is deployed outside these charts
+    # Make sure to set `duckling.enabled: false`
+    externalUrl: ""
+
+  # -- duckling.args overrides the default arguments for the container
+  args: []
+  # -- duckling.additionalArgs adds additional arguments to the default args
+  additionalArgs: []
+  # -- duckling.command overrides the default command for the container
+  command: []
+  # -- duckling.additionalEnv adds additional environment variables
+  additionalEnv: []
+    # - name: SOME_CUSTOM_ENV_VAR
+    #   value: "custom value"
+    # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name:
+    #       key:
+
+  # -- duckling.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- duckling.initContainers allows to specify init containers for the Duckling deployment
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  #  - name: init
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+  #    args:
+  #      - echo "init container"
+
+  # -- duckling.additionalContainers allows to specify additional containers for the Duckling Deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
+  # -- duckling.volumes specify additional volumes to mount in the Duckling container
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  volumes: []
+  #   - hostPath:
+  #       path: <HOST_PATH>
+  #     name: <VOLUME_NAME>
+
+  # -- duckling.volumeMounts specifies additional volumes to mount in the Duckling container
+  volumeMounts: []
+    # - name: <VOLUME_NAME>
+    #   mountPath: <CONTAINER_PATH>
+    #   readOnly: true
+
+  # -- duckling.serviceAccount defines service account
+  serviceAccount:
+    # -- serviceAccount.create specifies whether a service account should be created
+    create: true
+    # -- serviceAccount.annotations defines annotations to add to the service account
+    annotations: {}
+    # -- serviceAccount.name is the name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  # -- duckling.podAnnotations defines annotations to add to the pod
+  podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/duckling: runtime/default
+
+  # -- duckling.podSecurityContext defines pod security context
+  podSecurityContext:
+    enabled: true
+    # fsGroup: 2000
+
+  # -- duckling.securityContext defines security context that allows you to overwrite the pod-level security context
+  securityContext:
+    enabled: true
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  # -- duckling.service define service for Duckling
+  service:
+    # -- service.type is used to specify service type
+    type: ClusterIP
+    # -- service.port is used to specify service port
+    port: 8000
+    # -- service.targetPort is ued to specify service target port
+    targetPort: 8000
+    # -- service.annotations defines annotations to add to the service
+    annotations: {}
+    # -- service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+    nodePort:
+    # -- service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+    loadBalancerIP:
+    # -- service.externalTrafficPolicy enables client source IP preservation
+    ## Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+
+  # duckling.livenessProbe is used to override default liveness probe settings
+  livenessProbe:
+    # -- livenessProbe.enabled is used to enable or disable liveness probe
+    enabled: true
+    # -- livenessProbe.httpGet is used to define HTTP request
+    httpGet:
+      path: /
+      port: 8000
+      scheme: HTTP
+    # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
+    initialDelaySeconds: 15
+    # -- livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
+    periodSeconds: 15
+    # -- livenessProbe.successThreshold defines how often (in seconds) to perform the probe
+    successThreshold: 1
+    # -- livenessProbe.timeoutSeconds defines number of seconds after which the probe times out
+    timeoutSeconds: 5
+    # -- livenessProbe.failureThreshold defines after how many failures container is considered unhealthy
+    failureThreshold: 6
+    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
+    terminationGracePeriodSeconds: 30
+
+  # duckling.readinessProbe is used to override default readiness probe settings
+  readinessProbe:
+    # -- readinessProbe.enabled is used to enable or disable readinessProbe
+    enabled: true
+    # -- readinessProbe.httpGet is used to define HTTP request
+    httpGet:
+      path: /
+      port: 80
+      scheme: HTTP
+    # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
+    initialDelaySeconds: 15
+    # -- readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
+    periodSeconds: 15
+    # -- readinessProbe.successThreshold defines how often (in seconds) to perform the probe
+    successThreshold: 1
+    # -- readinessProbe.timeoutSeconds defines number of seconds after which the probe times out
+    timeoutSeconds: 5
+    # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
+    failureThreshold: 6
+    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
+    terminationGracePeriodSeconds: 30
+
+  # Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- ingress.enabled specifies whether an ingress service should be created
     enabled: false
-    # -- External URL to Duckling
-    url: ""
+    # -- ingress.className specifies the ingress className to be used
+    className: ""
+    # -- ingress.lables defines labels to add to the ingress
+    labels: {}
+    # -- ingress.annotations defines annotations to add to the ingress
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- ingress.hosts specifies the hosts for this ingress
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+            pathType: Prefix
+        extraPaths: []
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # -- duckling.resources specifies the resources limits and requests
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # duckling.autoscaling specifies the HPA settings
+  autoscaling:
+    # -- autoscaling.enabled specifies whether autoscaling should be enabled
+    enabled: false
+    # -- autoscaling.minReplicas specifies the minimum number of replicas
+    minReplicas: 1
+    # -- autoscaling.maxReplicas specifies the maximum number of replicas
+    maxReplicas: 100
+    # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- duckling.nodeSelector allows the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  nodeSelector: {}
+
+  # -- duckling.tolerations defines tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  # -- duckling.affinity allows the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}

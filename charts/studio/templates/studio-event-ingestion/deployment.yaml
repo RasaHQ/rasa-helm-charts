@@ -48,6 +48,10 @@ spec:
           imagePullPolicy: {{ .Values.eventIngestion.image.pullPolicy }}
           resources:
             {{- toYaml .Values.eventIngestion.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.eventIngestion.volumeMounts }}
+            {{- toYaml .Values.eventIngestion.volumeMounts | nindent 12 }}
+          {{- end }}
           env:
             {{- range $key, $value := .Values.eventIngestion.environmentVariables }}
             - name: {{ $key | upper }}
@@ -60,6 +64,10 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
+      volumes:
+      {{- if .Values.eventIngestion.volumes }}
+        {{- toYaml .Values.eventIngestion.volumes | nindent 8 }}
+      {{- end }}
       {{- with .Values.eventIngestion.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

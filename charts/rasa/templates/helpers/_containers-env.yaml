@@ -9,6 +9,10 @@ Environment Variables for Rasa Containers
 - name: "RASA_TELEMETRY_DEBUG"
   value: {{ .telemetry.debug | quote }}
 {{- end -}}
+{{- if or $.Values.duckling.enabled (not (empty $.Values.duckling.settings.externalUrl)) -}}
+- name: "RASA_DUCKLING_HTTP_URL"
+  value: "{{ include "rasa.ducklingUrl" $ }}"
+{{- end }}
 - name: "MPLCONFIGDIR"
   value: "/tmp/.matplotlib"
 - name: "TF_CPP_MIN_LOG_LEVEL"

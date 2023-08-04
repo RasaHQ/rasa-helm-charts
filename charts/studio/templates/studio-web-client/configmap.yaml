@@ -9,3 +9,5 @@ data:
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; 
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
     window.FEATURE_FLAG_FLOWS = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_FLOWS | quote }};
+    window.FEATURE_FLAG_TRY_ASSISTANT = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_TRY_ASSISTANT | quote }};
+    window.FEATURE_FLAG_TRAINING = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_TRAINING | quote }};

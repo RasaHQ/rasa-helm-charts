@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.20](https://img.shields.io/badge/Version-0.1.20-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.0](https://img.shields.io/badge/AppVersion-0.1.0-informational?style=flat-square)
+![Version: 0.1.21](https://img.shields.io/badge/Version-0.1.21-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 0.1.2](https://img.shields.io/badge/AppVersion-0.1.2-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
+$ helm install my-release oci://registry-1.docker.io/helm-charts/studio --version 0.1.21
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
+$ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.21
 ```
 
 ## Values
@@ -46,10 +46,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| backend.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-backend/studio-backend","tag":"v0.1.0-latest"}` | Define image settings |
+| backend.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-backend","tag":"0.1.2"}` | Define image settings |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| backend.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-backend/studio-backend"` | Specifies image repository |
-| backend.image.tag | string | `"v0.1.0-latest"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| backend.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-backend"` | Specifies image repository |
+| backend.image.tag | string | `"0.1.2"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
 | backend.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | backend.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | backend.ingress.className | string | `""` | Specifies the ingress className to be used |
@@ -58,11 +58,11 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enable":true,"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-database-migration/studio-database-migration","tag":"v0.1.0-latest"}}` | Define Studio Database Migration job settings |
+| backend.migration | object | `{"enable":true,"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-database-migration","tag":"0.1.2"}}` | Define Studio Database Migration job settings |
 | backend.migration.enable | bool | `true` | Specifies whether a database migration job should be created |
-| backend.migration.image | object | `{"repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-database-migration/studio-database-migration","tag":"v0.1.0-latest"}` | Specifies which image database migration job should use |
-| backend.migration.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-database-migration/studio-database-migration"` | Specifies the repository of the image |
-| backend.migration.image.tag | string | `"v0.1.0-latest"` | Specifies the tag of the image |
+| backend.migration.image | object | `{"repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-database-migration","tag":"0.1.2"}` | Specifies which image database migration job should use |
+| backend.migration.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-database-migration"` | Specifies the repository of the image |
+| backend.migration.image.tag | string | `"0.1.2"` | Specifies the tag of the image |
 | backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | backend.podAnnotations | object | `{}` | Annotations to add to the pod |
 | backend.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -88,10 +88,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
 | eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":""},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":""},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion","tag":"v0.1.0-latest"}` | Define image settings |
+| eventIngestion.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-event-ingestion","tag":"0.1.2"}` | Define image settings |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| eventIngestion.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-event-ingestion/studio-event-ingestion"` | Specifies image repository |
-| eventIngestion.image.tag | string | `"v0.1.0-latest"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| eventIngestion.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-event-ingestion"` | Specifies image repository |
+| eventIngestion.image.tag | string | `"0.1.2"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
 | eventIngestion.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | eventIngestion.podAnnotations | object | `{}` | Annotations to add to the pod |
 | eventIngestion.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -111,10 +111,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
 | imagePullSecrets | list | `[]` | Repository pull secrets |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
-| keycloak.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak","tag":"v0.1.0-latest"}` | Define image settings |
+| keycloak.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-keycloak","tag":"0.1.2"}` | Define image settings |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| keycloak.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-keycloak/studio-keycloak"` | Specifies image repository |
-| keycloak.image.tag | string | `"v0.1.0-latest"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| keycloak.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-keycloak"` | Specifies image repository |
+| keycloak.image.tag | string | `"0.1.2"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
 | keycloak.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | keycloak.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | keycloak.ingress.className | string | `""` | Specifies the ingress className to be used |
@@ -144,10 +144,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/studio --version 0.1.20
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"studio-local","KEYCLOAK_REALM":"rasa-local-dev","KEYCLOAK_URL":""}` | Define environment variables for deployment |
-| webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio-web-client/studio-web-client","tag":"v0.1.0-latest"}` | Define image settings |
+| webClient.image | object | `{"pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-web-client","tag":"0.1.2"}` | Define image settings |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| webClient.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio-web-client/studio-web-client"` | Specifies image repository |
-| webClient.image.tag | string | `"v0.1.0-latest"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| webClient.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/studio-web-client"` | Specifies image repository |
+| webClient.image.tag | string | `"0.1.2"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
 | webClient.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | webClient.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | webClient.ingress.className | string | `""` | Specifies the ingress className to be used |

@@ -13,10 +13,10 @@
   emptyDir: {}
 - name: app-dir
   emptyDir: {}
-- name: jwtSecret
+- name: jwt-secret
   secret:
     secretName: {{ .Values.rasa.settings.jwtSecret.secretName }}
-- name: rasaToken
+- name: rasa-token
   secret:
     secretName: {{ .Values.rasa.settings.authToken.secretName }}
 {{- end -}}
@@ -33,8 +33,8 @@
   subPath: "credentials.yml"
   name: "rasa-configuration"
   readOnly: true
-- mountPath: "/app/secrets"
-  name: jwtSecret
-- mountPath: "/app/secrets"
-  name: rasaToken
+- mountPath: "/app/jwt-secret"
+  name: jwt-secret
+- mountPath: "/app/rasa-token"
+  name: rasa-token
 {{- end -}}

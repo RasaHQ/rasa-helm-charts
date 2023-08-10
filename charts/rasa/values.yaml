@@ -12,13 +12,13 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- imagePullSecrets is used for private repository pull secrets
-imagePullSecrets:
-  - name: artifact-registry
+imagePullSecrets: []
+  # - name: regcred
 
 # -- rasaProLicence is license key for Rasa Pro Services.
 rasaProLicence:
-  secretName: "rasapro-license"
-  secretKey: "licensekey"
+  secretName: "rasa-secrets"
+  secretKey: "rasaProLicence"
 
 # Rasa Open Source
 rasa:
@@ -235,7 +235,7 @@ rasa:
   # -- rasa.command overrides the default command for the container
   command: []
   # -- rasa.additionalEnv adds additional environment variables
-  additionalEnv:
+  additionalEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"
     # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
@@ -445,7 +445,7 @@ rasa:
 # Settings for Rasa Pro Services
 rasaProServices:
   # -- rasaProServices.enabled enables Rasa Pro Services deployment
-  enabled: false
+  enabled: true
   # -- rasaProServices.replicaCount specifies number of replicas
   replicaCount: 1
   # rasaProServices.image defines image settings

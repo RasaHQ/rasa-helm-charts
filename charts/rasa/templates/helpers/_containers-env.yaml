@@ -28,11 +28,11 @@ Environment Variables for Rasa Containers
       name: {{ .jwtSecret.secretName }}
       key: {{ .jwtSecret.secretKey }}
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.plus.enabled }}
-# - name: "RASA_PRO_LICENSE" 
-#   valueFrom:
-#     secretKeyRef:
-#       name: {{ $.Values.rasaProLicence.secretName }}
-#       key: {{ $.Values.rasaProLicence.secretKey }}
+- name: "RASA_PRO_LICENSE" 
+  valueFrom:
+    secretKeyRef:
+      name: {{ $.Values.rasaProLicence.secretName }}
+      key: {{ $.Values.rasaProLicence.secretKey }}
 # Telemetry
 - name: "RASA_PRO_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}

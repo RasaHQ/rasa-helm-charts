@@ -243,8 +243,6 @@ rasa:
     #     secretKeyRef:
     #       name:
     #       key:
-    - name: RASA_PRO_LICENSE
-      value: "SECRET"
 
   # -- rasa.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []

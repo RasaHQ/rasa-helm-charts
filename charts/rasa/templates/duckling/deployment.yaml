@@ -60,10 +60,8 @@ spec:
           imagePullPolicy: {{ .Values.duckling.image.pullPolicy }}
           args:
             {{- toYaml .Values.duckling.args | nindent 12 }}
-          {{- else }}
           command:
             {{- toYaml .Values.duckling.command | nindent 12 }}
-          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.duckling.service.port }}

@@ -74,11 +74,11 @@ spec:
           {{- end }}
           {{- if .Values.duckling.livenessProbe.enabled }}
           livenessProbe:
-            {{- toYaml .Values.duckling.livenessProbe | nindent 12 }}
+            {{- omit .Values.duckling.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.duckling.readinessProbe.enabled }}
           readinessProbe:
-            {{- toYaml .Values.duckling.readinessProbe | nindent 12 }}
+            {{- omit .Values.duckling.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.duckling.resources | nindent 12 }}

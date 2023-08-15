@@ -39,7 +39,7 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      value: "postgresql://postgres:${DB_PASSWoRD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
+      value: "postgresql://postgres:${DB_PASSWORD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
     KEYCLOAK_URL:
       value: "http://studio-keycloak:80/auth"
     KEYCLOAK_REALM:
@@ -364,7 +364,7 @@ eventIngestion:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      value: "postgresql://postgres:${DB_PASSWoRD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
+      value: "postgresql://postgres:${DB_PASSWORD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
     # Set to true if you want to use SSL
     KAFKA_ENABLE_SSL:
       value: ""
@@ -519,7 +519,7 @@ keycloak:
     KC_DB_USERNAME:
       value: "postgres"
     KC_DB_PASSWORD:
-      value: "${DB_PASSWoRD}"
+      value: "${DB_PASSWORD}"
 
   # -- Define service account
   serviceAccount:

@@ -533,6 +533,12 @@ keycloak:
       secret:
         name: "studio-secrets"
         key: "KC_DB_PASSWORD"
+    # Use SSL for Keycloak database connection used during db migration
+    KC_DB_SSL:
+      value: ""
+    # If true the server will reject DB connection which is not authorized during db migration
+    KC_REJECT_UNAUTHORIZED:
+      value: ""
 
   # -- Define service account
   serviceAccount:

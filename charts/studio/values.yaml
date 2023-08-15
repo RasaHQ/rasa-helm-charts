@@ -536,7 +536,7 @@ keycloak:
     # Use SSL for Keycloak database connection used during db migration
     KC_DB_SSL:
       value: ""
-    # If true the server will reject DB connection which is not authorized during db migration
+    # If true the server will reject db connection which is not authorized with the list of supplied CAs.
     KC_REJECT_UNAUTHORIZED:
       value: ""
 

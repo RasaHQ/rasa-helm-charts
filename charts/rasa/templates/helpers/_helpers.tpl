@@ -118,11 +118,11 @@ Determine rasa server to run with arguments
 - {{ .Values.rasa.settings.jwtMethod }}
 {{- if and .Values.rasa.settings.jwtSecret.secretName .Values.rasa.settings.jwtSecret.secretKey }}
 - --jwt-secret
-- "$(cat /app/secrets/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
+- "$(cat /app/secrets/jwt-secret/{{ .Values.rasa.settings.jwtSecret.secretKey }})"
 {{- end }}
 {{- if and .Values.rasa.settings.authToken.secretName .Values.rasa.settings.authToken.secretKey }}
 - --auth-token
-- "$(cat /app/secrets/{{ .Values.rasa.settings.authToken.secretKey }})"
+- "$(cat /app/secrets/rasa-token/{{ .Values.rasa.settings.authToken.secretKey }})"
 {{- end }}
 {{- end -}}
 {{- end -}}

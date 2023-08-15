@@ -342,7 +342,7 @@ rasa:
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      port: 80
+      port: 5005
       scheme: HTTP
     # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15
@@ -364,7 +364,7 @@ rasa:
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      port: 80
+      port: 5005
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15
@@ -376,8 +376,6 @@ rasa:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
-    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
-    terminationGracePeriodSeconds: 30
 
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -621,8 +619,6 @@ rasaProServices:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
-    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
-    terminationGracePeriodSeconds: 30
 
   # -- rasaProServices.resources specifies the resources limits and requests
   resources: {}
@@ -880,8 +876,6 @@ duckling:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
-    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
-    terminationGracePeriodSeconds: 30
 
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/

@@ -1,0 +1,67 @@
+{{- if .Values.duckling-ingress.enabled -}}
+{{- $svcPort := .Values.duckling.service.port -}}
+apiVersion: {{ include "rasa-common.capabilities.ingress.apiVersion" . }}
+kind: Ingress
+metadata:
+  name: duckling-ingress
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+    {{- if .Values.duckling.ingress.labels }}
+{{ toYaml .Values.duckling.ingress.labels | indent 4 }}
+    {{- end }}
+  {{- with .Values.duckling.ingress.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if .Values.duckling.ingress.tls }}
+  tls:
+    {{- range .Values.duckling.ingress.tls }}
+    - hosts:
+        {{- range .hosts }}
+        - {{ . | quote }}
+        {{- end }}
+      secretName: {{ .secretName }}
+    {{- end }}
+  {{- end }}
+  rules:
+    {{- range .Values.duckling.ingress.hosts }}
+    - host: {{ .host | quote }}
+      http:
+        paths:
+          {{- range .paths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: duckling-service
+                port:
+                  number: {{ $svcPort }}
+              {{- else }}
+              serviceName: duckling-service
+              servicePort: {{ $svcPort }}
+              {{- end }}
+          {{- end }}
+          {{- if .extraPaths }}
+          {{- range .extraPaths }}
+          - path: {{ .path }}
+            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
+            pathType: {{ .pathType }}
+            {{- end }}
+            backend:
+              {{- if semverCompare ">1.19-0" $.Capabilities.KubeVersion.GitVersion }}
+              service:
+                name: {{ .serviceName }}
+                port:
+                  number: {{ .serviceName }}
+              {{- else }}
+              serviceName: {{ .serviceName }}
+              servicePort: {{ .servicePort }}
+              {{- end }}
+          {{- end }}
+          {{- end }}
+    {{- end }}
+{{- end }}

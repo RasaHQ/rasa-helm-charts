@@ -26,5 +26,5 @@ spec:
       nodePort: {{ .Values.duckling.service.nodePort }}
       {{- end }}
   selector:
-    {{- include "duckling.selectorLabels" . | nindent 4 }}
+    {{- include "rasa.duckling.selectorLabels" . | nindent 4 }}
 {{- end }}

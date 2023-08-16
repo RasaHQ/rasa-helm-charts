@@ -4,7 +4,7 @@ kind: Deployment
 metadata:
   name: duckling-deployment
   labels:
-    {{- include "duckling.labels" . | nindent 4 }}
+    {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
@@ -67,7 +67,7 @@ spec:
               containerPort: {{ .Values.duckling.service.port }}
               protocol: TCP
           env:
-          {{- include "duckling.containers.env" . | nindent 12 }}
+          {{- include "rasa.containers.env" . | nindent 12 }}
           {{- if .Values.duckling.volumeMounts }}
            envFrom:
             {{- toYaml .Values.duckling.envFrom | nindent 12 }}

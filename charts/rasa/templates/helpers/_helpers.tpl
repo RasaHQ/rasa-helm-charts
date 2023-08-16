@@ -62,6 +62,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels for Duckling
+*/}}
+{{- define "rasa.duckling.selectorLabels" -}}
+app.kubernetes.io/name: duckling
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "rasa.serviceAccountName" -}}
@@ -80,6 +88,17 @@ Create the name of the service account to use
 {{- default "rasa-pro-services" .Values.rasaProServices.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasaProServices.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "rasa.duckling.serviceAccountName" -}}
+{{- if .Values.duckling.serviceAccount.create }}
+{{- default "duckling" .Values.duckling.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.duckling.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

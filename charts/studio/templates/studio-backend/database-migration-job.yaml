@@ -39,6 +39,10 @@ spec:
                 name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
                 key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
           {{- end }}
+          - name: KC_DB_SSL
+            value: {{ .Values.keycloak.environmentVariables.KC_DB_SSL.value | quote }}
+          - name: KC_REJECT_UNAUTHORIZED
+            value: {{ .Values.keycloak.environmentVariables.KC_REJECT_UNAUTHORIZED.value | quote }}
           - name: KC_DB_URL
             value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
           - name: KC_DB_USERNAME

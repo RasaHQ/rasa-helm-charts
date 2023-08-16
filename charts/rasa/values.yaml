@@ -703,7 +703,7 @@ podLabels: {}
 ## Settings for Duckling
 duckling:
   # -- duckling.enabled enables Duckling deployment
-  enabled: false
+  enabled: true
   # -- duckling.replicaCount specifies number of replicas
   replicaCount: 1
   # duckling.image defines image settings

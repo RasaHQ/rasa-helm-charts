@@ -85,11 +85,11 @@ spec:
           {{- end }}
           {{- if .Values.rasaProServices.livenessProbe.enabled }}
           livenessProbe:
-            {{- toYaml .Values.rasaProServices.livenessProbe | nindent 12 }}
+            {{- omit .Values.rasaProServices.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           {{- if .Values.rasaProServices.readinessProbe.enabled }}
           readinessProbe:
-            {{- toYaml .Values.rasaProServices.readinessProbe | nindent 12 }}
+            {{- omit .Values.rasaProServices.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.rasaProServices.resources | nindent 12 }}

@@ -44,19 +44,19 @@ Environment Variables for Rasa Containers
   value: {{ .environment | quote }}
 # Lock Store
 - name: "TICKET_LOCK_LIFETIME"
-  value: {{ .lockStore.ticketLockLifetime }}
+  value: {{ .lockStore.ticketLockLifetime | quote }}
 # Sanic Server
 - name: "SANIC_BACKLOG"
   value: {{ .sanicServer.backlog | quote }}
 - name: "SANIC_WORKERS"
-  value: {{ .sanicServer.workers }}
+  value: {{ .sanicServer.workers | quote }}
 # Postgres Tracker Store
 - name: "POSTGRESQL_SCHEMA"
   value: {{ .postgresTrackerStore.schema | quote }}
 - name: "POSTGRESQL_POOL_SIZE"
-  value: {{ .postgresTrackerStore.poolSize }}
+  value: {{ .postgresTrackerStore.poolSize | quote }}
 - name: "POSTGRESQL_MAX_OVERFLOW"
-  value: {{ .postgresTrackerStore.maxOverflow }}
+  value: {{ .postgresTrackerStore.maxOverflow | quote }}
 # RabbitMQ
 {{- if .rabbitmq.enabled }}
 - name: "RABBITMQ_SSL_CLIENT_CERTIFICATE"

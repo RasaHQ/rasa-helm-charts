@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "rasa.fullname" . }}-rasa-pro-services
+  name: {{ include "rasa.fullname" . }}-pro-services
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}

@@ -50,13 +50,13 @@ spec:
             - name: http
               containerPort: {{ .Values.backend.service.port }}
               protocol: TCP
-          {{- if or .Values.backend.livenessProbe.enabled (not (hasKey .Values.backend.livenessProbe "enabled")) }}
+          {{- if or .Values.backend.livenessProbe.enabled }}
           livenessProbe:
-            {{- toYaml .Values.backend.livenessProbe | nindent 12 }}
+            {{- omit .Values.backend.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.backend.readinessProbe.enabled (not (hasKey .Values.backend.readinessProbe "enabled")) }}
+          {{- if or .Values.backend.readinessProbe.enabled }}
           readinessProbe:
-            {{- toYaml .Values.backend.readinessProbe | nindent 12 }}
+            {{- omit .Values.backend.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}

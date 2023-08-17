@@ -16,8 +16,7 @@ data:
 {{- with .Values.rasa.settings.endpoints }}
 {{- if .models.enabled }}
     models:
-      url: {{ .models.url }}
-      wait_time_between_pulls: {{ .models.waitTimeBetweenPulls }}
+      {{- omit .models "enabled" | toYaml | nindent 6 }}
 {{- end }}
 {{- if .trackerStore.enabled }}
     tracker_store:

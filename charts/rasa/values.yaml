@@ -584,8 +584,8 @@ rasaProServices:
     enabled: true
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
-      path: /
-      port: 80
+      path: /healthcheck
+      port: 8732
       scheme: HTTP
     # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15
@@ -606,8 +606,8 @@ rasaProServices:
     enabled: true
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
-      path: /
-      port: 80
+      path: /healthcheck
+      port: 8732
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15

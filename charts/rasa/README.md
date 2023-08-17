@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.5
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.5
 ```
 
 ## Values
@@ -82,7 +82,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 | duckling.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | duckling.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | duckling.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| duckling.readinessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | duckling.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | duckling.replicaCount | int | `1` | duckling.replicaCount specifies number of replicas |
 | duckling.resources | object | `{}` | duckling.resources specifies the resources limits and requests |
@@ -138,7 +137,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 | rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file |
 | rasa.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasa.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasa.livenessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
+| rasa.livenessProbe.httpGet | object | `{"path":"/","port":5005,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
 | rasa.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | rasa.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | rasa.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
@@ -150,11 +149,10 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
 | rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
 | rasa.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasa.readinessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
+| rasa.readinessProbe.httpGet | object | `{"path":"/","port":5005,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
 | rasa.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | rasa.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | rasa.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasa.readinessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasa.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasa.replicaCount | int | `1` | rasa.replicaCount specifies number of replicas |
 | rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
@@ -267,7 +265,6 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.4
 | rasaProServices.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | rasaProServices.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | rasaProServices.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasaProServices.readinessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasaProServices.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasaProServices.replicaCount | int | `1` | rasaProServices.replicaCount specifies number of replicas |
 | rasaProServices.resources | object | `{}` | rasaProServices.resources specifies the resources limits and requests |

@@ -40,7 +40,7 @@ data:
       socket_timeout: {{ .lockStore.socketTimeout }}
 {{- end }}
 {{- if .eventBroker.enabled }}
-    eventBroker:
+    event_broker:
       {{- omit .eventBroker "enabled" | toYaml | nindent 6 }}
 {{- end }}
 {{- if and .tracing.enabled $.Values.rasa.plus.enabled }}

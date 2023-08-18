@@ -13,8 +13,7 @@ fullnameOverride: ""
 
 # -- Repository pull secrets
 imagePullSecrets:
-  []
-  # - name: regcred
+  - name: artifact-registry
 
 # Studio Backend component specific configuration
 backend:
@@ -28,7 +27,7 @@ backend:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "0.1.2"
+    tag: "0.1.3"
 
   # -- Define environment variables for deployment
   # Example: Specify the string value for variables
@@ -40,21 +39,17 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      secret:
-        name: "studio-secrets"
-        key: "DATABASE_URL"
+      value: "postgresql://postgres:${DB_PASSWORD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
     KEYCLOAK_URL:
-      value: ""
+      value: "http://studio-keycloak:80/auth"
     KEYCLOAK_REALM:
       value: "rasa-local-dev"
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
     KEYCLOAK_API_USERNAME:
-      value: ""
+      value: "studio"
     KEYCLOAK_API_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_API_PASSWORD"
+      value: "studio"
     KEYCLOAK_API_GRANT_TYPE:
       value: "password"
 
@@ -95,7 +90,7 @@ backend:
   # -- Define service
   service:
     # -- Specify service type
-    type: ClusterIP
+    type: NodePort
     # -- Specify service port
     port: 80
     # -- Specify service target port
@@ -136,7 +131,7 @@ backend:
       # -- Specifies the repository of the image
       repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/studio-database-migration"
       # -- Specifies the tag of the image
-      tag: "0.1.2"
+      tag: "0.1.3"
 
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -149,12 +144,11 @@ backend:
     labels: {}
     # -- Annotations to add to the ingress
     annotations:
-      {}
-      # kubernetes.io/ingress.class: nginx
+      kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
     hosts:
-      - host: chart-example.local
+      - host: localhost
         paths:
           - path: /api
             pathType: Prefix
@@ -216,12 +210,12 @@ webClient:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "0.1.2"
+    tag: "0.1.3"
 
   # -- Define environment variables for deployment
   environmentVariables:
-    API_ENDPOINT: ""
-    KEYCLOAK_URL: ""
+    API_ENDPOINT: "http://localhost:80/api"
+    KEYCLOAK_URL: "http://localhost:80/auth"
     KEYCLOAK_REALM: "rasa-local-dev"
     KEYCLOAK_CLIENT_ID: "studio-local"
 
@@ -262,7 +256,7 @@ webClient:
   # -- Define service
   service:
     # -- Specify service type
-    type: ClusterIP
+    type: NodePort
     # -- Specify service port
     port: 80
     targetPort: 80
@@ -304,12 +298,11 @@ webClient:
     labels: {}
     # -- Annotations to add to the ingress
     annotations:
-      {}
-      # kubernetes.io/ingress.class: nginx
+      kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
     hosts:
-      - host: chart-example.local
+      - host: localhost
         paths:
           - path: /
             pathType: Prefix
@@ -359,7 +352,7 @@ eventIngestion:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "0.1.2"
+    tag: "0.1.3"
 
   # -- Define environment variables for deployment
   # Example: Specify the string value for variables
@@ -371,9 +364,7 @@ eventIngestion:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
     DATABASE_URL:
-      secret:
-        name: "studio-secrets"
-        key: "DATABASE_URL"
+      value: "postgresql://postgres:${DB_PASSWORD}@studio.postgresql.svc.cluster.local:5432/studio?schema=public"
     # Set to true if you want to use SSL
     KAFKA_ENABLE_SSL:
       value: ""
@@ -399,21 +390,19 @@ eventIngestion:
     KAFKA_SASL_MECHANISM:
       value: ""
     KAFKA_SASL_USERNAME:
-      value: ""
+      value: "studio"
     KAFKA_SASL_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KAFKA_SASL_PASSWORD"
+      value: "studio"
     KAFKA_BROKER_ADDRESS:
-      value: ""
+      value: "studio-kafka-bootstrap.kafka.svc.cluster.local:9092"
     KAFKA_TOPIC:
-      value: ""
+      value: "studio-topic"
     KAFKA_DLQ_TOPIC:
-      value: ""
+      value: "studio-dlq-topic"
     KAFKA_CLIENT_ID:
       value: "kafka-python-rasa"
     KAFKA_GROUP_ID:
-      value: ""
+      value: "studio"
 
   # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
@@ -515,30 +504,22 @@ keycloak:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     ## Overrides the image tag whose default is the chart appVersion.
-    tag: "0.1.2"
+    tag: "0.1.3"
 
   # -- Define environment variables for deployment
   environmentVariables:
     KC_DB_URL:
-      value: ""
+      value: "jdbc:postgresql://studio.postgresql.svc.cluster.local:5432/keycloak"
     KEYCLOAK_ADMIN:
-      value: ""
+      value: "kcadmin"
     KEYCLOAK_ADMIN_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_ADMIN_PASSWORD"
-    KC_DB_USERNAME:
-      value: ""
-    KC_DB_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KC_DB_PASSWORD"
-    # Use SSL for Keycloak database connection used during db migration
+      value: "kcadmin"
     KC_DB_SSL:
-      value: ""
-    # If true the server will reject db connection which is not authorized with the list of supplied CAs.
-    KC_REJECT_UNAUTHORIZED:
-      value: ""
+      value: "true"
+    KC_DB_USERNAME:
+      value: "postgres"
+    KC_DB_PASSWORD:
+      value: "${DB_PASSWORD}"
 
   # -- Define service account
   serviceAccount:
@@ -577,7 +558,7 @@ keycloak:
   # -- Define service
   service:
     # -- Specify service type
-    type: ClusterIP
+    type: NodePort
     # -- Specify service port
     port: 80
     targetPort: 8080
@@ -619,12 +600,11 @@ keycloak:
     labels: {}
     # -- Annotations to add to the ingress
     annotations:
-      {}
-      # kubernetes.io/ingress.class: nginx
+      kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- Specifies the hosts for this ingress
     hosts:
-      - host: chart-example.local
+      - host: localhost
         paths:
           - path: /auth
             pathType: Prefix

@@ -68,7 +68,7 @@ spec:
               protocol: TCP
           env:
           {{- include "rasa.containers.env" . | nindent 12 }}
-          {{- if .Values.duckling.volumeMounts }}
+          {{- if .Values.duckling.envFrom }}
            envFrom:
             {{- toYaml .Values.duckling.envFrom | nindent 12 }}
           {{- end }}
@@ -82,15 +82,15 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.duckling.resources | nindent 12 }}
-          volumeMounts:
           {{- if .Values.duckling.volumeMounts }}
+          volumeMounts:
             {{- toYaml .Values.duckling.volumeMounts | nindent 12 }}
           {{- end }}
       {{- if .Values.duckling.additionalContainers }}
         {{- toYaml .Values.duckling.additionalContainers | nindent 8 }}
       {{- end }}
-      volumes:
       {{- if .Values.duckling.volumes }}
+      volumes:
         {{- toYaml .Values.duckling.volumes | nindent 8 }}
       {{- end }}
       {{- with .Values.duckling.nodeSelector }}

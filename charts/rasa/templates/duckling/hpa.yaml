@@ -10,8 +10,8 @@ spec:
     apiVersion: apps/v1
     kind: Deployment
     name: duckling-deployment
-  minReplicas: {{ .Values.rasaProServices.autoscaling.minReplicas }}
-  maxReplicas: {{ .Values.rasaProServices.autoscaling.maxReplicas }}
+  minReplicas: {{ .Values.duckling.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.duckling.autoscaling.maxReplicas }}
   metrics:
     {{- if .Values.duckling.autoscaling.targetCPUUtilizationPercentage }}
     - type: Resource

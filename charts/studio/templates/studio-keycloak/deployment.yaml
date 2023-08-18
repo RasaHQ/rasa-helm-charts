@@ -48,16 +48,16 @@ spec:
             - name: http
               containerPort: {{ .Values.keycloak.service.port }}
               protocol: TCP
-          {{- if or .Values.keycloak.livenessProbe.enabled (not (hasKey .Values.keycloak.livenessProbe "enabled")) }}
+          {{- if or .Values.keycloak.livenessProbe.enabled }}
           livenessProbe:
-            {{- toYaml .Values.keycloak.livenessProbe | nindent 12 }}
+            {{- omit .Values.keycloak.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.keycloak.readinessProbe.enabled (not (hasKey .Values.keycloak.readinessProbe "enabled")) }}
+          {{- if or .Values.keycloak.readinessProbe.enabled }}
           readinessProbe:
             {{- toYaml .Values.keycloak.readinessProbe | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml .Values.keycloak.resources | nindent 12 }}
+            {{- omit .Values.keycloak.readinessProbe "enabled" | toYaml | nindent 12 }}
           env:
             {{- range $key, $value := .Values.keycloak.environmentVariables }}
             - name: {{ $key | upper }}

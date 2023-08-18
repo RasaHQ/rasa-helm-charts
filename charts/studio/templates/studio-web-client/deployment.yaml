@@ -49,13 +49,13 @@ spec:
             - name: http
               containerPort: {{ .Values.webClient.service.port }}
               protocol: TCP
-          {{- if or .Values.webClient.livenessProbe.enabled (not (hasKey .Values.webClient.livenessProbe "enabled")) }}
+          {{- if or .Values.webClient.livenessProbe.enabled }}
           livenessProbe:
-            {{- toYaml .Values.webClient.livenessProbe | nindent 12 }}
+            {{- omit .Values.webClient.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.webClient.readinessProbe.enabled (not (hasKey .Values.webClient.readinessProbe "enabled")) }}
+          {{- if or .Values.webClient.readinessProbe.enabled }}
           readinessProbe:
-            {{- toYaml .Values.webClient.readinessProbe | nindent 12 }}
+            {{- omit .Values.webClient.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.webClient.resources | nindent 12 }}

@@ -390,9 +390,9 @@ eventIngestion:
     KAFKA_SASL_MECHANISM:
       value: ""
     KAFKA_SASL_USERNAME:
-      value: ""
+      value: "studio"
     KAFKA_SASL_PASSWORD:
-      value: ""
+      value: "studio"
     KAFKA_BROKER_ADDRESS:
       value: "studio-kafka-bootstrap.kafka.svc.cluster.local:9092"
     KAFKA_TOPIC:
@@ -511,9 +511,9 @@ keycloak:
     KC_DB_URL:
       value: "jdbc:postgresql://studio.postgresql.svc.cluster.local:5432/keycloak"
     KEYCLOAK_ADMIN:
-      value: "studio"
+      value: "kcadmin"
     KEYCLOAK_ADMIN_PASSWORD:
-      value: "studio"
+      value: "kcadmin"
     KC_DB_SSL:
       value: "true"
     KC_DB_USERNAME:

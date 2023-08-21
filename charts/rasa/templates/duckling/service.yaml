@@ -1,0 +1,30 @@
+{{- if .Values.duckling.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: duckling-service
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+  {{- with .Values.duckling.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.duckling.service.type }}
+  {{- if or (eq .Values.duckling.service.type "LoadBalancer") (eq .Values.duckling.service.type "NodePort") }}
+  externalTrafficPolicy: {{ .Values.duckling.service.externalTrafficPolicy | quote }}
+  {{- end }}
+  {{- if and (eq .Values.duckling.service.type "LoadBalancer") (not (empty .Values.duckling.service.loadBalancerIP)) }}
+  loadBalancerIP: {{ .Values.duckling.service.loadBalancerIP }}
+  {{- end }}
+  ports:
+    - port: {{ .Values.duckling.service.port }}
+      targetPort: {{ .Values.duckling.service.targetPort }}
+      protocol: TCP
+      name: http
+      {{- if and (or (eq .Values.duckling.service.type "NodePort") (eq .Values.duckling.service.type "LoadBalancer")) (not (empty .Values.duckling.service.nodePort)) }}
+      nodePort: {{ .Values.duckling.service.nodePort }}
+      {{- end }}
+  selector:
+    {{- include "rasa.duckling.selectorLabels" . | nindent 4 }}
+{{- end }}

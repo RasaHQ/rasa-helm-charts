@@ -1,0 +1,28 @@
+{{- if and .Values.duckling.enabled .Values.duckling.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: duckling-hpa
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: duckling-deployment
+  minReplicas: {{ .Values.duckling.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.duckling.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.duckling.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.duckling.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.duckling.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.duckling.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

@@ -1,0 +1,108 @@
+{{- if .Values.duckling.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: duckling-deployment
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.duckling.autoscaling.enabled }}
+  replicas: {{ .Values.duckling.replicaCount }}
+  {{- end }}
+  {{- if .Values.duckling.strategy }}
+  strategy:
+    {{- toYaml .Values.duckling.strategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rasa.duckling.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.duckling.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rasa.duckling.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "rasa.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: "{{ include "rasa.duckling.serviceAccountName" . }}"
+      {{- if .Values.duckling.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.duckling.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: duckling
+          {{- if .Values.duckling.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.duckling.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.duckling.image.repository }}:{{ .Values.duckling.image.tag }}"
+          imagePullPolicy: {{ .Values.duckling.image.pullPolicy }}
+          args:
+            {{- toYaml .Values.duckling.args | nindent 12 }}
+          command:
+            {{- toYaml .Values.duckling.command | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.duckling.service.port }}
+              protocol: TCP
+          env:
+          {{- include "rasa.containers.env" . | nindent 12 }}
+          {{- if .Values.duckling.envFrom }}
+           envFrom:
+            {{- toYaml .Values.duckling.envFrom | nindent 12 }}
+          {{- end }}
+          {{- if .Values.duckling.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.duckling.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.duckling.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.duckling.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.duckling.resources | nindent 12 }}
+          {{- if .Values.duckling.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.duckling.volumeMounts | nindent 12 }}
+          {{- end }}
+      {{- if .Values.duckling.additionalContainers }}
+        {{- toYaml .Values.duckling.additionalContainers | nindent 8 }}
+      {{- end }}
+      {{- if .Values.duckling.volumes }}
+      volumes:
+        {{- toYaml .Values.duckling.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.duckling.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.duckling.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.duckling.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

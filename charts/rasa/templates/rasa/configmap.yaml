@@ -16,12 +16,11 @@ data:
 {{- with .Values.rasa.settings.endpoints }}
 {{- if .models.enabled }}
     models:
-      url: {{ .models.url }}
-      wait_time_between_pulls: {{ .models.waitTimeBetweenPulls }}
+      {{- omit .models "enabled" | toYaml | nindent 6 }}
 {{- end }}
 {{- if .trackerStore.enabled }}
     tracker_store:
-      {{- toYaml .trackerStore | nindent 6 }}
+      {{- omit .trackerStore "enabled" | toYaml  | nindent 6 }}
 {{- end }}
 {{- if .lockStore.enabled }}
     lock_store:
@@ -40,12 +39,12 @@ data:
       socket_timeout: {{ .lockStore.socketTimeout }}
 {{- end }}
 {{- if .eventBroker.enabled }}
-    eventBroker:
-      {{- toYaml .eventBroker | nindent 6 }}
+    event_broker:
+      {{- omit .eventBroker "enabled" | toYaml | nindent 6 }}
 {{- end }}
 {{- if and .tracing.enabled $.Values.rasa.plus.enabled }}
     tracing:
-      {{- toYaml .setTracing | nindent 6 }}
+      {{- omit .tracing "enabled" | toYaml | nindent 6 }}
 {{- end }}
     action_endpoint:
       url: {{ .actionEndpoint.url }}

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
+$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
+$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
 ```
 
 ## Values
@@ -43,9 +43,9 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Rasa deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args |
+| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args - "-p" - --access-log=/dev/stdout - --error-log=/dev/stderr |
 | duckling.additionalContainers | list | `[]` | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment |
-| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables |
+| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables - duckling-example-exe |
 | duckling.affinity | object | `{}` | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | duckling.args | list | `[]` | duckling.args overrides the default arguments for the container |
 | duckling.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
@@ -53,7 +53,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
 | duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | duckling.command | list | `[]` | duckling.command overrides the default command for the container |
-| duckling.enabled | bool | `false` | duckling.enabled enables Duckling deployment |
+| duckling.enabled | bool | `true` | duckling.enabled enables Duckling deployment |
 | duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
 | duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | duckling.image.repository | string | `"rasa/duckling"` | image.repository specifies image repository |
@@ -250,7 +250,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
 | rasaProServices.image.tag | string | `"3.1.1-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasaProServices.livenessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
+| rasaProServices.livenessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
 | rasaProServices.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | rasaProServices.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | rasaProServices.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
@@ -261,7 +261,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.6
 | rasaProServices.podSecurityContext | object | `{"enabled":true}` | rasaProServices.podSecurityContext defines pod security context |
 | rasaProServices.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
 | rasaProServices.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasaProServices.readinessProbe.httpGet | object | `{"path":"/","port":80,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
+| rasaProServices.readinessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
 | rasaProServices.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | rasaProServices.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | rasaProServices.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |

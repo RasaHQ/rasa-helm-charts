@@ -703,7 +703,7 @@ podLabels: {}
 ## Settings for Duckling
 duckling:
   # -- duckling.enabled enables Duckling deployment
-  enabled: true
+  enabled: false
   # -- duckling.replicaCount specifies number of replicas
   replicaCount: 1
   # duckling.image defines image settings
@@ -731,15 +731,15 @@ duckling:
 
   # -- duckling.args overrides the default arguments for the container
   args: []
+    # - "-p"
+    # - --access-log=/dev/stdout
+    # - --error-log=/dev/stderr
   # -- duckling.additionalArgs adds additional arguments to the default args
-  # - "-p"
-  # - --access-log=/dev/stdout
-  # - --error-log=/dev/stderr
   additionalArgs: []
   # -- duckling.command overrides the default command for the container
   command: []
-  # -- duckling.additionalEnv adds additional environment variables
   # - duckling-example-exe
+  # -- duckling.additionalEnv adds additional environment variables
   additionalEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"

@@ -67,7 +67,7 @@ spec:
               containerPort: {{ .Values.duckling.service.port }}
               protocol: TCP
           env:
-          {{- include "rasa.containers.env" . | nindent 12 }}
+            {{- toYaml .Values.duckling.additionalEnv | nindent 12 }}
           {{- if .Values.duckling.envFrom }}
            envFrom:
             {{- toYaml .Values.duckling.envFrom | nindent 12 }}

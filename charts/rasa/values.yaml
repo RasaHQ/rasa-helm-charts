@@ -25,6 +25,12 @@ rasa:
   # -- rasa.enabled enables Rasa OSS/Plus deployment
   # Disable this if you want to deploy ONLY Rasa Pro Services
   enabled: true
+
+  # Rasa Plus is the drop-in replacement of Rasa
+  plus:
+    # -- plus.enabled enabled Rasa Plus drop-in replacement of Rasa
+    enabled: true
+
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
   # rasa.image defines image settings
@@ -43,11 +49,6 @@ rasa:
   #   rollingUpdate:
   #     maxSurge: 1
   #     maxUnavailable: 0
-
-  # Rasa Plus is the drop-in replacement of Rasa
-  plus:
-    # -- plus.enabled enabled Rasa Plus drop-in replacement of Rasa
-    enabled: true
 
   settings:
     # -- settings.debugMode enables debug mode

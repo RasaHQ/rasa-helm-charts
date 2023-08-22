@@ -2,19 +2,19 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.11](https://img.shields.io/badge/Version-0.1.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
 - Kubernetes 1.19+
-- Helm 3.2.0+
+- Helm 3.0.0+
 
 ## Installing the Chart
 
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.11
 ```
 
 ## Uninstalling the Chart
@@ -32,8 +32,59 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.11
 ```
+
+## General Configuration
+
+- **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
+- **rasaProLicence**: If you are using Plus or Pro, please provide `secretName` and `secretKey` of your licence.
+
+> **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+### Rasa Pro
+
+To deploy Rasa Pro Services, set `rasa.enabled: true`, `rasa.plus.enabled: true`, and `rasaProServices.enabled: true`. Configure image and image pull settings.
+
+```yaml
+rasa:
+  enabled: true
+  plus:
+    enabled: true
+  # Other settings...
+rasaProServices:
+  enabled: true
+```
+
+### Rasa Plus only
+
+Deploy Rasa Plus by setting `rasa.enabled: true` and `rasa.plus.enabled: true`. Adjust image and image pull settings accordingly.
+
+```yaml
+rasa:
+  enabled: true
+  plus:
+    enabled: true
+  # Other settings...
+rasaProServices:
+  enabled: false
+```
+
+### Rasa Open Source
+
+Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.plus.enabled: false`. Adjust image and image pull settings as needed.
+
+```yaml
+rasa:
+  enabled: true
+  plus:
+    enabled: false
+  # Other settings...
+rasaProServices:
+  enabled: false
+```
+
+> **Note:** If you already have Rasa OSS/Plus deployed and want to deploy only Rasa Pro Services deployment, set `rasaProServices.enabled: true` and use `false` for other deployments.
 
 ## Values
 
@@ -43,9 +94,9 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Rasa deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args - "-p" - --access-log=/dev/stdout - --error-log=/dev/stderr |
+| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args |
 | duckling.additionalContainers | list | `[]` | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment |
-| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables - duckling-example-exe |
+| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables |
 | duckling.affinity | object | `{}` | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | duckling.args | list | `[]` | duckling.args overrides the default arguments for the container |
 | duckling.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
@@ -53,7 +104,7 @@ $ helm pull oci://registry-1.docker.io/helm-charts/rasa --version 0.1.9
 | duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | duckling.command | list | `[]` | duckling.command overrides the default command for the container |
-| duckling.enabled | bool | `true` | duckling.enabled enables Duckling deployment |
+| duckling.enabled | bool | `false` | duckling.enabled enables Duckling deployment |
 | duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
 | duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | duckling.image.repository | string | `"rasa/duckling"` | image.repository specifies image repository |

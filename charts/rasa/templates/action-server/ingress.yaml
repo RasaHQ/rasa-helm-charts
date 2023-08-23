@@ -1,5 +1,5 @@
-{{- if .Values.duckling.ingress.enabled -}}
-{{- $svcPort := .Values.duckling.service.port -}}
+{{- if .Values.actionServer.ingress.enabled -}}
+{{- $svcPort := .Values.actionServer.service.port -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -9,20 +9,20 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: duckling
+  name: action-server
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
-    {{- if .Values.duckling.ingress.labels }}
-{{ toYaml .Values.duckling.ingress.labels | indent 4 }}
+    {{- if .Values.actionServer.ingress.labels }}
+{{ toYaml .Values.actionServer.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.duckling.ingress.annotations }}
+  {{- with .Values.actionServer.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.duckling.ingress.tls }}
+  {{- if .Values.actionServer.ingress.tls }}
   tls:
-    {{- range .Values.duckling.ingress.tls }}
+    {{- range .Values.actionServer.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -31,7 +31,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.duckling.ingress.hosts }}
+    {{- range .Values.actionServer.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:
@@ -43,11 +43,11 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: duckling
+                name: action-server
                 port:
                   number: {{ $svcPort }}
               {{- else }}
-              serviceName: duckling
+              serviceName: action-server
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}

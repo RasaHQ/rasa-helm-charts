@@ -942,3 +942,244 @@ duckling:
   # -- duckling.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+actionServer:
+  # -- actionServer.enabled enables Action Server deployment
+  enabled: false
+  # -- actionServer.replicaCount specifies number of replicas
+  replicaCount: 1
+  # actionServer.image defines image settings
+  image:
+    # -- image.repository specifies image repository
+    repository: "rasa/rasa-x-demo"
+    # -- image.pullPolicy specifies image pull policy
+    pullPolicy: IfNotPresent
+    # -- image.tag specifies image tag
+    tag: "0.40.0"
+
+  # -- actionServer.strategy specifies deployment strategy type
+  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+  strategy: {}
+  #   type: RollingUpdate
+  #   rollingUpdate:
+  #     maxSurge: 1
+  #     maxUnavailable: 0
+
+  settings:
+    # -- settings.port defines port on which Action Server runs
+    port: 5055
+    # -- settings.scheme defines sheme by which the service are accessible
+    scheme: http
+
+  # -- actionServer.args overrides the default arguments for the container
+  args: []
+    # - "-p"
+    # - --access-log=/dev/stdout
+    # - --error-log=/dev/stderr
+  # -- actionServer.additionalArgs adds additional arguments to the default args
+  additionalArgs: []
+  # -- actionServer.command overrides the default command for the container
+  command: []
+
+  # -- actionServer.additionalEnv adds additional environment variables
+  additionalEnv: []
+    # - name: SOME_CUSTOM_ENV_VAR
+    #   value: "custom value"
+    # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
+    #   valueFrom:
+    #     secretKeyRef:
+    #       name:
+    #       key:
+
+  # -- actionServer.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- actionServer.initContainers allows to specify init containers for the Action Server deployment
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+  #  - name: init
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+  #    args:
+  #      - echo "init container"
+
+  # -- actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
+  # -- actionServer.volumes specify additional volumes to mount in the Action Server container
+  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  volumes: []
+  #   - hostPath:
+  #       path: <HOST_PATH>
+  #     name: <VOLUME_NAME>
+
+  # -- actionServer.volumeMounts specifies additional volumes to mount in the Action Server container
+  volumeMounts: []
+    # - name: <VOLUME_NAME>
+    #   mountPath: <CONTAINER_PATH>
+    #   readOnly: true
+
+  # -- actionServer.serviceAccount defines service account
+  serviceAccount:
+    # -- serviceAccount.create specifies whether a service account should be created
+    create: true
+    # -- serviceAccount.annotations defines annotations to add to the service account
+    annotations: {}
+    # -- serviceAccount.name is the name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template
+    name: ""
+
+  # -- actionServer.podAnnotations defines annotations to add to the pod
+  podAnnotations: {}
+    # container.apparmor.security.beta.kubernetes.io/action-server: runtime/default
+
+  # -- actionServer.podSecurityContext defines pod security context
+  podSecurityContext:
+    enabled: true
+    # fsGroup: 2000
+
+  # -- actionServer.securityContext defines security context that allows you to overwrite the pod-level security context
+  securityContext:
+    enabled: true
+    # privileged: false
+    # allowPrivilegeEscalation: false
+    # capabilities:
+    #   drop:
+    #   - ALL
+    # readOnlyRootFilesystem: true
+    # runAsNonRoot: true
+    # runAsUser: 1000
+    # seccompProfile:
+    #   type: RuntimeDefault
+
+  # -- actionServer.service define service for Action Server
+  service:
+    # -- service.type is used to specify service type
+    type: ClusterIP
+    # -- service.port is used to specify service port
+    port: 5055
+    # -- service.targetPort is ued to specify service target port
+    targetPort: 5055
+    # -- service.annotations defines annotations to add to the service
+    annotations: {}
+    # -- service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+    nodePort:
+    # -- service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer
+    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+    loadBalancerIP:
+    # -- service.externalTrafficPolicy enables client source IP preservation
+    ## Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+    externalTrafficPolicy: Cluster
+
+  # actionServer.livenessProbe is used to override default liveness probe settings
+  livenessProbe:
+    # -- livenessProbe.enabled is used to enable or disable liveness probe
+    enabled: true
+    # -- livenessProbe.httpGet is used to define HTTP request
+    httpGet:
+      path: /
+      port: 5055
+      scheme: HTTP
+    # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
+    initialDelaySeconds: 15
+    # -- livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
+    periodSeconds: 15
+    # -- livenessProbe.successThreshold defines how often (in seconds) to perform the probe
+    successThreshold: 1
+    # -- livenessProbe.timeoutSeconds defines number of seconds after which the probe times out
+    timeoutSeconds: 5
+    # -- livenessProbe.failureThreshold defines after how many failures container is considered unhealthy
+    failureThreshold: 6
+    # -- readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container
+    terminationGracePeriodSeconds: 30
+
+  # actionServer.readinessProbe is used to override default readiness probe settings
+  readinessProbe:
+    # -- readinessProbe.enabled is used to enable or disable readinessProbe
+    enabled: true
+    # -- readinessProbe.httpGet is used to define HTTP request
+    httpGet:
+      path: /
+      port: 5055
+      scheme: HTTP
+    # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
+    initialDelaySeconds: 15
+    # -- readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
+    periodSeconds: 15
+    # -- readinessProbe.successThreshold defines how often (in seconds) to perform the probe
+    successThreshold: 1
+    # -- readinessProbe.timeoutSeconds defines number of seconds after which the probe times out
+    timeoutSeconds: 5
+    # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
+    failureThreshold: 6
+
+  # Configure the ingress resource that allows you to access the deployment installation.
+  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  ingress:
+    # -- ingress.enabled specifies whether an ingress service should be created
+    enabled: false
+    # -- ingress.className specifies the ingress className to be used
+    className: ""
+    # -- ingress.lables defines labels to add to the ingress
+    labels: {}
+    # -- ingress.annotations defines annotations to add to the ingress
+    annotations:
+      {}
+      # kubernetes.io/ingress.class: nginx
+      # kubernetes.io/tls-acme: "true"
+    # -- ingress.hosts specifies the hosts for this ingress
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+            pathType: Prefix
+        extraPaths: []
+    # -- ingress.tls spefices the TLS configuration for ingress
+    tls: []
+    #  - secretName: chart-example-tls
+    #    hosts:
+    #      - chart-example.local
+
+  # -- actionServer.resources specifies the resources limits and requests
+  resources: {}
+    # We usually recommend not to specify default resources and to leave this as a conscious
+    # choice for the user. This also increases chances charts run on environments with little
+    # resources, such as Minikube. If you do want to specify resources, uncomment the following
+    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    # requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+
+  # actionServer.autoscaling specifies the HPA settings
+  autoscaling:
+    # -- autoscaling.enabled specifies whether autoscaling should be enabled
+    enabled: false
+    # -- autoscaling.minReplicas specifies the minimum number of replicas
+    minReplicas: 1
+    # -- autoscaling.maxReplicas specifies the maximum number of replicas
+    maxReplicas: 100
+    # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
+    targetCPUUtilizationPercentage: 80
+    # targetMemoryUtilizationPercentage: 80
+
+  # -- actionServer.nodeSelector allows the deployment to be scheduled on selected nodes
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  nodeSelector: {}
+
+  # -- actionServer.tolerations defines tolerations for pod assignment
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  tolerations: []
+
+  # -- actionServer.affinity allows the deployment to schedule using affinity rules
+  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  affinity: {}

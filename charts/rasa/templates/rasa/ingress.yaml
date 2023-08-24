@@ -15,7 +15,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: {{ $fullName }}-ingress
+  name: {{ $fullName }}
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.rasa.ingress.labels }}

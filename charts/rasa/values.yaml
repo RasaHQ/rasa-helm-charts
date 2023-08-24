@@ -951,11 +951,11 @@ actionServer:
   # actionServer.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "rasa/rasa-x-demo"
+    repository: "rasa/rasa-sdk"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "0.40.0"
+    tag: "3.6.2"
 
   # -- actionServer.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -1083,7 +1083,7 @@ actionServer:
     enabled: true
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
-      path: /
+      path: /health
       port: 5055
       scheme: HTTP
     # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
@@ -1105,7 +1105,7 @@ actionServer:
     enabled: true
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
-      path: /
+      path: /health
       port: 5055
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe

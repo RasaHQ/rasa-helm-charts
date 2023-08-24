@@ -44,7 +44,7 @@ Rasa Studio:
 ```yaml
 - Install a chart: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
 - Upgrade your application: helm upgrade <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
-- Install specific version: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version <desired version>`
+- Install specific version: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version <desired version>
 - Delete the release: helm delete <your release name>
 ```
 
@@ -67,6 +67,26 @@ Rasa Pro:
 - [helm-docs](https://github.com/norwoodj/helm-docs)
 
 > **Please install and use `pre-commit-hook` before creating the PR so we can have all our README files up to date with the chart changes.**
+
+Before you can run hooks, you need to have the pre-commit package manager installed.
+
+Using pip:
+
+```bash
+pip install pre-commit
+```
+
+Using homebrew:
+
+```bash
+brew install pre-commit
+```
+
+Install the git hook scripts
+```bash
+pre-commit install
+```
+now `pre-commit` will run automatically on `git commit`!
 
 Make sure to always check if `README.md` is valid and reflects your changes properly. Also, make sure to leave comments in `values.yaml` in form:
 

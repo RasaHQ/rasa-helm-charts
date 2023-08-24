@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.13](https://img.shields.io/badge/Version-0.1.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.14](https://img.shields.io/badge/Version-0.1.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.13
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.14
 ```
 
 ## Uninstalling the Chart
@@ -22,7 +22,7 @@ $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-c
 To uninstall/delete the `my-release` deployment:
 
 ```console
-$ helm delete my-release
+helm delete my-release
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.13
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.14
 ```
 
 ## General Configuration
@@ -103,8 +103,8 @@ rasaProServices:
 | actionServer.enabled | bool | `false` | actionServer.enabled enables Action Server deployment |
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| actionServer.image.repository | string | `"rasa/rasa-x-demo"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"0.40.0"` | image.tag specifies image tag |
+| actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
+| actionServer.image.tag | string | `"3.6.2"` | image.tag specifies image tag |
 | actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -114,7 +114,7 @@ rasaProServices:
 | actionServer.initContainers | list | `[]` | actionServer.initContainers allows to specify init containers for the Action Server deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | actionServer.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | actionServer.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| actionServer.livenessProbe.httpGet | object | `{"path":"/","port":5055,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
+| actionServer.livenessProbe.httpGet | object | `{"path":"/health","port":5055,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
 | actionServer.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | actionServer.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | actionServer.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
@@ -125,7 +125,7 @@ rasaProServices:
 | actionServer.podSecurityContext | object | `{"enabled":true}` | actionServer.podSecurityContext defines pod security context |
 | actionServer.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
 | actionServer.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| actionServer.readinessProbe.httpGet | object | `{"path":"/","port":5055,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
+| actionServer.readinessProbe.httpGet | object | `{"path":"/health","port":5055,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
 | actionServer.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
 | actionServer.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
 | actionServer.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |

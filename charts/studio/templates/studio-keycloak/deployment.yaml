@@ -54,10 +54,10 @@ spec:
           {{- end }}
           {{- if or .Values.keycloak.readinessProbe.enabled }}
           readinessProbe:
-            {{- toYaml .Values.keycloak.readinessProbe | nindent 12 }}
+            {{- omit .Values.keycloak.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
-            {{- omit .Values.keycloak.readinessProbe "enabled" | toYaml | nindent 12 }}
+            {{- toYaml .Values.keycloak.resources | nindent 12 }}
           env:
             {{- range $key, $value := .Values.keycloak.environmentVariables }}
             - name: {{ $key | upper }}

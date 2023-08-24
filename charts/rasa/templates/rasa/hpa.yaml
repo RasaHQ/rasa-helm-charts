@@ -9,7 +9,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "rasa.fullname" . }}-deployment
+    name: {{ include "rasa.fullname" . }}
   minReplicas: {{ .Values.rasa.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.rasa.autoscaling.maxReplicas }}
   metrics:

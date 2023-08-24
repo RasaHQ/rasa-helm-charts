@@ -9,7 +9,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: rasa-pro-services-deployment
+    name: rasa-pro-services
   minReplicas: {{ .Values.rasaProServices.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.rasaProServices.autoscaling.maxReplicas }}
   metrics:

@@ -1,0 +1,28 @@
+{{- if and .Values.actionServer.enabled .Values.actionServer.autoscaling.enabled }}
+apiVersion: autoscaling/v2beta1
+kind: HorizontalPodAutoscaler
+metadata:
+  name: action-server
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: action-server
+  minReplicas: {{ .Values.actionServer.autoscaling.minReplicas }}
+  maxReplicas: {{ .Values.actionServer.autoscaling.maxReplicas }}
+  metrics:
+    {{- if .Values.actionServer.autoscaling.targetCPUUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: cpu
+        targetAverageUtilization: {{ .Values.actionServer.autoscaling.targetCPUUtilizationPercentage }}
+    {{- end }}
+    {{- if .Values.actionServer.autoscaling.targetMemoryUtilizationPercentage }}
+    - type: Resource
+      resource:
+        name: memory
+        targetAverageUtilization: {{ .Values.actionServer.autoscaling.targetMemoryUtilizationPercentage }}
+    {{- end }}
+{{- end }}

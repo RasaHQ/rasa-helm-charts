@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: duckling-service
+  name: duckling
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
   {{- with .Values.duckling.service.annotations }}

@@ -2,7 +2,7 @@
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:
-  name: rasa-pro-services-hpa
+  name: rasa-pro-services
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 spec:

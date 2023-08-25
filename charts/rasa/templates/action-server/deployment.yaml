@@ -1,0 +1,108 @@
+{{- if .Values.actionServer.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: action-server
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if not .Values.actionServer.autoscaling.enabled }}
+  replicas: {{ .Values.actionServer.replicaCount }}
+  {{- end }}
+  {{- if .Values.actionServer.strategy }}
+  strategy:
+    {{- toYaml .Values.actionServer.strategy | nindent 4 }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rasa.actionServer.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.actionServer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "rasa.actionServer.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | indent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "rasa.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: "{{ include "rasa.actionServer.serviceAccountName" . }}"
+      {{- if .Values.actionServer.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.actionServer.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: action-server
+          {{- if .Values.actionServer.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.actionServer.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.actionServer.image.repository }}:{{ .Values.actionServer.image.tag }}"
+          imagePullPolicy: {{ .Values.actionServer.image.pullPolicy }}
+          args:
+            {{- toYaml .Values.actionServer.args | nindent 12 }}
+          command:
+            {{- toYaml .Values.actionServer.command | nindent 12 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.actionServer.service.port }}
+              protocol: TCP
+          env:
+            {{- toYaml .Values.actionServer.additionalEnv | nindent 12 }}
+          {{- if .Values.actionServer.envFrom }}
+          envFrom:
+            {{- toYaml .Values.actionServer.envFrom | nindent 12 }}
+          {{- end }}
+          {{- if .Values.actionServer.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.actionServer.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if .Values.actionServer.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.actionServer.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.actionServer.resources | nindent 12 }}
+          {{- if .Values.actionServer.volumeMounts }}
+          volumeMounts:
+            {{- toYaml .Values.actionServer.volumeMounts | nindent 12 }}
+          {{- end }}
+      {{- if .Values.actionServer.additionalContainers }}
+        {{- toYaml .Values.actionServer.additionalContainers | nindent 8 }}
+      {{- end }}
+      {{- if .Values.actionServer.volumes }}
+      volumes:
+        {{- toYaml .Values.actionServer.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.actionServer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.actionServer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.actionServer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: duckling-deployment
+  name: duckling
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}
@@ -69,7 +69,7 @@ spec:
           env:
             {{- toYaml .Values.duckling.additionalEnv | nindent 12 }}
           {{- if .Values.duckling.envFrom }}
-           envFrom:
+          envFrom:
             {{- toYaml .Values.duckling.envFrom | nindent 12 }}
           {{- end }}
           {{- if .Values.duckling.livenessProbe.enabled }}

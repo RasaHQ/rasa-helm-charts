@@ -70,6 +70,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels for Action Server
+*/}}
+{{- define "rasa.actionServer.selectorLabels" -}}
+app.kubernetes.io/name: action-server
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "rasa.serviceAccountName" -}}
@@ -99,6 +107,17 @@ Create the name of the service account to use
 {{- default "duckling" .Values.duckling.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.duckling.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use
+*/}}
+{{- define "rasa.actionServer.serviceAccountName" -}}
+{{- if .Values.actionServer.serviceAccount.create }}
+{{- default "action-server" .Values.actionServer.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.actionServer.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

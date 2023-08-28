@@ -16,6 +16,10 @@ spec:
   {{- if not .Values.rasaProServices.autoscaling.enabled }}
   replicas: {{ .Values.rasaProServices.replicaCount }}
   {{- end }}
+  {{- with .Values.hostAliases }}
+  hostAliases:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if .Values.rasaProServices.strategy }}
   strategy:
     {{- toYaml .Values.rasaProServices.strategy | nindent 4 }}

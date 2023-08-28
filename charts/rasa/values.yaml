@@ -679,6 +679,12 @@ global:
 # -- hostNetwork controls whether the pod may use the node network namespace
 hostNetwork: false
 
+# -- hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable
+hostAliases: []
+# - ip: 127.0.0.1
+#   hostnames:
+#   - "localhost"
+
 # -- dnsPolicy specifies Pod's DNS policy
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
 dnsPolicy: ""

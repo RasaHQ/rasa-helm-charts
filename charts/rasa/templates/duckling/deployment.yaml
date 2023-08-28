@@ -16,6 +16,10 @@ spec:
   {{- if not .Values.duckling.autoscaling.enabled }}
   replicas: {{ .Values.duckling.replicaCount }}
   {{- end }}
+  {{- with .Values.hostAliases }}
+  hostAliases:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if .Values.duckling.strategy }}
   strategy:
     {{- toYaml .Values.duckling.strategy | nindent 4 }}

@@ -16,6 +16,10 @@ spec:
   {{- if not .Values.actionServer.autoscaling.enabled }}
   replicas: {{ .Values.actionServer.replicaCount }}
   {{- end }}
+  {{- with .Values.hostAliases }}
+  hostAliases:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
   {{- if .Values.actionServer.strategy }}
   strategy:
     {{- toYaml .Values.actionServer.strategy | nindent 4 }}

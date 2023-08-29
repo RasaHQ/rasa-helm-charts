@@ -78,6 +78,9 @@ spec:
             mountPath: "/usr/share/nginx/html/config.js"
             subPath: "config.js"
             readOnly: true
+      {{- if .Values.webClient.additionalContainers }}
+        {{- toYaml .Values.webClient.additionalContainers | nindent 8 }}
+      {{- end }}
       volumes:
       - name: configmap
         configMap:

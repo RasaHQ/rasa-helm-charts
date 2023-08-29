@@ -63,6 +63,12 @@ backend:
     # - configMapRef:
     #     name: my-configmap
 
+  # -- backend.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
   # -- Define service account
   serviceAccount:
     # -- Specifies whether a service account should be created
@@ -234,6 +240,12 @@ webClient:
   envFrom: []
     # - configMapRef:
     #     name: my-configmap
+
+  # -- webClient.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
 
   # -- Define service account
   serviceAccount:
@@ -430,6 +442,12 @@ eventIngestion:
     # - configMapRef:
     #     name: my-configmap
 
+  # -- eventIngestion.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
   # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
   volumes:
@@ -559,6 +577,12 @@ keycloak:
   envFrom: []
     # - configMapRef:
     #     name: my-configmap
+
+  # -- keycloak.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
 
   # -- Define service account
   serviceAccount:

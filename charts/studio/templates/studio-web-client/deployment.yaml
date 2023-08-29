@@ -5,6 +5,13 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-web-client
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.webClient.replicaCount }}
   selector:
@@ -21,6 +28,9 @@ spec:
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: studio-web-client
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "studio.dnsPolicy" . }}
@@ -59,6 +69,10 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.webClient.resources | nindent 12 }}
+          {{- if .Values.webClient.envFrom }}
+          envFrom:
+            {{- toYaml .Values.webClient.envFrom | nindent 12 }}
+          {{- end }}
           volumeMounts:
           - name: configmap
             mountPath: "/usr/share/nginx/html/config.js"

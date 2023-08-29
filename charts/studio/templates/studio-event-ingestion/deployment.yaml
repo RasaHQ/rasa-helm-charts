@@ -5,6 +5,13 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-event-ingestion
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.eventIngestion.autoscaling.enabled }}
   replicas: {{ .Values.eventIngestion.replicaCount }}
@@ -22,6 +29,9 @@ spec:
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: studio-event-ingestion
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "studio.dnsPolicy" . }}
@@ -64,6 +74,10 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
+          {{- if .Values.eventIngestion.envFrom }}
+          envFrom:
+            {{- toYaml .Values.eventIngestion.envFrom | nindent 12 }}
+          {{- end }}
       volumes:
       {{- if .Values.eventIngestion.volumes }}
         {{- toYaml .Values.eventIngestion.volumes | nindent 8 }}

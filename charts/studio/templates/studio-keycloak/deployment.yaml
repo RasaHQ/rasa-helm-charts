@@ -5,6 +5,13 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-keycloak
+  {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   replicas: {{ .Values.keycloak.replicaCount }}
   selector:
@@ -20,6 +27,9 @@ spec:
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: studio-keycloak
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "studio.dnsPolicy" . }}
@@ -70,6 +80,10 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
+          {{- if .Values.keycloak.envFrom }}
+          envFrom:
+            {{- toYaml .Values.keycloak.envFrom | nindent 12 }}
+          {{- end }}
       {{- with .Values.keycloak.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

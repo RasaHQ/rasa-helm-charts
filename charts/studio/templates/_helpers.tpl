@@ -55,7 +55,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Create the name of the backend service account to use
+Create the name of the backend service account to use for Backend
 */}}
 {{- define "studio.backend.serviceAccountName" -}}
 {{- if .Values.backend.serviceAccount.create }}
@@ -66,7 +66,7 @@ Create the name of the backend service account to use
 {{- end }}
 
 {{/*
-Create the name of the eventIngestion service account to use
+Create the name of the eventIngestion service account to use for Event Ingestion
 */}}
 {{- define "studio.eventIngestion.serviceAccountName" -}}
 {{- if .Values.eventIngestion.serviceAccount.create }}
@@ -77,7 +77,7 @@ Create the name of the eventIngestion service account to use
 {{- end }}
 
 {{/*
-Create the name of the keycloak service account to use
+Create the name of the keycloak service account to use for Keycloak
 */}}
 {{- define "studio.keycloak.serviceAccountName" -}}
 {{- if .Values.keycloak.serviceAccount.create }}
@@ -88,7 +88,7 @@ Create the name of the keycloak service account to use
 {{- end }}
 
 {{/*
-Create the name of the frontend service account to use
+Create the name of the frontend service account to use for Web Client
 */}}
 {{- define "studio.webClient.serviceAccountName" -}}
 {{- if .Values.webClient.serviceAccount.create }}
@@ -121,3 +121,58 @@ Return the appropriate apiVersion for networkpolicy.
 {{- print "networking.k8s.io/v1" }}
 {{- end }}
 {{- end }}
+
+{{/*
+Return image repository with tag and image name for Backend
+*/}}
+{{- define "studio.backend.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.repository }}{{ .Values.backend.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.repository }}/{{ .Values.backend.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Backend migration
+*/}}
+{{- define "studio.migration.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.repository }}{{ .Values.backend.migration.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.repository }}/{{ .Values.backend.migration.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Web Client
+*/}}
+{{- define "studio.webClient.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.repository }}{{ .Values.webClient.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.repository }}/{{ .Values.webClient.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Event Ingestion
+*/}}
+{{- define "studio.eventIngestion.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.repository }}{{ .Values.eventIngestion.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.repository }}/{{ .Values.eventIngestion.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Keycloak
+*/}}
+{{- define "studio.keycloak.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}

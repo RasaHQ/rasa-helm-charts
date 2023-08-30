@@ -52,7 +52,7 @@ spec:
           securityContext:
             {{- omit .Values.keycloak.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.keycloak.image.repository }}:{{ .Values.keycloak.image.tag }}"
+          image: {{ include "studio.keycloak.image" . }}
           imagePullPolicy: {{ .Values.keycloak.image.pullPolicy }}
           ports:
             - name: http

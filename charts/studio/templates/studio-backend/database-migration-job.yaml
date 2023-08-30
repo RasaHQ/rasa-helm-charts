@@ -26,8 +26,8 @@ spec:
       {{- end }}
       restartPolicy: Never
       containers:
-      - name: {{ include "studio.fullname" . }}-database-migration
-        image: "{{ .Values.backend.migration.image.repository }}:{{ .Values.backend.migration.image.tag }}"
+      - name: {{ .Chart.Name }}-database-migration
+        image: {{ include "studio.migration.image" . }}
         env:
           {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
           - name: DATABASE_URL

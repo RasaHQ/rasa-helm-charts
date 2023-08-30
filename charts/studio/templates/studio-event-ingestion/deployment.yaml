@@ -54,7 +54,7 @@ spec:
           securityContext:
             {{- omit .Values.eventIngestion.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.eventIngestion.image.repository }}:{{ .Values.eventIngestion.image.tag }}"
+          image: {{ include "studio.eventIngestion.image" . }}
           imagePullPolicy: {{ .Values.eventIngestion.image.pullPolicy }}
           resources:
             {{- toYaml .Values.eventIngestion.resources | nindent 12 }}

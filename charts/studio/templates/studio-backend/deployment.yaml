@@ -54,7 +54,7 @@ spec:
           securityContext:
             {{- omit .Values.backend.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.backend.image.repository }}:{{ .Values.backend.image.tag }}"
+          image: {{ include "studio.backend.image" . }}
           imagePullPolicy: {{ .Values.backend.image.pullPolicy }}
           ports:
             - name: http

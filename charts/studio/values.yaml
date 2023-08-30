@@ -58,6 +58,17 @@ backend:
     KEYCLOAK_API_GRANT_TYPE:
       value: "password"
 
+  # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- backend.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
   # -- Define service account
   serviceAccount:
     # -- Specifies whether a service account should be created
@@ -224,6 +235,17 @@ webClient:
     KEYCLOAK_URL: ""
     KEYCLOAK_REALM: "rasa-local-dev"
     KEYCLOAK_CLIENT_ID: "studio-local"
+
+  # -- webClient.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- webClient.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
 
   # -- Define service account
   serviceAccount:
@@ -415,6 +437,17 @@ eventIngestion:
     KAFKA_GROUP_ID:
       value: ""
 
+  # -- eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- eventIngestion.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
+
   # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
   volumes:
@@ -539,6 +572,17 @@ keycloak:
     # If true the server will reject db connection which is not authorized with the list of supplied CAs.
     KC_REJECT_UNAUTHORIZED:
       value: ""
+
+  # -- keycloak.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
+
+  # -- keycloak.additionalContainers allows to specify additional containers for the deployment
+  additionalContainers: []
+  #  - name: extra
+  #    image: "busybox"
+  #    command: ["bash", "-c"]
 
   # -- Define service account
   serviceAccount:
@@ -692,3 +736,13 @@ dnsConfig:
   # options:
   # - name: ndots
   #   value: "1"
+
+# -- deploymentAnnotations defines annotations to add to all Studio deployments
+deploymentAnnotations: {}
+  #  key: "value"
+
+# -- deploymentLabels defines labels to add to all Studio deployment
+deploymentLabels: {}
+
+# -- podLabels defines labels to add to all Studio pod(s)
+podLabels: {}

@@ -5,6 +5,13 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-backend
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
 spec:
   {{- if not .Values.backend.autoscaling.enabled }}
   replicas: {{ .Values.backend.replicaCount }}
@@ -22,6 +29,9 @@ spec:
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
         app.kubernetes.io/component: studio-backend
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
     spec:
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "studio.dnsPolicy" . }}
@@ -72,6 +82,13 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
+          {{- if .Values.backend.envFrom }}
+          envFrom:
+            {{- toYaml .Values.backend.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.backend.additionalContainers }}
+        {{- toYaml .Values.backend.additionalContainers | nindent 8 }}
+      {{- end }}
       {{- with .Values.backend.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

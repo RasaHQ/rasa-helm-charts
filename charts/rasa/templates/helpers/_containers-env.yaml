@@ -13,6 +13,10 @@ Environment Variables for Rasa Containers
 - name: "RASA_DUCKLING_HTTP_URL"
   value: "{{ include "rasa.ducklingUrl" $ }}"
 {{- end }}
+{{- if or $.Values.actionServer.enabled (not (empty $.Values.rasa.settings.endpoints.actionEndpoint.url)) -}}
+- name: "ACTION_SERVER_URL"
+  value: "{{ include "rasa.actionServerUrl" $ }}"
+{{- end }}
 - name: "MPLCONFIGDIR"
   value: "/tmp/.matplotlib"
 - name: "TF_CPP_MIN_LOG_LEVEL"

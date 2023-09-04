@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.29](https://img.shields.io/badge/Version-0.1.29-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.30](https://img.shields.io/badge/Version-0.1.30-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.29
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.30
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.29
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.30
 ```
 
 ## Values
@@ -115,7 +115,7 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
-| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":""},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
+| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":""},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":""},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | Specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |

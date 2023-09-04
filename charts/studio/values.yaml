@@ -62,7 +62,8 @@ backend:
       value: "password"
 
   # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: my-configmap
 
@@ -235,7 +236,8 @@ webClient:
     KEYCLOAK_CLIENT_ID: "studio-local"
 
   # -- webClient.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: my-configmap
 
@@ -433,7 +435,8 @@ eventIngestion:
       value: ""
 
   # -- eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: my-configmap
 
@@ -564,9 +567,13 @@ keycloak:
     # If true the server will reject db connection which is not authorized with the list of supplied CAs.
     KC_REJECT_UNAUTHORIZED:
       value: ""
+    # Set value to edge to enable communication through HTTP between the proxy/load balancer and Keycloak. Useful for highly secure internal network where the reverse proxy keeps a secure connection (HTTP over TLS) with clients while communicating with Keycloak using HTTP.
+    KC_PROXY:
+      value: ""
 
   # -- keycloak.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
+  envFrom:
+    []
     # - configMapRef:
     #     name: my-configmap
 
@@ -730,7 +737,8 @@ dnsConfig:
   #   value: "1"
 
 # -- deploymentAnnotations defines annotations to add to all Studio deployments
-deploymentAnnotations: {}
+deploymentAnnotations:
+  {}
   #  key: "value"
 
 # -- deploymentLabels defines labels to add to all Studio deployment

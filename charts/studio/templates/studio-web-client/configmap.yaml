@@ -11,3 +11,8 @@ data:
     window.FEATURE_FLAG_FLOWS = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_FLOWS | default false | quote }};
     window.FEATURE_FLAG_TRY_ASSISTANT = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_TRY_ASSISTANT | default false | quote }};
     window.FEATURE_FLAG_TRAINING = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_TRAINING | default false | quote }};
+    window.CURRENT_VERSION_NUMBER = {{ if .Values.webClient.environmentVariables.CURRENT_VERSION_NUMBER }}
+      {{ .Values.webClient.environmentVariables.CURRENT_VERSION_NUMBER | quote }}
+    {{ else }}
+      {{ .Values.tag | quote }}
+    {{ end }};

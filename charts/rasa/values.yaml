@@ -161,73 +161,8 @@ rasa:
     logging:
       # -- logging.logLevel is Rasa Log Level
       logLevel: info
-      # -- logging.logLevelLibraries configures log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka
-      logLevelLibraries: error
-      # -- logging.logLevelMatplotlib configures log level for Matplotlib
-      logLevelMatplotlib: error
-      # -- logging.logLevelRabbitMq configures log level for RabbitMQ
-      logLevelRabbitMq: error
-      # -- logging.logLevelKafka configures log level for Kafka
-      logLevelKafka: error
-      # -- logging.logLevelPresidio configures log level for Presidio
-      logLevelPresidio: error
-      # -- logging.logLevelFaker configures log level for Faker
-      logLevelFaker: error
-      # -- logging.forceJsonLogging forces logging in JSON
-      forceJsonLogging: false
     # -- settings.ducklingHttpUrl is HTTP URL to the duckling service
     ducklingHttpUrl:
-    # -- settings.sanicServer defines sanicServer settings
-    sanicServer:
-      # -- sanicServer.backlog is number of unaccepted connections the server allows before refusing new connections
-      backlog: 100
-      # -- sanicServer.workers is number of Sanic worker processes in the HTTP Server and Input Channel Server
-      workers: 1
-    # -- settings.postgresTrackerStore defines settings to customize connections to Postgres
-    postgresTrackerStore:
-      # -- postgresTrackerStore.shema is PostgreSQL schema to access
-      schema: public
-      # -- postgresTrackerStore.poolSize defines Pool Size configuration
-      poolSize: 50
-      # -- postgresTrackerStore.maxOverflow defines maximum overflow size of the pool
-      maxOverflow: 100
-    # -- settings.rabbitmq defines settings to setup RabbitMQ SSL
-    rabbitmq:
-      # -- rabbitmq.enabled defines if RabbitMq will be used
-      enabled: false
-      # -- rabbitmq.sslClientCertificate is path to the SSL client certificate
-      sslClientCertificate:
-        secretName: "rasa-secrets"
-        secretKey: "sslClientCertificate"
-      # -- rabbitmq.sslClientKey is path to the SSL client key
-      sslClientKey:
-        secretName: "rasa-secrets"
-        secretKey: "sslClientKey"
-    # -- settings.cache is used for `rasa train` command
-    cache:
-      # -- cache.maxSize is maximum size for the cache
-      maxSize: 1000
-      # -- cache.name is the name of the cache file
-      name: cache.db
-      # -- cache.default is location of the cache
-      # default is equivalent of Path(".rasa", "cache")
-      directory:
-    # -- settings.lockStore provides synchronization mechanism used by Rasa
-    lockStore:
-      # -- lockStore.ticketLockLifetime is lifetime of the ticket associated with a lock
-      ticketLockLifetime: 60
-    # -- settings.tensorflow defines Tensorflow parameters
-    tensorflow:
-      # -- tensorflow.gpuMemoryAlloc is used to limit the absolute amount of GPU memory that can be used by a Rasa process
-      gpuMemoryAlloc: "0:1024, 1:2048"
-      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation
-      interOpParallelismThreads: "3"
-      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-multiple-operations
-      intraOpParallelismThreads: "2"
-      # -- See: https://rasa.com/docs/rasa/tuning-your-model/#deterministic-operations
-      deterministicOps: false
-    shellStreamReadingTimeoutInSeconds: 10
-    maxNumberOfPreditions: 10
 
   # -- rasa.args overrides the default arguments for the container
   args: []

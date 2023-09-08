@@ -152,9 +152,9 @@ Determine rasa server to run with arguments
 - run
 {{- if .Values.rasa.settings.enableApi }}
 - --enable-api
+{{- if and .Values.rasa.settings.jwtSecret.secretName .Values.rasa.settings.jwtSecret.secretKey }}
 - --jwt-method
 - {{ .Values.rasa.settings.jwtMethod }}
-{{- if and .Values.rasa.settings.jwtSecret.secretName .Values.rasa.settings.jwtSecret.secretKey }}
 - --jwt-secret
 - "$(JWT_SECRET)"
 {{- end }}
@@ -173,16 +173,5 @@ Return Duckling URL
 {{- printf "%s://%s-duckling.%s.svc:%d" .Values.duckling.settings.scheme "duckling" .Release.Namespace (.Values.duckling.service.port | int) -}}
 {{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl))  -}}
 {{- print .Values.rasa.settings.ducklingHttpUrl -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return Action Server URL
-*/}}
-{{- define "rasa.actionServerUrl" -}}
-{{- if and .Values.actionServer.enabled (empty .Values.rasa.settings.endpoints.actionEndpoint.url) -}}
-{{- printf "%s://%s-action-server.%s.svc:%d%s" .Values.actionServer.settings.scheme "action-server" .Release.Namespace (.Values.actionServer.service.port | int) .Values.rasa.settings.endpoints.actionEndpoint.url -}}
-{{- else if and (not .Values.actionServer.enabled) (not (empty .Values.rasa.settings.endpoints.actionEndpoint.url))  -}}
-{{- print .Values.rasa.settings.endpoints.actionEndpoint.url -}}
 {{- end -}}
 {{- end -}}

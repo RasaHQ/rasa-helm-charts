@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.17](https://img.shields.io/badge/Version-0.1.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
+![Version: 0.1.18](https://img.shields.io/badge/Version-0.1.18-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 1.16.0](https://img.shields.io/badge/AppVersion-1.16.0-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.17
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.18
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.17
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.18
 ```
 
 ## General Configuration
@@ -283,10 +283,6 @@ rasaProServices:
 | rasa.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | rasa.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasa.settings.authToken | object | `{"secretKey":"authToken","secretName":"rasa-secrets"}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
-| rasa.settings.cache | object | `{"directory":null,"maxSize":1000,"name":"cache.db"}` | settings.cache is used for `rasa train` command |
-| rasa.settings.cache.directory | string | `nil` | cache.default is location of the cache default is equivalent of Path(".rasa", "cache") |
-| rasa.settings.cache.maxSize | int | `1000` | cache.maxSize is maximum size for the cache |
-| rasa.settings.cache.name | string | `"cache.db"` | cache.name is the name of the cache file |
 | rasa.settings.cors | string | `"*"` | settings.cors is CORS for the passed origin. Default is * to allow all origins |
 | rasa.settings.credentials.additionalChannelCredentials | object | `{}` | credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
 | rasa.settings.credentials.enabled | bool | `false` | credentials.enabled enables credentials configuration for channel connectors |
@@ -303,38 +299,11 @@ rasaProServices:
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
-| rasa.settings.lockStore | object | `{"ticketLockLifetime":60}` | settings.lockStore provides synchronization mechanism used by Rasa |
-| rasa.settings.lockStore.ticketLockLifetime | int | `60` | lockStore.ticketLockLifetime is lifetime of the ticket associated with a lock |
-| rasa.settings.logging.forceJsonLogging | bool | `false` | logging.forceJsonLogging forces logging in JSON |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
-| rasa.settings.logging.logLevelFaker | string | `"error"` | logging.logLevelFaker configures log level for Faker |
-| rasa.settings.logging.logLevelKafka | string | `"error"` | logging.logLevelKafka configures log level for Kafka |
-| rasa.settings.logging.logLevelLibraries | string | `"error"` | logging.logLevelLibraries configures log level for Tensorflow, asyncio, APScheduler, SocketIO, Matplotlib, RabbitMQ, Kafka |
-| rasa.settings.logging.logLevelMatplotlib | string | `"error"` | logging.logLevelMatplotlib configures log level for Matplotlib |
-| rasa.settings.logging.logLevelPresidio | string | `"error"` | logging.logLevelPresidio configures log level for Presidio |
-| rasa.settings.logging.logLevelRabbitMq | string | `"error"` | logging.logLevelRabbitMq configures log level for RabbitMQ |
-| rasa.settings.maxNumberOfPreditions | int | `10` |  |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
-| rasa.settings.postgresTrackerStore | object | `{"maxOverflow":100,"poolSize":50,"schema":"public"}` | settings.postgresTrackerStore defines settings to customize connections to Postgres |
-| rasa.settings.postgresTrackerStore.maxOverflow | int | `100` | postgresTrackerStore.maxOverflow defines maximum overflow size of the pool |
-| rasa.settings.postgresTrackerStore.poolSize | int | `50` | postgresTrackerStore.poolSize defines Pool Size configuration |
-| rasa.settings.postgresTrackerStore.schema | string | `"public"` | postgresTrackerStore.shema is PostgreSQL schema to access |
-| rasa.settings.rabbitmq | object | `{"enabled":false,"sslClientCertificate":{"secretKey":"sslClientCertificate","secretName":"rasa-secrets"},"sslClientKey":{"secretKey":"sslClientKey","secretName":"rasa-secrets"}}` | settings.rabbitmq defines settings to setup RabbitMQ SSL |
-| rasa.settings.rabbitmq.enabled | bool | `false` | rabbitmq.enabled defines if RabbitMq will be used |
-| rasa.settings.rabbitmq.sslClientCertificate | object | `{"secretKey":"sslClientCertificate","secretName":"rasa-secrets"}` | rabbitmq.sslClientCertificate is path to the SSL client certificate |
-| rasa.settings.rabbitmq.sslClientKey | object | `{"secretKey":"sslClientKey","secretName":"rasa-secrets"}` | rabbitmq.sslClientKey is path to the SSL client key |
-| rasa.settings.sanicServer | object | `{"backlog":100,"workers":1}` | settings.sanicServer defines sanicServer settings |
-| rasa.settings.sanicServer.backlog | int | `100` | sanicServer.backlog is number of unaccepted connections the server allows before refusing new connections |
-| rasa.settings.sanicServer.workers | int | `1` | sanicServer.workers is number of Sanic worker processes in the HTTP Server and Input Channel Server |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
-| rasa.settings.shellStreamReadingTimeoutInSeconds | int | `10` |  |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |
 | rasa.settings.telemetry.enabled | bool | `true` | telemetry.enabled allow Rasa to collect anonymous usage details |
-| rasa.settings.tensorflow | object | `{"deterministicOps":false,"gpuMemoryAlloc":"0:1024, 1:2048","interOpParallelismThreads":"3","intraOpParallelismThreads":"2"}` | settings.tensorflow defines Tensorflow parameters |
-| rasa.settings.tensorflow.deterministicOps | bool | `false` | See: https://rasa.com/docs/rasa/tuning-your-model/#deterministic-operations |
-| rasa.settings.tensorflow.gpuMemoryAlloc | string | `"0:1024, 1:2048"` | tensorflow.gpuMemoryAlloc is used to limit the absolute amount of GPU memory that can be used by a Rasa process |
-| rasa.settings.tensorflow.interOpParallelismThreads | string | `"3"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-one-operation |
-| rasa.settings.tensorflow.intraOpParallelismThreads | string | `"2"` | See: https://rasa.com/docs/rasa/tuning-your-model/#parallelizing-multiple-operations |
 | rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |

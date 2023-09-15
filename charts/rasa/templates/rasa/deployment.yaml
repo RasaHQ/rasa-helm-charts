@@ -29,10 +29,10 @@ spec:
       {{- include "rasa.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.rasa.podAnnotations }}
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- toYaml . | nindent 8 }}
+        checksum/config: {{ include (print $.Template.BasePath "/rasa/configmap.yaml") . | sha256sum }}
+      {{- if .Values.rasa.podAnnotations }}
+        {{- toYaml .Values.rasa.podAnnotations | nindent 8 }}
       {{- end }}
       labels:
         {{- include "rasa.selectorLabels" . | nindent 8 }}

@@ -258,8 +258,7 @@ webClient:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations:
-    {}
+  podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
   # -- Define pod security context

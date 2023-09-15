@@ -20,10 +20,10 @@ spec:
       app.kubernetes.io/component: studio-web-client
   template:
     metadata:
-      {{- with .Values.webClient.podAnnotations }}
       annotations:
-        {{- toYaml . | nindent 8 }}
-        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/studio-web-client/configmap.yaml") . | sha256sum }}
+      {{- if .Values.webClient.podAnnotations }}
+        {{- toYaml .Values.webClient.podAnnotations | nindent 8 }}
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}

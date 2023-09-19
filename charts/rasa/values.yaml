@@ -82,11 +82,11 @@ rasa:
       # input channels
       ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
       additionalChannelCredentials: {}
-      #  rest:
-      #  facebook:
-      #    verify: "rasa"
-      #    secret: "<SECRET>"
-      #    page-access-token: "<PAGE-ACCESS-TOKEN>"
+        # rest:
+        # facebook:
+        #   verify: "rasa"
+        #   secret: "<SECRET>"
+        #   page-access-token: "<PAGE-ACCESS-TOKEN>"
 
     # See: https://rasa.com/docs/rasa/telemetry/telemetry/
     telemetry:
@@ -598,13 +598,30 @@ rasaProServices:
 # Network policy settings
 networkPolicy:
   # -- Specifies whether to enable network policies
-  enabled: false
+  enabled: true
   # -- Specifies whether to apply denyAll network policy
   denyAll: false
   # -- Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes
   nodeCIDR: []
     # - ipBlock:
     #     cidr: 0.0.0.0/0
+  rabbitmqAllowEgressIngress:
+    enabled: false
+    matchLabels: {}
+      # app.kubernetes.io/name: rabbitmq
+    port: 5672
+  postgresqlAllowEgressIngress:
+    enabled: false
+    matchLabels: {}
+      # app.kubernetes.io/name: postgresql
+    port: 5432
+  actionServerAllowEgressIngress:
+    enabled: false
+  redisAllowEgressIngress:
+    enabled: false
+    matchLabels: {}
+      # app.kubernetes.io/name: redis
+    port: 6379
 
 # Defines global settings for all resources
 global:

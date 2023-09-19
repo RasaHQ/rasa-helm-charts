@@ -2,7 +2,7 @@
 apiVersion: {{ template "networkPolicy.apiVersion" . }}
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-rasa
+  name: {{ include "rasa.fullname" . }}-ingress-egress-from-kubelet-to-rasa
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:
@@ -24,7 +24,7 @@ spec:
 apiVersion: {{ template "networkPolicy.apiVersion" . }}
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-rasa-pro-services
+  name: {{ include "rasa.fullname" . }}-ingress-egress-from-kubelet-to-rasa-pro-services
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:

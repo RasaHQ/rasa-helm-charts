@@ -1,0 +1,39 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.actionServerAllowEgressIngress.enabled }}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-action-server-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rasa.name" . }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: action-server
+    ports:
+    - protocol: TCP
+      port: {{ .Values.actionServer.service.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-action-server-ingress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: action-server
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: {{ include "rasa.name" . }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.actionServer.service.port }}
+{{- end }}

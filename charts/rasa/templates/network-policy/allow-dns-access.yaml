@@ -2,7 +2,7 @@
 apiVersion: {{ template "networkPolicy.apiVersion" . }}
 kind: NetworkPolicy
 metadata:
-  name: allow-dns-access
+  name: {{ include "rasa.fullname" . }}-allow-dns-access
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:

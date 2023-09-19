@@ -222,9 +222,19 @@ rasaProServices:
 | hostNetwork | bool | `false` | hostNetwork controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets |
 | nameOverride | string | `""` | nameOverride overrides name of the app |
+| networkPolicy.actionServerAllowEgressIngress.enabled | bool | `false` |  |
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
-| networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
+| networkPolicy.enabled | bool | `true` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
+| networkPolicy.postgresqlAllowEgressIngress.enabled | bool | `false` |  |
+| networkPolicy.postgresqlAllowEgressIngress.matchLabels | object | `{}` |  |
+| networkPolicy.postgresqlAllowEgressIngress.port | int | `5432` |  |
+| networkPolicy.rabbitmqAllowEgressIngress.enabled | bool | `false` |  |
+| networkPolicy.rabbitmqAllowEgressIngress.matchLabels | object | `{}` |  |
+| networkPolicy.rabbitmqAllowEgressIngress.port | int | `5672` |  |
+| networkPolicy.redisAllowEgressIngress.enabled | bool | `false` |  |
+| networkPolicy.redisAllowEgressIngress.matchLabels | object | `{}` |  |
+| networkPolicy.redisAllowEgressIngress.port | int | `6379` |  |
 | podLabels | object | `{}` | podLabels defines labels to add to all Rasa pod(s) |
 | rasa.additionalArgs | list | `[]` | rasa.additionalArgs adds additional arguments to the default args |
 | rasa.additionalContainers | list | `[]` | rasa.additionalContainers allows to specify additional containers for the Rasa Deployment |

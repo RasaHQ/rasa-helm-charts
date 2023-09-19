@@ -1,0 +1,39 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.postgresqlAllowEgressIngress.enabled }}
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-postgresql-egress
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "rasa.name" . }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- .Values.networkPolicy.postgresqlAllowEgressIngress.matchLabels | toYaml | nindent 10 }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.networkPolicy.postgresqlAllowEgressIngress.port }}
+---
+apiVersion: {{ template "networkPolicy.apiVersion" . }}
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-postgresql-ingress
+spec:
+  podSelector:
+    matchLabels:
+      {{- .Values.networkPolicy.postgresqlAllowEgressIngress.matchLabels | toYaml | nindent 6 }}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: {{ include "rasa.name" . }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.networkPolicy.postgresqlAllowEgressIngress.port }}
+{{- end }}

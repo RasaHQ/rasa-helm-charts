@@ -26,7 +26,15 @@ rasa:
       lockStore:
         enabled: false
       eventBroker:
-        enabled: false
+        enabled: true
+        type: kafka
+        security_protocol: SASL_SSL
+        sasl_mechanism: PLAIN
+        topic: rasa-events
+        url: rasa-kafka-bootstrap.example-pro.svc:9092
+        sasl_username: ${KAFKA_USER}
+        sasl_password: ${KAFKA_PASSWORD}
+        ssl_check_hostname: true
       tracing:
         enabled: false
       actionEndpoint:

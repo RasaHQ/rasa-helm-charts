@@ -22,7 +22,14 @@ rasa:
       models:
         enabled: false
       trackerStore:
-        enabled: false
+        enabled: true
+        type: sql
+        dialect: postgresql
+        url: ${DB_HOST}
+        db: ${DB_DATABASE}
+        username: ${DB_USER}
+        password: ${DB_PASSWORD}
+        port: 5432
       lockStore:
         enabled: true
         db: 1

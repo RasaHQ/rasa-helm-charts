@@ -24,7 +24,11 @@ rasa:
       trackerStore:
         enabled: false
       lockStore:
-        enabled: false
+        enabled: true
+        db: 1
+        password: ${REDIS_PASSWORD}
+        port: 6379
+        url: redis-lockstore-master
       eventBroker:
         enabled: true
         type: kafka

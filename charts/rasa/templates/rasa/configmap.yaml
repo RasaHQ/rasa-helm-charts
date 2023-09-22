@@ -24,19 +24,14 @@ data:
 {{- end }}
 {{- if .lockStore.enabled }}
     lock_store:
-      {{- if $.Values.rasa.plus.enabled }}
+      {{- omit .lockStore "enabled" | toYaml | nindent 6 }}
+      {{- if and $.Values.rasa.plus.enabled .lockStore.useConcurrent }}
       type: "rasa_plus.components.concurrent_lock_store.ConcurrentRedisLockStore"
       host: {{ .lockStore.url }}
       {{- else }}
       type: "redis"
       url: {{ .lockStore.url }}
       {{- end }}
-      port: {{ .lockStore.port }}
-      password: {{ .lockStore.password }}
-      db: {{ .lockStore.db }}
-      key_prefix: {{ .lockStore.keyPrefix }}
-      use_ssl: {{ .lockStore.useSsl }}
-      socket_timeout: {{ .lockStore.socketTimeout }}
 {{- end }}
 {{- if .eventBroker.enabled }}
     event_broker:

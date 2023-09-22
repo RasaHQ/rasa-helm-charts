@@ -32,7 +32,42 @@ rasa:
       actionEndpoint:
         url: /webhook
       additionalEndpoints: {}
-
+  additionalEnv:
+    - name: DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: dbUrl
+    - name: DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: database
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: username
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: password
+    - name: KAFKA_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: kafka-secrets
+          key: password
+    - name: KAFKA_USER
+      valueFrom:
+        secretKeyRef:
+          name: kafka-secrets
+          key: username
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secrets
+          key: password
 # Rasa Pro Services Configuration
 rasaProServices:
   enabled: false

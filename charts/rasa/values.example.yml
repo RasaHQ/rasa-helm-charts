@@ -147,6 +147,18 @@ duckling:
     type: ClusterIP
     port: 8000
     targetPort: 8000
+  ingress:
+    enabled: false
+    className: ""
+    labels: {}
+    annotations: {}
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+            pathType: Prefix
+        extraPaths: []
+    tls: []
 
 actionServer:
   enabled: false
@@ -163,33 +175,6 @@ actionServer:
     type: ClusterIP
     port: 5055
     targetPort: 5055
-    annotations: {}
-    nodePort: null
-    loadBalancerIP: null
-    externalTrafficPolicy: Cluster
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-      port: 5055
-      scheme: HTTP
-    initialDelaySeconds: 15
-    periodSeconds: 15
-    successThreshold: 1
-    timeoutSeconds: 5
-    failureThreshold: 6
-    terminationGracePeriodSeconds: 30
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /health
-      port: 5055
-      scheme: HTTP
-    initialDelaySeconds: 15
-    periodSeconds: 15
-    successThreshold: 1
-    timeoutSeconds: 5
-    failureThreshold: 6
   ingress:
     enabled: false
     className: ""

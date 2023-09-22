@@ -25,13 +25,6 @@ rasa:
         enabled: false
       lockStore:
         enabled: false
-        url: ""
-        port: ""
-        password: ""
-        db: "1"
-        keyPrefix: ""
-        useSsl: false
-        socketTimeout: ""
       eventBroker:
         enabled: false
       tracing:
@@ -112,23 +105,6 @@ actionServer:
     port: 5055
     scheme: http
   args: []
-  additionalArgs: []
-  command: []
-  additionalEnv: []
-  envFrom: []
-  initContainers: []
-  additionalContainers: []
-  volumes: []
-  volumeMounts: []
-  serviceAccount:
-    create: true
-    annotations: {}
-    name: ""
-  podAnnotations: {}
-  podSecurityContext:
-    enabled: true
-  securityContext:
-    enabled: true
   service:
     type: ClusterIP
     port: 5055

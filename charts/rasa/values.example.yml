@@ -1,0 +1,190 @@
+# Basic values for rasa.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Rasa Open Source
+rasa:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"
+    pullPolicy: IfNotPresent
+    tag: "3.6.4-latest"
+  settings:
+    port: 5005
+    scheme: http
+    enableApi: true
+  service:
+    type: ClusterIP
+    port: 5005
+    targetPort: 5005
+  endpoints:
+      models:
+        enabled: false
+      trackerStore:
+        enabled: true
+        type: sql
+        dialect: postgresql
+        url: ${DB_HOST}
+        db: ${DB_DATABASE}
+        username: ${DB_USER}
+        password: ${DB_PASSWORD}
+        port: 5432
+      lockStore:
+        enabled: true
+        db: 1
+        password: ${REDIS_PASSWORD}
+        port: 6379
+        url: redis-lockstore-master
+      eventBroker:
+        enabled: true
+        type: kafka
+        security_protocol: SASL_SSL
+        sasl_mechanism: PLAIN
+        topic: rasa-events
+        url: rasa-kafka-bootstrap.example-pro.svc:9092
+        sasl_username: ${KAFKA_USER}
+        sasl_password: ${KAFKA_PASSWORD}
+        ssl_check_hostname: true
+      tracing:
+        enabled: false
+      actionEndpoint:
+        url: /webhook
+      additionalEndpoints: {}
+  additionalEnv:
+    - name: DB_HOST
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: dbUrl
+    - name: DB_DATABASE
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: database
+    - name: DB_USER
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: username
+    - name: DB_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: postgres-db
+          key: password
+    - name: KAFKA_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: kafka-secrets
+          key: password
+    - name: KAFKA_USER
+      valueFrom:
+        secretKeyRef:
+          name: kafka-secrets
+          key: username
+    - name: REDIS_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: redis-secrets
+          key: password
+# Rasa Pro Services Configuration
+rasaProServices:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    tag: "3.1.1-latest"
+  service:
+    type: ClusterIP
+    port: 8732
+    targetPort: 8732
+  environmentVariables:
+    # Address of the Kafka broker.
+    KAFKA_BROKER_ADDRESS:
+      value: ""
+    # Topic Rasa Plus publishes events to and Rasa Pro consumes from
+    KAFKA_TOPIC:
+      value: "rasa_core_events"
+    # Set the log level of the application
+    LOGGING_LEVEL:
+      value: "INFO"
+    # URL of the data lake to store analytics data in
+    RASA_ANALYTICS_DB_URL:
+      value: ""
+      # secret:
+      #   name:
+      #   key:
+    # SASL mechanism to use for authentication.
+    KAFKA_SASL_MECHANISM:
+      value: "PLAIN"
+    # Username for SASL authentication.
+    KAFKA_SASL_USERNAME:
+      value: ""
+    # Password for SASL authentication
+    KAFKA_SASL_PASSWORD:
+      secret:
+        name: "rasa-secrets"
+        key: "kafkaSslPassword"
+    # Security protocol to use for communication with Kafka
+    KAFKA_SECURITY_PROTOCOL:
+      value: "PLAINTEXT"
+    # Filepath for SSL CA Certificate that will be used to connect with Kafka
+    KAFKA_SSL_CA_LOCATION:
+      value: ""
+  
+
+# Duckling Configuration
+duckling:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: "rasa/duckling"
+    tag: "0.2.0.2-r0"
+  settings:
+    port: 8000
+    scheme: http
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+  ingress:
+    enabled: false
+    className: ""
+    labels: {}
+    annotations: {}
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+            pathType: Prefix
+        extraPaths: []
+    tls: []
+
+actionServer:
+  enabled: false
+  replicaCount: 1
+  image:
+    repository: "rasa/rasa-sdk"
+    pullPolicy: IfNotPresent
+    tag: "3.6.2"
+  settings:
+    port: 5055
+    scheme: http
+  args: []
+  service:
+    type: ClusterIP
+    port: 5055
+    targetPort: 5055
+  ingress:
+    enabled: false
+    className: ""
+    labels: {}
+    annotations: {}
+    hosts:
+      - host: chart-example.local
+        paths:
+          - path: /api
+            pathType: Prefix
+        extraPaths: []
+    tls: []
+  resources: {}

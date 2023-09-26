@@ -124,7 +124,7 @@ rasa:
         # password: ""
         # db: "1"
         # keyPrefix: ""
-        # useSsl: false
+        # use_ssl: false
         # socketTimeout: ""
       # -- endpoints.eventBroker allows you to connect your running assistant to other services that process the data
       # See: https://rasa.com/docs/rasa/event-brokers

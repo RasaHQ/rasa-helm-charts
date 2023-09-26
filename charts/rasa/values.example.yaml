@@ -2,9 +2,19 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+imagePullSecrets: []
+  # - name: regcred
+
+# -- rasaProLicence is license key for Rasa Pro Services.
+rasaProLicence:
+  secretName: "rasa-secrets"
+  secretKey: "rasaProLicence"
+
 # Rasa Open Source
 rasa:
   enabled: true
+  plus:
+    enabled: true
   replicaCount: 1
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"

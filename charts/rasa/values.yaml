@@ -118,13 +118,14 @@ rasa:
       # See: https://rasa.com/docs/rasa/lock-stores
       lockStore:
         enabled: false
+        useConcurrent: true
         url: ""
-        port: ""
-        password: ""
-        db: "1"
-        keyPrefix: ""
-        useSsl: false
-        socketTimeout: ""
+        # port: ""
+        # password: ""
+        # db: "1"
+        # key_prefix: ""
+        # use_ssl: false
+        # socket_timeout: ""
       # -- endpoints.eventBroker allows you to connect your running assistant to other services that process the data
       # See: https://rasa.com/docs/rasa/event-brokers
       eventBroker:

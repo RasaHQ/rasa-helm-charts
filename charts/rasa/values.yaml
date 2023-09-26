@@ -123,7 +123,7 @@ rasa:
         # port: ""
         # password: ""
         # db: "1"
-        # keyPrefix: ""
+        # key_prefix: ""
         # use_ssl: false
         # socket_timeout: ""
       # -- endpoints.eventBroker allows you to connect your running assistant to other services that process the data

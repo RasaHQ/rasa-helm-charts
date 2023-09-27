@@ -28,6 +28,7 @@ spec:
       containers:
       - name: {{ .Chart.Name }}-database-migration
         image: {{ include "studio.migration.image" . }}
+        imagePullPolicy: {{ .Values.backend.migration.image.pullPolicy }}
         env:
           {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
           - name: DATABASE_URL

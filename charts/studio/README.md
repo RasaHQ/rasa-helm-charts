@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.32](https://img.shields.io/badge/Version-0.1.32-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.33](https://img.shields.io/badge/Version-0.1.33-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.32
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.33
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.32
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.33
 ```
 
 ## Values
@@ -59,10 +59,11 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration"}}` | Define Studio Database Migration job settings |
+| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}}` | Define Studio Database Migration job settings |
 | backend.migration.enable | bool | `true` | Specifies whether a database migration job should be created |
-| backend.migration.image | object | `{"name":"studio-database-migration"}` | Specifies which image database migration job should use |
+| backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | Specifies which image database migration job should use |
 | backend.migration.image.name | string | `"studio-database-migration"` | Specifies the repository of the image |
+| backend.migration.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | backend.podAnnotations | object | `{}` | Annotations to add to the pod |
 | backend.podSecurityContext | object | `{"enabled":true}` | Define pod security context |

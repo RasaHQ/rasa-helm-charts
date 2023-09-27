@@ -150,6 +150,8 @@ backend:
     image:
       # -- Specifies the repository of the image
       name: "studio-database-migration"
+      # -- Specifies image pull policy
+      pullPolicy: IfNotPresent
 
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/

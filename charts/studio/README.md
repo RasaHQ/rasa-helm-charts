@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.33](https://img.shields.io/badge/Version-0.1.33-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.34](https://img.shields.io/badge/Version-0.1.34-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.33
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.34
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.33
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.34
 ```
 
 ## Values
@@ -143,12 +143,65 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelTrainingService.consumer.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelTrainingService.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| modelTrainingService.consumer.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelTrainingService.consumer.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GCS_BUCKET_NAME":{"value":""},"GOOGLE_APPLICATION_CREDENTIALS":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_JOB_TOPIC":{"value":""},"KAFKA_RESULT_TOPIC":{"value":"password"},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_DATA_PVC":{"value":""},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"KUBERNETES_NAMESPACE":{"value":""},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":""},"RASA_PRO_LICENSE_SECRET_KEY":{"value":""},"RASA_PRO_LICENSE_SECRET_NAME":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelTrainingService.consumer.image | object | `{"name":"mts-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/","tag":"1.1.1"}` | Define image settings |
+| modelTrainingService.consumer.image.name | string | `"mts-job-consumer"` | Specifies image name |
+| modelTrainingService.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelTrainingService.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"` | Specifies image repository |
+| modelTrainingService.consumer.image.tag | string | `"1.1.1"` | SPecifies image tag |
+| modelTrainingService.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelTrainingService.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
+| modelTrainingService.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelTrainingService.consumer.replicaCount | int | `1` | Specifies number of replicas |
+| modelTrainingService.consumer.resources | object | `{}` | Specifies the resources limits and requests |
+| modelTrainingService.consumer.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelTrainingService.consumer.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelTrainingService.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
+| modelTrainingService.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelTrainingService.enabled | bool | `false` |  |
+| modelTrainingService.orchestrator.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelTrainingService.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| modelTrainingService.orchestrator.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelTrainingService.orchestrator.environmentVariables | object | `{"AUTHENTICATION_ENDPOINT_ENABLED":{"value":"false"},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"ENABLE_AUTHORIZATION":{"value":"false"},"GOOGLE_APPLICATION_CREDENTIALS":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KEYCLOAK_CLIENT_ID":{"value":""},"KEYCLOAK_CLIENT_SECRET":{"secret":{"key":"KEYCLOAK_CLIENT_SECRET","name":"mts-secrets"}},"KEYCLOAK_REALM":{"value":""},"KEYCLOAK_SERVER_URL":{"value":""},"KUBERNETES_NAMESPACE":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":"password"},"TRAINING_STORAGE":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"mts-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelTrainingService.orchestrator.image | object | `{"name":"mts-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/","tag":"1.1.1"}` | Define image settings |
+| modelTrainingService.orchestrator.image.name | string | `"mts-orchestrator"` | Specifies image name |
+| modelTrainingService.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelTrainingService.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"` | Specifies image repository |
+| modelTrainingService.orchestrator.image.tag | string | `"1.1.1"` | SPecifies image tag |
+| modelTrainingService.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| modelTrainingService.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelTrainingService.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
+| modelTrainingService.orchestrator.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelTrainingService.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| modelTrainingService.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
+| modelTrainingService.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
+| modelTrainingService.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelTrainingService.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"ClusterIP"}` | Define service |
+| modelTrainingService.orchestrator.service.port | int | `8000` | Specify service port |
+| modelTrainingService.orchestrator.service.targetPort | int | `8000` | Specify service target port |
+| modelTrainingService.orchestrator.service.type | string | `"ClusterIP"` | Specify service type |
+| modelTrainingService.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelTrainingService.orchestrator.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
+| modelTrainingService.orchestrator.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelTrainingService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once ana then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
+| modelTrainingService.persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
+| modelTrainingService.persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
+| modelTrainingService.persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
+| modelTrainingService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
+| modelTrainingService.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| modelTrainingService.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| modelTrainingService.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| modelTrainingService.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository |
+| studioEnabled | bool | `true` |  |
 | tag | string | `"0.1.3"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |

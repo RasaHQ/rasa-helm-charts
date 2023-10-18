@@ -1,0 +1,99 @@
+{{- if .Values.modelTrainingService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}-model-training-service
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: model-training-service
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelTrainingService.consumer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "modelTrainingService.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: model-training-service
+  template:
+    metadata:
+      {{- with .Values.modelTrainingService.consumer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "modelTrainingService.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: model-training-service
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "modelTrainingService.serviceAccountName" . }}
+      {{- if .Values.modelTrainingService.consumer.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelTrainingService.consumer.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: model-training-service-consumer
+          {{- if .Values.modelTrainingService.consumer.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelTrainingService.consumer.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "modelTrainingService.consumer.image" . }}
+          imagePullPolicy: {{ .Values.modelTrainingService.consumer.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.modelTrainingService.consumer.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.modelTrainingService.consumer.volumeMounts }}
+            {{- toYaml .Values.modelTrainingService.consumer.volumeMounts | nindent 12 }}
+          {{- end }}
+          env:
+            {{- range $key, $value := .Values.modelTrainingService.consumer.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.modelTrainingService.consumer.envFrom }}
+          envFrom:
+            {{- toYaml .Values.modelTrainingService.consumer.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.modelTrainingService.consumer.additionalContainers }}
+        {{- toYaml .Values.modelTrainingService.consumer.additionalContainers | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- if .Values.modelTrainingService.consumer.volumes }}
+        {{- toYaml .Values.modelTrainingService.consumer.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelTrainingService.consumer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelTrainingService.consumer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelTrainingService.consumer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
+{{- end }}

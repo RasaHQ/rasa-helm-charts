@@ -1,0 +1,18 @@
+{{- if .Values.modelTrainingService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "studio.fullname" . }}-model-training-service
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.modelTrainingService.orchestrator.service.type }}
+  ports:
+    - port: {{ .Values.modelTrainingService.orchestrator.service.port }}
+      targetPort: {{ .Values.modelTrainingService.orchestrator.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "modelTrainingService.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: model-training-service
+{{- end }}

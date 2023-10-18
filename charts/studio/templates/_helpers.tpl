@@ -47,10 +47,18 @@ app.kubernetes.io/app: {{ .Chart.Name }}
 {{- end }}
 
 {{/*
-Selector labels
+Selector labels for Studio
 */}}
 {{- define "studio.selectorLabels" -}}
 app.kubernetes.io/name: {{ include "studio.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
+Selector labels for Model Training Service
+*/}}
+{{- define "modelTrainingService.selectorLabels" -}}
+app.kubernetes.io/name: model-training-service
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -95,6 +103,17 @@ Create the name of the frontend service account to use for Web Client
 {{- default (include "studio.fullname" .) .Values.webClient.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.webClient.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use for Model Training Service
+*/}}
+{{- define "modelTrainingService.serviceAccountName" -}}
+{{- if .Values.modelTrainingService.serviceAccount.create }}
+{{- default "model-training-service" .Values.modelTrainingService.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.modelTrainingService.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -174,5 +193,27 @@ Return image repository with tag and image name for Keycloak
 "{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
 {{- else -}}
 "{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Model Training Service
+*/}}
+{{- define "modelTrainingService.consumer.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.modelTrainingService.consumer.image.repository }}{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
+{{- else -}}
+"{{ .Values.modelTrainingService.consumer.image.repository }}/{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Model Training Service
+*/}}
+{{- define "modelTrainingService.orchestrator.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.modelTrainingService.orchestrator.image.repository }}{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
+{{- else -}}
+"{{ .Values.modelTrainingService.orchestrator.image.repository }}/{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
 {{- end -}}
 {{- end -}}

@@ -62,6 +62,14 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Selector labels for Model Training Service
+*/}}
+{{- define "modelRunningService.selectorLabels" -}}
+app.kubernetes.io/name: model-running-service
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the backend service account to use for Backend
 */}}
 {{- define "studio.backend.serviceAccountName" -}}
@@ -113,6 +121,17 @@ Create the name of the service account to use for Model Training Service
 {{- default "model-training-service" .Values.modelTrainingService.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.modelTrainingService.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the service account to use for Model Training Service
+*/}}
+{{- define "modelRunningService.serviceAccountName" -}}
+{{- if .Values.modelRunningService.serviceAccount.create }}
+{{- default "model-running-service" .Values.modelRunningService.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.modelRunningService.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -214,5 +233,27 @@ Return image repository with tag and image name for Model Training Service
 "{{ .Values.modelTrainingService.orchestrator.image.repository }}{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
 {{- else -}}
 "{{ .Values.modelTrainingService.orchestrator.image.repository }}/{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Model Running Service
+*/}}
+{{- define "modelRunningService.consumer.image" -}}
+{{- if hasSuffix "/" .Values.modelRunningService.consumer.image.repository -}}
+"{{ .Values.modelRunningService.consumer.image.repository }}{{ .Values.modelRunningService.consumer.image.name }}:{{ .Values.modelRunningService.consumer.image.tag }}"
+{{- else -}}
+"{{ .Values.modelRunningService.consumer.image.repository }}/{{ .Values.modelRunningService.consumer.image.name }}:{{ .Values.modelRunningService.consumer.image.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Model Running Service
+*/}}
+{{- define "modelRunningService.orchestrator.image" -}}
+{{- if hasSuffix "/" .Values.modelRunningService.orchestrator.image.repository -}}
+"{{ .Values.modelRunningService.orchestrator.image.repository }}{{ .Values.modelRunningService.orchestrator.image.name }}:{{ .Values.modelRunningService.orchestrator.image.tag }}"
+{{- else -}}
+"{{ .Values.modelRunningService.orchestrator.image.repository }}/{{ .Values.modelRunningService.orchestrator.image.name }}:{{ .Values.modelRunningService.orchestrator.image.tag }}"
 {{- end -}}
 {{- end -}}

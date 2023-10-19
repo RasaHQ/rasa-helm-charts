@@ -1,0 +1,99 @@
+{{- if .Values.modelRunningService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-running-service-consumer
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: model-running-service
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelRunningService.consumer.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: model-running-service
+  template:
+    metadata:
+      {{- with .Values.modelRunningService.consumer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "modelRunningService.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: model-running-service
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "modelRunningService.serviceAccountName" . }}
+      {{- if .Values.modelRunningService.consumer.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelRunningService.consumer.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: model-running-service-consumer
+          {{- if .Values.modelRunningService.consumer.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelRunningService.consumer.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "modelRunningService.consumer.image" . }}
+          imagePullPolicy: {{ .Values.modelRunningService.consumer.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.modelRunningService.consumer.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.modelRunningService.consumer.volumeMounts }}
+            {{- toYaml .Values.modelRunningService.consumer.volumeMounts | nindent 12 }}
+          {{- end }}
+          env:
+            {{- range $key, $value := .Values.modelRunningService.consumer.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.modelRunningService.consumer.envFrom }}
+          envFrom:
+            {{- toYaml .Values.modelRunningService.consumer.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.modelRunningService.consumer.additionalContainers }}
+        {{- toYaml .Values.modelRunningService.consumer.additionalContainers | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- if .Values.modelRunningService.consumer.volumes }}
+        {{- toYaml .Values.modelRunningService.consumer.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.consumer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.consumer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.consumer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
+{{- end }}

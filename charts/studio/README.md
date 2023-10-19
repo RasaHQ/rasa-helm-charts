@@ -143,6 +143,58 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelRunningService.consumer.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelRunningService.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| modelRunningService.consumer.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelRunningService.consumer.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":""},"GCS_BUCKET_NAME":{"value":""},"GOOGLE_APPLICATION_CREDENTIALS":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"password"},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_DATA_PVC":{"value":""},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"KUBERNETES_NAMESPACE":{"value":""},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":""},"RASA_PRO_LICENSE_SECRET_KEY":{"value":""},"RASA_PRO_LICENSE_SECRET_NAME":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelRunningService.consumer.image | object | `{"name":"mrs-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/","tag":"1.1.1"}` | Define image settings |
+| modelRunningService.consumer.image.name | string | `"mrs-job-consumer"` | Specifies image name |
+| modelRunningService.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelRunningService.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"` | Specifies image repository |
+| modelRunningService.consumer.image.tag | string | `"1.1.1"` | SPecifies image tag |
+| modelRunningService.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelRunningService.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
+| modelRunningService.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelRunningService.consumer.replicaCount | int | `1` | Specifies number of replicas |
+| modelRunningService.consumer.resources | object | `{}` | Specifies the resources limits and requests |
+| modelRunningService.consumer.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelRunningService.consumer.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelRunningService.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
+| modelRunningService.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelRunningService.enabled | bool | `true` |  |
+| modelRunningService.orchestrator.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelRunningService.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| modelRunningService.orchestrator.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelRunningService.orchestrator.environmentVariables | object | `{"DEPLOYMENT_JOB_TOPIC":{"value":""},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":""},"DEPLOYMENT_RESULT_TOPIC":{"value":"password"},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KUBERNETES_NAMESPACE":{"value":""},"LOGGING_LEVEL":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelRunningService.orchestrator.image | object | `{"name":"mrs-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/","tag":"1.1.1"}` | Define image settings |
+| modelRunningService.orchestrator.image.name | string | `"mrs-orchestrator"` | Specifies image name |
+| modelRunningService.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelRunningService.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"` | Specifies image repository |
+| modelRunningService.orchestrator.image.tag | string | `"1.1.1"` | SPecifies image tag |
+| modelRunningService.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| modelRunningService.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelRunningService.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
+| modelRunningService.orchestrator.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelRunningService.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| modelRunningService.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
+| modelRunningService.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
+| modelRunningService.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelRunningService.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"ClusterIP"}` | Define service |
+| modelRunningService.orchestrator.service.port | int | `8001` | Specify service port |
+| modelRunningService.orchestrator.service.targetPort | int | `8001` | Specify service target port |
+| modelRunningService.orchestrator.service.type | string | `"ClusterIP"` | Specify service type |
+| modelRunningService.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelRunningService.orchestrator.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
+| modelRunningService.orchestrator.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelRunningService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once ana then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
+| modelRunningService.persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
+| modelRunningService.persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
+| modelRunningService.persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
+| modelRunningService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
+| modelRunningService.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
+| modelRunningService.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
+| modelRunningService.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| modelRunningService.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | modelTrainingService.consumer.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
 | modelTrainingService.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelTrainingService.consumer.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -161,7 +213,7 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelTrainingService.consumer.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelTrainingService.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
 | modelTrainingService.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelTrainingService.enabled | bool | `false` |  |
+| modelTrainingService.enabled | bool | `true` |  |
 | modelTrainingService.orchestrator.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
 | modelTrainingService.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelTrainingService.orchestrator.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |

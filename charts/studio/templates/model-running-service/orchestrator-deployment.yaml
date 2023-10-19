@@ -1,0 +1,111 @@
+{{- if .Values.modelRunningService.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-running-service-orchestrator
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: model-running-service
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelRunningService.orchestrator.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: model-running-service
+  template:
+    metadata:
+      {{- with .Values.modelRunningService.orchestrator.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "modelRunningService.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: model-running-service
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "modelRunningService.serviceAccountName" . }}
+      {{- if .Values.modelRunningService.orchestrator.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelRunningService.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: model-running-service-orchestrator
+          {{- if .Values.modelRunningService.orchestrator.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelRunningService.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "modelRunningService.orchestrator.image" . }}
+          imagePullPolicy: {{ .Values.modelRunningService.orchestrator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.modelRunningService.orchestrator.service.port }}
+              protocol: TCP
+          {{- if or .Values.modelRunningService.orchestrator.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.modelRunningService.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.modelRunningService.orchestrator.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.modelRunningService.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.modelRunningService.orchestrator.resources | nindent 12 }}
+          volumeMounts:
+          {{- if .Values.modelRunningService.orchestrator.volumeMounts }}
+            {{- toYaml .Values.modelRunningService.orchestrator.volumeMounts | nindent 12 }}
+          {{- end }}
+          env:
+            {{- range $key, $value := .Values.modelRunningService.orchestrator.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.modelRunningService.orchestrator.envFrom }}
+          envFrom:
+            {{- toYaml .Values.modelRunningService.orchestrator.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.modelRunningService.orchestrator.additionalContainers }}
+        {{- toYaml .Values.modelRunningService.orchestrator.additionalContainers | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- if .Values.modelRunningService.orchestrator.volumes }}
+        {{- toYaml .Values.modelRunningService.orchestrator.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.orchestrator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.orchestrator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelRunningService.orchestrator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
+{{- end }}

@@ -1,0 +1,18 @@
+{{- if .Values.modelRunningService.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: model-running-service
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.modelRunningService.orchestrator.service.type }}
+  ports:
+    - port: {{ .Values.modelRunningService.orchestrator.service.port }}
+      targetPort: {{ .Values.modelRunningService.orchestrator.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "modelRunningService.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: model-running-service
+{{- end }}

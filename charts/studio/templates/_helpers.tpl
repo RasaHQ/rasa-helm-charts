@@ -40,7 +40,6 @@ helm.sh/chart: {{ include "studio.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-app.kubernetes.io/app: {{ .Chart.Name }}
 {{ if .Values.global.additionalDeploymentLabels -}}
 {{- $.Values.global.additionalDeploymentLabels | toYaml -}}
 {{- end }}
@@ -200,7 +199,7 @@ Return image repository with tag and image name for Keycloak
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.repository -}}
+{{- if hasSuffix "/" .Values.modelTrainingService.consumer.image.repository -}}
 "{{ .Values.modelTrainingService.consumer.image.repository }}{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
 {{- else -}}
 "{{ .Values.modelTrainingService.consumer.image.repository }}/{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
@@ -211,7 +210,7 @@ Return image repository with tag and image name for Model Training Service
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.repository -}}
+{{- if hasSuffix "/" .Values.modelTrainingService.orchestrator.image.repository -}}
 "{{ .Values.modelTrainingService.orchestrator.image.repository }}{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
 {{- else -}}
 "{{ .Values.modelTrainingService.orchestrator.image.repository }}/{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"

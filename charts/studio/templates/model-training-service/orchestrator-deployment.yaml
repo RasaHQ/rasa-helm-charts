@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "studio.fullname" . }}-model-training-service
+  name: model-training-service-orchestrator
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: model-training-service

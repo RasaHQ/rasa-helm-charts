@@ -792,28 +792,33 @@ modelTrainingService:
           key: "KEYCLOAK_CLIENT_SECRET"
 
 
-    # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+    # -- modelTrainingService.envFrom is used to add environment variables from ConfigMap or Secret
     envFrom:
       []
       # - configMapRef:
       #     name: my-configmap
 
-    # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
+    # TODO: I will move this to the deployments when its decided how it should be
+    # -- modelTrainingService.volumes specify additional volumes
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
-      []
+      - name: "model-training-service-data-pv"
+        secret:
+          secretName: ""
       # - hostPath:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
-    # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+    # -- modelTrainingService.volumeMounts specifies additional volumes to mount
     volumeMounts:
-      []
+      - mountPath: ""
+        name: "model-training-service-data-pv"
+        readOnly: true
       # - name: <VOLUME_NAME>
       #   mountPath: <CONTAINER_PATH>
       #   readOnly: true
 
-    # -- backend.additionalContainers allows to specify additional containers for the deployment
+    # -- modelTrainingService.additionalContainers allows to specify additional containers for the deployment
     additionalContainers: []
     #  - name: extra
     #    image: "busybox"
@@ -822,7 +827,7 @@ modelTrainingService:
     # -- Annotations to add to the pod
     podAnnotations:
       {}
-      # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+      # container.apparmor.security.beta.kubernetes.io/model-training-service-orchestrator: runtime/default
 
     # -- Define pod security context
     podSecurityContext:
@@ -969,7 +974,7 @@ modelTrainingService:
       # - configMapRef:
       #     name: my-configmap
 
-    # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
+    # -- eventIngestion.volumes specify additional volumes
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
       []
@@ -977,7 +982,7 @@ modelTrainingService:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
-    # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+    # -- eventIngestion.volumeMounts specifies additional volumes to mount
     volumeMounts:
       []
       # - name: <VOLUME_NAME>
@@ -993,7 +998,7 @@ modelTrainingService:
     # -- Annotations to add to the pod
     podAnnotations:
       {}
-      # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+      # container.apparmor.security.beta.kubernetes.io/model-training-service-consumer: runtime/default
 
     # -- Define pod security context
     podSecurityContext:
@@ -1050,6 +1055,10 @@ modelTrainingService:
     # -- Type of the volume that will be used to store the training data
     # Valid values: local, nfs
     type: local
+    # -- If you are deploying to AWS and using EFS for volume, set this value to true.
+    aws: false
+    # -- FileSystemId of the AWS EFS volume
+    efs_id: ""
     # -- Storage Class name for PV
     storageClassName: ""
     # -- Storage Capacity for PV

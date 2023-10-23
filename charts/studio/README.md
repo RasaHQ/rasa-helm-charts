@@ -214,12 +214,12 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelTrainingService.consumer.resources | object | `{}` | Specifies the resources limits and requests |
 | modelTrainingService.consumer.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
 | modelTrainingService.consumer.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelTrainingService.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
-| modelTrainingService.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelTrainingService.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount |
+| modelTrainingService.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelTrainingService.enabled | bool | `true` |  |
-| modelTrainingService.orchestrator.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelTrainingService.orchestrator.additionalContainers | list | `[]` | modelTrainingService.additionalContainers allows to specify additional containers for the deployment |
 | modelTrainingService.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelTrainingService.orchestrator.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelTrainingService.orchestrator.envFrom | list | `[]` | modelTrainingService.envFrom is used to add environment variables from ConfigMap or Secret |
 | modelTrainingService.orchestrator.environmentVariables | object | `{"AUTHENTICATION_ENDPOINT_ENABLED":{"value":"false"},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"ENABLE_AUTHORIZATION":{"value":"false"},"GOOGLE_APPLICATION_CREDENTIALS":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KEYCLOAK_CLIENT_ID":{"value":""},"KEYCLOAK_CLIENT_SECRET":{"secret":{"key":"KEYCLOAK_CLIENT_SECRET","name":"mts-secrets"}},"KEYCLOAK_REALM":{"value":""},"KEYCLOAK_SERVER_URL":{"value":""},"KUBERNETES_NAMESPACE":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":"password"},"TRAINING_STORAGE":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"mts-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelTrainingService.orchestrator.image | object | `{"name":"mts-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/","tag":"1.1.1"}` | Define image settings |
 | modelTrainingService.orchestrator.image.name | string | `"mts-orchestrator"` | Specifies image name |
@@ -239,9 +239,11 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelTrainingService.orchestrator.service.targetPort | int | `8000` | Specify service target port |
 | modelTrainingService.orchestrator.service.type | string | `"ClusterIP"` | Specify service type |
 | modelTrainingService.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelTrainingService.orchestrator.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
-| modelTrainingService.orchestrator.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelTrainingService.orchestrator.volumeMounts | list | `[{"mountPath":"","name":"model-training-service-data-pv","readOnly":true}]` | modelTrainingService.volumeMounts specifies additional volumes to mount |
+| modelTrainingService.orchestrator.volumes | list | `[{"name":"model-training-service-data-pv","secret":{"secretName":""}}]` | modelTrainingService.volumes specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelTrainingService.persistence.aws | bool | `false` | If you are deploying to AWS and using EFS for volume, set this value to true. |
 | modelTrainingService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once ana then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
+| modelTrainingService.persistence.efs_id | string | `""` | FileSystemId of the AWS EFS volume |
 | modelTrainingService.persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
 | modelTrainingService.persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
 | modelTrainingService.persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |

@@ -13,6 +13,11 @@ spec:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.modelTrainingService.persistence.storageClassName }}
+  {{- if .Values.modelTrainingService.persistence.aws }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.modelTrainingService.persistence.efs_id }}
+  {{- end }}
   {{- if eq .Values.modelTrainingService.persistence.type "local" }}
   local:
     path: {{ .Values.modelTrainingService.persistence.hostPath }}
@@ -46,4 +51,13 @@ spec:
   selector:
     matchLabels:
       name: model-training-service-data-pv
+{{- end }}
+---
+{{- if .Values.modelTrainingService.persistence.aws }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: efs-sc
+  namespace: {{ .Release.Namespace }}
+provisioner: efs.csi.aws.com 
 {{- end }}

@@ -7,12 +7,12 @@ metadata:
     name: model-training-service-data-pv
 spec:
   capacity:
-    storage: 1Gi
+    storage: {{ .Values.modelTrainingService.persistence.storageCapacity }}
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: ""
+  storageClassName: {{ .Values.modelTrainingService.persistence.storageClassName }}
   {{- if eq .Values.modelTrainingService.persistence.type "local" }}
   local:
     path: {{ .Values.modelTrainingService.persistence.hostPath }}
@@ -41,8 +41,8 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: 1Gi
-  storageClassName: ""
+      storage: {{ .Values.modelTrainingService.persistence.storageRequests }}
+  storageClassName: {{ .Values.modelTrainingService.persistence.storageClassName }}
   selector:
     matchLabels:
       name: model-training-service-data-pv

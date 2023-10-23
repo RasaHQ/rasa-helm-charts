@@ -1050,6 +1050,12 @@ modelTrainingService:
     # -- Type of the volume that will be used to store the training data
     # Valid values: local, nfs
     type: local
+    # -- Storage Class name for PV
+    storageClassName: ""
+    # -- Storage Capacity for PV
+    storageCapacity: 1Gi
+    # -- Storage requests for PVC
+    storageRequests: 1Gi
     # -- DNS name or IP address of the NFS server
     # This value is used only when type is set to nfs
     nfsServer:
@@ -1270,6 +1276,8 @@ modelRunningService:
         value: ""
       TRAINING_STORAGE:
         value: ""
+      BOT_CONFIG_FETCHER_TYPE:
+        value: ""
       GCS_BUCKET_NAME:
         value: ""
       KUBERNETES_BASE_BOT_DATA_PATH:
@@ -1372,6 +1380,12 @@ modelRunningService:
     # -- Type of the volume that will be used to store the training data
     # Valid values: local, nfs
     type: local
+    # -- Storage Class name for PV
+    storageClassName: ""
+    # -- Storage Capacity for PV
+    storageCapacity: 1Gi
+    # -- Storage requests for PVC
+    storageRequests: 1Gi
     # -- DNS name or IP address of the NFS server
     # This value is used only when type is set to nfs
     nfsServer:

@@ -883,6 +883,33 @@ modelTrainingService:
       timeoutSeconds: 5
       failureThreshold: 6
 
+    # -- Configure the ingress resource.
+    ## ref: http://kubernetes.io/docs/user-guide/ingress/
+    ingress:
+      # -- Specifies whether an ingress service should be created
+      enabled: false
+      # -- Specifies the ingress className to be used
+      className: ""
+      # -- Labels to add to the ingress
+      labels: {}
+      # -- Annotations to add to the ingress
+      annotations:
+        {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      # -- Specifies the hosts for this ingress
+      hosts:
+        - host: chart-example.local
+          paths:
+            - path: /
+              pathType: Prefix
+          extraPaths: []
+      # -- Spefices the TLS configuration for ingress
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
+
     # -- Specifies the resources limits and requests
     resources:
       {}
@@ -1214,6 +1241,33 @@ modelRunningService:
       successThreshold: 1
       timeoutSeconds: 5
       failureThreshold: 6
+
+    # -- Configure the ingress resource.
+    ## ref: http://kubernetes.io/docs/user-guide/ingress/
+    ingress:
+      # -- Specifies whether an ingress service should be created
+      enabled: false
+      # -- Specifies the ingress className to be used
+      className: ""
+      # -- Labels to add to the ingress
+      labels: {}
+      # -- Annotations to add to the ingress
+      annotations:
+        {}
+        # kubernetes.io/ingress.class: nginx
+        # kubernetes.io/tls-acme: "true"
+      # -- Specifies the hosts for this ingress
+      hosts:
+        - host: chart-example.local
+          paths:
+            - path: /
+              pathType: Prefix
+          extraPaths: []
+      # -- Spefices the TLS configuration for ingress
+      tls: []
+      #  - secretName: chart-example-tls
+      #    hosts:
+      #      - chart-example.local
 
     # -- Specifies the resources limits and requests
     resources:

@@ -35,6 +35,42 @@ To pull chart contents for your own convenience:
 $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.34
 ```
 
+## General Configuration
+
+- **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
+
+> **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+### Studio
+
+To deploy Studio, set `studioEnabled: true`, `modelTrainingService.enabled: true`, and `modelRunningService.enabled: true`. Configure image and image pull settings.
+
+```yaml
+studioEnabled: true
+# Other settings...
+modelTrainingService:
+  enabled: true
+  # Other settings...
+modelRunningService:
+  enabled: true
+  # Other settings...
+```
+
+### MTS/MRS only
+
+To deploy only MTS/MRS, set `studioEnabled: false`, with `modelRunningService` and `modelTrainingService` to `true`.  Configure image and image pull settings.
+
+```yaml
+studioEnabled: false
+# Other settings...
+modelTrainingService:
+  enabled: true
+  # Other settings...
+modelRunningService:
+  enabled: true
+  # Other settings...
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -193,14 +229,6 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelRunningService.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelRunningService.orchestrator.volumeMounts | list | `[]` | Specifies additional volumes to mount |
 | modelRunningService.orchestrator.volumes | list | `[]` | specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelRunningService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once and then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
-| modelRunningService.persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
-| modelRunningService.persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
-| modelRunningService.persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
-| modelRunningService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelRunningService.persistence.storageClassName | string | `""` | Storage Class name for PV |
-| modelRunningService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
-| modelRunningService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
 | modelRunningService.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelRunningService.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelRunningService.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
@@ -255,16 +283,6 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelTrainingService.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelTrainingService.orchestrator.volumeMounts | list | `[{"mountPath":"","name":"model-training-service-data-pv","readOnly":true}]` | Specifies additional volumes to mount |
 | modelTrainingService.orchestrator.volumes | list | `[{"name":"model-training-service-data-pv","secret":{"secretName":""}}]` | Specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelTrainingService.persistence.aws | bool | `false` | If you are deploying to AWS and using EFS for volume, set this value to true. |
-| modelTrainingService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once and then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
-| modelTrainingService.persistence.efs_id | string | `""` | FileSystemId of the AWS EFS volume |
-| modelTrainingService.persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
-| modelTrainingService.persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
-| modelTrainingService.persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
-| modelTrainingService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelTrainingService.persistence.storageClassName | string | `""` | Storage Class name for PV |
-| modelTrainingService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
-| modelTrainingService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
 | modelTrainingService.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelTrainingService.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelTrainingService.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
@@ -273,6 +291,16 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
+| persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
+| persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once and then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
+| persistence.efs_id | string | `""` | FileSystemId of the AWS EFS volume |
+| persistence.hostPath | string | `nil` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
+| persistence.localNodeName | string | `nil` | Node on which the PV will be created This value is used only when type is set to local |
+| persistence.nfsServer | string | `nil` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
+| persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
+| persistence.storageClassName | string | `""` | Storage Class name for PV |
+| persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
+| persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository |
 | studioEnabled | bool | `true` |  |

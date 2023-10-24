@@ -1,4 +1,4 @@
-{{ if and .Values.modelRunningService.enabled .Values.modelRunningService.persistence.create -}}
+{{ if and .Values.modelRunningService.enabled .Values.persistence.create -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -7,15 +7,20 @@ metadata:
     name: model-running-service-data-pv
 spec:
   capacity:
-    storage: {{ .Values.modelRunningService.persistence.storageCapacity }}
+    storage: {{ .Values.persistence.storageCapacity }}
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.modelRunningService.persistence.storageClassName }}
-  {{- if eq .Values.modelRunningService.persistence.type "local" }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- if .Values.persistence.aws }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.persistence.efs_id }}
+  {{- end }}
+  {{- if and (eq .Values.persistence.type "local") (not .Values.persistence.aws) }}
   local:
-    path: {{ .Values.modelRunningService.persistence.hostPath }}
+    path: {{ .Values.persistence.hostPath }}
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -23,11 +28,11 @@ spec:
           - key: kubernetes.io/hostname
             operator: In
             values:
-              - {{ .Values.modelRunningService.persistence.localNodeName }}
+              - {{ .Values.persistence.localNodeName }}
   {{- end }}
-  {{- if eq .Values.modelRunningService.persistence.type "nfs" }}
+  {{- if eq .Values.persistence.type "nfs" }}
   nfs:
-    server: {{ .Values.modelRunningService.persistence.nfsServer }}
+    server: {{ .Values.persistence.nfsServer }}
     path: "/"
   {{- end }}
 ---
@@ -41,9 +46,18 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: {{ .Values.modelRunningService.persistence.storageRequests }}
-  storageClassName: {{ .Values.modelRunningService.persistence.storageClassName }}
+      storage: {{ .Values.persistence.storageRequests }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
   selector:
     matchLabels:
       name: model-running-service-data-pv
+---
+{{- if .Values.persistence.aws }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Values.persistence.storageClassName }}
+  namespace: {{ .Release.Namespace }}
+provisioner: efs.csi.aws.com 
+{{- end }}
 {{- end }}

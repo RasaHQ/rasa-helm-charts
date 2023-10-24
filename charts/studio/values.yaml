@@ -732,7 +732,7 @@ modelTrainingService:
       repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"
       # -- Specifies image name
       name: "mts-orchestrator"
-      # -- SPecifies image tag
+      # -- Specifies image tag
       tag: "1.1.1"
       # -- Specifies image pull policy
       pullPolicy: IfNotPresent
@@ -759,7 +759,7 @@ modelTrainingService:
       KAFKA_SECURITY_PROTOCOL:
         value: ""
       TRAINING_RESULT_TOPIC:
-        value: "password"
+        value: ""
       TRAINING_RESULT_CONSUMER_GROUP_ID:
         value: ""
       TRAINING_JOB_TOPIC:
@@ -778,7 +778,7 @@ modelTrainingService:
         value: ""
       TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
         secret:
-          name: "mts-secrets"
+          name: "studio-secrets"
           key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
       KEYCLOAK_SERVER_URL:
         value: ""
@@ -788,18 +788,18 @@ modelTrainingService:
         value: ""
       KEYCLOAK_CLIENT_SECRET:
         secret:
-          name: "mts-secrets"
+          name: "studio-secrets"
           key: "KEYCLOAK_CLIENT_SECRET"
 
 
-    # -- modelTrainingService.envFrom is used to add environment variables from ConfigMap or Secret
+    # -- envFrom is used to add environment variables from ConfigMap or Secret
     envFrom:
       []
       # - configMapRef:
       #     name: my-configmap
 
     # TODO: I will move this to the deployments when its decided how it should be
-    # -- modelTrainingService.volumes specify additional volumes
+    # -- Specify additional volumes
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
       - name: "model-training-service-data-pv"
@@ -809,7 +809,7 @@ modelTrainingService:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
-    # -- modelTrainingService.volumeMounts specifies additional volumes to mount
+    # -- Specifies additional volumes to mount
     volumeMounts:
       - mountPath: ""
         name: "model-training-service-data-pv"
@@ -818,7 +818,7 @@ modelTrainingService:
       #   mountPath: <CONTAINER_PATH>
       #   readOnly: true
 
-    # -- modelTrainingService.additionalContainers allows to specify additional containers for the deployment
+    # -- Allows to specify additional containers for the deployment
     additionalContainers: []
     #  - name: extra
     #    image: "busybox"
@@ -919,7 +919,7 @@ modelTrainingService:
       repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"
       # -- Specifies image name
       name: "mts-job-consumer"
-      # -- SPecifies image tag
+      # -- Specifies image tag
       tag: "1.1.1"
       # -- Specifies image pull policy
       pullPolicy: IfNotPresent
@@ -946,7 +946,7 @@ modelTrainingService:
       MODEL_TRAINING_KAFKA_CONSUMER_ID:
         value: ""
       KAFKA_RESULT_TOPIC:
-        value: "password"
+        value: ""
       GOOGLE_CLOUD_PROJECT:
         value: ""
       CLOUDSDK_COMPUTE_ZONE:
@@ -1048,7 +1048,7 @@ modelTrainingService:
 
   persistence:
     # -- Should the PV and PVC be created
-    # It is good practice to create volumes once ana then reuse them.
+    # It is good practice to create volumes once and then reuse them.
     # So set this value to true only when you are deploying the service for the first time.
     # If you are redeploying the service, set this value to false.
     create: true
@@ -1098,7 +1098,7 @@ modelRunningService:
       repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"
       # -- Specifies image name
       name: "mrs-orchestrator"
-      # -- SPecifies image tag
+      # -- Specifies image tag
       tag: "1.1.1"
       # -- Specifies image pull policy
       pullPolicy: IfNotPresent
@@ -1121,7 +1121,7 @@ modelRunningService:
       KAFKA_SECURITY_PROTOCOL:
         value: ""
       DEPLOYMENT_RESULT_TOPIC:
-        value: "password"
+        value: ""
       DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
         value: ""
       DEPLOYMENT_JOB_TOPIC:
@@ -1129,13 +1129,13 @@ modelRunningService:
       LOGGING_LEVEL:
         value: ""
 
-    # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+    # -- envFrom is used to add environment variables from ConfigMap or Secret
     envFrom:
       []
       # - configMapRef:
       #     name: my-configmap
 
-    # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
+    # -- specify additional volumes for the Studio event ingestion container
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
       []
@@ -1143,14 +1143,14 @@ modelRunningService:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
-    # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+    # -- Specifies additional volumes to mount
     volumeMounts:
       []
       # - name: <VOLUME_NAME>
       #   mountPath: <CONTAINER_PATH>
       #   readOnly: true
 
-    # -- backend.additionalContainers allows to specify additional containers for the deployment
+    # -- Allows to specify additional containers for the deployment
     additionalContainers: []
     #  - name: extra
     #    image: "busybox"
@@ -1159,7 +1159,7 @@ modelRunningService:
     # -- Annotations to add to the pod
     podAnnotations:
       {}
-      # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+      # container.apparmor.security.beta.kubernetes.io/model-running-service-orchestrator: runtime/default
 
     # -- Define pod security context
     podSecurityContext:
@@ -1251,7 +1251,7 @@ modelRunningService:
       repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"
       # -- Specifies image name
       name: "mrs-job-consumer"
-      # -- SPecifies image tag
+      # -- Specifies image tag
       tag: "1.1.1"
       # -- Specifies image pull policy
       pullPolicy: IfNotPresent
@@ -1278,7 +1278,7 @@ modelRunningService:
       MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
         value: ""
       KAFKA_DEPLOYMENT_RESULT_TOPIC:
-        value: "password"
+        value: ""
       GOOGLE_CLOUD_PROJECT:
         value: ""
       CLOUDSDK_COMPUTE_ZONE:
@@ -1302,13 +1302,13 @@ modelRunningService:
       RASA_PRO_LICENSE_SECRET_KEY:
         value: ""
 
-    # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+    # -- envFrom is used to add environment variables from ConfigMap or Secret
     envFrom:
       []
       # - configMapRef:
       #     name: my-configmap
 
-    # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
+    # -- Specify additional volumes
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
       []
@@ -1316,14 +1316,14 @@ modelRunningService:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
-    # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+    # -- Specifies additional volumes to mount
     volumeMounts:
       []
       # - name: <VOLUME_NAME>
       #   mountPath: <CONTAINER_PATH>
       #   readOnly: true
 
-    # -- backend.additionalContainers allows to specify additional containers for the deployment
+    # -- Allows to specify additional containers for the deployment
     additionalContainers: []
     #  - name: extra
     #    image: "busybox"
@@ -1332,7 +1332,7 @@ modelRunningService:
     # -- Annotations to add to the pod
     podAnnotations:
       {}
-      # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+      # container.apparmor.security.beta.kubernetes.io/model-running-service-consumer: runtime/default
 
     # -- Define pod security context
     podSecurityContext:
@@ -1382,7 +1382,7 @@ modelRunningService:
 
   persistence:
     # -- Should the PV and PVC be created
-    # It is good practice to create volumes once ana then reuse them.
+    # It is good practice to create volumes once and then reuse them.
     # So set this value to true only when you are deploying the service for the first time.
     # If you are redeploying the service, set this value to false.
     create: true
@@ -1404,7 +1404,6 @@ modelRunningService:
     # -- Node on which the PV will be created
     # This value is used only when type is set to local
     localNodeName:
-
 
 # Network policy settings
 networkPolicy:

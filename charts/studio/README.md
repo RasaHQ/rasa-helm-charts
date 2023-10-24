@@ -171,6 +171,13 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelRunningService.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | modelRunningService.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"` | Specifies image repository |
 | modelRunningService.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelRunningService.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelRunningService.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
+| modelRunningService.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
+| modelRunningService.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
+| modelRunningService.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| modelRunningService.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
+| modelRunningService.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelRunningService.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelRunningService.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelRunningService.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
@@ -226,6 +233,13 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 | modelTrainingService.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | modelTrainingService.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"` | Specifies image repository |
 | modelTrainingService.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelTrainingService.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelTrainingService.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
+| modelTrainingService.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
+| modelTrainingService.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
+| modelTrainingService.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| modelTrainingService.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
+| modelTrainingService.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelTrainingService.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelTrainingService.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelTrainingService.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |

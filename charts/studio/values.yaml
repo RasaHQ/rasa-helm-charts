@@ -709,6 +709,11 @@ keycloak:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+# -- GCP credentials for the service account
+gcpCredentials:
+  secretName: "studio-secrets"
+  secretKey: "GCP_CREDS"
+
 # Model Training Service specific configuration
 modelTrainingService:
   enabled: true
@@ -774,8 +779,6 @@ modelTrainingService:
         value: ""
       TRAINING_STORAGE_BUCKET:
         value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
-        value: ""
       TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
         secret:
           name: "studio-secrets"
@@ -798,22 +801,15 @@ modelTrainingService:
       # - configMapRef:
       #     name: my-configmap
 
-    # TODO: I will move this to the deployments when its decided how it should be
     # -- Specify additional volumes
     ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
     volumes:
-      - name: "model-training-service-data-pv"
-        secret:
-          secretName: ""
       # - hostPath:
       #   path: <HOST_PATH>
       #   name: <VOLUME_NAME>
 
     # -- Specifies additional volumes to mount
     volumeMounts:
-      - mountPath: ""
-        name: "model-training-service-data-pv"
-        readOnly: true
       # - name: <VOLUME_NAME>
       #   mountPath: <CONTAINER_PATH>
       #   readOnly: true
@@ -987,8 +983,6 @@ modelTrainingService:
       KUBERNETES_JOB_BOT_CONFIG_MOUNT:
         value: "/app"
       KUBERNETES_DATA_PVC:
-        value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
         value: ""
       RASA_PRO_LICENSE_SECRET_NAME:
         value: ""
@@ -1319,8 +1313,6 @@ modelRunningService:
       KUBERNETES_JOB_BOT_CONFIG_MOUNT:
         value: "/app"
       KUBERNETES_DATA_PVC:
-        value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
         value: ""
       RASA_PRO_LICENSE_SECRET_NAME:
         value: ""

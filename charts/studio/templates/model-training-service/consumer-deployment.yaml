@@ -58,10 +58,13 @@ spec:
           resources:
             {{- toYaml .Values.modelTrainingService.consumer.resources | nindent 12 }}
           volumeMounts:
+          {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
           {{- if .Values.modelTrainingService.consumer.volumeMounts }}
             {{- toYaml .Values.modelTrainingService.consumer.volumeMounts | nindent 12 }}
           {{- end }}
           env:
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/config/gcloud/credentials.json"
             {{- range $key, $value := .Values.modelTrainingService.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
@@ -81,6 +84,7 @@ spec:
         {{- toYaml .Values.modelTrainingService.consumer.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
+      {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelTrainingService.consumer.volumes }}
         {{- toYaml .Values.modelTrainingService.consumer.volumes | nindent 8 }}
       {{- end }}

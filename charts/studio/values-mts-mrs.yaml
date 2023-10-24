@@ -15,6 +15,11 @@ imagePullSecrets:
 # Disable this in case you only want to deploy MTS/MRS
 studioEnabled: false
 
+# -- GCP credentials for the service account
+gcpCredentials:
+  secretName: "studio-secrets"
+  secretKey: "GCP_CREDS"
+
 # Model Training Service specific configuration
 modelTrainingService:
   enabled: true
@@ -79,8 +84,6 @@ modelTrainingService:
       TRAINING_STORAGE:
         value: ""
       TRAINING_STORAGE_BUCKET:
-        value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
         value: ""
       TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
         secret:
@@ -293,8 +296,6 @@ modelTrainingService:
       KUBERNETES_JOB_BOT_CONFIG_MOUNT:
         value: "/app"
       KUBERNETES_DATA_PVC:
-        value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
         value: ""
       RASA_PRO_LICENSE_SECRET_NAME:
         value: ""
@@ -625,8 +626,6 @@ modelRunningService:
       KUBERNETES_JOB_BOT_CONFIG_MOUNT:
         value: "/app"
       KUBERNETES_DATA_PVC:
-        value: ""
-      GOOGLE_APPLICATION_CREDENTIALS:
         value: ""
       RASA_PRO_LICENSE_SECRET_NAME:
         value: ""

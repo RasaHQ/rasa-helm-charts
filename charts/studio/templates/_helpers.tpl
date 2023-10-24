@@ -257,3 +257,28 @@ Return image repository with tag and image name for Model Running Service
 "{{ .Values.modelRunningService.orchestrator.image.repository }}/{{ .Values.modelRunningService.orchestrator.image.name }}:{{ .Values.modelRunningService.orchestrator.image.tag }}"
 {{- end -}}
 {{- end -}}
+
+{{/*
+GCP credential volume
+*/}}
+{{- define "gcpCredentials.volumeMount" -}}
+{{- if not (empty .Values.gcpCredentials.secretName) -}}
+- mountPath: "/config/gcloud/"
+  name: "gcp-auth"
+  readOnly: true
+{{- end -}}
+{{- end -}}
+
+{{/*
+GCP credential volume mount
+*/}}
+{{- define "gcpCredentials.volume" -}}
+{{- if not (empty .Values.gcpCredentials.secretName) -}}
+- name: "gcp-auth"
+  secret:
+    secretName: {{ .Values.gcpCredentials.secretName }}
+    items:
+    - key: {{ .Values.gcpCredentials.secretKey }}
+      path: credentials.json
+{{- end -}}
+{{- end -}}

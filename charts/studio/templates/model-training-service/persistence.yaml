@@ -1,4 +1,4 @@
-{{ if and .Values.modelTrainingService.enabled .Values.modelTrainingService.persistence.create -}}
+{{ if and .Values.modelTrainingService.enabled .Values.persistence.create -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -7,20 +7,20 @@ metadata:
     name: model-training-service-data-pv
 spec:
   capacity:
-    storage: {{ .Values.modelTrainingService.persistence.storageCapacity }}
+    storage: {{ .Values.persistence.storageCapacity }}
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.modelTrainingService.persistence.storageClassName }}
-  {{- if .Values.modelTrainingService.persistence.aws }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
+  {{- if .Values.persistence.aws }}
   csi:
     driver: efs.csi.aws.com
-    volumeHandle: {{ .Values.modelTrainingService.persistence.efs_id }}
+    volumeHandle: {{ .Values.persistence.efs_id }}
   {{- end }}
-  {{- if eq .Values.modelTrainingService.persistence.type "local" }}
+  {{- if and (eq .Values.persistence.type "local") (not .Values.persistence.aws) }}
   local:
-    path: {{ .Values.modelTrainingService.persistence.hostPath }}
+    path: {{ .Values.persistence.hostPath }}
   nodeAffinity:
     required:
       nodeSelectorTerms:
@@ -28,11 +28,11 @@ spec:
           - key: kubernetes.io/hostname
             operator: In
             values:
-              - {{ .Values.modelTrainingService.persistence.localNodeName }}
+              - {{ .Values.persistence.localNodeName }}
   {{- end }}
-  {{- if eq .Values.modelTrainingService.persistence.type "nfs" }}
+  {{- if eq .Values.persistence.type "nfs" }}
   nfs:
-    server: {{ .Values.modelTrainingService.persistence.nfsServer }}
+    server: {{ .Values.persistence.nfsServer }}
     path: "/"
   {{- end }}
 ---
@@ -46,18 +46,18 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: {{ .Values.modelTrainingService.persistence.storageRequests }}
-  storageClassName: {{ .Values.modelTrainingService.persistence.storageClassName }}
+      storage: {{ .Values.persistence.storageRequests }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
   selector:
     matchLabels:
       name: model-training-service-data-pv
-{{- end }}
 ---
-{{- if .Values.modelTrainingService.persistence.aws }}
+{{- if .Values.persistence.aws }}
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: efs-sc
+  name: {{ .Values.persistence.storageClassName }}
   namespace: {{ .Release.Namespace }}
 provisioner: efs.csi.aws.com 
+{{- end }}
 {{- end }}

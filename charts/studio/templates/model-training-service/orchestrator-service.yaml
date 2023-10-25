@@ -1,4 +1,4 @@
-{{- if .Values.modelTrainingService.enabled }}
+{{- if .Values.modelService.training.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,10 +6,10 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.modelTrainingService.orchestrator.service.type }}
+  type: {{ .Values.modelService.training.orchestrator.service.type }}
   ports:
-    - port: {{ .Values.modelTrainingService.orchestrator.service.port }}
-      targetPort: {{ .Values.modelTrainingService.orchestrator.service.targetPort }}
+    - port: {{ .Values.modelService.training.orchestrator.service.port }}
+      targetPort: {{ .Values.modelService.training.orchestrator.service.targetPort }}
       protocol: TCP
       name: http
   selector:

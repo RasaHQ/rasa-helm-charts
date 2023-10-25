@@ -1,9 +1,9 @@
-{{- if and .Values.modelTrainingService.enabled .Values.modelTrainingService.orchestrator.ingress.enabled -}}
+{{- if and .Values.modelService.training.enabled .Values.modelService.training.orchestrator.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
-{{- $svcPort := .Values.modelTrainingService.orchestrator.service.port -}}
-{{- if and .Values.modelTrainingService.orchestrator.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.modelTrainingService.orchestrator.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.modelTrainingService.orchestrator.ingress.annotations "kubernetes.io/ingress.class" .Values.modelTrainingService.orchestrator.ingress.className}}
+{{- $svcPort := .Values.modelService.training.orchestrator.service.port -}}
+{{- if and .Values.modelService.training.orchestrator.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.modelService.training.orchestrator.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.modelService.training.orchestrator.ingress.annotations "kubernetes.io/ingress.class" .Values.modelService.training.orchestrator.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -18,20 +18,20 @@ metadata:
   name: model-training-service-orchestrator
   labels:
     {{- include "studio.labels" . | nindent 4 }}
-    {{- if .Values.modelTrainingService.orchestrator.ingress.labels }}
-{{ toYaml .Values.modelTrainingService.orchestrator.ingress.labels | indent 4 }}
+    {{- if .Values.modelService.training.orchestrator.ingress.labels }}
+{{ toYaml .Values.modelService.training.orchestrator.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.modelTrainingService.orchestrator.ingress.annotations }}
+  {{- with .Values.modelService.training.orchestrator.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.modelTrainingService.orchestrator.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.modelTrainingService.orchestrator.ingress.className }}
+  {{- if and .Values.modelService.training.orchestrator.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.modelService.training.orchestrator.ingress.className }}
   {{- end }}
-  {{- if .Values.modelTrainingService.orchestrator.ingress.tls }}
+  {{- if .Values.modelService.training.orchestrator.ingress.tls }}
   tls:
-    {{- range .Values.modelTrainingService.orchestrator.ingress.tls }}
+    {{- range .Values.modelService.training.orchestrator.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -40,7 +40,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.modelTrainingService.orchestrator.ingress.hosts }}
+    {{- range .Values.modelService.training.orchestrator.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

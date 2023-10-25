@@ -117,10 +117,10 @@ Create the name of the frontend service account to use for Web Client
 Create the name of the service account to use for Model Training Service
 */}}
 {{- define "modelTrainingService.serviceAccountName" -}}
-{{- if .Values.modelTrainingService.serviceAccount.create }}
-{{- default "model-training-service" .Values.modelTrainingService.serviceAccount.name }}
+{{- if .Values.modelService.training.serviceAccount.create }}
+{{- default "model-training-service" .Values.modelService.training.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.modelTrainingService.serviceAccount.name }}
+{{- default "default" .Values.modelService.training.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -128,10 +128,10 @@ Create the name of the service account to use for Model Training Service
 Create the name of the service account to use for Model Training Service
 */}}
 {{- define "modelRunningService.serviceAccountName" -}}
-{{- if .Values.modelRunningService.serviceAccount.create }}
-{{- default "model-running-service" .Values.modelRunningService.serviceAccount.name }}
+{{- if .Values.modelService.running.serviceAccount.create }}
+{{- default "model-running-service" .Values.modelService.running.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.modelRunningService.serviceAccount.name }}
+{{- default "default" .Values.modelService.running.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -218,10 +218,10 @@ Return image repository with tag and image name for Keycloak
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelTrainingService.consumer.image.repository -}}
-"{{ .Values.modelTrainingService.consumer.image.repository }}{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.training.consumer.image.repository -}}
+"{{ .Values.modelService.training.consumer.image.repository }}{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.training.consumer.image.tag }}"
 {{- else -}}
-"{{ .Values.modelTrainingService.consumer.image.repository }}/{{ .Values.modelTrainingService.consumer.image.name }}:{{ .Values.modelTrainingService.consumer.image.tag }}"
+"{{ .Values.modelService.training.consumer.image.repository }}/{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.training.consumer.image.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -229,10 +229,10 @@ Return image repository with tag and image name for Model Training Service
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelTrainingService.orchestrator.image.repository -}}
-"{{ .Values.modelTrainingService.orchestrator.image.repository }}{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.training.orchestrator.image.repository -}}
+"{{ .Values.modelService.training.orchestrator.image.repository }}{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.training.orchestrator.image.tag }}"
 {{- else -}}
-"{{ .Values.modelTrainingService.orchestrator.image.repository }}/{{ .Values.modelTrainingService.orchestrator.image.name }}:{{ .Values.modelTrainingService.orchestrator.image.tag }}"
+"{{ .Values.modelService.training.orchestrator.image.repository }}/{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.training.orchestrator.image.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -240,10 +240,10 @@ Return image repository with tag and image name for Model Training Service
 Return image repository with tag and image name for Model Running Service
 */}}
 {{- define "modelRunningService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelRunningService.consumer.image.repository -}}
-"{{ .Values.modelRunningService.consumer.image.repository }}{{ .Values.modelRunningService.consumer.image.name }}:{{ .Values.modelRunningService.consumer.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.running.consumer.image.repository -}}
+"{{ .Values.modelService.running.consumer.image.repository }}{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.running.consumer.image.tag }}"
 {{- else -}}
-"{{ .Values.modelRunningService.consumer.image.repository }}/{{ .Values.modelRunningService.consumer.image.name }}:{{ .Values.modelRunningService.consumer.image.tag }}"
+"{{ .Values.modelService.running.consumer.image.repository }}/{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.running.consumer.image.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -251,10 +251,10 @@ Return image repository with tag and image name for Model Running Service
 Return image repository with tag and image name for Model Running Service
 */}}
 {{- define "modelRunningService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelRunningService.orchestrator.image.repository -}}
-"{{ .Values.modelRunningService.orchestrator.image.repository }}{{ .Values.modelRunningService.orchestrator.image.name }}:{{ .Values.modelRunningService.orchestrator.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.running.orchestrator.image.repository -}}
+"{{ .Values.modelService.running.orchestrator.image.repository }}{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.running.orchestrator.image.tag }}"
 {{- else -}}
-"{{ .Values.modelRunningService.orchestrator.image.repository }}/{{ .Values.modelRunningService.orchestrator.image.name }}:{{ .Values.modelRunningService.orchestrator.image.tag }}"
+"{{ .Values.modelService.running.orchestrator.image.repository }}/{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.running.orchestrator.image.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -262,7 +262,7 @@ Return image repository with tag and image name for Model Running Service
 GCP credential volume
 */}}
 {{- define "gcpCredentials.volumeMount" -}}
-{{- if not (empty .Values.gcpCredentials.secretName) -}}
+{{- if not (empty .Values.modelService.gcpCredentials.secretName) -}}
 - mountPath: "/config/gcloud/"
   name: "gcp-auth"
   readOnly: true
@@ -273,12 +273,12 @@ GCP credential volume
 GCP credential volume mount
 */}}
 {{- define "gcpCredentials.volume" -}}
-{{- if not (empty .Values.gcpCredentials.secretName) -}}
+{{- if not (empty .Values.modelService.gcpCredentials.secretName) -}}
 - name: "gcp-auth"
   secret:
-    secretName: {{ .Values.gcpCredentials.secretName }}
+    secretName: {{ .Values.modelService.gcpCredentials.secretName }}
     items:
-    - key: {{ .Values.gcpCredentials.secretKey }}
+    - key: {{ .Values.modelService.gcpCredentials.secretKey }}
       path: credentials.json
 {{- end -}}
 {{- end -}}

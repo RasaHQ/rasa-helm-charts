@@ -1,4 +1,4 @@
-{{- if .Values.modelRunningService.enabled }}
+{{- if .Values.modelService.running.enabled }}
 apiVersion: v1
 kind: Service
 metadata:
@@ -6,10 +6,10 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.modelRunningService.orchestrator.service.type }}
+  type: {{ .Values.modelService.running.orchestrator.service.type }}
   ports:
-    - port: {{ .Values.modelRunningService.orchestrator.service.port }}
-      targetPort: {{ .Values.modelRunningService.orchestrator.service.targetPort }}
+    - port: {{ .Values.modelService.running.orchestrator.service.port }}
+      targetPort: {{ .Values.modelService.running.orchestrator.service.targetPort }}
       protocol: TCP
       name: http
   selector:

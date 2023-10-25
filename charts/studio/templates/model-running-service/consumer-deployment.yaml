@@ -1,4 +1,4 @@
-{{- if .Values.modelRunningService.enabled }}
+{{- if .Values.modelService.running.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,14 +14,14 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.modelRunningService.consumer.replicaCount }}
+  replicas: {{ .Values.modelService.running.consumer.replicaCount }}
   selector:
     matchLabels:
       {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: model-running-service
   template:
     metadata:
-      {{- with .Values.modelRunningService.consumer.podAnnotations }}
+      {{- with .Values.modelService.running.consumer.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -43,29 +43,29 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "modelRunningService.serviceAccountName" . }}
-      {{- if .Values.modelRunningService.consumer.podSecurityContext.enabled }}
+      {{- if .Values.modelService.running.consumer.podSecurityContext.enabled }}
       securityContext:
-        {{- omit .Values.modelRunningService.consumer.podSecurityContext "enabled" | toYaml | nindent 8 }}
+        {{- omit .Values.modelService.running.consumer.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
         - name: model-running-service-consumer
-          {{- if .Values.modelRunningService.consumer.securityContext.enabled }}
+          {{- if .Values.modelService.running.consumer.securityContext.enabled }}
           securityContext:
-            {{- omit .Values.modelRunningService.consumer.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.running.consumer.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: {{ include "modelRunningService.consumer.image" . }}
-          imagePullPolicy: {{ .Values.modelRunningService.consumer.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.modelService.running.consumer.image.pullPolicy }}
           resources:
-            {{- toYaml .Values.modelRunningService.consumer.resources | nindent 12 }}
+            {{- toYaml .Values.modelService.running.consumer.resources | nindent 12 }}
           volumeMounts:
           {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
-          {{- if .Values.modelRunningService.consumer.volumeMounts }}
-            {{- toYaml .Values.modelRunningService.consumer.volumeMounts | nindent 12 }}
+          {{- if .Values.modelService.running.consumer.volumeMounts }}
+            {{- toYaml .Values.modelService.running.consumer.volumeMounts | nindent 12 }}
           {{- end }}
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
-            {{- range $key, $value := .Values.modelRunningService.consumer.environmentVariables }}
+            {{- range $key, $value := .Values.modelService.running.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -76,27 +76,27 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
-          {{- if .Values.modelRunningService.consumer.envFrom }}
+          {{- if .Values.modelService.running.consumer.envFrom }}
           envFrom:
-            {{- toYaml .Values.modelRunningService.consumer.envFrom | nindent 12 }}
+            {{- toYaml .Values.modelService.running.consumer.envFrom | nindent 12 }}
           {{- end }}
-      {{- if .Values.modelRunningService.consumer.additionalContainers }}
-        {{- toYaml .Values.modelRunningService.consumer.additionalContainers | nindent 8 }}
+      {{- if .Values.modelService.running.consumer.additionalContainers }}
+        {{- toYaml .Values.modelService.running.consumer.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
-      {{- if .Values.modelRunningService.consumer.volumes }}
-        {{- toYaml .Values.modelRunningService.consumer.volumes | nindent 8 }}
+      {{- if .Values.modelService.running.consumer.volumes }}
+        {{- toYaml .Values.modelService.running.consumer.volumes | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.consumer.nodeSelector }}
+      {{- with .Values.modelService.running.consumer.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.consumer.affinity }}
+      {{- with .Values.modelService.running.consumer.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.consumer.tolerations }}
+      {{- with .Values.modelService.running.consumer.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}    

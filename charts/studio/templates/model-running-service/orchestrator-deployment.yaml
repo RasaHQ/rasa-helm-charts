@@ -1,4 +1,4 @@
-{{- if .Values.modelRunningService.enabled }}
+{{- if .Values.modelService.running.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,14 +14,14 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.modelRunningService.orchestrator.replicaCount }}
+  replicas: {{ .Values.modelService.running.orchestrator.replicaCount }}
   selector:
     matchLabels:
       {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: model-running-service
   template:
     metadata:
-      {{- with .Values.modelRunningService.orchestrator.podAnnotations }}
+      {{- with .Values.modelService.running.orchestrator.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -43,41 +43,41 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "modelRunningService.serviceAccountName" . }}
-      {{- if .Values.modelRunningService.orchestrator.podSecurityContext.enabled }}
+      {{- if .Values.modelService.running.orchestrator.podSecurityContext.enabled }}
       securityContext:
-        {{- omit .Values.modelRunningService.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
+        {{- omit .Values.modelService.running.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
         - name: model-running-service-orchestrator
-          {{- if .Values.modelRunningService.orchestrator.securityContext.enabled }}
+          {{- if .Values.modelService.running.orchestrator.securityContext.enabled }}
           securityContext:
-            {{- omit .Values.modelRunningService.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.running.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: {{ include "modelRunningService.orchestrator.image" . }}
-          imagePullPolicy: {{ .Values.modelRunningService.orchestrator.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.modelService.running.orchestrator.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.modelRunningService.orchestrator.service.port }}
+              containerPort: {{ .Values.modelService.running.orchestrator.service.port }}
               protocol: TCP
-          {{- if or .Values.modelRunningService.orchestrator.livenessProbe.enabled }}
+          {{- if or .Values.modelService.running.orchestrator.livenessProbe.enabled }}
           livenessProbe:
-            {{- omit .Values.modelRunningService.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.running.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.modelRunningService.orchestrator.readinessProbe.enabled }}
+          {{- if or .Values.modelService.running.orchestrator.readinessProbe.enabled }}
           readinessProbe:
-            {{- omit .Values.modelRunningService.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.running.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml .Values.modelRunningService.orchestrator.resources | nindent 12 }}
+            {{- toYaml .Values.modelService.running.orchestrator.resources | nindent 12 }}
           volumeMounts:
           {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
-          {{- if .Values.modelRunningService.orchestrator.volumeMounts }}
-            {{- toYaml .Values.modelRunningService.orchestrator.volumeMounts | nindent 12 }}
+          {{- if .Values.modelService.running.orchestrator.volumeMounts }}
+            {{- toYaml .Values.modelService.running.orchestrator.volumeMounts | nindent 12 }}
           {{- end }}
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
-            {{- range $key, $value := .Values.modelRunningService.orchestrator.environmentVariables }}
+            {{- range $key, $value := .Values.modelService.running.orchestrator.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -88,27 +88,27 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
-          {{- if .Values.modelRunningService.orchestrator.envFrom }}
+          {{- if .Values.modelService.running.orchestrator.envFrom }}
           envFrom:
-            {{- toYaml .Values.modelRunningService.orchestrator.envFrom | nindent 12 }}
+            {{- toYaml .Values.modelService.running.orchestrator.envFrom | nindent 12 }}
           {{- end }}
-      {{- if .Values.modelRunningService.orchestrator.additionalContainers }}
-        {{- toYaml .Values.modelRunningService.orchestrator.additionalContainers | nindent 8 }}
+      {{- if .Values.modelService.running.orchestrator.additionalContainers }}
+        {{- toYaml .Values.modelService.running.orchestrator.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
-      {{- if .Values.modelRunningService.orchestrator.volumes }}
-        {{- toYaml .Values.modelRunningService.orchestrator.volumes | nindent 8 }}
+      {{- if .Values.modelService.running.orchestrator.volumes }}
+        {{- toYaml .Values.modelService.running.orchestrator.volumes | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.orchestrator.nodeSelector }}
+      {{- with .Values.modelService.running.orchestrator.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.orchestrator.affinity }}
+      {{- with .Values.modelService.running.orchestrator.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelRunningService.orchestrator.tolerations }}
+      {{- with .Values.modelService.running.orchestrator.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}    

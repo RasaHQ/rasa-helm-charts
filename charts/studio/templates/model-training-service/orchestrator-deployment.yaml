@@ -1,4 +1,4 @@
-{{- if .Values.modelTrainingService.enabled }}
+{{- if .Values.modelService.training.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,14 +14,14 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  replicas: {{ .Values.modelTrainingService.orchestrator.replicaCount }}
+  replicas: {{ .Values.modelService.training.orchestrator.replicaCount }}
   selector:
     matchLabels:
       {{- include "modelTrainingService.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: model-training-service
   template:
     metadata:
-      {{- with .Values.modelTrainingService.orchestrator.podAnnotations }}
+      {{- with .Values.modelService.training.orchestrator.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -43,41 +43,41 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "modelTrainingService.serviceAccountName" . }}
-      {{- if .Values.modelTrainingService.orchestrator.podSecurityContext.enabled }}
+      {{- if .Values.modelService.training.orchestrator.podSecurityContext.enabled }}
       securityContext:
-        {{- omit .Values.modelTrainingService.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
+        {{- omit .Values.modelService.training.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
       containers:
         - name: model-training-service-orchestrator
-          {{- if .Values.modelTrainingService.orchestrator.securityContext.enabled }}
+          {{- if .Values.modelService.training.orchestrator.securityContext.enabled }}
           securityContext:
-            {{- omit .Values.modelTrainingService.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.training.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: {{ include "modelTrainingService.orchestrator.image" . }}
-          imagePullPolicy: {{ .Values.modelTrainingService.orchestrator.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.modelService.training.orchestrator.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.modelTrainingService.orchestrator.service.port }}
+              containerPort: {{ .Values.modelService.training.orchestrator.service.port }}
               protocol: TCP
-          {{- if or .Values.modelTrainingService.orchestrator.livenessProbe.enabled }}
+          {{- if or .Values.modelService.training.orchestrator.livenessProbe.enabled }}
           livenessProbe:
-            {{- omit .Values.modelTrainingService.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.training.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.modelTrainingService.orchestrator.readinessProbe.enabled }}
+          {{- if or .Values.modelService.training.orchestrator.readinessProbe.enabled }}
           readinessProbe:
-            {{- omit .Values.modelTrainingService.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.modelService.training.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
-            {{- toYaml .Values.modelTrainingService.orchestrator.resources | nindent 12 }}
+            {{- toYaml .Values.modelService.training.orchestrator.resources | nindent 12 }}
           volumeMounts:
           {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
-          {{- if .Values.modelTrainingService.orchestrator.volumeMounts }}
-            {{- toYaml .Values.modelTrainingService.orchestrator.volumeMounts | nindent 12 }}
+          {{- if .Values.modelService.training.orchestrator.volumeMounts }}
+            {{- toYaml .Values.modelService.training.orchestrator.volumeMounts | nindent 12 }}
           {{- end }}
           env:
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
-            {{- range $key, $value := .Values.modelTrainingService.orchestrator.environmentVariables }}
+            {{- range $key, $value := .Values.modelService.training.orchestrator.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -88,27 +88,27 @@ spec:
                   key: {{ $value.secret.key }}
               {{- end }}
             {{- end }}
-          {{- if .Values.modelTrainingService.orchestrator.envFrom }}
+          {{- if .Values.modelService.training.orchestrator.envFrom }}
           envFrom:
-            {{- toYaml .Values.modelTrainingService.orchestrator.envFrom | nindent 12 }}
+            {{- toYaml .Values.modelService.training.orchestrator.envFrom | nindent 12 }}
           {{- end }}
-      {{- if .Values.modelTrainingService.orchestrator.additionalContainers }}
-        {{- toYaml .Values.modelTrainingService.orchestrator.additionalContainers | nindent 8 }}
+      {{- if .Values.modelService.training.orchestrator.additionalContainers }}
+        {{- toYaml .Values.modelService.training.orchestrator.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
-      {{- if .Values.modelTrainingService.orchestrator.volumes }}
-        {{- toYaml .Values.modelTrainingService.orchestrator.volumes | nindent 8 }}
+      {{- if .Values.modelService.training.orchestrator.volumes }}
+        {{- toYaml .Values.modelService.training.orchestrator.volumes | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelTrainingService.orchestrator.nodeSelector }}
+      {{- with .Values.modelService.training.orchestrator.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelTrainingService.orchestrator.affinity }}
+      {{- with .Values.modelService.training.orchestrator.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- with .Values.modelTrainingService.orchestrator.tolerations }}
+      {{- with .Values.modelService.training.orchestrator.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}    

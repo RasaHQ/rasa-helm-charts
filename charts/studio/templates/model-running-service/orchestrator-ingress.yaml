@@ -1,9 +1,9 @@
-{{- if and .Values.modelRunningService.enabled .Values.modelRunningService.orchestrator.ingress.enabled -}}
+{{- if and .Values.modelService.running.enabled .Values.modelService.running.orchestrator.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
-{{- $svcPort := .Values.modelRunningService.orchestrator.service.port -}}
-{{- if and .Values.modelRunningService.orchestrator.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.modelRunningService.orchestrator.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.modelRunningService.orchestrator.ingress.annotations "kubernetes.io/ingress.class" .Values.modelRunningService.orchestrator.ingress.className}}
+{{- $svcPort := .Values.modelService.running.orchestrator.service.port -}}
+{{- if and .Values.modelService.running.orchestrator.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.modelService.running.orchestrator.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.modelService.running.orchestrator.ingress.annotations "kubernetes.io/ingress.class" .Values.modelService.running.orchestrator.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -18,20 +18,20 @@ metadata:
   name: model-running-service-orchestrator
   labels:
     {{- include "studio.labels" . | nindent 4 }}
-    {{- if .Values.modelRunningService.orchestrator.ingress.labels }}
-{{ toYaml .Values.modelRunningService.orchestrator.ingress.labels | indent 4 }}
+    {{- if .Values.modelService.running.orchestrator.ingress.labels }}
+{{ toYaml .Values.modelService.running.orchestrator.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.modelRunningService.orchestrator.ingress.annotations }}
+  {{- with .Values.modelService.running.orchestrator.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if and .Values.modelRunningService.orchestrator.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.modelRunningService.orchestrator.ingress.className }}
+  {{- if and .Values.modelService.running.orchestrator.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.modelService.running.orchestrator.ingress.className }}
   {{- end }}
-  {{- if .Values.modelRunningService.orchestrator.ingress.tls }}
+  {{- if .Values.modelService.running.orchestrator.ingress.tls }}
   tls:
-    {{- range .Values.modelRunningService.orchestrator.ingress.tls }}
+    {{- range .Values.modelService.running.orchestrator.ingress.tls }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
@@ -40,7 +40,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.modelRunningService.orchestrator.ingress.hosts }}
+    {{- range .Values.modelService.running.orchestrator.ingress.hosts }}
     - host: {{ .host | quote }}
       http:
         paths:

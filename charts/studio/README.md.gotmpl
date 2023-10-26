@@ -42,32 +42,34 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ templ
 
 ### Studio
 
-To deploy Studio, set `studioEnabled: true`, `modelTrainingService.enabled: true`, and `modelRunningService.enabled: true`. Configure image and image pull settings.
+To deploy Studio, set `studioEnabled: true`, `modelService.training.enabled: true`, and `modelService.running.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 studioEnabled: true
 # Other settings...
-modelTrainingService:
-  enabled: true
-  # Other settings...
-modelRunningService:
-  enabled: true
-  # Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
 ```
 
 ### MTS/MRS only
 
-To deploy only MTS/MRS, set `studioEnabled: false`, with `modelRunningService` and `modelTrainingService` to `true`.  Configure image and image pull settings.
+To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
 
 ```yaml
 studioEnabled: false
 # Other settings...
-modelTrainingService:
-  enabled: true
-  # Other settings...
-modelRunningService:
-  enabled: true
-  # Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
 ```
 
 {{ template "chart.valuesSection" . }}

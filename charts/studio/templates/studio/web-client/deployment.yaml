@@ -22,7 +22,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/studio-web-client/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/studio/web-client/configmap.yaml") . | sha256sum }}
       {{- if .Values.webClient.podAnnotations }}
         {{- toYaml .Values.webClient.podAnnotations | nindent 8 }}
       {{- end }}

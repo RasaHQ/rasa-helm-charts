@@ -19,9 +19,9 @@ imagePullSecrets:
 # Disable this in case you only want to deploy MTS/MRS
 studioEnabled: true
 
-# -- Specifies image repository
+# -- Specifies image repository for Studio
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
-# -- Specifies image tag
+# -- Specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
 tag: "0.1.3"
 
@@ -990,13 +990,13 @@ modelService:
         RASA_PRO_LICENSE_SECRET_KEY:
           value: ""
 
-      # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+      # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
         []
         # - configMapRef:
         #     name: my-configmap
 
-      # -- eventIngestion.volumes specify additional volumes
+      # -- volumes specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
         []
@@ -1004,14 +1004,14 @@ modelService:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
 
-      # -- eventIngestion.volumeMounts specifies additional volumes to mount
+      # -- volumeMounts specifies additional volumes to mount
       volumeMounts:
         []
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
 
-      # -- backend.additionalContainers allows to specify additional containers for the deployment
+      # -- additionalContainers allows to specify additional containers for the deployment
       additionalContainers: []
       #  - name: extra
       #    image: "busybox"
@@ -1127,7 +1127,7 @@ modelService:
         # - configMapRef:
         #     name: my-configmap
 
-      # -- specify additional volumes for the Studio event ingestion container
+      # -- specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
         []

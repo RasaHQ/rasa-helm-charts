@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.1.34](https://img.shields.io/badge/Version-0.1.34-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.0](https://img.shields.io/badge/Version-0.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.34
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.2.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.1.34
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.2.0
 ```
 
 ## General Configuration
@@ -43,32 +43,34 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 
 ### Studio
 
-To deploy Studio, set `studioEnabled: true`, `modelTrainingService.enabled: true`, and `modelRunningService.enabled: true`. Configure image and image pull settings.
+To deploy Studio, set `studioEnabled: true`, `modelService.training.enabled: true`, and `modelService.running.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 studioEnabled: true
 # Other settings...
-modelTrainingService:
-  enabled: true
-  # Other settings...
-modelRunningService:
-  enabled: true
-  # Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
 ```
 
 ### MTS/MRS only
 
-To deploy only MTS/MRS, set `studioEnabled: false`, with `modelRunningService` and `modelTrainingService` to `true`.  Configure image and image pull settings.
+To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
 
 ```yaml
 studioEnabled: false
 # Other settings...
-modelTrainingService:
-  enabled: true
-  # Other settings...
-modelRunningService:
-  enabled: true
-  # Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
 ```
 
 ## Values
@@ -239,14 +241,14 @@ modelRunningService:
 | modelService.running.orchestrator.service.type | string | `"ClusterIP"` | Specify service type |
 | modelService.running.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.running.orchestrator.volumeMounts | list | `[]` | Specifies additional volumes to mount |
-| modelService.running.orchestrator.volumes | list | `[]` | specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelService.running.orchestrator.volumes | list | `[]` | specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.running.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelService.running.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelService.running.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | modelService.running.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| modelService.training.consumer.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
+| modelService.training.consumer.additionalContainers | list | `[]` | additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelService.training.consumer.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
+| modelService.training.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.training.consumer.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GCS_BUCKET_NAME":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_JOB_TOPIC":{"value":""},"KAFKA_RESULT_TOPIC":{"value":""},"KAFKA_SECURITY_PROTOCOL":{"value":""},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_DATA_PVC":{"value":""},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"KUBERNETES_NAMESPACE":{"value":""},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":""},"RASA_PRO_LICENSE_SECRET_KEY":{"value":""},"RASA_PRO_LICENSE_SECRET_NAME":{"value":""},"RUNS_IN_CLUSTER":{"value":"true"},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.training.consumer.image | object | `{"name":"mts-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/","tag":"1.1.1"}` | Define image settings |
 | modelService.training.consumer.image.name | string | `"mts-job-consumer"` | Specifies image name |
@@ -260,8 +262,8 @@ modelRunningService:
 | modelService.training.consumer.resources | object | `{}` | Specifies the resources limits and requests |
 | modelService.training.consumer.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
 | modelService.training.consumer.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.training.consumer.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount |
-| modelService.training.consumer.volumes | list | `[]` | eventIngestion.volumes specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelService.training.consumer.volumeMounts | list | `[]` | volumeMounts specifies additional volumes to mount |
+| modelService.training.consumer.volumes | list | `[]` | volumes specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.training.enabled | bool | `true` |  |
 | modelService.training.orchestrator.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.training.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
@@ -303,9 +305,9 @@ modelRunningService:
 | networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
-| repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository |
+| repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository for Studio |
 | studioEnabled | bool | `true` |  |
-| tag | string | `"0.1.3"` | Specifies image tag # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"0.1.3"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

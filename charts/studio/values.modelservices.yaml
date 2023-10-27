@@ -47,7 +47,7 @@ modelService:
         # -- Specifies image tag
         tag: "latest"
         # -- Specifies image pull policy
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
       # -- Define environment variables for deployment
       # Example: Specify the string value for variables
@@ -251,7 +251,7 @@ modelService:
         # -- Specifies image tag
         tag: "latest"
         # -- Specifies image pull policy
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
       # -- Define environment variables for deployment
       # Example: Specify the string value for variables
@@ -294,6 +294,9 @@ modelService:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
           value: ""
+        ORCHESTRATOR_HTTP_API_URL:
+          # http://{{ .Values.orchestrator.internal_service_name }}:{{ .Values.orchestrator.service_port}}
+          value: "http://model-training-service:8000"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -306,7 +309,7 @@ modelService:
       volumes:
         - name: training-data
           persistentVolumeClaim:
-          claimName: model-training-service-data-pvc
+            claimName: model-training-service-data-pvc
 
       # -- volumeMounts specifies additional volumes to mount
       volumeMounts:
@@ -395,7 +398,7 @@ modelService:
         # -- Specifies image tag
         tag: "latest"
         # -- Specifies image pull policy
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
       # -- Define environment variables for deployment
       # Example: Specify the string value for variables
@@ -595,7 +598,7 @@ modelService:
         # -- Specifies image tag
         tag: "latest"
         # -- Specifies image pull policy
-        pullPolicy: IfNotPresent
+        pullPolicy: Always
 
       # -- Define environment variables for deployment
       # Example: Specify the string value for variables
@@ -646,7 +649,7 @@ modelService:
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
         ORCHESTRATOR_HTTP_API_URL:
           # http://{{ .Values.orchestrator.internal_service_name }}:{{ .Values.orchestrator.service_port}}
-          value: "model-running-service:8001"
+          value: "http://model-running-service:8001"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -659,7 +662,7 @@ modelService:
       volumes:
         - name: deployment-data
           persistentVolumeClaim:
-          claimName: model-running-service-data-pv
+            claimName: model-running-service-data-pvc
 
       # -- Specifies additional volumes to mount
       volumeMounts:
@@ -737,7 +740,7 @@ modelService:
     # -- FileSystemId of the AWS EFS volume
     efs_id: ""
     # -- Storage Class name for PV
-    storageClassName: ""
+    storageClassName: "standard-rwo"
     # -- Storage Capacity for PV
     storageCapacity: 1Gi
     # -- Storage requests for PVC

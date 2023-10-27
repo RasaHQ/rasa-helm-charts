@@ -12,7 +12,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.modelService.persistence.storageClassName }}
+  storageClassName: {{ .Values.modelService.persistence.storageClassName  | default "standard-rwo" }}
   {{- if .Values.modelService.persistence.aws }}
   csi:
     driver: efs.csi.aws.com
@@ -47,7 +47,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.modelService.persistence.storageRequests }}
-  storageClassName: {{ .Values.modelService.persistence.storageClassName }}
+  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
   selector:
     matchLabels:
       name: model-training-service-data-pv
@@ -56,7 +56,7 @@ spec:
 kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
-  name: {{ .Values.modelService.persistence.storageClassName }}
+  name: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }}
   namespace: {{ .Release.Namespace }}
 provisioner: efs.csi.aws.com 
 {{- end }}

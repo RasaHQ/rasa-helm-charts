@@ -289,7 +289,7 @@ modelService:
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
         KUBERNETES_DATA_PVC:
-          value: ""
+          value: "model-training-service-data-pvc"
         RASA_PRO_LICENSE_SECRET_NAME:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
@@ -638,7 +638,7 @@ modelService:
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
         KUBERNETES_DATA_PVC:
-          value: ""
+          value: "model-running-service-data-pvc"
         RASA_PRO_LICENSE_SECRET_NAME:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:

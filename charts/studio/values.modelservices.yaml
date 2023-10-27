@@ -41,11 +41,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"
+        repository: "us-central1-docker.pkg.dev/playground-studio-398307/studio-support-images/"
         # -- Specifies image name
-        name: "mts-orchestrator"
+        name: "model-training-orchestrator"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "latest"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -61,31 +61,31 @@ modelService:
         RUNS_IN_CLUSTER:
           value: "true"
         KUBERNETES_NAMESPACE:
-          value: ""
+          value: "helm-mts-mrs"
         AUTHENTICATION_ENDPOINT_ENABLED:
           value: "false"
         ENABLE_AUTHORIZATION:
           value: "false"
         KAFKA_BROKER_ADDRESS:
-          value: ""
+          value: "kafka-svc:29092"
         KAFKA_SECURITY_PROTOCOL:
-          value: ""
+          value: "PLAINTEXT"
         TRAINING_RESULT_TOPIC:
-          value: ""
+          value: "training-result"
         TRAINING_RESULT_CONSUMER_GROUP_ID:
-          value: ""
+          value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
-          value: ""
+          value: "training-job"
         GOOGLE_CLOUD_PROJECT:
-          value: ""
+          value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+          value: "us-central1"
         THIRD_PARTY_STORAGE_BUCKET:
-          value: ""
+          value: "studio_model_training_service"
         TRAINING_STORAGE:
-          value: ""
+          value: "gcs"
         TRAINING_STORAGE_BUCKET:
-          value: ""
+          value: "studio_model_training_service"
         TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
           secret:
             name: "studio-secrets"
@@ -100,7 +100,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "KEYCLOAK_CLIENT_SECRET"
-
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -154,7 +153,7 @@ modelService:
       # -- Define service
       service:
         # -- Specify service type
-        type: ClusterIP
+        type: LoadBalancer
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -246,11 +245,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"
+        repository: "us-central1-docker.pkg.dev/playground-studio-398307/studio-support-images/"
         # -- Specifies image name
-        name: "mts-job-consumer"
+        name: "model-training-job-consumer"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "latest"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -266,25 +265,25 @@ modelService:
         RUNS_IN_CLUSTER:
           value: "true"
         KUBERNETES_NAMESPACE:
-          value: ""
+          value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: ""
+          value: "kafka-svc:29092"
         KAFKA_SECURITY_PROTOCOL:
-          value: ""
+          value: "PLAINTEXT"
         KAFKA_JOB_TOPIC:
-          value: ""
+          value: "training-job"
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
-          value: ""
+          value: "training-result-consumer-group"
         KAFKA_RESULT_TOPIC:
-          value: ""
+          value: "training-result"
         GOOGLE_CLOUD_PROJECT:
-          value: ""
+          value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+          value: "us-central1"
         TRAINING_STORAGE:
-          value: ""
+          value: "gcs"
         GCS_BUCKET_NAME:
-          value: ""
+          value: "studio_model_training_service"
         KUBERNETES_BASE_TRAINING_DATA_PATH:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
@@ -305,17 +304,14 @@ modelService:
       # -- volumes specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
-        []
-        # - hostPath:
-        #   path: <HOST_PATH>
-        #   name: <VOLUME_NAME>
+        - name: training-data
+          persistentVolumeClaim:
+          claimName: model-training-service-data-pvc
 
       # -- volumeMounts specifies additional volumes to mount
       volumeMounts:
-        []
-        # - name: <VOLUME_NAME>
-        #   mountPath: <CONTAINER_PATH>
-        #   readOnly: true
+        - mountPath: /home
+          name: training-data
 
       # -- additionalContainers allows to specify additional containers for the deployment
       additionalContainers: []
@@ -393,11 +389,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"
+        repository: "us-central1-docker.pkg.dev/playground-studio-398307/studio-support-images/"
         # -- Specifies image name
-        name: "mrs-orchestrator"
+        name: "model-running-orchestrator"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "latest"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -413,19 +409,39 @@ modelService:
         RUNS_IN_CLUSTER:
           value: "true"
         KUBERNETES_NAMESPACE:
-          value: ""
+          value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: ""
+          value: "kafka-svc:29092"
         KAFKA_SECURITY_PROTOCOL:
-          value: ""
+          value: "PLAINTEXT"
         DEPLOYMENT_RESULT_TOPIC:
-          value: ""
+          value: "deployment-result"
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
-          value: ""
+          value: "deployment-result-consumer-group"
         DEPLOYMENT_JOB_TOPIC:
-          value: ""
+          value: "deployment-job"
         LOGGING_LEVEL:
-          value: ""
+          value: "INFO"
+        ENABLE_AUTHORIZATION:
+          value: "false"
+        DEPLOYMENT_DATA_STORAGE:
+          value: "gcs"
+        GOOGLE_CLOUD_PROJECT:
+          value: "playground-studio"
+        CLOUDSDK_COMPUTE_ZONE:
+          value: "us-central1"
+        AUTHENTICATION_ENDPOINT_ENABLED:
+          value: "false"
+        DEPLOYMENT_STORAGE_BUCKET:
+          value: "studio_model_training_service"
+        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -481,7 +497,7 @@ modelService:
       # -- Define service
       service:
         # -- Specify service type
-        type: ClusterIP
+        type: LoadBalancer
         # -- Specify service port
         port: 8001
         # -- Specify service target port
@@ -573,11 +589,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"
+        repository: "us-central1-docker.pkg.dev/playground-studio-398307/studio-support-images/"
         # -- Specifies image name
-        name: "mrs-job-consumer"
+        name: "model-running-job-consumer"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "latest"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -593,27 +609,27 @@ modelService:
         RUNS_IN_CLUSTER:
           value: "true"
         KUBERNETES_NAMESPACE:
-          value: ""
+          value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: ""
+          value: "kafka-svc:29092"
         KAFKA_SECURITY_PROTOCOL:
-          value: ""
+          value: "PLAINTEXT"
         DEPLOYMENT_JOB_KAFKA_TOPIC:
-          value: ""
+          value: "deployment-job"
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
-          value: ""
+          value: "deployment-result-consumer-group"
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
-          value: ""
+          value: "deployment-result"
         GOOGLE_CLOUD_PROJECT:
-          value: ""
+          value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+          value: "us-central1"
         TRAINING_STORAGE:
-          value: ""
+          value: "gcs"
         BOT_CONFIG_FETCHER_TYPE:
-          value: ""
+          value: "gcs"
         GCS_BUCKET_NAME:
-          value: ""
+          value: "studio_model_training_service"
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
@@ -624,6 +640,13 @@ modelService:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
           value: ""
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        ORCHESTRATOR_HTTP_API_URL:
+          # http://{{ .Values.orchestrator.internal_service_name }}:{{ .Values.orchestrator.service_port}}
+          value: "model-running-service:8001"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -634,17 +657,14 @@ modelService:
       # -- Specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
-        []
-        # - hostPath:
-        #   path: <HOST_PATH>
-        #   name: <VOLUME_NAME>
+        - name: deployment-data
+          persistentVolumeClaim:
+          claimName: model-running-service-data-pv
 
       # -- Specifies additional volumes to mount
       volumeMounts:
-        []
-        # - name: <VOLUME_NAME>
-        #   mountPath: <CONTAINER_PATH>
-        #   readOnly: true
+        - mountPath: /home
+          name: deployment-data
 
       # -- Allows to specify additional containers for the deployment
       additionalContainers: []
@@ -711,9 +731,9 @@ modelService:
     create: true
     # -- Type of the volume that will be used to store the training data
     # Valid values: local, nfs
-    type: local
+    type: nfs
     # -- If you are deploying to AWS and using EFS for volume, set this value to true.
-    aws: true
+    aws: false
     # -- FileSystemId of the AWS EFS volume
     efs_id: ""
     # -- Storage Class name for PV
@@ -724,7 +744,7 @@ modelService:
     storageRequests: 1Gi
     # -- DNS name or IP address of the NFS server
     # This value is used only when type is set to nfs
-    nfsServer: ""
+    nfsServer: "35.223.231.182"
     # -- Directory from the host machine that will be mounted to the container for training data
     # This value is used only when type is set to local
     hostPath: ""

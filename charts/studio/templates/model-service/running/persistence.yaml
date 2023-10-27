@@ -47,7 +47,7 @@ spec:
   resources:
     requests:
       storage: {{ .Values.modelService.persistence.storageRequests }}
-  storageClassName: {{ .Values.modelService.persistence.storageClassName }}
+  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
   selector:
     matchLabels:
       name: model-running-service-data-pv

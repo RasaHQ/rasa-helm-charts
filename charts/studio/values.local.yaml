@@ -15,6 +15,9 @@ fullnameOverride: ""
 imagePullSecrets:
   - name: artifact-registry
 
+# Disable this in case you only want to deploy MTS/MRS
+studioEnabled: true
+
 # -- Specifies image repository
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- Specifies image tag
@@ -635,6 +638,12 @@ keycloak:
   # -- Allow the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+modelService:
+  training:
+    enabled: false
+  running:
+    enabled: false
 
 # Network policy settings
 networkPolicy:

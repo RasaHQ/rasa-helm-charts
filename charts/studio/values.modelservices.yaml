@@ -309,14 +309,17 @@ modelService:
       # -- volumes specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
-        - name: training-data
-          persistentVolumeClaim:
-            claimName: model-training-service-data-pvc
+        []
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
 
       # -- volumeMounts specifies additional volumes to mount
       volumeMounts:
-        - mountPath: /home
-          name: training-data
+        []
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
 
       # -- additionalContainers allows to specify additional containers for the deployment
       additionalContainers: []
@@ -664,14 +667,17 @@ modelService:
       # -- Specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
       volumes:
-        - name: deployment-data
-          persistentVolumeClaim:
-            claimName: model-running-service-data-pvc
+        []
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
 
       # -- Specifies additional volumes to mount
       volumeMounts:
-        - mountPath: /home
-          name: deployment-data
+        []
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
 
       # -- Allows to specify additional containers for the deployment
       additionalContainers: []

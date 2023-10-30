@@ -58,6 +58,8 @@ spec:
           resources:
             {{- toYaml .Values.modelService.training.consumer.resources | nindent 12 }}
           volumeMounts:
+            - mountPath: /home
+              name: training-data
           {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
           {{- if .Values.modelService.training.consumer.volumeMounts }}
             {{- toYaml .Values.modelService.training.consumer.volumeMounts | nindent 12 }}
@@ -84,6 +86,9 @@ spec:
         {{- toYaml .Values.modelService.training.consumer.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
+        - name: training-data
+          persistentVolumeClaim:
+            claimName: model-training-service-data-pvc
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.training.consumer.volumes }}
         {{- toYaml .Values.modelService.training.consumer.volumes | nindent 8 }}

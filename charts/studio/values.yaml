@@ -989,6 +989,8 @@ modelService:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
           value: ""
+        ORCHESTRATOR_HTTP_API_URL:
+          value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1111,7 +1113,7 @@ modelService:
         KAFKA_BROKER_ADDRESS:
           value: ""
         KAFKA_SECURITY_PROTOCOL:
-          value: ""
+          value: "PLAINTEXT"
         DEPLOYMENT_RESULT_TOPIC:
           value: ""
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
@@ -1119,25 +1121,42 @@ modelService:
         DEPLOYMENT_JOB_TOPIC:
           value: ""
         LOGGING_LEVEL:
+          value: "INFO"
+        ENABLE_AUTHORIZATION:
+          value: "false"
+        DEPLOYMENT_DATA_STORAGE:
+          value: "gcs"
+        GOOGLE_CLOUD_PROJECT:
           value: ""
+        CLOUDSDK_COMPUTE_ZONE:
+          value: ""
+        AUTHENTICATION_ENDPOINT_ENABLED:
+          value: "false"
+        DEPLOYMENT_STORAGE_BUCKET:
+          value: ""
+        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
-      envFrom:
-        []
+      envFrom: []
         # - configMapRef:
         #     name: my-configmap
 
       # -- specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-      volumes:
-        []
+      volumes: []
         # - hostPath:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
 
       # -- Specifies additional volumes to mount
-      volumeMounts:
-        []
+      volumeMounts: []
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
@@ -1318,24 +1337,27 @@ modelService:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
           value: ""
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        ORCHESTRATOR_HTTP_API_URL:
+          value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
-      envFrom:
-        []
+      envFrom: []
         # - configMapRef:
         #     name: my-configmap
 
       # -- Specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-      volumes:
-        []
+      volumes: []
         # - hostPath:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
 
       # -- Specifies additional volumes to mount
-      volumeMounts:
-        []
+      volumeMounts: []
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true

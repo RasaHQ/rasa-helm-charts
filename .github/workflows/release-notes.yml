@@ -20,7 +20,7 @@ jobs:
 
       - name: Get previous release tag
         id: previous-release
-        uses: WOOSERK/get-prev-tag-action@v0.1.1
+        uses: JinoArch/get-latest-tag@latest
     
       - name: Read Helm Chart
         id: chart-info
@@ -51,12 +51,12 @@ jobs:
                 }
               ]
             }
-          fromTag: "${{ steps.previous-release.outputs.prev-tag }}"
+          fromTag: "${{ steps.previous-release.outputs.latestTag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create Release
-        uses: mikepenz/action-gh-release@v0.2.0-a03 #softprops/action-gh-release
+        uses: mikepenz/action-gh-release@v0.4.1 #softprops/action-gh-release
         with:
           tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
           body: ${{steps.github_release.outputs.changelog}}

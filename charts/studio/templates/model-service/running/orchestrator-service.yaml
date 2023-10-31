@@ -14,5 +14,4 @@ spec:
       name: http
   selector:
     {{- include "modelRunningService.selectorLabels" . | nindent 4 }}
-    app.kubernetes.io/component: model-running-service
 {{- end }}

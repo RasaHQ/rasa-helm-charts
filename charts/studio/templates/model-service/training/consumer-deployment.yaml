@@ -5,7 +5,7 @@ metadata:
   name: model-training-service-consumer
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
-    app.kubernetes.io/component: model-training-service
+    app.kubernetes.io/component: model-training-service-consumer
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
@@ -17,8 +17,7 @@ spec:
   replicas: {{ .Values.modelService.training.consumer.replicaCount }}
   selector:
     matchLabels:
-      {{- include "modelTrainingService.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: model-training-service
+      app.kubernetes.io/component: model-training-service-consumer
   template:
     metadata:
       {{- with .Values.modelService.training.consumer.podAnnotations }}
@@ -26,8 +25,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "modelTrainingService.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: model-training-service
+        app.kubernetes.io/component: model-training-service-consumer
         {{- if .Values.podLabels }}
           {{ toYaml .Values.podLabels | nindent 8 }}
         {{- end }}

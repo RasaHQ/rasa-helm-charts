@@ -59,14 +59,16 @@ Selector labels for Model Training Service
 {{- define "modelTrainingService.selectorLabels" -}}
 app.kubernetes.io/name: model-training-service
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: model-training-service-orchestrator
 {{- end }}
 
 {{/*
-Selector labels for Model Training Service
+Selector labels for Model Running Service
 */}}
 {{- define "modelRunningService.selectorLabels" -}}
 app.kubernetes.io/name: model-running-service
 app.kubernetes.io/instance: {{ .Release.Name }}
+app.kubernetes.io/component: model-running-service-orchestrator
 {{- end }}
 
 {{/*

@@ -18,7 +18,6 @@ spec:
   selector:
     matchLabels:
       {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: model-running-service
   template:
     metadata:
       {{- with .Values.modelService.running.orchestrator.podAnnotations }}
@@ -27,7 +26,6 @@ spec:
       {{- end }}
       labels:
         {{- include "modelRunningService.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: model-running-service
         {{- if .Values.podLabels }}
           {{ toYaml .Values.podLabels | nindent 8 }}
         {{- end }}

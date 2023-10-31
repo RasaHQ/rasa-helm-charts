@@ -1,0 +1,13 @@
+name: Assign label
+
+on:
+  pull_request:
+    types: [opened]
+
+jobs:
+  assign-label:
+    runs-on: ubuntu-22.04
+
+    steps:
+    - name: Assign label
+      uses: actions/labeler@v4

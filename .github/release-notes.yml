@@ -1,6 +1,0 @@
-changelog:
-  sections:
-  - title: "Studio"
-    labels: ["studio"]
-  - title: "Rasa"
-    labels: ["rasa"]

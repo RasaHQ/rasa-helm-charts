@@ -44,10 +44,6 @@ jobs:
                 {
                     "title": "## 📦 Rasa",
                     "labels": ["rasa"]
-                },
-                {
-                    "title": "## 📦 Studio",
-                    "labels": ["studio"]
                 }
               ]
             }

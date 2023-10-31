@@ -33,10 +33,9 @@ jobs:
         with:
           configurationJson: |
             {
-              "template": "#{{CHANGELOG}}\n\n<details>\n<summary>Uncategorized</summary>\n\n#{{UNCATEGORIZED}}\n</details>",
               "categories": [
                 {
-                  "title": "## 📦 Rasa Release",
+                  "title": "## 📦 ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }} Release",
                   "labels": ["rasa"]
                 },
                 {

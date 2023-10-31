@@ -1,4 +1,4 @@
-# Trigger the workflow on milestone events
+# Trigger the workflow on milestone events.
 name: Create Release Notes
 
 on: 
@@ -30,20 +30,6 @@ jobs:
       - name: Build Changelog
         id: github_release
         uses: mikepenz/release-changelog-builder-action@v3
-        with:
-          configurationJson: |
-            {
-              "categories": [
-                {
-                  "title": "## 📦 ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }} Release",
-                  "labels": ["rasa"]
-                },
-                {
-                  "title": "## 📦 Studio Release",
-                  "labels": ["studio"]
-                }
-              ]
-            }
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 

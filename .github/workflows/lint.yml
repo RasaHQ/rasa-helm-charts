@@ -74,7 +74,7 @@ jobs:
       - name: Generate Helm template
         run: helm template ./charts/${{ matrix.charts }} --output-dir ./output
 
-      - name: Setup Snyk IAC
+      - name: Scan chart with Snyk IAC
         uses: snyk/actions/iac@master
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}

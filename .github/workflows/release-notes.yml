@@ -2,7 +2,7 @@
 name: Create Release Notes
 
 on: 
-  pull_request:
+  milestone:
     types: [closed]
 
 jobs:

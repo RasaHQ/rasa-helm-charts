@@ -45,8 +45,10 @@ data:
     tracing:
       {{- omit .tracing "enabled" | toYaml | nindent 6 }}
 {{- end }}
+{{- if .actionEndpoint }}
     action_endpoint:
-      url: {{ .actionEndpoint.url }}
+      {{- toYaml .actionEndpoint | nindent 6 }}
+{{- end }}
 {{- with .additionalEndpoints }}
     {{- toYaml . | nindent 4 }}
 {{- end }}

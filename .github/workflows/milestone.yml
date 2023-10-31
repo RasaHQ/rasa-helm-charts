@@ -1,0 +1,19 @@
+# Trigger the workflow on milestone events
+name: Assign Milestone to Rasa PR
+
+on: 
+  pull_request:
+    types: [opened, reopened]
+    paths:
+      - 'charts/rasa/**'
+      - '!charts/studio/**'
+
+jobs:
+  assign-milestone:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set Milestone
+        uses: zoispag/action-assign-milestone@1f7abbbd14e2d95194633ead05cd332e140ec12d
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          milestone: "Rasa Release"

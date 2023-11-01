@@ -67,15 +67,23 @@ modelService:
         ENABLE_AUTHORIZATION:
           value: "false"
         KAFKA_BROKER_ADDRESS:
-          value: "kafka-svc:29092"
+          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
+        KAFKA_SASL_MECHANISM:
+          value: "SCRAM-SHA-256"
         KAFKA_SECURITY_PROTOCOL:
-          value: "PLAINTEXT"
+          value: "SASL_SSL"
+        KAFKA_SASL_USERNAME:
+          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
+        KAFKA_SASL_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         TRAINING_RESULT_TOPIC:
-          value: "training-result"
+          value: "helm-training-result"
         TRAINING_RESULT_CONSUMER_GROUP_ID:
           value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
-          value: "training-job"
+          value: "helm-training-job"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
@@ -267,15 +275,23 @@ modelService:
         KUBERNETES_NAMESPACE:
           value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: "kafka-svc:29092"
+          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
+        KAFKA_SASL_MECHANISM:
+          value: "SCRAM-SHA-256"
         KAFKA_SECURITY_PROTOCOL:
-          value: "PLAINTEXT"
+          value: "SASL_SSL"
+        KAFKA_SASL_USERNAME:
+          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
+        KAFKA_SASL_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         KAFKA_JOB_TOPIC:
-          value: "training-job"
+          value: "helm-training-job"
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
           value: "training-result-consumer-group"
         KAFKA_RESULT_TOPIC:
-          value: "training-result"
+          value: "helm-training-result"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
@@ -417,15 +433,23 @@ modelService:
         KUBERNETES_NAMESPACE:
           value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: "kafka-svc:29092"
+          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
+        KAFKA_SASL_MECHANISM:
+          value: "SCRAM-SHA-256"
         KAFKA_SECURITY_PROTOCOL:
-          value: "PLAINTEXT"
+          value: "SASL_SSL"
+        KAFKA_SASL_USERNAME:
+          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
+        KAFKA_SASL_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         DEPLOYMENT_RESULT_TOPIC:
-          value: "deployment-result"
+          value: "helm-deployment-result"
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
           value: "deployment-result-consumer-group"
         DEPLOYMENT_JOB_TOPIC:
-          value: "deployment-job"
+          value: "helm-deployment-job"
         LOGGING_LEVEL:
           value: "INFO"
         ENABLE_AUTHORIZATION:
@@ -617,15 +641,23 @@ modelService:
         KUBERNETES_NAMESPACE:
           value: "helm-mts-mrs"
         KAFKA_BROKER_ADDRESS:
-          value: "kafka-svc:29092"
+          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
+        KAFKA_SASL_MECHANISM:
+          value: "SCRAM-SHA-256"
         KAFKA_SECURITY_PROTOCOL:
-          value: "PLAINTEXT"
+          value: "SASL_SSL"
+        KAFKA_SASL_USERNAME:
+          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
+        KAFKA_SASL_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         DEPLOYMENT_JOB_KAFKA_TOPIC:
-          value: "deployment-job"
+          value: "helm-deployment-job"
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
           value: "deployment-result-consumer-group"
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
-          value: "deployment-result"
+          value: "helm-deployment-result"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:

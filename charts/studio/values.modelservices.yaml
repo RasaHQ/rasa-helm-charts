@@ -152,8 +152,6 @@ modelService:
 
       # -- Define service
       service:
-        # -- Specify service type
-        type: LoadBalancer
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -294,9 +292,6 @@ modelService:
           value: "studio-secrets"
         RASA_PRO_LICENSE_SECRET_KEY:
           value: "RASA_PRO_LICENSE_SECRET_KEY"
-        ORCHESTRATOR_HTTP_API_URL:
-          # http://{{ .Values.orchestrator.internal_service_name }}:{{ .Values.orchestrator.service_port}}
-          value: "http://model-training-service:8000"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -502,8 +497,6 @@ modelService:
 
       # -- Define service
       service:
-        # -- Specify service type
-        type: LoadBalancer
         # -- Specify service port
         port: 8001
         # -- Specify service target port
@@ -650,9 +643,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        ORCHESTRATOR_HTTP_API_URL:
-          # http://{{ .Values.orchestrator.internal_service_name }}:{{ .Values.orchestrator.service_port}}
-          value: "http://model-running-service:8001"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:

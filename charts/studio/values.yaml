@@ -847,8 +847,6 @@ modelService:
 
       # -- Define service
       service:
-        # -- Specify service type
-        type: ClusterIP
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -988,8 +986,6 @@ modelService:
         RASA_PRO_LICENSE_SECRET_NAME:
           value: ""
         RASA_PRO_LICENSE_SECRET_KEY:
-          value: ""
-        ORCHESTRATOR_HTTP_API_URL:
           value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
@@ -1193,8 +1189,6 @@ modelService:
 
       # -- Define service
       service:
-        # -- Specify service type
-        type: ClusterIP
         # -- Specify service port
         port: 8001
         # -- Specify service target port
@@ -1341,8 +1335,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        ORCHESTRATOR_HTTP_API_URL:
-          value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom: []

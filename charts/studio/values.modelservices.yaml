@@ -247,7 +247,7 @@ modelService:
 
     consumer:
       # -- Specifies number of replicas
-      replicaCount: 1
+      replicaCount: 5
       # -- Define image settings
       image:
         # -- Specifies image repository
@@ -567,7 +567,7 @@ modelService:
 
     consumer:
       # -- Specifies number of replicas
-      replicaCount: 1
+      replicaCount: 5
       # -- Define image settings
       image:
         # -- Specifies image repository

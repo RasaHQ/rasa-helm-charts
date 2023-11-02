@@ -22,6 +22,35 @@ modelService:
     secretName: "studio-secrets"
     secretKey: "GCP_CREDS"
 
+  runsInCluster: true
+
+  rasaProLicense:
+    secretName: "studio-secrets"
+    secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
+
+  openAiKey:
+    secretName: "studio-secrets"
+    secretKey: "OPENAI_API_KEY_SECRET_KEY"
+
+  keycloak:
+    enableAuthorization: false
+    serverUrl:
+    realmName:
+    clientId:
+    clientSecret:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_CLIENT_SECRET"
+
+  kafka:
+    brokerAddress: "flowing-newt-7970-us1-kafka.upstash.io:9092"
+    securityProtocol: "SASL_SSL"
+    saslMechanism: "SCRAM-SHA-256"
+    saslUsername: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
+    saslPassword:
+      secretName: "studio-secrets"
+      secretKey: "KAFKA_SASL_PASSWORD"
+    sslCaLocation: ""
+
   training:
     enabled: true
 
@@ -58,26 +87,8 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: "helm-mts-mrs"
         AUTHENTICATION_ENDPOINT_ENABLED:
           value: "false"
-        ENABLE_AUTHORIZATION:
-          value: "false"
-        KAFKA_BROKER_ADDRESS:
-          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
-        KAFKA_SASL_MECHANISM:
-          value: "SCRAM-SHA-256"
-        KAFKA_SECURITY_PROTOCOL:
-          value: "SASL_SSL"
-        KAFKA_SASL_USERNAME:
-          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
-        KAFKA_SASL_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KAFKA_SASL_PASSWORD"
         TRAINING_RESULT_TOPIC:
           value: "helm-training-result"
         TRAINING_RESULT_CONSUMER_GROUP_ID:
@@ -98,16 +109,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        KEYCLOAK_SERVER_URL:
-          value: ""
-        KEYCLOAK_REALM:
-          value: ""
-        KEYCLOAK_CLIENT_ID:
-          value: ""
-        KEYCLOAK_CLIENT_SECRET:
-          secret:
-            name: "studio-secrets"
-            key: "KEYCLOAK_CLIENT_SECRET"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -160,6 +161,7 @@ modelService:
 
       # -- Define service
       service:
+        type: NodePort
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -266,22 +268,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: "helm-mts-mrs"
-        KAFKA_BROKER_ADDRESS:
-          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
-        KAFKA_SASL_MECHANISM:
-          value: "SCRAM-SHA-256"
-        KAFKA_SECURITY_PROTOCOL:
-          value: "SASL_SSL"
-        KAFKA_SASL_USERNAME:
-          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
-        KAFKA_SASL_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KAFKA_SASL_PASSWORD"
         KAFKA_JOB_TOPIC:
           value: "helm-training-job"
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
@@ -300,16 +286,6 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
-        KUBERNETES_DATA_PVC:
-          value: "model-training-service-data-pvc"
-        RASA_PRO_LICENSE_SECRET_NAME:
-          value: "studio-secrets"
-        RASA_PRO_LICENSE_SECRET_KEY:
-          value: "RASA_PRO_LICENSE_SECRET_KEY"
-        OPENAI_API_KEY_SECRET_NAME:
-          value: "studio-secrets"
-        OPENAI_API_KEY_SECRET_KEY:
-          value: "OPENAI_API_KEY_SECRET_KEY"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -425,22 +401,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: "helm-mts-mrs"
-        KAFKA_BROKER_ADDRESS:
-          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
-        KAFKA_SASL_MECHANISM:
-          value: "SCRAM-SHA-256"
-        KAFKA_SECURITY_PROTOCOL:
-          value: "SASL_SSL"
-        KAFKA_SASL_USERNAME:
-          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
-        KAFKA_SASL_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KAFKA_SASL_PASSWORD"
         DEPLOYMENT_RESULT_TOPIC:
           value: "helm-deployment-result"
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
@@ -449,8 +409,6 @@ modelService:
           value: "helm-deployment-job"
         LOGGING_LEVEL:
           value: "INFO"
-        ENABLE_AUTHORIZATION:
-          value: "false"
         DEPLOYMENT_DATA_STORAGE:
           value: "gcs"
         GOOGLE_CLOUD_PROJECT:
@@ -523,6 +481,7 @@ modelService:
 
       # -- Define service
       service:
+        type: NodePort
         # -- Specify service port
         port: 8001
         # -- Specify service target port
@@ -629,22 +588,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: "helm-mts-mrs"
-        KAFKA_BROKER_ADDRESS:
-          value: "flowing-newt-7970-us1-kafka.upstash.io:9092"
-        KAFKA_SASL_MECHANISM:
-          value: "SCRAM-SHA-256"
-        KAFKA_SECURITY_PROTOCOL:
-          value: "SASL_SSL"
-        KAFKA_SASL_USERNAME:
-          value: "Zmxvd2luZy1uZXd0LTc5NzAkJyiK6OMXSzrb9JeVh17UBvzdIbgBCWnaWkUTyc4"
-        KAFKA_SASL_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KAFKA_SASL_PASSWORD"
         DEPLOYMENT_JOB_KAFKA_TOPIC:
           value: "helm-deployment-job"
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
@@ -665,12 +608,6 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
-        KUBERNETES_DATA_PVC:
-          value: "model-running-service-data-pvc"
-        RASA_PRO_LICENSE_SECRET_NAME:
-          value: "studio-secrets"
-        RASA_PRO_LICENSE_SECRET_KEY:
-          value: "RASA_PRO_LICENSE_SECRET_KEY"
         DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
           secret:
             name: "studio-secrets"
@@ -730,6 +667,16 @@ modelService:
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
+
+      rasaReadinessProbe:
+        initialDelaySeconds: 10
+        intervalInSeconds: 5
+        failureThreshold: 50
+
+      rasaStartupProbe:
+        initialDelaySeconds: 10
+        intervalInSeconds: 5
+        failureThreshold: 50
 
       # -- Specifies the resources limits and requests
       resources:

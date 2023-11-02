@@ -306,6 +306,10 @@ modelService:
           value: "studio-secrets"
         RASA_PRO_LICENSE_SECRET_KEY:
           value: "RASA_PRO_LICENSE_SECRET_KEY"
+        OPENAI_API_KEY_SECRET_NAME:
+          value: "studio-secrets"
+        OPENAI_API_KEY_SECRET_KEY:
+          value: "OPENAI_API_KEY_SECRET_KEY"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -671,6 +675,10 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        OPENAI_API_KEY_SECRET_NAME:
+          value: "studio-secrets"
+        OPENAI_API_KEY_SECRET_KEY:
+          value: "OPENAI_API_KEY_SECRET_KEY"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:

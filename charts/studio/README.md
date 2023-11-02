@@ -188,12 +188,12 @@ modelService:
 | modelService.kafka.saslUsername | string | `""` | Username used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.securityProtocol | string | `"SASL_SSL"` | Security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | Location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.keycloak.clientId | string | `nil` | Client ID used to authenticate with Keycloak. |
+| modelService.keycloak.clientId | string | `""` | Client ID used to authenticate with Keycloak. |
 | modelService.keycloak.clientSecret | object | `{"secretKey":"KEYCLOAK_CLIENT_SECRET","secretName":"studio-secrets"}` | Secret used to authenticate with Keycloak. |
 | modelService.keycloak.enableAuthorization | bool | `false` |  |
 | modelService.keycloak.enabled | bool | `false` |  |
-| modelService.keycloak.realmName | string | `nil` |  |
-| modelService.keycloak.serverUrl | string | `nil` | URL on which Keycloak server is available. If this variable is not set, authorization will be disabled. |
+| modelService.keycloak.realmName | string | `""` |  |
+| modelService.keycloak.serverUrl | string | `""` | URL on which Keycloak server is available. If this variable is not set, authorization will be disabled. |
 | modelService.openAiKey.envVarName | string | `""` | Name of the Env Var containing the OpenAI API key which will be used to pass the API key to the pod which runs Rasa training. |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which OpenAI API key is stored. |
@@ -223,7 +223,7 @@ modelService:
 | modelService.running.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
 | modelService.running.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
 | modelService.running.consumer.rasaReadinessProbe.failureThreshold | int | `50` | Allowed number of failed readiness checks until Rasa container inside the pod is considered unreachable and unable to serve requests. # Total possible readiness check = initial delay + check interval x failure threshold |
-| modelService.running.consumer.rasaReadinessProbe.initialDelaySeconds | int | `10` | Initial delay after which readiness probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa is ready to serve requests.  |
+| modelService.running.consumer.rasaReadinessProbe.initialDelaySeconds | int | `10` | Initial delay after which readiness probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa is ready to serve requests. |
 | modelService.running.consumer.rasaReadinessProbe.intervalInSeconds | int | `5` | Interval (in seconds) on which readiness check will be performed. |
 | modelService.running.consumer.rasaStartupProbe.failureThreshold | int | `50` | Allowed number of failed startup checks until Rasa app inside the container is considered not started. # Total possible startup check = initial delay + check interval x failure threshold |
 | modelService.running.consumer.rasaStartupProbe.initialDelaySeconds | int | `10` | Initial delay after which startup probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa application is ready. |
@@ -270,7 +270,7 @@ modelService:
 | modelService.running.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelService.running.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
 | modelService.running.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| modelService.runsInCluster | bool | `true` | Describes if service is run inside cluster or not.  # It is used during the initialization procedure or API clients which communicate with K8S API. |
+| modelService.runsInCluster | bool | `true` | Describes if service is run inside cluster or not. # It is used during the initialization procedure or API clients which communicate with K8S API. |
 | modelService.training.consumer.additionalContainers | list | `[]` | additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |

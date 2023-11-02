@@ -716,7 +716,7 @@ modelService:
     secretName: "studio-secrets"
     secretKey: "GCP_CREDS"
 
-  # -- Describes if service is run inside cluster or not. 
+  # -- Describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
   runsInCluster: true
 
@@ -740,16 +740,16 @@ modelService:
     enabled: false
     enableAuthorization: false
     # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
-    serverUrl:
+    serverUrl: ""
     # - Name of the realm in which client for exists.
-    realmName:
+    realmName: ""
     # -- Client ID used to authenticate with Keycloak.
-    clientId: 
+    clientId: ""
     # -- Secret used to authenticate with Keycloak.
     clientSecret:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_CLIENT_SECRET"
-  
+
   kafka:
     # -- URL of the Kafka broker to which to connect to.
     brokerAddress: ""
@@ -1382,7 +1382,7 @@ modelService:
 
       rasaReadinessProbe:
         # -- Initial delay after which readiness probe will be run on the container which is running Rasa deployment.
-        ## Readiness check assess if Rasa is ready to serve requests. 
+        ## Readiness check assess if Rasa is ready to serve requests.
         initialDelaySeconds: 10
         # -- Interval (in seconds) on which readiness check will be performed.
         intervalInSeconds: 5

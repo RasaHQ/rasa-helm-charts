@@ -21,7 +21,7 @@ modelService:
   gcpCredentials:
     secretName: "studio-secrets"
     secretKey: "GCP_CREDS"
-  
+
   runsInCluster: true
 
   rasaProLicense:
@@ -33,15 +33,14 @@ modelService:
     secretKey: "OPENAI_API_KEY_SECRET_KEY"
 
   keycloak:
-    enabled: false
     enableAuthorization: false
     serverUrl:
     realmName:
-    clientId: 
+    clientId:
     clientSecret:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_CLIENT_SECRET"
-  
+
   kafka:
     brokerAddress: "flowing-newt-7970-us1-kafka.upstash.io:9092"
     securityProtocol: "SASL_SSL"

@@ -7,7 +7,6 @@ Environment Variables shared between MTS and MRS
 {{- with .Values.modelService }}
 - name: RUNS_IN_CLUSTER
   value: {{ .runsInCluster | quote }}
-{{- if .keycloak.enabled }}
 - name: ENABLE_AUTHORIZATION
   value: {{ .keycloak.enableAuthorization | quote }}
 - name: KEYCLOAK_SERVER_URL
@@ -21,7 +20,6 @@ Environment Variables shared between MTS and MRS
     secretKeyRef:
       name: {{ .keycloak.clientSecret.secretName }}
       key: {{ .keycloak.clientSecret.secretKey }}
-{{- end }}
 - name: KAFKA_BROKER_ADDRESS
   value: {{ .kafka.brokerAddress | quote }}
 - name: KAFKA_SECURITY_PROTOCOL

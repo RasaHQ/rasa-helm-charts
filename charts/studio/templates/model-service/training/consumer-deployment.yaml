@@ -63,6 +63,8 @@ spec:
             {{- toYaml .Values.modelService.training.consumer.volumeMounts | nindent 12 }}
           {{- end }}
           env:
+            {{- include "modelService.shared.env" . | nindent 12 }}
+            {{- include "modelServiceTraining.consumer.env" . | nindent 12 }}
             - name: ORCHESTRATOR_HTTP_API_URL
               value: "http://model-training-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
             - name: GOOGLE_APPLICATION_CREDENTIALS

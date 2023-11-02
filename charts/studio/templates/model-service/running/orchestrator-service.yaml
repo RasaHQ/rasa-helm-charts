@@ -6,7 +6,7 @@ metadata:
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:
-  type: NodePort
+  type: {{ .Values.modelService.running.orchestrator.service.type }}
   ports:
     - port: {{ .Values.modelService.running.orchestrator.service.port }}
       targetPort: {{ .Values.modelService.running.orchestrator.service.targetPort }}

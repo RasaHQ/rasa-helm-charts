@@ -716,6 +716,58 @@ modelService:
     secretName: "studio-secrets"
     secretKey: "GCP_CREDS"
 
+  # -- Describes if service is run inside cluster or not. 
+  ## It is used during the initialization procedure or API clients which communicate with K8S API.
+  runsInCluster: true
+
+  rasaProLicense:
+    # -- Name of the ENV var used to pass license to Rasa.
+    envVarName: ""
+    # -- Set this to the name of the secret under which Rasa Pro License is stored.
+    secretName: "studio-secrets"
+    # -- Key in the K8s under which Rasa Pro License is stored.
+    secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
+
+  openAiKey:
+    # -- Name of the Env Var containing the OpenAI API key which will be used to pass the API key to the pod which runs Rasa training.
+    envVarName: ""
+    # -- Set this to the name of the secret under which OpenAI API key is stored.
+    secretName: "studio-secrets"
+    # -- Key in the K8s under which OpenAI API key is stored in K8s secret.
+    secretKey: "OPENAI_API_KEY_SECRET_KEY"
+
+  keycloak:
+    enabled: false
+    enableAuthorization: false
+    # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
+    serverUrl:
+    # - Name of the realm in which client for exists.
+    realmName:
+    # -- Client ID used to authenticate with Keycloak.
+    clientId: 
+    # -- Secret used to authenticate with Keycloak.
+    clientSecret:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_CLIENT_SECRET"
+  
+  kafka:
+    # -- URL of the Kafka broker to which to connect to.
+    brokerAddress: ""
+    # -- Security protocol used to connect to Kafka broker.
+    ## Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL
+    securityProtocol: "SASL_SSL"
+    # -- Kafka SASL mechanism used to connect to Kafka Broker.
+    ## Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+    saslMechanism: "SCRAM-SHA-256"
+    # -- Username used to connect to Kafka broker which has SASL authentication method enabled.
+    saslUsername: ""
+    # -- Password used to connect to Kafka broker which has SASL authentication method enabled.
+    saslPassword:
+      secretName: "studio-secrets"
+      secretKey: "KAFKA_SASL_PASSWORD"
+    # -- Location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
+    sslCaLocation: ""
+
   training:
     enabled: true
 
@@ -752,18 +804,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: ""
-        AUTHENTICATION_ENDPOINT_ENABLED:
-          value: "false"
-        ENABLE_AUTHORIZATION:
-          value: "false"
-        KAFKA_BROKER_ADDRESS:
-          value: ""
-        KAFKA_SECURITY_PROTOCOL:
-          value: ""
         TRAINING_RESULT_TOPIC:
           value: ""
         TRAINING_RESULT_CONSUMER_GROUP_ID:
@@ -784,16 +824,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        KEYCLOAK_SERVER_URL:
-          value: ""
-        KEYCLOAK_REALM:
-          value: ""
-        KEYCLOAK_CLIENT_ID:
-          value: ""
-        KEYCLOAK_CLIENT_SECRET:
-          secret:
-            name: "studio-secrets"
-            key: "KEYCLOAK_CLIENT_SECRET"
 
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
@@ -847,6 +877,9 @@ modelService:
 
       # -- Define service
       service:
+        # -- Specify service type
+        ## Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`.
+        type: NodePort
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -955,14 +988,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: ""
-        KAFKA_BROKER_ADDRESS:
-          value: ""
-        KAFKA_SECURITY_PROTOCOL:
-          value: ""
         KAFKA_JOB_TOPIC:
           value: ""
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
@@ -981,12 +1006,6 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
-        KUBERNETES_DATA_PVC:
-          value: ""
-        RASA_PRO_LICENSE_SECRET_NAME:
-          value: ""
-        RASA_PRO_LICENSE_SECRET_KEY:
-          value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1102,14 +1121,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: ""
-        KAFKA_BROKER_ADDRESS:
-          value: ""
-        KAFKA_SECURITY_PROTOCOL:
-          value: "PLAINTEXT"
         DEPLOYMENT_RESULT_TOPIC:
           value: ""
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
@@ -1118,16 +1129,12 @@ modelService:
           value: ""
         LOGGING_LEVEL:
           value: "INFO"
-        ENABLE_AUTHORIZATION:
-          value: "false"
         DEPLOYMENT_DATA_STORAGE:
-          value: "gcs"
+          value: ""
         GOOGLE_CLOUD_PROJECT:
           value: ""
         CLOUDSDK_COMPUTE_ZONE:
           value: ""
-        AUTHENTICATION_ENDPOINT_ENABLED:
-          value: "false"
         DEPLOYMENT_STORAGE_BUCKET:
           value: ""
         TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
@@ -1189,6 +1196,9 @@ modelService:
 
       # -- Define service
       service:
+        # -- Specify service type
+        ## Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`.
+        type: NodePort
         # -- Specify service port
         port: 8001
         # -- Specify service target port
@@ -1297,14 +1307,6 @@ modelService:
       #     key: my-secret-key
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
-        RUNS_IN_CLUSTER:
-          value: "true"
-        KUBERNETES_NAMESPACE:
-          value: ""
-        KAFKA_BROKER_ADDRESS:
-          value: ""
-        KAFKA_SECURITY_PROTOCOL:
-          value: ""
         DEPLOYMENT_JOB_KAFKA_TOPIC:
           value: ""
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
@@ -1325,12 +1327,6 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
-        KUBERNETES_DATA_PVC:
-          value: ""
-        RASA_PRO_LICENSE_SECRET_NAME:
-          value: ""
-        RASA_PRO_LICENSE_SECRET_KEY:
-          value: ""
         DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
           secret:
             name: "studio-secrets"
@@ -1383,6 +1379,26 @@ modelService:
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
+
+      rasaReadinessProbe:
+        # -- Initial delay after which readiness probe will be run on the container which is running Rasa deployment.
+        ## Readiness check assess if Rasa is ready to serve requests. 
+        initialDelaySeconds: 10
+        # -- Interval (in seconds) on which readiness check will be performed.
+        intervalInSeconds: 5
+        # -- Allowed number of failed readiness checks until Rasa container inside the pod is considered unreachable and unable to serve requests.
+        ## Total possible readiness check = initial delay + check interval x failure threshold
+        failureThreshold: 50
+
+      rasaStartupProbe:
+        # -- Initial delay after which startup probe will be run on the container which is running Rasa deployment.
+        ## Readiness check assess if Rasa application is ready.
+        initialDelaySeconds: 10
+        # -- Interval (in seconds) on which startup check will be performed.
+        intervalInSeconds: 5
+        # -- Allowed number of failed startup checks until Rasa app inside the container is considered not started.
+        ## Total possible startup check = initial delay + check interval x failure threshold
+        failureThreshold: 50
 
       # -- Specifies the resources limits and requests
       resources:

@@ -721,22 +721,19 @@ modelService:
   runsInCluster: true
 
   rasaProLicense:
-    # -- Name of the ENV var used to pass license to Rasa.
-    envVarName: ""
     # -- Set this to the name of the secret under which Rasa Pro License is stored.
     secretName: "studio-secrets"
     # -- Key in the K8s under which Rasa Pro License is stored.
     secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
 
   openAiKey:
-    # -- Name of the Env Var containing the OpenAI API key which will be used to pass the API key to the pod which runs Rasa training.
-    envVarName: ""
     # -- Set this to the name of the secret under which OpenAI API key is stored.
     secretName: "studio-secrets"
     # -- Key in the K8s under which OpenAI API key is stored in K8s secret.
     secretKey: "OPENAI_API_KEY_SECRET_KEY"
 
   keycloak:
+    # -- Enable or disable Keycloack
     enabled: false
     enableAuthorization: false
     # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
@@ -878,8 +875,8 @@ modelService:
       # -- Define service
       service:
         # -- Specify service type
-        ## Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`.
-        type: NodePort
+        ## Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`.
+        type: ClusterIP
         # -- Specify service port
         port: 8000
         # -- Specify service target port
@@ -1197,8 +1194,8 @@ modelService:
       # -- Define service
       service:
         # -- Specify service type
-        ## Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`.
-        type: NodePort
+        ## Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`.
+        type: ClusterIP
         # -- Specify service port
         port: 8001
         # -- Specify service target port

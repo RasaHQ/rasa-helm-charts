@@ -25,12 +25,10 @@ modelService:
   runsInCluster: true
 
   rasaProLicense:
-    envVarName:
     secretName: "studio-secrets"
     secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
 
   openAiKey:
-    envVarName:
     secretName: "studio-secrets"
     secretKey: "OPENAI_API_KEY_SECRET_KEY"
 

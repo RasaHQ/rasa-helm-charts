@@ -191,10 +191,9 @@ modelService:
 | modelService.keycloak.clientId | string | `""` | Client ID used to authenticate with Keycloak. |
 | modelService.keycloak.clientSecret | object | `{"secretKey":"KEYCLOAK_CLIENT_SECRET","secretName":"studio-secrets"}` | Secret used to authenticate with Keycloak. |
 | modelService.keycloak.enableAuthorization | bool | `false` |  |
-| modelService.keycloak.enabled | bool | `false` |  |
+| modelService.keycloak.enabled | bool | `false` | Enable or disable Keycloack |
 | modelService.keycloak.realmName | string | `""` |  |
 | modelService.keycloak.serverUrl | string | `""` | URL on which Keycloak server is available. If this variable is not set, authorization will be disabled. |
-| modelService.openAiKey.envVarName | string | `""` | Name of the Env Var containing the OpenAI API key which will be used to pass the API key to the pod which runs Rasa training. |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
@@ -207,7 +206,6 @@ modelService:
 | modelService.persistence.storageClassName | string | `""` | Storage Class name for PV |
 | modelService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
 | modelService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
-| modelService.rasaProLicense.envVarName | string | `""` | Name of the ENV var used to pass license to Rasa. |
 | modelService.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | Key in the K8s under which Rasa Pro License is stored. |
 | modelService.rasaProLicense.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which Rasa Pro License is stored. |
 | modelService.running.consumer.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
@@ -259,10 +257,10 @@ modelService:
 | modelService.running.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
 | modelService.running.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
 | modelService.running.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
-| modelService.running.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"NodePort"}` | Define service |
+| modelService.running.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"ClusterIP"}` | Define service |
 | modelService.running.orchestrator.service.port | int | `8001` | Specify service port |
 | modelService.running.orchestrator.service.targetPort | int | `8001` | Specify service target port |
-| modelService.running.orchestrator.service.type | string | `"NodePort"` | Specify service type # Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`. |
+| modelService.running.orchestrator.service.type | string | `"ClusterIP"` | Specify service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
 | modelService.running.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.running.orchestrator.volumeMounts | list | `[]` | Specifies additional volumes to mount |
 | modelService.running.orchestrator.volumes | list | `[]` | specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
@@ -314,10 +312,10 @@ modelService:
 | modelService.training.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
 | modelService.training.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
 | modelService.training.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
-| modelService.training.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"NodePort"}` | Define service |
+| modelService.training.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"ClusterIP"}` | Define service |
 | modelService.training.orchestrator.service.port | int | `8000` | Specify service port |
 | modelService.training.orchestrator.service.targetPort | int | `8000` | Specify service target port |
-| modelService.training.orchestrator.service.type | string | `"NodePort"` | Specify service type # Set this to `NodePort` if you are using ingress controller, in ALL other cases set it to `ClusterIP`. |
+| modelService.training.orchestrator.service.type | string | `"ClusterIP"` | Specify service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
 | modelService.training.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.training.orchestrator.volumeMounts | string | `nil` | Specifies additional volumes to mount |
 | modelService.training.orchestrator.volumes | string | `nil` | Specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |

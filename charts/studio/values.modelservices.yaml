@@ -95,6 +95,8 @@ modelService:
           value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
           value: "helm-training-job"
+        KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
+          value: "helm-training-status-update"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
@@ -261,7 +263,7 @@ modelService:
 
     consumer:
       # -- Specifies number of replicas
-      replicaCount: 5
+      replicaCount: 2
       # -- Define image settings
       image:
         # -- Specifies image repository
@@ -595,7 +597,7 @@ modelService:
 
     consumer:
       # -- Specifies number of replicas
-      replicaCount: 5
+      replicaCount: 2
       # -- Define image settings
       image:
         # -- Specifies image repository

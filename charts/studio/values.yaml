@@ -16,9 +16,12 @@ imagePullSecrets:
   []
   # - name: regcred
 
-# -- Specifies image repository
+# Disable this in case you only want to deploy MTS/MRS
+studioEnabled: true
+
+# -- Specifies image repository for Studio
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
-# -- Specifies image tag
+# -- Specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
 tag: "0.1.3"
 
@@ -705,6 +708,750 @@ keycloak:
   # -- Allow the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+# Model training and running service specific configuration
+modelService:
+  # -- GCP credentials for the service account
+  gcpCredentials:
+    secretName: "studio-secrets"
+    secretKey: "GCP_CREDS"
+
+  # -- Describes if service is run inside cluster or not.
+  ## It is used during the initialization procedure or API clients which communicate with K8S API.
+  runsInCluster: true
+
+  rasaProLicense:
+    # -- Set this to the name of the secret under which Rasa Pro License is stored.
+    secretName: "studio-secrets"
+    # -- Key in the K8s under which Rasa Pro License is stored.
+    secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
+
+  openAiKey:
+    # -- Set this to the name of the secret under which OpenAI API key is stored.
+    secretName: "studio-secrets"
+    # -- Key in the K8s under which OpenAI API key is stored in K8s secret.
+    secretKey: "OPENAI_API_KEY_SECRET_KEY"
+
+  keycloak:
+    # -- Enable or disable Keycloack
+    enabled: false
+    enableAuthorization: false
+    # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
+    serverUrl: ""
+    # - Name of the realm in which client for exists.
+    realmName: ""
+    # -- Client ID used to authenticate with Keycloak.
+    clientId: ""
+    # -- Secret used to authenticate with Keycloak.
+    clientSecret:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_CLIENT_SECRET"
+
+  kafka:
+    # -- URL of the Kafka broker to which to connect to.
+    brokerAddress: ""
+    # -- Security protocol used to connect to Kafka broker.
+    ## Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL
+    securityProtocol: "SASL_SSL"
+    # -- Kafka SASL mechanism used to connect to Kafka Broker.
+    ## Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
+    saslMechanism: "SCRAM-SHA-256"
+    # -- Username used to connect to Kafka broker which has SASL authentication method enabled.
+    saslUsername: ""
+    # -- Password used to connect to Kafka broker which has SASL authentication method enabled.
+    saslPassword:
+      secretName: "studio-secrets"
+      secretKey: "KAFKA_SASL_PASSWORD"
+    # -- Location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
+    sslCaLocation: ""
+
+  training:
+    enabled: true
+
+    # -- Define service account
+    serviceAccount:
+      # -- Specifies whether a service account should be created
+      create: true
+      # -- Annotations to add to the service account
+      annotations: {}
+      # -- The name of the service account to use.
+      ## If not set and create is true, a name is generated using the fullname template
+      name: ""
+
+    orchestrator:
+      # -- Specifies number of replicas
+      replicaCount: 1
+      # -- Define image settings
+      image:
+        # -- Specifies image repository
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"
+        # -- Specifies image name
+        name: "mts-orchestrator"
+        # -- Specifies image tag
+        tag: "1.1.1"
+        # -- Specifies image pull policy
+        pullPolicy: IfNotPresent
+
+      # -- Define environment variables for deployment
+      # Example: Specify the string value for variables
+      #   value: my-value
+      # Example: Specify the value for variables sourced from a Secret.
+      #   secret:
+      #     name: my-secret
+      #     key: my-secret-key
+      # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+      environmentVariables:
+        TRAINING_RESULT_TOPIC:
+          value: ""
+        TRAINING_RESULT_CONSUMER_GROUP_ID:
+          value: ""
+        TRAINING_JOB_TOPIC:
+          value: ""
+        GOOGLE_CLOUD_PROJECT:
+          value: ""
+        CLOUDSDK_COMPUTE_ZONE:
+          value: ""
+        THIRD_PARTY_STORAGE_BUCKET:
+          value: ""
+        TRAINING_STORAGE:
+          value: ""
+        TRAINING_STORAGE_BUCKET:
+          value: ""
+        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+
+
+      # -- envFrom is used to add environment variables from ConfigMap or Secret
+      envFrom:
+        []
+        # - configMapRef:
+        #     name: my-configmap
+
+      # -- Specify additional volumes
+      ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+      volumes:
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
+
+      # -- Specifies additional volumes to mount
+      volumeMounts:
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
+
+      # -- Allows to specify additional containers for the deployment
+      additionalContainers: []
+      #  - name: extra
+      #    image: "busybox"
+      #    command: ["bash", "-c"]
+
+      # -- Annotations to add to the pod
+      podAnnotations:
+        {}
+        # container.apparmor.security.beta.kubernetes.io/model-training-service-orchestrator: runtime/default
+
+      # -- Define pod security context
+      podSecurityContext:
+        enabled: true
+        # fsGroup: 2000
+
+      # -- Define security context that allows you to overwrite the pod-level security context
+      securityContext:
+        enabled: true
+        # privileged: false
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        # seccompProfile:
+        #   type: RuntimeDefault
+
+      # -- Define service
+      service:
+        # -- Specify service type
+        ## Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`.
+        type: ClusterIP
+        # -- Specify service port
+        port: 8000
+        # -- Specify service target port
+        targetPort: 8000
+
+      # -- Override default liveness probe settings
+      livenessProbe:
+        enabled: true
+        httpGet:
+          path: /
+          port: 8000
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Override default readiness probe settings
+      readinessProbe:
+        enabled: true
+        httpGet:
+          path: /
+          port: 8000
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Configure the ingress resource.
+      ## ref: http://kubernetes.io/docs/user-guide/ingress/
+      ingress:
+        # -- Specifies whether an ingress service should be created
+        enabled: false
+        # -- Specifies the ingress className to be used
+        className: ""
+        # -- Labels to add to the ingress
+        labels: {}
+        # -- Annotations to add to the ingress
+        annotations:
+          {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        # -- Specifies the hosts for this ingress
+        hosts:
+          - host: chart-example.local
+            paths:
+              - path: /
+                pathType: Prefix
+            extraPaths: []
+        # -- Spefices the TLS configuration for ingress
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+      # -- Specifies the resources limits and requests
+      resources:
+        {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+      # -- Allow the deployment to be scheduled on selected nodes
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+      nodeSelector: {}
+
+      # -- Tolerations for pod assignment
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      # -- Allow the deployment to schedule using affinity rules
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+    consumer:
+      # -- Specifies number of replicas
+      replicaCount: 1
+      # -- Define image settings
+      image:
+        # -- Specifies image repository
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"
+        # -- Specifies image name
+        name: "mts-job-consumer"
+        # -- Specifies image tag
+        tag: "1.1.1"
+        # -- Specifies image pull policy
+        pullPolicy: IfNotPresent
+
+      # -- Define environment variables for deployment
+      # Example: Specify the string value for variables
+      #   value: my-value
+      # Example: Specify the value for variables sourced from a Secret.
+      #   secret:
+      #     name: my-secret
+      #     key: my-secret-key
+      # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+      environmentVariables:
+        KAFKA_JOB_TOPIC:
+          value: ""
+        MODEL_TRAINING_KAFKA_CONSUMER_ID:
+          value: ""
+        KAFKA_RESULT_TOPIC:
+          value: ""
+        GOOGLE_CLOUD_PROJECT:
+          value: ""
+        CLOUDSDK_COMPUTE_ZONE:
+          value: ""
+        TRAINING_STORAGE:
+          value: ""
+        GCS_BUCKET_NAME:
+          value: ""
+        KUBERNETES_BASE_TRAINING_DATA_PATH:
+          value: "/home"
+        KUBERNETES_JOB_BOT_CONFIG_MOUNT:
+          value: "/app"
+
+      # -- envFrom is used to add environment variables from ConfigMap or Secret
+      envFrom:
+        []
+        # - configMapRef:
+        #     name: my-configmap
+
+      # -- volumes specify additional volumes
+      ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+      volumes:
+        []
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
+
+      # -- volumeMounts specifies additional volumes to mount
+      volumeMounts:
+        []
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
+
+      # -- additionalContainers allows to specify additional containers for the deployment
+      additionalContainers: []
+      #  - name: extra
+      #    image: "busybox"
+      #    command: ["bash", "-c"]
+
+      # -- Annotations to add to the pod
+      podAnnotations:
+        {}
+        # container.apparmor.security.beta.kubernetes.io/model-training-service-consumer: runtime/default
+
+      # -- Define pod security context
+      podSecurityContext:
+        enabled: true
+        # fsGroup: 2000
+
+      # -- Define security context that allows you to overwrite the pod-level security context
+      securityContext:
+        enabled: true
+        # privileged: false
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        # seccompProfile:
+        #   type: RuntimeDefault
+
+      # -- Specifies the resources limits and requests
+      resources:
+        {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+      # -- Allow the deployment to be scheduled on selected nodes
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+      nodeSelector: {}
+
+      # -- Tolerations for pod assignment
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      # -- Allow the deployment to schedule using affinity rules
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+  running:
+    enabled: true
+
+    # -- Define service account
+    serviceAccount:
+      # -- Specifies whether a service account should be created
+      create: true
+      # -- Annotations to add to the service account
+      annotations: {}
+      # -- The name of the service account to use.
+      ## If not set and create is true, a name is generated using the fullname template
+      name: ""
+
+    orchestrator:
+      # -- Specifies number of replicas
+      replicaCount: 1
+      # -- Define image settings
+      image:
+        # -- Specifies image repository
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"
+        # -- Specifies image name
+        name: "mrs-orchestrator"
+        # -- Specifies image tag
+        tag: "1.1.1"
+        # -- Specifies image pull policy
+        pullPolicy: IfNotPresent
+
+      # -- Define environment variables for deployment
+      # Example: Specify the string value for variables
+      #   value: my-value
+      # Example: Specify the value for variables sourced from a Secret.
+      #   secret:
+      #     name: my-secret
+      #     key: my-secret-key
+      # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+      environmentVariables:
+        DEPLOYMENT_RESULT_TOPIC:
+          value: ""
+        DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
+          value: ""
+        DEPLOYMENT_JOB_TOPIC:
+          value: ""
+        LOGGING_LEVEL:
+          value: "INFO"
+        DEPLOYMENT_DATA_STORAGE:
+          value: ""
+        GOOGLE_CLOUD_PROJECT:
+          value: ""
+        CLOUDSDK_COMPUTE_ZONE:
+          value: ""
+        DEPLOYMENT_STORAGE_BUCKET:
+          value: ""
+        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+
+      # -- envFrom is used to add environment variables from ConfigMap or Secret
+      envFrom: []
+        # - configMapRef:
+        #     name: my-configmap
+
+      # -- specify additional volumes
+      ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+      volumes: []
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
+
+      # -- Specifies additional volumes to mount
+      volumeMounts: []
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
+
+      # -- Allows to specify additional containers for the deployment
+      additionalContainers: []
+      #  - name: extra
+      #    image: "busybox"
+      #    command: ["bash", "-c"]
+
+      # -- Annotations to add to the pod
+      podAnnotations:
+        {}
+        # container.apparmor.security.beta.kubernetes.io/model-running-service-orchestrator: runtime/default
+
+      # -- Define pod security context
+      podSecurityContext:
+        enabled: true
+        # fsGroup: 2000
+
+      # -- Define security context that allows you to overwrite the pod-level security context
+      securityContext:
+        enabled: true
+        # privileged: false
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        # seccompProfile:
+        #   type: RuntimeDefault
+
+      # -- Define service
+      service:
+        # -- Specify service type
+        ## Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`.
+        type: ClusterIP
+        # -- Specify service port
+        port: 8001
+        # -- Specify service target port
+        targetPort: 8001
+
+      # -- Override default liveness probe settings
+      livenessProbe:
+        enabled: true
+        httpGet:
+          path: /
+          port: 8001
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Override default readiness probe settings
+      readinessProbe:
+        enabled: true
+        httpGet:
+          path: /
+          port: 8001
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Configure the ingress resource.
+      ## ref: http://kubernetes.io/docs/user-guide/ingress/
+      ingress:
+        # -- Specifies whether an ingress service should be created
+        enabled: false
+        # -- Specifies the ingress className to be used
+        className: ""
+        # -- Labels to add to the ingress
+        labels: {}
+        # -- Annotations to add to the ingress
+        annotations:
+          {}
+          # kubernetes.io/ingress.class: nginx
+          # kubernetes.io/tls-acme: "true"
+        # -- Specifies the hosts for this ingress
+        hosts:
+          - host: chart-example.local
+            paths:
+              - path: /
+                pathType: Prefix
+            extraPaths: []
+        # -- Spefices the TLS configuration for ingress
+        tls: []
+        #  - secretName: chart-example-tls
+        #    hosts:
+        #      - chart-example.local
+
+      # -- Specifies the resources limits and requests
+      resources:
+        {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+      # -- Allow the deployment to be scheduled on selected nodes
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+      nodeSelector: {}
+
+      # -- Tolerations for pod assignment
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      # -- Allow the deployment to schedule using affinity rules
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+    consumer:
+      # -- Specifies number of replicas
+      replicaCount: 1
+      # -- Define image settings
+      image:
+        # -- Specifies image repository
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"
+        # -- Specifies image name
+        name: "mrs-job-consumer"
+        # -- Specifies image tag
+        tag: "1.1.1"
+        # -- Specifies image pull policy
+        pullPolicy: IfNotPresent
+
+      # -- Define environment variables for deployment
+      # Example: Specify the string value for variables
+      #   value: my-value
+      # Example: Specify the value for variables sourced from a Secret.
+      #   secret:
+      #     name: my-secret
+      #     key: my-secret-key
+      # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+      environmentVariables:
+        DEPLOYMENT_JOB_KAFKA_TOPIC:
+          value: ""
+        MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
+          value: ""
+        KAFKA_DEPLOYMENT_RESULT_TOPIC:
+          value: ""
+        GOOGLE_CLOUD_PROJECT:
+          value: ""
+        CLOUDSDK_COMPUTE_ZONE:
+          value: ""
+        TRAINING_STORAGE:
+          value: ""
+        BOT_CONFIG_FETCHER_TYPE:
+          value: ""
+        GCS_BUCKET_NAME:
+          value: ""
+        KUBERNETES_BASE_BOT_DATA_PATH:
+          value: "/home"
+        KUBERNETES_JOB_BOT_CONFIG_MOUNT:
+          value: "/app"
+        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+          secret:
+            name: "studio-secrets"
+            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+
+      # -- envFrom is used to add environment variables from ConfigMap or Secret
+      envFrom: []
+        # - configMapRef:
+        #     name: my-configmap
+
+      # -- Specify additional volumes
+      ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+      volumes: []
+        # - hostPath:
+        #   path: <HOST_PATH>
+        #   name: <VOLUME_NAME>
+
+      # -- Specifies additional volumes to mount
+      volumeMounts: []
+        # - name: <VOLUME_NAME>
+        #   mountPath: <CONTAINER_PATH>
+        #   readOnly: true
+
+      # -- Allows to specify additional containers for the deployment
+      additionalContainers: []
+      #  - name: extra
+      #    image: "busybox"
+      #    command: ["bash", "-c"]
+
+      # -- Annotations to add to the pod
+      podAnnotations:
+        {}
+        # container.apparmor.security.beta.kubernetes.io/model-running-service-consumer: runtime/default
+
+      # -- Define pod security context
+      podSecurityContext:
+        enabled: true
+        # fsGroup: 2000
+
+      # -- Define security context that allows you to overwrite the pod-level security context
+      securityContext:
+        enabled: true
+        # privileged: false
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        # seccompProfile:
+        #   type: RuntimeDefault
+
+      rasaReadinessProbe:
+        # -- Initial delay after which readiness probe will be run on the container which is running Rasa deployment.
+        ## Readiness check assess if Rasa is ready to serve requests.
+        initialDelaySeconds: 10
+        # -- Interval (in seconds) on which readiness check will be performed.
+        intervalInSeconds: 5
+        # -- Allowed number of failed readiness checks until Rasa container inside the pod is considered unreachable and unable to serve requests.
+        ## Total possible readiness check = initial delay + check interval x failure threshold
+        failureThreshold: 50
+
+      rasaStartupProbe:
+        # -- Initial delay after which startup probe will be run on the container which is running Rasa deployment.
+        ## Readiness check assess if Rasa application is ready.
+        initialDelaySeconds: 10
+        # -- Interval (in seconds) on which startup check will be performed.
+        intervalInSeconds: 5
+        # -- Allowed number of failed startup checks until Rasa app inside the container is considered not started.
+        ## Total possible startup check = initial delay + check interval x failure threshold
+        failureThreshold: 50
+
+      # -- Specifies the resources limits and requests
+      resources:
+        {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+      # -- Allow the deployment to be scheduled on selected nodes
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+      ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+      nodeSelector: {}
+
+      # -- Tolerations for pod assignment
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+      tolerations: []
+
+      # -- Allow the deployment to schedule using affinity rules
+      ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+      affinity: {}
+
+  persistence:
+    # -- Should the PV and PVC be created
+    # It is good practice to create volumes once and then reuse them.
+    # So set this value to true only when you are deploying the service for the first time.
+    # If you are redeploying the service, set this value to false.
+    create: true
+    # -- Type of the volume that will be used to store the training data
+    # Valid values: local, nfs
+    type: local
+    # -- If you are deploying to AWS and using EFS for volume, set this value to true.
+    aws: true
+    # -- FileSystemId of the AWS EFS volume
+    efs_id: ""
+    # -- Storage Class name for PV
+    storageClassName: ""
+    # -- Storage Capacity for PV
+    storageCapacity: 1Gi
+    # -- Storage requests for PVC
+    storageRequests: 1Gi
+    # -- DNS name or IP address of the NFS server
+    # This value is used only when type is set to nfs
+    nfsServer: ""
+    # -- Directory from the host machine that will be mounted to the container for training data
+    # This value is used only when type is set to local
+    hostPath: ""
+    # -- Node on which the PV will be created
+    # This value is used only when type is set to local
+    localNodeName: ""
 
 # Network policy settings
 networkPolicy:

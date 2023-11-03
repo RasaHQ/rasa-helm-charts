@@ -1,3 +1,4 @@
+{{- if .Values.studioEnabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -58,3 +59,4 @@ spec:
                 name: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.name }}
                 key: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.key }}
           {{- end }}
+{{- end }}

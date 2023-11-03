@@ -1,0 +1,63 @@
+{{ if and .Values.modelService.running.enabled .Values.modelService.persistence.create -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: model-running-service-data-pv
+  labels:
+    name: model-running-service-data-pv
+spec:
+  capacity:
+    storage: {{ .Values.modelService.persistence.storageCapacity }}
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
+  {{- if .Values.modelService.persistence.aws }}
+  csi:
+    driver: efs.csi.aws.com
+    volumeHandle: {{ .Values.modelService.persistence.efs_id }}
+  {{- end }}
+  {{- if and (eq .Values.modelService.persistence.type "local") (not .Values.modelService.persistence.aws) }}
+  local:
+    path: {{ .Values.modelService.persistence.hostPath }}
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+          - key: kubernetes.io/hostname
+            operator: In
+            values:
+              - {{ .Values.modelService.persistence.localNodeName }}
+  {{- end }}
+  {{- if eq .Values.modelService.persistence.type "nfs" }}
+  nfs:
+    server: {{ .Values.modelService.persistence.nfsServer }}
+    path: "/"
+  {{- end }}
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: model-running-service-data-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.modelService.persistence.storageRequests }}
+  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
+  selector:
+    matchLabels:
+      name: model-running-service-data-pv
+---
+{{- if .Values.modelService.persistence.aws }}
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }}
+  namespace: {{ .Release.Namespace }}
+provisioner: efs.csi.aws.com 
+{{- end }}
+{{- end }}

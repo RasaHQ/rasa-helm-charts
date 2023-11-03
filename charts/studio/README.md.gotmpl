@@ -34,4 +34,42 @@ To pull chart contents for your own convenience:
 $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
 ```
 
+## General Configuration
+
+- **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
+
+> **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+### Studio
+
+To deploy Studio, set `studioEnabled: true`, `modelService.training.enabled: true`, and `modelService.running.enabled: true`. Configure image and image pull settings.
+
+```yaml
+studioEnabled: true
+# Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
+```
+
+### MTS/MRS only
+
+To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
+
+```yaml
+studioEnabled: false
+# Other settings...
+modelService:
+  training:
+    enabled: true
+    # Other settings...
+  running:
+    enabled: true
+    # Other settings...
+```
+
 {{ template "chart.valuesSection" . }}

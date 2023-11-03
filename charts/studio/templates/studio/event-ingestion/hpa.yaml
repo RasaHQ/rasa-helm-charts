@@ -1,4 +1,4 @@
-{{- if .Values.eventIngestion.autoscaling.enabled }}
+{{- if and .Values.studioEnabled .Values.eventIngestion.autoscaling.enabled }}
 apiVersion: autoscaling/v2beta1
 kind: HorizontalPodAutoscaler
 metadata:

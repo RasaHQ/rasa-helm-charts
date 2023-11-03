@@ -1,0 +1,110 @@
+{{- if .Values.modelService.training.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-training-service-consumer
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: model-training-service-consumer
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelService.training.consumer.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/component: model-training-service-consumer
+  template:
+    metadata:
+      {{- with .Values.modelService.training.consumer.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        app.kubernetes.io/component: model-training-service-consumer
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "modelTrainingService.serviceAccountName" . }}
+      {{- if .Values.modelService.training.consumer.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelService.training.consumer.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: model-training-service-consumer
+          {{- if .Values.modelService.training.consumer.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelService.training.consumer.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "modelTrainingService.consumer.image" . }}
+          imagePullPolicy: {{ .Values.modelService.training.consumer.image.pullPolicy }}
+          resources:
+            {{- toYaml .Values.modelService.training.consumer.resources | nindent 12 }}
+          volumeMounts:
+            - mountPath: /home
+              name: training-data
+          {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
+          {{- if .Values.modelService.training.consumer.volumeMounts }}
+            {{- toYaml .Values.modelService.training.consumer.volumeMounts | nindent 12 }}
+          {{- end }}
+          env:
+            {{- include "modelService.shared.env" . | nindent 12 }}
+            {{- include "modelServiceTraining.consumer.env" . | nindent 12 }}
+            - name: ORCHESTRATOR_HTTP_API_URL
+              value: "http://model-training-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/config/gcloud/credentials.json"
+            {{- range $key, $value := .Values.modelService.training.consumer.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.modelService.training.consumer.envFrom }}
+          envFrom:
+            {{- toYaml .Values.modelService.training.consumer.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.modelService.training.consumer.additionalContainers }}
+        {{- toYaml .Values.modelService.training.consumer.additionalContainers | nindent 8 }}
+      {{- end }}
+      volumes:
+        - name: training-data
+          persistentVolumeClaim:
+            claimName: model-training-service-data-pvc
+      {{- include "gcpCredentials.volume" . | nindent 8 -}}
+      {{- if .Values.modelService.training.consumer.volumes }}
+        {{- toYaml .Values.modelService.training.consumer.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.training.consumer.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.training.consumer.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.training.consumer.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
+{{- end }}

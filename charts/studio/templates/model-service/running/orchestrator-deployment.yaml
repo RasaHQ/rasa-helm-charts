@@ -1,0 +1,114 @@
+{{- if .Values.modelService.running.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: model-running-service-orchestrator
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: model-running-service
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelService.running.orchestrator.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "modelRunningService.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.modelService.running.orchestrator.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "modelRunningService.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "modelRunningService.serviceAccountName" . }}
+      {{- if .Values.modelService.running.orchestrator.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelService.running.orchestrator.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: model-running-service-orchestrator
+          {{- if .Values.modelService.running.orchestrator.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelService.running.orchestrator.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "modelRunningService.orchestrator.image" . }}
+          imagePullPolicy: {{ .Values.modelService.running.orchestrator.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.modelService.running.orchestrator.service.port }}
+              protocol: TCP
+          {{- if or .Values.modelService.running.orchestrator.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.modelService.running.orchestrator.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.modelService.running.orchestrator.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.modelService.running.orchestrator.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.modelService.running.orchestrator.resources | nindent 12 }}
+          volumeMounts:
+          {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
+          {{- if .Values.modelService.running.orchestrator.volumeMounts }}
+            {{- toYaml .Values.modelService.running.orchestrator.volumeMounts | nindent 12 }}
+          {{- end }}
+          env:
+            {{- include "modelService.shared.env" . | nindent 12 }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/config/gcloud/credentials.json"
+            {{- range $key, $value := .Values.modelService.running.orchestrator.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.modelService.running.orchestrator.envFrom }}
+          envFrom:
+            {{- toYaml .Values.modelService.running.orchestrator.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.modelService.running.orchestrator.additionalContainers }}
+        {{- toYaml .Values.modelService.running.orchestrator.additionalContainers | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- include "gcpCredentials.volume" . | nindent 8 -}}
+      {{- if .Values.modelService.running.orchestrator.volumes }}
+        {{- toYaml .Values.modelService.running.orchestrator.volumes | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.running.orchestrator.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.running.orchestrator.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.modelService.running.orchestrator.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}    
+{{- end }}

@@ -109,6 +109,20 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        PERSISTOR_BACKEND:
+          value: "postgres"
+        POSTGRES_HOST:
+          value: "model-service.cqcbki6hde4j.us-east-1.rds.amazonaws.com"
+        POSTGRES_PORT:
+          value: "5432"
+        POSTGRES_DATABASE:
+          value: "mode_service"
+        POSTGRES_USERNAME:
+          value: "postgres"
+        POSTGRES_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "MODEL_SERVICE_DB_PASSWORD"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -427,6 +441,20 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        PERSISTOR_BACKEND:
+          value: "postgres"
+        POSTGRES_HOST:
+          value: "model-service.cqcbki6hde4j.us-east-1.rds.amazonaws.com"
+        POSTGRES_PORT:
+          value: "5432"
+        POSTGRES_DATABASE:
+          value: "mode_service"
+        POSTGRES_USERNAME:
+          value: "postgres"
+        POSTGRES_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "MODEL_SERVICE_DB_PASSWORD"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:

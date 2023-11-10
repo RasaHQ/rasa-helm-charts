@@ -69,6 +69,8 @@ spec:
               value: "http://model-training-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
+            - name: KUBERNETES_DATA_PVC
+              value: "model-training-service-data-pvc-{{ .Release.Namespace }}"
             {{- range $key, $value := .Values.modelService.training.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
@@ -90,7 +92,7 @@ spec:
       volumes:
         - name: training-data
           persistentVolumeClaim:
-            claimName: model-training-service-data-pvc
+            claimName: model-training-service-data-pvc-{{ .Release.Namespace }}
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.training.consumer.volumes }}
         {{- toYaml .Values.modelService.training.consumer.volumes | nindent 8 }}

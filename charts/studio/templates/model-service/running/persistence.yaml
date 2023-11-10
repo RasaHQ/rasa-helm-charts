@@ -1,10 +1,11 @@
-{{ if and .Values.modelService.running.enabled .Values.modelService.persistence.create -}}
+{{- if .Values.modelService.running.enabled }}
+{{- if .Values.modelService.persistence.create }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: model-running-service-data-pv
+  name: model-running-service-data-pv-{{ .Release.Namespace }}
   labels:
-    name: model-running-service-data-pv
+    name: model-running-service-data-pv-{{ .Release.Namespace }}
 spec:
   capacity:
     storage: {{ .Values.modelService.persistence.storageCapacity }}
@@ -35,11 +36,12 @@ spec:
     server: {{ .Values.modelService.persistence.nfsServer }}
     path: "/"
   {{- end }}
+  {{- end }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: model-running-service-data-pvc
+  name: model-running-service-data-pvc-{{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -50,14 +52,6 @@ spec:
   storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
   selector:
     matchLabels:
-      name: model-running-service-data-pv
+      name: model-running-service-data-pv-{{ .Release.Namespace }}
 ---
-{{- if .Values.modelService.persistence.aws }}
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }}
-  namespace: {{ .Release.Namespace }}
-provisioner: efs.csi.aws.com 
-{{- end }}
 {{- end }}

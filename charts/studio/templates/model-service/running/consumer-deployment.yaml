@@ -69,6 +69,8 @@ spec:
               value: "http://model-running-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.running.orchestrator.service.port }}"
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
+            - name: KUBERNETES_DATA_PVC
+              value: "model-running-service-data-pvc-{{ .Release.Namespace }}"
             {{- range $key, $value := .Values.modelService.running.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
@@ -90,7 +92,7 @@ spec:
       volumes:
         - name: deployment-data
           persistentVolumeClaim:
-            claimName: model-running-service-data-pvc
+            claimName: model-running-service-data-pvc-{{ .Release.Namespace }}
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.running.consumer.volumes }}
         {{- toYaml .Values.modelService.running.consumer.volumes | nindent 8 }}

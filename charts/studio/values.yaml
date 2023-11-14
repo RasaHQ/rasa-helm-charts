@@ -1316,7 +1316,7 @@ modelService:
           value: ""
         TRAINING_STORAGE:
           value: ""
-        BOT_CONFIG_FETCHER_TYPE:
+        STORAGE_TYPE:
           value: ""
         GCS_BUCKET_NAME:
           value: ""

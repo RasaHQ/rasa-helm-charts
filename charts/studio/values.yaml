@@ -1126,7 +1126,7 @@ modelService:
           value: ""
         LOGGING_LEVEL:
           value: "INFO"
-        DEPLOYMENT_DATA_STORAGE:
+        STORAGE_TYPE:
           value: ""
         GOOGLE_CLOUD_PROJECT:
           value: ""
@@ -1316,7 +1316,7 @@ modelService:
           value: ""
         TRAINING_STORAGE:
           value: ""
-        BOT_CONFIG_FETCHER_TYPE:
+        STORAGE_TYPE:
           value: ""
         GCS_BUCKET_NAME:
           value: ""

@@ -425,7 +425,7 @@ modelService:
           value: "amal-deployment-job"
         LOGGING_LEVEL:
           value: "INFO"
-        DEPLOYMENT_DATA_STORAGE:
+        STORAGE_TYPE:
           value: "gcs"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
@@ -630,7 +630,7 @@ modelService:
           value: "us-central1"
         TRAINING_STORAGE:
           value: "gcs"
-        BOT_CONFIG_FETCHER_TYPE:
+        STORAGE_TYPE:
           value: "gcs"
         GCS_BUCKET_NAME:
           value: "studio_model_training_service"

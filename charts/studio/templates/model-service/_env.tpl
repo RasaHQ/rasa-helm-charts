@@ -36,6 +36,11 @@ Environment Variables shared between MTS and MRS
       key: {{ .kafka.saslPassword.secretKey }}
 - name: KAFKA_SSL_CA_LOCATION
   value: {{ .kafka.sslCaLocation | quote }}
+- name: RASA_PRO_LICENSE
+  valueFrom:
+    secretKeyRef:
+      name: {{ .rasaProLicense.secretName}}
+      key: {{ .rasaProLicense.secretKey}}
 {{- end }}
 {{- end -}}
 

@@ -74,7 +74,7 @@ modelService:
         # -- Specifies image name
         name: "model-training-orchestrator"
         # -- Specifies image tag
-        tag: "latest"
+        tag: "3.2.0dev1"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -90,11 +90,13 @@ modelService:
         AUTHENTICATION_ENDPOINT_ENABLED:
           value: "false"
         TRAINING_RESULT_TOPIC:
-          value: "helm-training-result"
+          value: "amal-training-result"
         TRAINING_RESULT_CONSUMER_GROUP_ID:
           value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
-          value: "helm-training-job"
+          value: "amal-training-job"
+        KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
+          value: "amal-training-status-update"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
@@ -116,7 +118,7 @@ modelService:
         POSTGRES_PORT:
           value: "5432"
         POSTGRES_DATABASE:
-          value: "mode_service"
+          value: "amal"
         POSTGRES_USERNAME:
           value: "postgres"
         POSTGRES_PASSWORD:
@@ -269,7 +271,7 @@ modelService:
         # -- Specifies image name
         name: "model-training-job-consumer"
         # -- Specifies image tag
-        tag: "latest"
+        tag: "3.2.0dev1"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -283,11 +285,11 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         KAFKA_JOB_TOPIC:
-          value: "helm-training-job"
+          value: "amal-training-job"
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
           value: "training-result-consumer-group"
         KAFKA_RESULT_TOPIC:
-          value: "helm-training-result"
+          value: "amal-training-result"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
@@ -402,7 +404,7 @@ modelService:
         # -- Specifies image name
         name: "model-running-orchestrator"
         # -- Specifies image tag
-        tag: "latest"
+        tag: "3.2.0dev1"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -416,11 +418,11 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         DEPLOYMENT_RESULT_TOPIC:
-          value: "helm-deployment-result"
+          value: "amal-deployment-result"
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
           value: "deployment-result-consumer-group"
         DEPLOYMENT_JOB_TOPIC:
-          value: "helm-deployment-job"
+          value: "amal-deployment-job"
         LOGGING_LEVEL:
           value: "INFO"
         DEPLOYMENT_DATA_STORAGE:
@@ -448,7 +450,7 @@ modelService:
         POSTGRES_PORT:
           value: "5432"
         POSTGRES_DATABASE:
-          value: "mode_service"
+          value: "amal"
         POSTGRES_USERNAME:
           value: "postgres"
         POSTGRES_PASSWORD:
@@ -603,7 +605,7 @@ modelService:
         # -- Specifies image name
         name: "model-running-job-consumer"
         # -- Specifies image tag
-        tag: "latest"
+        tag: "3.2.0dev1"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -617,11 +619,11 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         DEPLOYMENT_JOB_KAFKA_TOPIC:
-          value: "helm-deployment-job"
+          value: "amal-deployment-job"
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
           value: "deployment-result-consumer-group"
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
-          value: "helm-deployment-result"
+          value: "amal-deployment-result"
         GOOGLE_CLOUD_PROJECT:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:

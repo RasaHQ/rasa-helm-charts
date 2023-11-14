@@ -1126,7 +1126,7 @@ modelService:
           value: ""
         LOGGING_LEVEL:
           value: "INFO"
-        DEPLOYMENT_DATA_STORAGE:
+        STORAGE_TYPE:
           value: ""
         GOOGLE_CLOUD_PROJECT:
           value: ""

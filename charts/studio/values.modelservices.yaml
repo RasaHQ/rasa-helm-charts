@@ -101,7 +101,7 @@ modelService:
           value: "us-central1"
         THIRD_PARTY_STORAGE_BUCKET:
           value: "studio_model_training_service"
-        TRAINING_STORAGE:
+        STORAGE_TYPE:
           value: "gcs"
         TRAINING_STORAGE_BUCKET:
           value: "studio_model_training_service"
@@ -292,9 +292,9 @@ modelService:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
           value: "us-central1"
-        TRAINING_STORAGE:
+        STORAGE_TYPE:
           value: "gcs"
-        GCS_BUCKET_NAME:
+        BUCKET_NAME:
           value: "studio_model_training_service"
         KUBERNETES_BASE_TRAINING_DATA_PATH:
           value: "/home"
@@ -626,11 +626,9 @@ modelService:
           value: "playground-studio"
         CLOUDSDK_COMPUTE_ZONE:
           value: "us-central1"
-        TRAINING_STORAGE:
-          value: "gcs"
         STORAGE_TYPE:
           value: "gcs"
-        GCS_BUCKET_NAME:
+        BUCKET_NAME:
           value: "studio_model_training_service"
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"

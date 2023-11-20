@@ -330,6 +330,7 @@ rasaProServices:
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
 | rasaProServices.image.tag | string | `"3.1.1-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasaProServices.livenessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |

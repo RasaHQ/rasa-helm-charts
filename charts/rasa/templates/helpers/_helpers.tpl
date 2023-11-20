@@ -170,7 +170,7 @@ Return Duckling URL
 */}}
 {{- define "rasa.ducklingUrl" -}}
 {{- if and .Values.duckling.enabled (empty .Values.rasa.settings.ducklingHttpUrl) -}}
-{{- printf "%s://%s-duckling.%s.svc:%d" .Values.duckling.settings.scheme "duckling" .Release.Namespace (.Values.duckling.service.port | int) -}}
+{{- printf "%s://%s.%s.svc:%d" .Values.duckling.settings.scheme "duckling" .Release.Namespace (.Values.duckling.service.port | int) -}}
 {{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl))  -}}
 {{- print .Values.rasa.settings.ducklingHttpUrl -}}
 {{- end -}}

@@ -1231,7 +1231,7 @@ modelService:
       ## ref: http://kubernetes.io/docs/user-guide/ingress/
       ingress:
         # -- Specifies whether an ingress service should be created
-        enabled: false
+        enabled: true
         # -- Specifies the ingress className to be used
         className: ""
         # -- Labels to add to the ingress
@@ -1319,6 +1319,8 @@ modelService:
         STORAGE_TYPE:
           value: ""
         BUCKET_NAME:
+          value: ""
+        BASE_DOMAIN:
           value: ""
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"
@@ -1423,6 +1425,88 @@ modelService:
       # -- Allow the deployment to schedule using affinity rules
       ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
       affinity: {}
+
+    proxy:
+      # -- Specifies number of replicas
+      replicaCount: 1
+      # -- Define image settings
+      image: "nginx:alpine"
+      # -- Specifies image pull policy
+      pullPolicy: IfNotPresent
+      # TODO: Define how we want to name this or we want to hardcode it
+      botTalkSubPath: "/talk"
+
+      # -- Define service
+      service:
+        # -- Specify service type
+        type: ClusterIP
+        # -- Specify service port
+        port: 80
+        # -- Specify service target port
+        targetPort: 80
+
+      # -- Annotations to add to the pod
+      podAnnotations: {}
+        # container.apparmor.security.beta.kubernetes.io/nginx-reverse-proxy: runtime/default
+
+      # -- Define pod security context
+      podSecurityContext:
+        enabled: true
+        # fsGroup: 2000
+
+      # -- Define security context that allows you to overwrite the pod-level security context
+      securityContext:
+        enabled: true
+        # privileged: false
+        # allowPrivilegeEscalation: false
+        # capabilities:
+        #   drop:
+        #   - ALL
+        # readOnlyRootFilesystem: true
+        # runAsNonRoot: true
+        # runAsUser: 1000
+        # seccompProfile:
+        #   type: RuntimeDefault
+
+      # -- Override default liveness probe settings
+      livenessProbe:
+        enabled: true
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Override default readiness probe settings
+      readinessProbe:
+        enabled: true
+        httpGet:
+          path: /healthz
+          port: 80
+          scheme: HTTP
+        initialDelaySeconds: 15
+        periodSeconds: 15
+        successThreshold: 1
+        timeoutSeconds: 5
+        failureThreshold: 6
+
+      # -- Specifies the resources limits and requests
+      resources:
+        {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
 
   persistence:
     # -- Should the PV and PVC be created

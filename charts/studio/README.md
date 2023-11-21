@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.2.3](https://img.shields.io/badge/Version-0.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.2.3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.2.3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
 ```
 
 ## General Configuration
@@ -242,10 +242,10 @@ modelService:
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"` | Specifies image repository |
 | modelService.running.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
-| modelService.running.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
+| modelService.running.orchestrator.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
 | modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
 | modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
@@ -264,6 +264,20 @@ modelService:
 | modelService.running.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.running.orchestrator.volumeMounts | list | `[]` | Specifies additional volumes to mount |
 | modelService.running.orchestrator.volumes | list | `[]` | specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
+| modelService.running.proxy.image | string | `"nginx:alpine"` | Define image settings |
+| modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| modelService.running.proxy.podAnnotations | object | `{}` | Annotations to add to the pod |
+| modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| modelService.running.proxy.replicaCount | int | `1` | Specifies number of replicas |
+| modelService.running.proxy.resources | object | `{}` | Specifies the resources limits and requests |
+| modelService.running.proxy.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelService.running.proxy.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
+| modelService.running.proxy.service.port | int | `80` | Specify service port |
+| modelService.running.proxy.service.targetPort | int | `80` | Specify service target port |
+| modelService.running.proxy.service.type | string | `"ClusterIP"` | Specify service type |
 | modelService.running.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelService.running.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelService.running.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |

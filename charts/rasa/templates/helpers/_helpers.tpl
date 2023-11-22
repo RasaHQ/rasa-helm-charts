@@ -170,8 +170,19 @@ Return Duckling URL
 */}}
 {{- define "rasa.ducklingUrl" -}}
 {{- if and .Values.duckling.enabled (empty .Values.rasa.settings.ducklingHttpUrl) -}}
-{{- printf "%s://%s-duckling.%s.svc:%d" .Values.duckling.settings.scheme "duckling" .Release.Namespace (.Values.duckling.service.port | int) -}}
-{{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl))  -}}
+{{- printf "%s://%s.%s.svc:%d" .Values.duckling.settings.scheme "duckling" .Release.Namespace (.Values.duckling.service.port | int) -}}
+{{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl)) -}}
 {{- print .Values.rasa.settings.ducklingHttpUrl -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Check for image pull secrets for Rasa Pro Services
+*/}}
+{{- define "rasaProServices.imagePullSecrets" -}}
+{{- if empty .Values.rasaProServices.imagePullSecrets -}}
+{{- .Values.imagePullSecrets | toYaml | nindent 8 -}}
+{{- else -}}
+{{- .Values.rasaProServices.imagePullSecrets | toYaml | nindent 8 -}}
 {{- end -}}
 {{- end -}}

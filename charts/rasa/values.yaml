@@ -381,6 +381,11 @@ rasa:
 
 # Settings for Rasa Pro Services
 rasaProServices:
+  # -- imagePullSecrets is used for private repository pull secrets
+  ## If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority.
+  imagePullSecrets: []
+  # - name: regcred
+
   # -- rasaProServices.enabled enables Rasa Pro Services deployment
   enabled: true
   # -- rasaProServices.replicaCount specifies number of replicas
@@ -807,7 +812,7 @@ duckling:
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      port: 80
+      port: 8000
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15

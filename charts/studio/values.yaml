@@ -813,7 +813,7 @@ modelService:
           value: ""
         THIRD_PARTY_STORAGE_BUCKET:
           value: ""
-        TRAINING_STORAGE:
+        STORAGE_TYPE:
           value: ""
         TRAINING_STORAGE_BUCKET:
           value: ""
@@ -995,9 +995,9 @@ modelService:
           value: ""
         CLOUDSDK_COMPUTE_ZONE:
           value: ""
-        TRAINING_STORAGE:
+        STORAGE_TYPE:
           value: ""
-        GCS_BUCKET_NAME:
+        BUCKET_NAME:
           value: ""
         KUBERNETES_BASE_TRAINING_DATA_PATH:
           value: "/home"
@@ -1318,7 +1318,7 @@ modelService:
           value: ""
         STORAGE_TYPE:
           value: ""
-        GCS_BUCKET_NAME:
+        BUCKET_NAME:
           value: ""
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"

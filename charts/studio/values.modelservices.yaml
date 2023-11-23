@@ -74,7 +74,7 @@ modelService:
         # -- Specifies image name
         name: "model-training-orchestrator"
         # -- Specifies image tag
-        tag: "3.2.0dev1"
+        tag: "3.2.0dev2"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -223,7 +223,7 @@ modelService:
           kubernetes.io/ingress.class: "gce"
         # -- Specifies the hosts for this ingress
         hosts:
-          - host:
+          - host: mts.playground-studio.rasa-dev.io
             paths:
               - path: /
                 pathType: Prefix
@@ -271,7 +271,7 @@ modelService:
         # -- Specifies image name
         name: "model-training-job-consumer"
         # -- Specifies image tag
-        tag: "3.2.0dev1"
+        tag: "3.2.0dev2"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -295,6 +295,8 @@ modelService:
         CLOUDSDK_COMPUTE_ZONE:
           value: "us-central1"
         TRAINING_STORAGE:
+          value: "gcs"
+        STORAGE_TYPE:
           value: "gcs"
         GCS_BUCKET_NAME:
           value: "studio_model_training_service"
@@ -404,7 +406,7 @@ modelService:
         # -- Specifies image name
         name: "model-running-orchestrator"
         # -- Specifies image tag
-        tag: "3.2.0dev1"
+        tag: "3.2.0dev2"
         # -- Specifies image pull policy
         pullPolicy: Always
 
@@ -557,7 +559,7 @@ modelService:
           kubernetes.io/ingress.class: "gce"
         # -- Specifies the hosts for this ingress
         hosts:
-          - host:
+          - host: mrs.playground-studio.rasa-dev.io
             paths:
               - path: /
                 pathType: Prefix
@@ -605,7 +607,7 @@ modelService:
         # -- Specifies image name
         name: "model-running-job-consumer"
         # -- Specifies image tag
-        tag: "3.2.0dev1"
+        tag: "3.2.0dev2"
         # -- Specifies image pull policy
         pullPolicy: Always
 

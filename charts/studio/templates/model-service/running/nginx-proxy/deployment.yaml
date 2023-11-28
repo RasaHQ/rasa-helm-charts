@@ -1,0 +1,76 @@
+{{- if .Values.modelService.running.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-reverse-proxy
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.modelService.running.proxy.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "nginx.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.modelService.running.proxy.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "nginx.selectorLabels" . | nindent 8 }}
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.modelService.running.proxy.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.modelService.running.proxy.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: nginx-reverse-proxy
+          {{- if .Values.modelService.running.proxy.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.modelService.running.proxy.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ .Values.modelService.running.proxy.image }}
+          imagePullPolicy: {{ .Values.modelService.running.proxy.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.modelService.running.proxy.service.port }}
+              protocol: TCP
+          {{- if or .Values.modelService.running.proxy.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.modelService.running.proxy.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.modelService.running.proxy.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.modelService.running.proxy.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.modelService.running.proxy.resources | nindent 12 }}
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: nginx-configmap   
+{{- end }}

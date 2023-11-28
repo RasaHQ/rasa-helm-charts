@@ -72,6 +72,14 @@ app.kubernetes.io/component: model-running-service-orchestrator
 {{- end }}
 
 {{/*
+Selector labels for Nginx Proxy
+*/}}
+{{- define "nginx.selectorLabels" -}}
+app.kubernetes.io/name: nginx-reverse-proxy
+app.kubernetes.io/instance: {{ .Release.Name }}
+{{- end }}
+
+{{/*
 Create the name of the backend service account to use for Backend
 */}}
 {{- define "studio.backend.serviceAccountName" -}}

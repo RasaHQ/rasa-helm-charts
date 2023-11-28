@@ -49,7 +49,7 @@ Environment Variables for Model Service Training Consumer
 {{- define "modelServiceTraining.consumer.env" -}}
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
-  value: "model-training-service-data-pvc"
+  value: "model-training-service-data-pvc-{{ $.Release.Namespace }}"
 - name: RASA_PRO_LICENSE_SECRET_NAME
   value: {{ .rasaProLicense.secretName | quote }}
 - name: RASA_PRO_LICENSE_SECRET_KEY
@@ -67,7 +67,7 @@ Environment Variables for Model Service Running Consumer
 {{- define "modelServiceRunning.consumer.env" -}}
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
-  value: "model-running-service-data-pvc"
+  value: "model-running-service-data-pvc-{{ $.Release.Namespace }}"
 - name: RASA_PRO_LICENSE_SECRET_NAME
   value: {{ .rasaProLicense.secretName | quote }}
 - name: RASA_PRO_LICENSE_SECRET_KEY

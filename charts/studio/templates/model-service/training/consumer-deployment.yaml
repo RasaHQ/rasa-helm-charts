@@ -90,7 +90,7 @@ spec:
       volumes:
         - name: training-data
           persistentVolumeClaim:
-            claimName: model-training-service-data-pvc
+            claimName: model-training-service-data-pvc-{{ .Release.Namespace }}
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.training.consumer.volumes }}
         {{- toYaml .Values.modelService.training.consumer.volumes | nindent 8 }}

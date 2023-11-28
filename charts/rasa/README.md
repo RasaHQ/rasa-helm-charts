@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 0.1.24](https://img.shields.io/badge/Version-0.1.24-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.24
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.0
 ```
 
 ## Uninstalling the Chart
@@ -32,25 +32,24 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 0.1.24
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.0
 ```
 
 ## General Configuration
 
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
-- **rasaProLicence**: If you are using Plus or Pro, please provide `secretName` and `secretKey` of your licence.
+- **rasaProLicense**: If you are using Plus or Pro, please provide `secretName` and `secretKey` of your license.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
 ### Rasa Pro
 
-To deploy Rasa Pro Services, set `rasa.enabled: true`, `rasa.plus.enabled: true`, and `rasaProServices.enabled: true`. Configure image and image pull settings.
+To deploy Rasa Pro Services, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: true
+  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: true
@@ -58,13 +57,12 @@ rasaProServices:
 
 ### Rasa Plus only
 
-Deploy Rasa Plus by setting `rasa.enabled: true` and `rasa.plus.enabled: true`. Adjust image and image pull settings accordingly.
+Deploy Rasa Plus by setting `rasa.enabled: true`. Adjust image and image pull settings accordingly.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: true
+  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: false
@@ -72,13 +70,12 @@ rasaProServices:
 
 ### Rasa Open Source
 
-Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.plus.enabled: false`. Adjust image and image pull settings as needed.
+Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.deployOSS: true`. Adjust image and image pull settings as needed.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: false
+  deployOSS: true
   # Other settings...
 rasaProServices:
   enabled: false
@@ -236,11 +233,12 @@ rasaProServices:
 | rasa.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | rasa.command overrides the default command for the container |
-| rasa.enabled | bool | `true` | rasa.enabled enables Rasa OSS/Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
+| rasa.deployOSS | bool | `false` | rasa.deployOSS enables Rasa Open Source deployment |
+| rasa.enabled | bool | `true` | rasa.enabled enables Rasa Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.6.4-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.7.0-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -257,7 +255,6 @@ rasaProServices:
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasa.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasa.nodeSelector | object | `{}` | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| rasa.plus.enabled | bool | `true` | plus.enabled enabled Rasa Plus drop-in replacement of Rasa |
 | rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
 | rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
@@ -308,7 +305,7 @@ rasaProServices:
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |
 | rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| rasaProLicence | object | `{"secretKey":"rasaProLicence","secretName":"rasa-secrets"}` | rasaProLicence is license key for Rasa Pro Services. |
+| rasaProLicense | object | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` | rasaProLicense is license key for Rasa Pro Services. |
 | rasaProServices.additionalContainers | list | `[]` | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
 | rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |

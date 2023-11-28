@@ -37,19 +37,18 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ templat
 ## General Configuration
 
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
-- **rasaProLicence**: If you are using Plus or Pro, please provide `secretName` and `secretKey` of your licence.
+- **rasaProLicense**: If you are using Plus or Pro, please provide `secretName` and `secretKey` of your license.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
 ### Rasa Pro
 
-To deploy Rasa Pro Services, set `rasa.enabled: true`, `rasa.plus.enabled: true`, and `rasaProServices.enabled: true`. Configure image and image pull settings.
+To deploy Rasa Pro Services, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: true
+  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: true
@@ -57,13 +56,12 @@ rasaProServices:
 
 ### Rasa Plus only
 
-Deploy Rasa Plus by setting `rasa.enabled: true` and `rasa.plus.enabled: true`. Adjust image and image pull settings accordingly.
+Deploy Rasa Plus by setting `rasa.enabled: true`. Adjust image and image pull settings accordingly.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: true
+  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: false
@@ -71,13 +69,12 @@ rasaProServices:
 
 ### Rasa Open Source
 
-Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.plus.enabled: false`. Adjust image and image pull settings as needed.
+Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.deployOSS: true`. Adjust image and image pull settings as needed.
 
 ```yaml
 rasa:
   enabled: true
-  plus:
-    enabled: false
+  deployOSS: true
   # Other settings...
 rasaProServices:
   enabled: false

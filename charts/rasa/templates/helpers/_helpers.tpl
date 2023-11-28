@@ -152,16 +152,6 @@ Determine rasa server to run with arguments
 - run
 {{- if .Values.rasa.settings.enableApi }}
 - --enable-api
-{{- if and .Values.rasa.settings.jwtSecret.secretName .Values.rasa.settings.jwtSecret.secretKey }}
-- --jwt-method
-- {{ .Values.rasa.settings.jwtMethod }}
-- --jwt-secret
-- "$(JWT_SECRET)"
-{{- end }}
-{{- if and .Values.rasa.settings.authToken.secretName .Values.rasa.settings.authToken.secretKey }}
-- --auth-token
-- "$(RASA_TOKEN)"
-{{- end }}
 {{- end -}}
 {{- end -}}
 

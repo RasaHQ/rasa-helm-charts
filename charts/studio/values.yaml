@@ -263,7 +263,8 @@ webClient:
     name: ""
 
   # -- Annotations to add to the pod
-  podAnnotations: {}
+  podAnnotations:
+    {}
     # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
   # -- Define pod security context
@@ -822,7 +823,6 @@ modelService:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
-
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
         []
@@ -1144,19 +1144,22 @@ modelService:
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
-      envFrom: []
+      envFrom:
+        []
         # - configMapRef:
         #     name: my-configmap
 
       # -- specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-      volumes: []
+      volumes:
+        []
         # - hostPath:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
 
       # -- Specifies additional volumes to mount
-      volumeMounts: []
+      volumeMounts:
+        []
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
@@ -1332,19 +1335,22 @@ modelService:
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
-      envFrom: []
+      envFrom:
+        []
         # - configMapRef:
         #     name: my-configmap
 
       # -- Specify additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-      volumes: []
+      volumes:
+        []
         # - hostPath:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
 
       # -- Specifies additional volumes to mount
-      volumeMounts: []
+      volumeMounts:
+        []
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
@@ -1430,7 +1436,7 @@ modelService:
       # -- Specifies number of replicas
       replicaCount: 1
       # -- Define image settings
-      image: "nginx:alpine"
+      image: "nginx:1.25-alpine"
       # -- Specifies image pull policy
       pullPolicy: IfNotPresent
       # TODO: Define how we want to name this or we want to hardcode it
@@ -1446,7 +1452,8 @@ modelService:
         targetPort: 80
 
       # -- Annotations to add to the pod
-      podAnnotations: {}
+      podAnnotations:
+        {}
         # container.apparmor.security.beta.kubernetes.io/nginx-reverse-proxy: runtime/default
 
       # -- Define pod security context

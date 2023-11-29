@@ -7,6 +7,10 @@ Chart usage can be found:
 - [Rasa Studio](https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md)
 - [Rasa Pro](https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/README.md)
 
+## License
+
+By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available at [Rasa EULA](https://rasa.com/eula). Please review the EULA carefully before proceeding.
+
 ## TL;DR
 
 ```bash

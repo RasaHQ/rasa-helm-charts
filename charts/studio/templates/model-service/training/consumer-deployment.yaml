@@ -67,8 +67,8 @@ spec:
             {{- include "modelServiceTraining.consumer.env" . | nindent 12 }}
             - name: ORCHESTRATOR_HTTP_API_URL
               value: "http://model-training-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: "/config/gcloud/credentials.json"
+            # - name: GOOGLE_APPLICATION_CREDENTIALS
+            #   value: "/config/gcloud/credentials.json"
             {{- range $key, $value := .Values.modelService.training.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

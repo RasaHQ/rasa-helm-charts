@@ -72,6 +72,8 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
+            - name: KEYCLOAK_URL
+              value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
             {{- range $key, $value := .Values.backend.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

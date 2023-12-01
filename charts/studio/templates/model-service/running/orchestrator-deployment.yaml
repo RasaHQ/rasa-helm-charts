@@ -74,8 +74,8 @@ spec:
           {{- end }}
           env:
             {{- include "modelService.shared.env" . | nindent 12 }}
-            - name: GOOGLE_APPLICATION_CREDENTIALS
-              value: "/config/gcloud/credentials.json"
+            # - name: GOOGLE_APPLICATION_CREDENTIALS
+            #   value: "/config/gcloud/credentials.json"
             {{- range $key, $value := .Values.modelService.running.orchestrator.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

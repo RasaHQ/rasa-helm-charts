@@ -9,17 +9,6 @@ Environment Variables shared between MTS and MRS
   value: {{ .runsInCluster | quote }}
 - name: ENABLE_AUTHORIZATION
   value: {{ .keycloak.enableAuthorization | quote }}
-- name: KEYCLOAK_SERVER_URL
-  value: {{ .keycloak.serverUrl | quote }}
-- name: KEYCLOAK_REALM_NAME
-  value: {{ .keycloak.realmName | quote }}
-- name: KEYCLOAK_CLIENT_ID
-  value: {{ .keycloak.clientId | quote }}
-- name: KEYCLOAK_CLIENT_SECRET
-  valueFrom:
-    secretKeyRef:
-      name: {{ .keycloak.clientSecret.secretName }}
-      key: {{ .keycloak.clientSecret.secretKey }}
 - name: KAFKA_BROKER_ADDRESS
   value: {{ .kafka.brokerAddress | quote }}
 - name: KAFKA_SECURITY_PROTOCOL

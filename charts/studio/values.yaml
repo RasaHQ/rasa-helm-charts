@@ -49,8 +49,6 @@ backend:
       secret:
         name: "studio-secrets"
         key: "DATABASE_URL"
-    KEYCLOAK_URL:
-      value: ""
     KEYCLOAK_REALM:
       value: "rasa-local-dev"
     KEYCLOAK_API_CLIENT_ID:
@@ -714,8 +712,8 @@ keycloak:
 modelService:
   # -- GCP credentials for the service account
   gcpCredentials:
-    secretName: "studio-secrets"
-    secretKey: "GCP_CREDS"
+    secretName: ""
+    secretKey: ""
 
   # -- Describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
@@ -738,15 +736,15 @@ modelService:
     enabled: false
     enableAuthorization: false
     # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
-    serverUrl: ""
-    # - Name of the realm in which client for exists.
-    realmName: ""
-    # -- Client ID used to authenticate with Keycloak.
-    clientId: ""
-    # -- Secret used to authenticate with Keycloak.
-    clientSecret:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_CLIENT_SECRET"
+    # serverUrl: ""
+    # # - Name of the realm in which client for exists.
+    # realmName: ""
+    # # -- Client ID used to authenticate with Keycloak.
+    # clientId: ""
+    # # -- Secret used to authenticate with Keycloak.
+    # clientSecret:
+    #   secretName: ""
+    #   secretKey: ""
 
   kafka:
     # -- URL of the Kafka broker to which to connect to.
@@ -808,20 +806,20 @@ modelService:
           value: ""
         TRAINING_JOB_TOPIC:
           value: ""
-        GOOGLE_CLOUD_PROJECT:
-          value: ""
-        CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+        # GOOGLE_CLOUD_PROJECT:
+        #   value: ""
+        # CLOUDSDK_COMPUTE_ZONE:
+        #   value: ""
         THIRD_PARTY_STORAGE_BUCKET:
           value: ""
         STORAGE_TYPE:
           value: ""
         TRAINING_STORAGE_BUCKET:
           value: ""
-        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-          secret:
-            name: "studio-secrets"
-            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1134,14 +1132,14 @@ modelService:
           value: ""
         DEPLOYMENT_STORAGE_BUCKET:
           value: ""
-        TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-          secret:
-            name: "studio-secrets"
-            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-          secret:
-            name: "studio-secrets"
-            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        # DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1329,10 +1327,10 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
-        DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-          secret:
-            name: "studio-secrets"
-            key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        # DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:

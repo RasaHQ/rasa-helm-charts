@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
 ```
 
 ## General Configuration
@@ -85,7 +85,7 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
 | backend.image.name | string | `"studio-backend"` | Specifies image repository |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -181,19 +181,15 @@ modelService:
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.gcpCredentials | object | `{"secretKey":"GCP_CREDS","secretName":"studio-secrets"}` | GCP credentials for the service account |
+| modelService.gcpCredentials | object | `{"secretKey":"","secretName":""}` | GCP credentials for the service account |
 | modelService.kafka.brokerAddress | string | `""` | URL of the Kafka broker to which to connect to. |
 | modelService.kafka.saslMechanism | string | `"SCRAM-SHA-256"` | Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512 |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | Password used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.saslUsername | string | `""` | Username used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.securityProtocol | string | `"SASL_SSL"` | Security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | Location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.keycloak.clientId | string | `""` | Client ID used to authenticate with Keycloak. |
-| modelService.keycloak.clientSecret | object | `{"secretKey":"KEYCLOAK_CLIENT_SECRET","secretName":"studio-secrets"}` | Secret used to authenticate with Keycloak. |
 | modelService.keycloak.enableAuthorization | bool | `false` |  |
 | modelService.keycloak.enabled | bool | `false` | Enable or disable Keycloack |
-| modelService.keycloak.realmName | string | `""` |  |
-| modelService.keycloak.serverUrl | string | `""` | URL on which Keycloak server is available. If this variable is not set, authorization will be disabled. |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
@@ -211,7 +207,7 @@ modelService:
 | modelService.running.consumer.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.running.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.running.consumer.image | object | `{"name":"mrs-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/","tag":"1.1.1"}` | Define image settings |
 | modelService.running.consumer.image.name | string | `"mrs-job-consumer"` | Specifies image name |
 | modelService.running.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -236,7 +232,7 @@ modelService:
 | modelService.running.orchestrator.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.running.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_TOPIC":{"value":""},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":""},"DEPLOYMENT_RESULT_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_BUCKET":{"value":""},"DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}},"GOOGLE_CLOUD_PROJECT":{"value":""},"LOGGING_LEVEL":{"value":"INFO"},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_TOPIC":{"value":""},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":""},"DEPLOYMENT_RESULT_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_BUCKET":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"LOGGING_LEVEL":{"value":"INFO"},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.running.orchestrator.image | object | `{"name":"mrs-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/","tag":"1.1.1"}` | Define image settings |
 | modelService.running.orchestrator.image.name | string | `"mrs-orchestrator"` | Specifies image name |
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -305,7 +301,7 @@ modelService:
 | modelService.training.orchestrator.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.training.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"STORAGE_TYPE":{"value":""},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.training.orchestrator.environmentVariables | object | `{"STORAGE_TYPE":{"value":""},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.training.orchestrator.image | object | `{"name":"mts-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/","tag":"1.1.1"}` | Define image settings |
 | modelService.training.orchestrator.image.name | string | `"mts-orchestrator"` | Specifies image name |
 | modelService.training.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |

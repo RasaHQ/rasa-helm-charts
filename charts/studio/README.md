@@ -181,7 +181,7 @@ modelService:
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.gcpCredentials | object | `{"secretKey":"","secretName":""}` | GCP credentials for the service account |
+| modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account |
 | modelService.kafka.brokerAddress | string | `""` | URL of the Kafka broker to which to connect to. |
 | modelService.kafka.saslMechanism | string | `"SCRAM-SHA-256"` | Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512 |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | Password used to connect to Kafka broker which has SASL authentication method enabled. |

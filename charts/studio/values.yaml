@@ -51,7 +51,7 @@ backend:
         name: "studio-secrets"
         key: "DATABASE_URL"
     KEYCLOAK_REALM:
-      value: "rasa-local-dev"
+      value: "rasa-studio"
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
     # -- We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
@@ -253,8 +253,8 @@ webClient:
     API_ENDPOINT: ""
     # -- This is your load_balancer or host_name URL to which you plan to deploy Studio with /auth suffixed. For example http://rasa-studio.dev.io/auth
     KEYCLOAK_URL: ""
-    KEYCLOAK_REALM: "rasa-local-dev"
-    KEYCLOAK_CLIENT_ID: "studio-local"
+    KEYCLOAK_REALM: "rasa-studio"
+    KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
   # -- webClient.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:

@@ -208,11 +208,11 @@ modelService:
 | modelService.running.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.consumer.image | object | `{"name":"mrs-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/","tag":"1.1.1"}` | Define image settings |
-| modelService.running.consumer.image.name | string | `"mrs-job-consumer"` | Specifies image name |
+| modelService.running.consumer.image | object | `{"name":"model-running-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.running.consumer.image.name | string | `"model-running-job-consumer"` | Specifies image name |
 | modelService.running.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"` | Specifies image repository |
-| modelService.running.consumer.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.running.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.running.consumer.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.running.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
 | modelService.running.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -233,18 +233,17 @@ modelService:
 | modelService.running.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.running.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_TOPIC":{"value":""},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":""},"DEPLOYMENT_RESULT_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_BUCKET":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"LOGGING_LEVEL":{"value":"INFO"},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.orchestrator.image | object | `{"name":"mrs-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/","tag":"1.1.1"}` | Define image settings |
-| modelService.running.orchestrator.image.name | string | `"mrs-orchestrator"` | Specifies image name |
+| modelService.running.orchestrator.image | object | `{"name":"model-running-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.running.orchestrator.image.name | string | `"model-running-orchestrator"` | Specifies image name |
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"` | Specifies image repository |
-| modelService.running.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.running.orchestrator.image.tag | string | `"3.2.2"` | Specifies image tag |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"host":"chart-example.local"}],"labels":{}}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
 | modelService.running.orchestrator.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| modelService.running.orchestrator.ingress.hosts | list | `[{"host":"chart-example.local"}]` | Specifies the hosts for this ingress |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
-| modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
@@ -283,11 +282,11 @@ modelService:
 | modelService.training.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.training.consumer.environmentVariables | object | `{"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_JOB_TOPIC":{"value":""},"KAFKA_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.consumer.image | object | `{"name":"mts-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/","tag":"1.1.1"}` | Define image settings |
-| modelService.training.consumer.image.name | string | `"mts-job-consumer"` | Specifies image name |
+| modelService.training.consumer.image | object | `{"name":"model-training-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services","tag":"3.2.2"}` | Define image settings |
+| modelService.training.consumer.image.name | string | `"model-training-job-consumer"` | Specifies image name |
 | modelService.training.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"` | Specifies image repository |
-| modelService.training.consumer.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.training.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services"` | Specifies image repository |
+| modelService.training.consumer.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.training.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.training.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
 | modelService.training.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -302,11 +301,11 @@ modelService:
 | modelService.training.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.training.orchestrator.environmentVariables | object | `{"STORAGE_TYPE":{"value":""},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.orchestrator.image | object | `{"name":"mts-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/","tag":"1.1.1"}` | Define image settings |
-| modelService.training.orchestrator.image.name | string | `"mts-orchestrator"` | Specifies image name |
+| modelService.training.orchestrator.image | object | `{"name":"model-training-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.training.orchestrator.image.name | string | `"model-training-orchestrator"` | Specifies image name |
 | modelService.training.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"` | Specifies image repository |
-| modelService.training.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.training.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.training.orchestrator.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.training.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.training.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | modelService.training.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |

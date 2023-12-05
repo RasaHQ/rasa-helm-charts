@@ -783,11 +783,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
-        name: "mts-orchestrator"
+        name: "model-training-orchestrator"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -966,11 +966,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services"
         # -- Specifies image name
-        name: "mts-job-consumer"
+        name: "model-training-job-consumer"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -1099,11 +1099,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
-        name: "mrs-orchestrator"
+        name: "model-running-orchestrator"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -1245,12 +1245,12 @@ modelService:
         # -- Specifies the hosts for this ingress
         hosts:
           - host: chart-example.local
-            paths:
-              - path: /
-                pathType: Prefix
-            extraPaths: []
+            # paths:
+            #   - path: /
+            #     pathType: Prefix
+            # extraPaths: []
         # -- Spefices the TLS configuration for ingress
-        tls: []
+        # tls: []
         #  - secretName: chart-example-tls
         #    hosts:
         #      - chart-example.local
@@ -1288,11 +1288,11 @@ modelService:
       # -- Define image settings
       image:
         # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"
+        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
-        name: "mrs-job-consumer"
+        name: "model-running-job-consumer"
         # -- Specifies image tag
-        tag: "1.1.1"
+        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 

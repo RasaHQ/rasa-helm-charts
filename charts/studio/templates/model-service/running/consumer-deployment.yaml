@@ -67,8 +67,10 @@ spec:
             {{- include "modelServiceRunning.consumer.env" . | nindent 12 }}
             - name: ORCHESTRATOR_HTTP_API_URL
               value: "http://model-running-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.running.orchestrator.service.port }}"
-            # - name: GOOGLE_APPLICATION_CREDENTIALS
-            #   value: "/config/gcloud/credentials.json"
+            {{- if .Values.modelService.gcpCredentials.secretName }}
+            - name: GOOGLE_APPLICATION_CREDENTIALS
+              value: "/config/gcloud/credentials.json"
+            {{- end }}
             {{- range $key, $value := .Values.modelService.running.consumer.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

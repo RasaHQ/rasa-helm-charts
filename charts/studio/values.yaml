@@ -710,10 +710,10 @@ keycloak:
 
 # Model training and running service specific configuration
 modelService:
-  # -- GCP credentials for the service account
+  # -- GCP credentials for the service account. The secretKey is the base64 encoded service account JSON.
   gcpCredentials:
-    secretName: ""
-    secretKey: ""
+    secretName:
+    secretKey:
 
   # -- Describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
@@ -730,21 +730,6 @@ modelService:
     secretName: "studio-secrets"
     # -- Key in the K8s under which OpenAI API key is stored in K8s secret.
     secretKey: "OPENAI_API_KEY_SECRET_KEY"
-
-  keycloak:
-    # -- Enable or disable Keycloack
-    enabled: false
-    enableAuthorization: false
-    # -- URL on which Keycloak server is available. If this variable is not set, authorization will be disabled.
-    # serverUrl: ""
-    # # - Name of the realm in which client for exists.
-    # realmName: ""
-    # # -- Client ID used to authenticate with Keycloak.
-    # clientId: ""
-    # # -- Secret used to authenticate with Keycloak.
-    # clientSecret:
-    #   secretName: ""
-    #   secretKey: ""
 
   kafka:
     # -- URL of the Kafka broker to which to connect to.
@@ -801,21 +786,50 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         TRAINING_RESULT_TOPIC:
-          value: ""
+          value: "training-result"
         TRAINING_RESULT_CONSUMER_GROUP_ID:
-          value: ""
+          value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
+          value: "training-job"
+        KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
+          value: "training-status-update"
+        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
+        STORAGE_TYPE:
           value: ""
+        # -- Name of the storage bucket
+        TRAINING_STORAGE_BUCKET:
+          value: ""
+        PERSISTOR_BACKEND:
+          value: "postgres"
+        POSTGRES_HOST:
+          value: ""
+        POSTGRES_PORT:
+          value: ""
+        POSTGRES_DATABASE:
+          value: ""
+        POSTGRES_USERNAME:
+          value: ""
+        POSTGRES_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "MODEL_SERVICE_DB_PASSWORD"
+        # -- Needed if STORAGE_TYPE is set to aws_s3
+        # AWS_ACCESS_KEY_ID:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_ACCESS_KEY_ID"
+        # AWS_SECRET_ACCESS_KEY:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_SECRET_ACCESS_KEY"
+        # REGION_NAME:
+        #   value: ""
+        # -- Needed if GCP is used
         # GOOGLE_CLOUD_PROJECT:
         #   value: ""
         # CLOUDSDK_COMPUTE_ZONE:
         #   value: ""
-        THIRD_PARTY_STORAGE_BUCKET:
-          value: ""
-        STORAGE_TYPE:
-          value: ""
-        TRAINING_STORAGE_BUCKET:
-          value: ""
+        # -- Needed if STORAGE_TYPE is set to gcs
         # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
         #   secret:
         #     name: "studio-secrets"
@@ -984,11 +998,11 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         KAFKA_JOB_TOPIC:
-          value: ""
+          value: "training-job"
         MODEL_TRAINING_KAFKA_CONSUMER_ID:
-          value: ""
+          value: "training-result-consumer-group"
         KAFKA_RESULT_TOPIC:
-          value: ""
+          value: "training-result"
         GOOGLE_CLOUD_PROJECT:
           value: ""
         CLOUDSDK_COMPUTE_ZONE:
@@ -1001,6 +1015,26 @@ modelService:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
           value: "/app"
+        # -- Amount of CPU and Memory to allocate to the container for model training
+        RASA_REQUESTS_CPU:
+          value: "1000m"
+        RASA_REQUESTS_MEMORY:
+          value: "1Gi"
+        RASA_LIMITS_CPU:
+          value: "1000m"
+        RASA_LIMITS_MEMORY:
+          value: "1Gi"
+        # -- Needed if STORAGE_TYPE is set to aws_s3
+        # AWS_ACCESS_KEY_ID:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_ACCESS_KEY_ID"
+        # AWS_SECRET_ACCESS_KEY:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_SECRET_ACCESS_KEY"
+        # REGION_NAME:
+        #   value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1117,21 +1151,44 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         DEPLOYMENT_RESULT_TOPIC:
-          value: ""
+          value: "deployment-result"
         DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
-          value: ""
+          value: "deployment-result-consumer-group"
         DEPLOYMENT_JOB_TOPIC:
-          value: ""
-        LOGGING_LEVEL:
-          value: "INFO"
+          value: "deployment-job"
         STORAGE_TYPE:
           value: ""
-        GOOGLE_CLOUD_PROJECT:
-          value: ""
-        CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+        # GOOGLE_CLOUD_PROJECT:
+        #   value: ""
+        # CLOUDSDK_COMPUTE_ZONE:
+        #   value: ""
         DEPLOYMENT_STORAGE_BUCKET:
           value: ""
+        PERSISTOR_BACKEND:
+          value: "postgres"
+        POSTGRES_HOST:
+          value: ""
+        POSTGRES_PORT:
+          value: ""
+        POSTGRES_DATABASE:
+          value: ""
+        POSTGRES_USERNAME:
+          value: ""
+        POSTGRES_PASSWORD:
+          secret:
+            name: "studio-secrets"
+            key: "MODEL_SERVICE_DB_PASSWORD"
+        # -- Needed if STORAGE_TYPE is set to aws_s3
+        # AWS_ACCESS_KEY_ID:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_ACCESS_KEY_ID"
+        # AWS_SECRET_ACCESS_KEY:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_SECRET_ACCESS_KEY"
+        # REGION_NAME:
+        #   value: ""
         # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
         #   secret:
         #     name: "studio-secrets"
@@ -1306,23 +1363,24 @@ modelService:
       # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
       environmentVariables:
         DEPLOYMENT_JOB_KAFKA_TOPIC:
-          value: ""
+          value: "deployment-job"
         MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
-          value: ""
+          value: "deployment-result-consumer-group"
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
-          value: ""
-        GOOGLE_CLOUD_PROJECT:
-          value: ""
-        CLOUDSDK_COMPUTE_ZONE:
-          value: ""
-        TRAINING_STORAGE:
-          value: ""
+          value: "deployment-result"
+        # GOOGLE_CLOUD_PROJECT:
+        #   value: ""
+        # CLOUDSDK_COMPUTE_ZONE:
+        #   value: ""
         STORAGE_TYPE:
           value: ""
         BUCKET_NAME:
           value: ""
+        # -- Domain name of the deployment. Example: "http://my-domain.com"
         BASE_DOMAIN:
           value: ""
+        BOT_TALK_SUB_PATH:
+          value: "talk"
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
@@ -1331,6 +1389,26 @@ modelService:
         #   secret:
         #     name: "studio-secrets"
         #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        # -- Amount of CPU and Memory to allocate to the container for model training
+        RASA_REQUESTS_CPU:
+          value: "1000m"
+        RASA_REQUESTS_MEMORY:
+          value: "1Gi"
+        RASA_LIMITS_CPU:
+          value: "1000m"
+        RASA_LIMITS_MEMORY:
+          value: "1Gi"
+        # -- Needed if STORAGE_TYPE is set to aws_s3
+        # AWS_ACCESS_KEY_ID:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_ACCESS_KEY_ID"
+        # AWS_SECRET_ACCESS_KEY:
+        #   secret:
+        #     name: "studio-secrets"
+        #     key: "AWS_SECRET_ACCESS_KEY"
+        # REGION_NAME:
+        #   value: ""
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1515,18 +1593,15 @@ modelService:
 
   persistence:
     # -- Should the PV and PVC be created
-    # It is good practice to create volumes once and then reuse them.
-    # So set this value to true only when you are deploying the service for the first time.
-    # If you are redeploying the service, set this value to false.
     create: true
     # -- Type of the volume that will be used to store the training data
-    # Valid values: local, nfs
+    # Valid values: local, nfs. Leave this empty if you are using AWS EFS.
     type: local
     # -- If you are deploying to AWS and using EFS for volume, set this value to true.
     aws: true
-    # -- FileSystemId of the AWS EFS volume
+    # -- FileSystemId::MountPoint of the AWS EFS volume.
     efs_id: ""
-    # -- Storage Class name for PV
+    # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS.
     storageClassName: ""
     # -- Storage Capacity for PV
     storageCapacity: 1Gi

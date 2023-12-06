@@ -1003,10 +1003,10 @@ modelService:
           value: "training-result-consumer-group"
         KAFKA_RESULT_TOPIC:
           value: "training-result"
-        GOOGLE_CLOUD_PROJECT:
-          value: ""
-        CLOUDSDK_COMPUTE_ZONE:
-          value: ""
+        # GOOGLE_CLOUD_PROJECT:
+        #   value: ""
+        # CLOUDSDK_COMPUTE_ZONE:
+        #   value: ""
         STORAGE_TYPE:
           value: ""
         BUCKET_NAME:

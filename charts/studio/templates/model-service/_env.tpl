@@ -8,7 +8,7 @@ Environment Variables shared between MTS and MRS
 - name: RUNS_IN_CLUSTER
   value: {{ .runsInCluster | quote }}
 - name: AUTHENTICATION_ENDPOINT_ENABLED
-  value: {{ default "false" .keycloak.enableAuthorization | quote }}
+  value: "false"
 - name: KAFKA_BROKER_ADDRESS
   value: {{ .kafka.brokerAddress | quote }}
 - name: KAFKA_SECURITY_PROTOCOL

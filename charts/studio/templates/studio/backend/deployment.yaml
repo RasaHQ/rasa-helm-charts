@@ -72,7 +72,26 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
+            - name: KEYCLOAK_URL
+              value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
+            - name: MODEL_TRAINING_MOCK_ENABLED
+              value: "false"
+            - name: MODEL_RUNNING_MOCK_ENABLED
+              value: "false"
+            - name: MTS_API_URL
+              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
+              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
+              {{- else }}
+              value: "http://model-training-service.{{ .Release.Namespace }}:8000"
+              {{- end }}
+            - name: MRS_API_URL
+              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
+              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
+              {{- else }}
+              value: "http://model-running-service.{{ .Release.Namespace }}:8001"
+              {{- end }}
             {{- range $key, $value := .Values.backend.environmentVariables }}
+            {{- if and (not (eq $key "MODEL_TRAINING_MOCK_ENABLED")) (not (eq $key "MTS_API_URL")) (not (eq $key "MRS_API_URL")) }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -82,6 +101,7 @@ spec:
                   name: {{ $value.secret.name }}
                   key: {{ $value.secret.key }}
               {{- end }}
+            {{- end }}
             {{- end }}
           {{- if .Values.backend.envFrom }}
           envFrom:

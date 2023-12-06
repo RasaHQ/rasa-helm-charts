@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
 ```
 
 ## General Configuration
@@ -85,7 +85,13 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"KEYCLOAK_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_ADMIN_USERNAME":{"value":"kcadmin"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"WEB_CLIENT_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public |
+| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":""}` | The complete registry URL of the RASA Pro docker image used for training |
+| backend.environmentVariables.KEYCLOAK_ADMIN_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}` | The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak. |
+| backend.environmentVariables.KEYCLOAK_API_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}}` | We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
+| backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
+| backend.environmentVariables.WEB_CLIENT_URL | object | `{"value":""}` | The host of the web application. |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
 | backend.image.name | string | `"studio-backend"` | Specifies image repository |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -93,7 +99,7 @@ modelService:
 | backend.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | backend.ingress.className | string | `""` | Specifies the ingress className to be used |
 | backend.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
-| backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| backend.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | backend.ingress.labels | object | `{}` | Labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -131,6 +137,20 @@ modelService:
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | eventIngestion.envFrom | list | `[]` | eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret |
 | eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":""},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":""},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| eventIngestion.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public. This should be same as the one defined for backend. |
+| eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | `{"value":""}` | Kafka broker address |
+| eventIngestion.environmentVariables.KAFKA_CA_FILE | object | `{"value":""}` | Path to the CA file |
+| eventIngestion.environmentVariables.KAFKA_CERT_FILE | object | `{"value":""}` | Path to the client certificate file |
+| eventIngestion.environmentVariables.KAFKA_CLIENT_ID | object | `{"value":"kafka-python-rasa"}` | Kafka internal client id. Please do not change this value. |
+| eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL | object | `{"value":""}` | Set to true if you want to use SSL with custom certs |
+| eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC | object | `{"value":""}` | Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own. |
+| eventIngestion.environmentVariables.KAFKA_ENABLE_SSL | object | `{"value":""}` | Set to true if you want to use SSL |
+| eventIngestion.environmentVariables.KAFKA_GROUP_ID | object | `{"value":""}` | This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic. |
+| eventIngestion.environmentVariables.KAFKA_KEY_FILE | object | `{"value":""}` | Path to the client key file |
+| eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED | object | `{"value":""}` | Defaults to true, the server certificate is verified against the list of supplied CA |
+| eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM | object | `{"value":""}` | Supported values are plain, scram-sha-256 or scram-sha-512. You can leave it empty if you are not using SASL. |
+| eventIngestion.environmentVariables.KAFKA_TOPIC | object | `{"value":""}` | Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own. |
+| eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | `{"value":""}` | Instructs the application to allow untrusted certificates. Set this to 0 if using untrusted certificates for Kafka. |
 | eventIngestion.image | object | `{"name":"studio-event-ingestion","pullPolicy":"IfNotPresent"}` | Define image settings |
 | eventIngestion.image.name | string | `"studio-event-ingestion"` | Specifies image repository |
 | eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -154,7 +174,12 @@ modelService:
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
-| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":""},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":""},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
+| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":"true"},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":"edge"},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":"kcadmin"},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
+| keycloak.environmentVariables.KC_DB_PASSWORD | object | `{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}}` | Keycloak database password |
+| keycloak.environmentVariables.KC_DB_URL | object | `{"value":""}` | Database URL for storing user and RBAC data used by Keycloak. The connection string should be of the format jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}. Please note that if you are using pgbouncer in your database cluster the transaction pool mode is not compatible with Keycloak. Instead, use the session mode. |
+| keycloak.environmentVariables.KC_DB_USERNAME | object | `{"value":""}` | Keycloak database username |
+| keycloak.environmentVariables.KEYCLOAK_ADMIN | object | `{"value":"kcadmin"}` | Admin user name to for Keycloak admin interface. This is the user that you can use to create/modify users for Studio |
+| keycloak.environmentVariables.KEYCLOAK_ADMIN_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}` | The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak. |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | Specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -162,7 +187,7 @@ modelService:
 | keycloak.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | keycloak.ingress.className | string | `""` | Specifies the ingress className to be used |
 | keycloak.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
-| keycloak.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| keycloak.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/auth","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | keycloak.ingress.labels | object | `{}` | Labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | keycloak.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -181,42 +206,44 @@ modelService:
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.gcpCredentials | object | `{"secretKey":"GCP_CREDS","secretName":"studio-secrets"}` | GCP credentials for the service account |
+| modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage. |
 | modelService.kafka.brokerAddress | string | `""` | URL of the Kafka broker to which to connect to. |
 | modelService.kafka.saslMechanism | string | `"SCRAM-SHA-256"` | Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512 |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | Password used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.saslUsername | string | `""` | Username used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.securityProtocol | string | `"SASL_SSL"` | Security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | Location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.keycloak.clientId | string | `""` | Client ID used to authenticate with Keycloak. |
-| modelService.keycloak.clientSecret | object | `{"secretKey":"KEYCLOAK_CLIENT_SECRET","secretName":"studio-secrets"}` | Secret used to authenticate with Keycloak. |
-| modelService.keycloak.enableAuthorization | bool | `false` |  |
-| modelService.keycloak.enabled | bool | `false` | Enable or disable Keycloack |
-| modelService.keycloak.realmName | string | `""` |  |
-| modelService.keycloak.serverUrl | string | `""` | URL on which Keycloak server is available. If this variable is not set, authorization will be disabled. |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
-| modelService.persistence.create | bool | `true` | Should the PV and PVC be created It is good practice to create volumes once and then reuse them. So set this value to true only when you are deploying the service for the first time. If you are redeploying the service, set this value to false. |
-| modelService.persistence.efs_id | string | `""` | FileSystemId of the AWS EFS volume |
-| modelService.persistence.hostPath | string | `""` | Directory from the host machine that will be mounted to the container for training data This value is used only when type is set to local |
+| modelService.persistence.create | bool | `true` | Should the PV and PVC be created |
+| modelService.persistence.efs_id | string | `""` | FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd" |
+| modelService.persistence.hostPath | string | `""` | Directory from the host machine that will be mounted to the container for training data. This value is used only when type is set to local |
 | modelService.persistence.localNodeName | string | `""` | Node on which the PV will be created This value is used only when type is set to local |
-| modelService.persistence.nfsServer | string | `""` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
+| modelService.persistence.nfsServer | string | `""` | DNS name or IP address of the NFS server. This value is used only when type is set to nfs |
 | modelService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelService.persistence.storageClassName | string | `""` | Storage Class name for PV |
+| modelService.persistence.storageClassName | string | `""` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server. |
 | modelService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
-| modelService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs |
+| modelService.persistence.type | string | `""` | Type of the volume that will be used to store the training data Valid values: local, nfs. Leave this empty if you are using AWS EFS. |
 | modelService.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | Key in the K8s under which Rasa Pro License is stored. |
 | modelService.rasaProLicense.secretName | string | `"studio-secrets"` | Set this to the name of the secret under which Rasa Pro License is stored. |
 | modelService.running.consumer.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.running.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.consumer.image | object | `{"name":"mrs-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/","tag":"1.1.1"}` | Define image settings |
-| modelService.running.consumer.image.name | string | `"mrs-job-consumer"` | Specifies image name |
+| modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BOT_TALK_SUB_PATH":{"value":"talk"},"BUCKET_NAME":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.consumer.environmentVariables.BASE_DOMAIN | object | `{"value":""}` | Domain name of the deployment which is mapped to ingress resource. Example: "http://my-domain.com" |
+| modelService.running.consumer.environmentVariables.BUCKET_NAME | object | `{"value":""}` | Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for TRAINING_STORAGE_BUCKET variable |
+| modelService.running.consumer.environmentVariables.DEPLOYMENT_JOB_KAFKA_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.running.consumer.environmentVariables.KAFKA_DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.running.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
+| modelService.running.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.running.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.running.consumer.environmentVariables.STORAGE_TYPE | object | `{"value":""}` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
+| modelService.running.consumer.image | object | `{"name":"model-running-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.running.consumer.image.name | string | `"model-running-job-consumer"` | Specifies image name |
 | modelService.running.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-job-consumer/"` | Specifies image repository |
-| modelService.running.consumer.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.running.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.running.consumer.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.running.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
 | modelService.running.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -236,19 +263,28 @@ modelService:
 | modelService.running.orchestrator.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.running.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"DEPLOYMENT_JOB_TOPIC":{"value":""},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":""},"DEPLOYMENT_RESULT_TOPIC":{"value":""},"DEPLOYMENT_STORAGE_BUCKET":{"value":""},"DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}},"GOOGLE_CLOUD_PROJECT":{"value":""},"LOGGING_LEVEL":{"value":"INFO"},"STORAGE_TYPE":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.orchestrator.image | object | `{"name":"mrs-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/","tag":"1.1.1"}` | Define image settings |
-| modelService.running.orchestrator.image.name | string | `"mrs-orchestrator"` | Specifies image name |
+| modelService.running.orchestrator.environmentVariables | object | `{"DEPLOYMENT_JOB_TOPIC":{"value":"deployment-job"},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":"deployment-result-consumer-group"},"DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"DEPLOYMENT_STORAGE_BUCKET":{"value":""},"PERSISTOR_BACKEND":{"value":"postgres"},"POSTGRES_DATABASE":{"value":""},"POSTGRES_HOST":{"value":""},"POSTGRES_PASSWORD":{"secret":{"key":"MODEL_SERVICE_DB_PASSWORD","name":"studio-secrets"}},"POSTGRES_PORT":{"value":""},"POSTGRES_USERNAME":{"value":""},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.orchestrator.environmentVariables.DEPLOYMENT_JOB_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.running.orchestrator.environmentVariables.DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.running.orchestrator.environmentVariables.DEPLOYMENT_STORAGE_BUCKET | object | `{"value":""}` | Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for BUCKET_NAME variable |
+| modelService.running.orchestrator.environmentVariables.PERSISTOR_BACKEND | object | `{"value":"postgres"}` | Studio supports only postgres as a database backend |
+| modelService.running.orchestrator.environmentVariables.POSTGRES_DATABASE | object | `{"value":""}` | The name of the database. This should be different from the one used for "backend" and "eventIngestion" pods. Please make sure to pre-create this database. |
+| modelService.running.orchestrator.environmentVariables.POSTGRES_HOST | object | `{"value":""}` | The URL of the database host |
+| modelService.running.orchestrator.environmentVariables.POSTGRES_PASSWORD | object | `{"secret":{"key":"MODEL_SERVICE_DB_PASSWORD","name":"studio-secrets"}}` | The password of the database user |
+| modelService.running.orchestrator.environmentVariables.POSTGRES_PORT | object | `{"value":""}` | The port of the database host |
+| modelService.running.orchestrator.environmentVariables.POSTGRES_USERNAME | object | `{"value":""}` | The username of the database user |
+| modelService.running.orchestrator.environmentVariables.STORAGE_TYPE | object | `{"value":""}` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
+| modelService.running.orchestrator.image | object | `{"name":"model-running-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.running.orchestrator.image.name | string | `"model-running-orchestrator"` | Specifies image name |
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mrs-orchestrator/"` | Specifies image repository |
-| modelService.running.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.running.orchestrator.image.tag | string | `"3.2.2"` | Specifies image tag |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"host":"chart-example.local"}],"labels":{}}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
 | modelService.running.orchestrator.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| modelService.running.orchestrator.ingress.hosts | list | `[{"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
-| modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
@@ -286,12 +322,20 @@ modelService:
 | modelService.training.consumer.additionalContainers | list | `[]` | additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.consumer.environmentVariables | object | `{"BUCKET_NAME":{"value":""},"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"KAFKA_JOB_TOPIC":{"value":""},"KAFKA_RESULT_TOPIC":{"value":""},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":""},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.consumer.image | object | `{"name":"mts-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/","tag":"1.1.1"}` | Define image settings |
-| modelService.training.consumer.image.name | string | `"mts-job-consumer"` | Specifies image name |
+| modelService.training.consumer.environmentVariables | object | `{"BUCKET_NAME":{"value":""},"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.training.consumer.environmentVariables.BUCKET_NAME | object | `{"value":""}` | Name of the storage bucket. Make sure to pre-create this bucket.  This bucket is the same one used for TRAINING_STORAGE_BUCKET variable |
+| modelService.training.consumer.environmentVariables.KAFKA_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.consumer.environmentVariables.KAFKA_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.RASA_REQUESTS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.STORAGE_TYPE | object | `{"value":""}` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
+| modelService.training.consumer.image | object | `{"name":"model-training-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services","tag":"3.2.2"}` | Define image settings |
+| modelService.training.consumer.image.name | string | `"model-training-job-consumer"` | Specifies image name |
 | modelService.training.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-job-consumer/"` | Specifies image repository |
-| modelService.training.consumer.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.training.consumer.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services"` | Specifies image repository |
+| modelService.training.consumer.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.training.consumer.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.training.consumer.podAnnotations | object | `{}` | Annotations to add to the pod |
 | modelService.training.consumer.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
@@ -305,16 +349,27 @@ modelService:
 | modelService.training.orchestrator.additionalContainers | list | `[]` | Allows to specify additional containers for the deployment |
 | modelService.training.orchestrator.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.orchestrator.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.orchestrator.environmentVariables | object | `{"CLOUDSDK_COMPUTE_ZONE":{"value":""},"GOOGLE_CLOUD_PROJECT":{"value":""},"STORAGE_TYPE":{"value":""},"THIRD_PARTY_STORAGE_BUCKET":{"value":""},"TRAINING_JOB_TOPIC":{"value":""},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":""},"TRAINING_RESULT_TOPIC":{"value":""},"TRAINING_STORAGE_BUCKET":{"value":""},"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT":{"secret":{"key":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","name":"studio-secrets"}}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.orchestrator.image | object | `{"name":"mts-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/","tag":"1.1.1"}` | Define image settings |
-| modelService.training.orchestrator.image.name | string | `"mts-orchestrator"` | Specifies image name |
+| modelService.training.orchestrator.environmentVariables | object | `{"KAFKA_TRAINING_STATUS_UPDATE_TOPIC":{"value":"training-status-update"},"PERSISTOR_BACKEND":{"value":"postgres"},"POSTGRES_DATABASE":{"value":""},"POSTGRES_HOST":{"value":""},"POSTGRES_PASSWORD":{"secret":{"key":"MODEL_SERVICE_DB_PASSWORD","name":"studio-secrets"}},"POSTGRES_PORT":{"value":""},"POSTGRES_USERNAME":{"value":""},"STORAGE_TYPE":{"value":""},"TRAINING_JOB_TOPIC":{"value":"training-job"},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":"training-result-consumer-group"},"TRAINING_RESULT_TOPIC":{"value":"training-result"},"TRAINING_STORAGE_BUCKET":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.training.orchestrator.environmentVariables.KAFKA_TRAINING_STATUS_UPDATE_TOPIC | object | `{"value":"training-status-update"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.orchestrator.environmentVariables.PERSISTOR_BACKEND | object | `{"value":"postgres"}` | Studio supports only postgres as a database backend |
+| modelService.training.orchestrator.environmentVariables.POSTGRES_DATABASE | object | `{"value":""}` | The name of the database. This should be different from the one used for "backend" and "eventIngestion" pods. Please make sure to pre-create this database. |
+| modelService.training.orchestrator.environmentVariables.POSTGRES_HOST | object | `{"value":""}` | The URL of the database host |
+| modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD | object | `{"secret":{"key":"MODEL_SERVICE_DB_PASSWORD","name":"studio-secrets"}}` | The password of the database user |
+| modelService.training.orchestrator.environmentVariables.POSTGRES_PORT | object | `{"value":""}` | The port of the database host |
+| modelService.training.orchestrator.environmentVariables.POSTGRES_USERNAME | object | `{"value":""}` | The username of the database user |
+| modelService.training.orchestrator.environmentVariables.STORAGE_TYPE | object | `{"value":""}` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
+| modelService.training.orchestrator.environmentVariables.TRAINING_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.orchestrator.environmentVariables.TRAINING_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.orchestrator.environmentVariables.TRAINING_STORAGE_BUCKET | object | `{"value":""}` | Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for BUCKET_NAME variable |
+| modelService.training.orchestrator.image | object | `{"name":"model-training-orchestrator","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
+| modelService.training.orchestrator.image.name | string | `"model-training-orchestrator"` | Specifies image name |
 | modelService.training.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/mts-orchestrator/"` | Specifies image repository |
-| modelService.training.orchestrator.image.tag | string | `"1.1.1"` | Specifies image tag |
+| modelService.training.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
+| modelService.training.orchestrator.image.tag | string | `"3.2.2"` | Specifies image tag |
 | modelService.training.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.training.orchestrator.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | modelService.training.orchestrator.ingress.className | string | `""` | Specifies the ingress className to be used |
-| modelService.training.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created |
+| modelService.training.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created. An ingress for this service is not mandatory. |
 | modelService.training.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
 | modelService.training.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
 | modelService.training.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
@@ -344,11 +399,12 @@ modelService:
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository for Studio |
 | studioEnabled | bool | `true` |  |
-| tag | string | `"0.1.3"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.0.1"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |
 | webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"studio-local","KEYCLOAK_REALM":"rasa-local-dev","KEYCLOAK_URL":""}` | Define environment variables for deployment |
+| webClient.environmentVariables.KEYCLOAK_URL | string | `""` | This is your load_balancer or host_name URL to which you plan to deploy Studio with /auth suffixed. For example http://rasa-studio.dev.io/auth |
 | webClient.image | object | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` | Define image settings |
 | webClient.image.name | string | `"studio-web-client"` | Specifies image repository |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -356,7 +412,7 @@ modelService:
 | webClient.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | webClient.ingress.className | string | `""` | Specifies the ingress className to be used |
 | webClient.ingress.enabled | bool | `true` | Specifies whether an ingress service should be created |
-| webClient.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress |
+| webClient.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | webClient.ingress.labels | object | `{}` | Labels to add to the ingress |
 | webClient.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | webClient.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |

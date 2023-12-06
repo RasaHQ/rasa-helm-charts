@@ -52,12 +52,4 @@ spec:
     matchLabels:
       name: model-training-service-data-pv-{{ .Release.Namespace }}
 ---
-{{- if .Values.modelService.persistence.aws }}
-kind: StorageClass
-apiVersion: storage.k8s.io/v1
-metadata:
-  name: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }}
-  namespace: {{ .Release.Namespace }}
-provisioner: efs.csi.aws.com 
-{{- end }}
 {{- end }}

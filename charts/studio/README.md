@@ -85,7 +85,8 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":""},"KEYCLOAK_REALM":{"value":"rasa-local-dev"}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_ADMIN_USERNAME":{"value":"kcadmin"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"WEB_CLIENT_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":""}` | The complete registry URL of the RASA Pro docker image using for training |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
 | backend.image.name | string | `"studio-backend"` | Specifies image repository |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -154,7 +155,7 @@ modelService:
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
-| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":""},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":""},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
+| keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":"true"},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":"edge"},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | Specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -197,7 +198,7 @@ modelService:
 | modelService.persistence.localNodeName | string | `""` | Node on which the PV will be created This value is used only when type is set to local |
 | modelService.persistence.nfsServer | string | `""` | DNS name or IP address of the NFS server This value is used only when type is set to nfs |
 | modelService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelService.persistence.storageClassName | string | `""` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. |
+| modelService.persistence.storageClassName | string | `""` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server. |
 | modelService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
 | modelService.persistence.type | string | `"local"` | Type of the volume that will be used to store the training data Valid values: local, nfs. Leave this empty if you are using AWS EFS. |
 | modelService.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | Key in the K8s under which Rasa Pro License is stored. |
@@ -206,7 +207,7 @@ modelService:
 | modelService.running.consumer.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | envFrom is used to add environment variables from ConfigMap or Secret |
 | modelService.running.consumer.environmentVariables | object | `{"BASE_DOMAIN":{"value":""},"BOT_TALK_SUB_PATH":{"value":"talk"},"BUCKET_NAME":{"value":""},"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"},"STORAGE_TYPE":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.consumer.environmentVariables.BASE_DOMAIN | object | `{"value":""}` | Domain name of the deployment. Example: "http://my-domain.com" |
+| modelService.running.consumer.environmentVariables.BASE_DOMAIN | object | `{"value":""}` | Domain name of the deployment which is mapped to ingress resource. Example: "http://my-domain.com" |
 | modelService.running.consumer.environmentVariables.RASA_REQUESTS_CPU | object | `{"value":"1000m"}` | Amount of CPU and Memory to allocate to the container for model training |
 | modelService.running.consumer.image | object | `{"name":"model-running-job-consumer","pullPolicy":"IfNotPresent","repository":"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/","tag":"3.2.2"}` | Define image settings |
 | modelService.running.consumer.image.name | string | `"model-running-job-consumer"` | Specifies image name |
@@ -342,7 +343,7 @@ modelService:
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository for Studio |
 | studioEnabled | bool | `true` |  |
-| tag | string | `"0.1.3"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.0.1"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

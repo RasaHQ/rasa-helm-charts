@@ -23,7 +23,7 @@ studioEnabled: true
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- Specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
-tag: "0.1.3"
+tag: "1.0.1"
 
 # Studio Backend component specific configuration
 backend:
@@ -54,13 +54,24 @@ backend:
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
     KEYCLOAK_API_USERNAME:
-      value: ""
+      value: "realmadmin"
     KEYCLOAK_API_PASSWORD:
       secret:
         name: "studio-secrets"
         key: "KEYCLOAK_API_PASSWORD"
+    KEYCLOAK_ADMIN_USERNAME:
+      value: "kcadmin"
+    KEYCLOAK_ADMIN_PASSWORD:
+      secret:
+        name: "studio-secrets"
+        key: "KEYCLOAK_ADMIN_PASSWORD"
     KEYCLOAK_API_GRANT_TYPE:
       value: "password"
+    WEB_CLIENT_URL:
+      value: ""
+    # -- The complete registry URL of the RASA Pro docker image using for training
+    DOCKER_IMAGE_TAG:
+      value: ""
 
   # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:
@@ -566,13 +577,13 @@ keycloak:
         key: "KC_DB_PASSWORD"
     # Use SSL for Keycloak database connection used during db migration
     KC_DB_SSL:
-      value: ""
+      value: "true"
     # If true the server will reject db connection which is not authorized with the list of supplied CAs.
     KC_REJECT_UNAUTHORIZED:
       value: ""
     # Set value to edge to enable communication through HTTP between the proxy/load balancer and Keycloak. Useful for highly secure internal network where the reverse proxy keeps a secure connection (HTTP over TLS) with clients while communicating with Keycloak using HTTP.
     KC_PROXY:
-      value: ""
+      value: "edge"
 
   # -- keycloak.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:
@@ -824,7 +835,7 @@ modelService:
         #     key: "AWS_SECRET_ACCESS_KEY"
         # REGION_NAME:
         #   value: ""
-        # -- Needed if GCP is used
+        # -- Needed if STORAGE_TYPE is set to gcs
         # GOOGLE_CLOUD_PROJECT:
         #   value: ""
         # CLOUDSDK_COMPUTE_ZONE:
@@ -1376,7 +1387,7 @@ modelService:
           value: ""
         BUCKET_NAME:
           value: ""
-        # -- Domain name of the deployment. Example: "http://my-domain.com"
+        # -- Domain name of the deployment which is mapped to ingress resource. Example: "http://my-domain.com"
         BASE_DOMAIN:
           value: ""
         BOT_TALK_SUB_PATH:
@@ -1601,7 +1612,7 @@ modelService:
     aws: true
     # -- FileSystemId::MountPoint of the AWS EFS volume.
     efs_id: ""
-    # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS.
+    # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server.
     storageClassName: ""
     # -- Storage Capacity for PV
     storageCapacity: 1Gi

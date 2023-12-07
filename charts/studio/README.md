@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.2](https://img.shields.io/badge/Version-0.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.2
 ```
 
 ## General Configuration
@@ -85,7 +85,7 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_ADMIN_USERNAME":{"value":"kcadmin"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-local-dev"},"WEB_CLIENT_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_ADMIN_USERNAME":{"value":"kcadmin"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"},"WEB_CLIENT_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public |
 | backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":""}` | The complete registry URL of the RASA Pro docker image used for training |
 | backend.environmentVariables.KEYCLOAK_ADMIN_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}` | The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak. |
@@ -403,7 +403,7 @@ modelService:
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |
-| webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"studio-local","KEYCLOAK_REALM":"rasa-local-dev","KEYCLOAK_URL":""}` | Define environment variables for deployment |
+| webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"rasa-studio-backend","KEYCLOAK_REALM":"rasa-studio","KEYCLOAK_URL":""}` | Define environment variables for deployment |
 | webClient.environmentVariables.KEYCLOAK_URL | string | `""` | This is your load_balancer or host_name URL to which you plan to deploy Studio with /auth suffixed. For example http://rasa-studio.dev.io/auth |
 | webClient.image | object | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` | Define image settings |
 | webClient.image.name | string | `"studio-web-client"` | Specifies image repository |

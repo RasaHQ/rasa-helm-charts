@@ -49,7 +49,7 @@ backend:
     KEYCLOAK_URL:
       value: "http://studio-keycloak:80/auth"
     KEYCLOAK_REALM:
-      value: "rasa-local-dev"
+      value: "rasa-studio"
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
     KEYCLOAK_API_USERNAME:
@@ -219,8 +219,8 @@ webClient:
   environmentVariables:
     API_ENDPOINT: "http://localhost:80/api"
     KEYCLOAK_URL: "http://localhost:80/auth"
-    KEYCLOAK_REALM: "rasa-local-dev"
-    KEYCLOAK_CLIENT_ID: "studio-local"
+    KEYCLOAK_REALM: "rasa-studio"
+    KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
   # -- Define service account
   serviceAccount:

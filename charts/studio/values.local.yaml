@@ -220,7 +220,7 @@ webClient:
     API_ENDPOINT: "http://localhost:80/api"
     KEYCLOAK_URL: "http://localhost:80/auth"
     KEYCLOAK_REALM: "rasa-studio"
-    KEYCLOAK_CLIENT_ID: "studio-local"
+    KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
   # -- Define service account
   serviceAccount:

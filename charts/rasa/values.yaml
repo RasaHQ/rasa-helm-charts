@@ -1,10 +1,5 @@
-# Default values for rasa.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
-
-############################
-# THIS IS WORK IN PROGRESS #
-############################
 
 # -- nameOverride overrides name of the app
 nameOverride: ""
@@ -15,21 +10,19 @@ fullnameOverride: ""
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaProLicence is license key for Rasa Pro Services.
-rasaProLicence:
+# -- rasaProLicense is license key for Rasa Pro Services.
+rasaProLicense:
   secretName: "rasa-secrets"
-  secretKey: "rasaProLicence"
+  secretKey: "rasaProLicense"
 
-# Rasa Open Source
+# Rasa Plus
 rasa:
-  # -- rasa.enabled enables Rasa OSS/Plus deployment
+  # -- rasa.enabled enables Rasa Plus deployment
   # Disable this if you want to deploy ONLY Rasa Pro Services
   enabled: true
 
-  # Rasa Plus is the drop-in replacement of Rasa
-  plus:
-    # -- plus.enabled enabled Rasa Plus drop-in replacement of Rasa
-    enabled: true
+  # -- rasa.deployOSS enables Rasa Open Source deployment
+  deployOSS: false
 
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
@@ -40,7 +33,7 @@ rasa:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.6.4-latest"
+    tag: "3.7.0-latest"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -198,7 +191,6 @@ rasa:
     #   volumeMounts:
     #     - mountPath: /app/models
     #       name: models
-
 
   # -- rasa.additionalContainers allows to specify additional containers for the Rasa Deployment
   additionalContainers: []

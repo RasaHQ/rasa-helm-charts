@@ -24,7 +24,7 @@ data:
 {{- end }}
 {{- if .lockStore.enabled }}
     lock_store:
-      {{- if and $.Values.rasa.plus.enabled .lockStore.useConcurrent }}
+      {{- if and $.Values.rasa.enabled .lockStore.useConcurrent ( not $.Values.rasa.deployOSS ) }}
       type: "rasa_plus.components.concurrent_lock_store.ConcurrentRedisLockStore"
       host: {{ .lockStore.url }}
       {{- else }}
@@ -41,7 +41,7 @@ data:
     event_broker:
       {{- omit .eventBroker "enabled" | toYaml | nindent 6 }}
 {{- end }}
-{{- if and .tracing.enabled $.Values.rasa.plus.enabled }}
+{{- if and .tracing.enabled $.Values.rasa.enabled ( not $.Values.rasa.deployOSS ) }}
     tracing:
       {{- omit .tracing "enabled" | toYaml | nindent 6 }}
 {{- end }}

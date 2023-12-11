@@ -5,16 +5,14 @@
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaProLicence is license key for Rasa Pro Services.
-rasaProLicence:
+# -- rasaProLicense is license key for Rasa Pro Services.
+rasaProLicense:
   secretName: "rasa-secrets"
-  secretKey: "rasaProLicence"
+  secretKey: "rasaProLicense"
 
 # Rasa Open Source
 rasa:
   enabled: true
-  plus:
-    enabled: true
   replicaCount: 1
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"

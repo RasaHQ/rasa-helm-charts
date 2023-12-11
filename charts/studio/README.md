@@ -78,12 +78,12 @@ modelService:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | backend.additionalContainers | list | `[]` | backend.additionalContainers allows to specify additional containers for the deployment |
-| backend.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| backend.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
-| backend.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
-| backend.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
-| backend.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
-| backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
+| backend.affinity | object | `{}` | backend.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| backend.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | backend.autoscaling specifies the HPA settings |
+| backend.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
+| backend.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
+| backend.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
+| backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
 | backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_ADMIN_USERNAME":{"value":"kcadmin"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_GRANT_TYPE":{"value":"password"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"},"WEB_CLIENT_URL":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public |
@@ -93,8 +93,8 @@ modelService:
 | backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.environmentVariables.WEB_CLIENT_URL | object | `{"value":""}` | The host of the web application. |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
-| backend.image.name | string | `"studio-backend"` | Specifies image repository |
-| backend.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| backend.image.name | string | `"studio-backend"` | image.name specifies image repository |
+| backend.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | backend.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | backend.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | backend.ingress.className | string | `""` | Specifies the ingress className to be used |
@@ -104,37 +104,37 @@ modelService:
 | backend.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}}` | Define Studio Database Migration job settings |
-| backend.migration.enable | bool | `true` | Specifies whether a database migration job should be created |
-| backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | Specifies which image database migration job should use |
-| backend.migration.image.name | string | `"studio-database-migration"` | Specifies the repository of the image |
-| backend.migration.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| backend.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| backend.podAnnotations | object | `{}` | Annotations to add to the pod |
-| backend.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| backend.migration.enable | bool | `true` | migration.enable specifies whether a database migration job should be created |
+| backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | migration.image specifies which image database migration job should use |
+| backend.migration.image.name | string | `"studio-database-migration"` | image.name specifies the repository of the image |
+| backend.migration.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
+| backend.nodeSelector | object | `{}` | backend.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| backend.podAnnotations | object | `{}` | backend.podAnnotations defines annotations to add to the pod |
+| backend.podSecurityContext | object | `{"enabled":true}` | backend.podSecurityContext defines pod security context |
 | backend.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| backend.replicaCount | int | `1` | Specifies number of replicas |
-| backend.resources | object | `{}` | Specifies the resources limits and requests |
-| backend.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| backend.replicaCount | int | `1` | replicaCount specifies number of replicas |
+| backend.resources | object | `{}` | backend.resources specifies the resources limits and requests |
+| backend.securityContext | object | `{"enabled":true}` | backend.securityContext defines security context that allows you to overwrite the pod-level security context |
 | backend.service | object | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` | Define service |
-| backend.service.port | int | `80` | Specify service port |
-| backend.service.targetPort | int | `4000` | Specify service target port |
-| backend.service.type | string | `"ClusterIP"` | Specify service type |
+| backend.service.port | int | `80` | service.port specifies service port |
+| backend.service.targetPort | int | `4000` | service.targetPort specifies service target port |
+| backend.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | backend.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
-| backend.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| backend.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
-| backend.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| backend.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| backend.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| backend.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
+| backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio deployments |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Studio deployment |
-| dnsConfig | object | `{}` | Specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
-| dnsPolicy | string | `""` | Specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
+| dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
+| dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
 | eventIngestion.additionalContainers | list | `[]` | eventIngestion.additionalContainers allows to specify additional containers for the deployment |
-| eventIngestion.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| eventIngestion.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | Specifies the HPA settings |
-| eventIngestion.autoscaling.enabled | bool | `false` | Specifies whether autoscaling should be enabled |
-| eventIngestion.autoscaling.maxReplicas | int | `100` | Specifies the maximum number of replicas |
-| eventIngestion.autoscaling.minReplicas | int | `1` | Specifies the minimum number of replicas |
-| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | Specifies the target CPU/Memory utilization percentage |
+| eventIngestion.affinity | object | `{}` | eventIngestion.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| eventIngestion.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | eventIngestion.autoscaling specifies the HPA settings |
+| eventIngestion.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
+| eventIngestion.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
+| eventIngestion.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
+| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | eventIngestion.envFrom | list | `[]` | eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret |
 | eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":""},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":""},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":""},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | Define environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public. This should be same as the one defined for backend. |
@@ -152,27 +152,27 @@ modelService:
 | eventIngestion.environmentVariables.KAFKA_TOPIC | object | `{"value":""}` | Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own. |
 | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | `{"value":""}` | Instructs the application to allow untrusted certificates. Set this to 0 if using untrusted certificates for Kafka. |
 | eventIngestion.image | object | `{"name":"studio-event-ingestion","pullPolicy":"IfNotPresent"}` | Define image settings |
-| eventIngestion.image.name | string | `"studio-event-ingestion"` | Specifies image repository |
-| eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| eventIngestion.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| eventIngestion.podAnnotations | object | `{}` | Annotations to add to the pod |
-| eventIngestion.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
-| eventIngestion.replicaCount | int | `1` | Specifies number of replicas |
-| eventIngestion.resources | object | `{}` | Specifies the resources limits and requests |
-| eventIngestion.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| eventIngestion.image.name | string | `"studio-event-ingestion"` | image.name specifies image repository |
+| eventIngestion.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
+| eventIngestion.nodeSelector | object | `{}` | eventIngestion.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| eventIngestion.podAnnotations | object | `{}` | eventIngestion.podAnnotations defines to add to the pod |
+| eventIngestion.podSecurityContext | object | `{"enabled":true}` | eventIngestion.podSecurityContext defines pod security context |
+| eventIngestion.replicaCount | int | `1` | replicaCount specifies number of replicas |
+| eventIngestion.resources | object | `{}` | eventIngestion.resources specifies the resources limits and requests |
+| eventIngestion.securityContext | object | `{"enabled":true}` | eventIngestion.securityContext defines security context that allows you to overwrite the pod-level security context |
 | eventIngestion.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
-| eventIngestion.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| eventIngestion.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
-| eventIngestion.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| eventIngestion.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| eventIngestion.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| eventIngestion.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
+| eventIngestion.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| eventIngestion.tolerations | list | `[]` | eventIngestion.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | eventIngestion.volumeMounts | list | `[]` | eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container |
 | eventIngestion.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | fullnameOverride | string | `""` | Override the full qualified app name |
-| global.additionalDeploymentLabels | object | `{}` | additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
+| global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
-| imagePullSecrets | list | `[]` | Repository pull secrets |
+| imagePullSecrets | list | `[]` | imagePullSecret defines repository pull secrets |
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
-| keycloak.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| keycloak.affinity | object | `{}` | keycloak.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
 | keycloak.environmentVariables | object | `{"KC_DB_PASSWORD":{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}},"KC_DB_SSL":{"value":"true"},"KC_DB_URL":{"value":""},"KC_DB_USERNAME":{"value":""},"KC_PROXY":{"value":"edge"},"KC_REJECT_UNAUTHORIZED":{"value":""},"KEYCLOAK_ADMIN":{"value":"kcadmin"},"KEYCLOAK_ADMIN_PASSWORD":{"secret":{"key":"KEYCLOAK_ADMIN_PASSWORD","name":"studio-secrets"}}}` | Define environment variables for deployment |
 | keycloak.environmentVariables.KC_DB_PASSWORD | object | `{"secret":{"key":"KC_DB_PASSWORD","name":"studio-secrets"}}` | Keycloak database password |
@@ -191,16 +191,17 @@ modelService:
 | keycloak.ingress.labels | object | `{}` | Labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | keycloak.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| keycloak.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| keycloak.podAnnotations | object | `{}` | Annotations to add to the pod |
-| keycloak.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| keycloak.nodeSelector | object | `{}` | keycloak.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| keycloak.podAnnotations | object | `{}` | keycloak.podAnnotations defines annotations to add to the pod |
+| keycloak.podSecurityContext | object | `{"enabled":true}` | keycloak.podSecurityContext defines pod security context |
 | keycloak.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| keycloak.replicaCount | int | `1` | Specifies number of replicas |
-| keycloak.resources | object | `{}` | Specifies the resources limits and requests |
-| keycloak.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| keycloak.replicaCount | int | `1` | replicaCount specifies number of replicas |
+| keycloak.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |
+| keycloak.securityContext | object | `{"enabled":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
 | keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
-| keycloak.service.port | int | `80` | Specify service port |
-| keycloak.service.type | string | `"ClusterIP"` | Specify service type |
+| keycloak.service.port | int | `80` | service.port specifies service port |
+| keycloak.service.targetPort | int | `8080` | service.targetPort specifies service target port |
+| keycloak.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | keycloak.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | keycloak.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | keycloak.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
@@ -286,34 +287,34 @@ modelService:
 | modelService.running.orchestrator.ingress.hosts | list | `[{"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.running.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.running.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
-| modelService.running.orchestrator.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelService.running.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelService.running.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
+| modelService.running.orchestrator.podSecurityContext | object | `{"enabled":true}` | orchestrator.podSecurityContext defines pod security context |
 | modelService.running.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.running.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
-| modelService.running.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
-| modelService.running.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelService.running.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
+| modelService.running.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
+| modelService.running.orchestrator.securityContext | object | `{"enabled":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"ClusterIP"}` | Define service |
-| modelService.running.orchestrator.service.port | int | `8001` | Specify service port |
-| modelService.running.orchestrator.service.targetPort | int | `8001` | Specify service target port |
-| modelService.running.orchestrator.service.type | string | `"ClusterIP"` | Specify service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
-| modelService.running.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.running.orchestrator.volumeMounts | list | `[]` | Specifies additional volumes to mount |
-| modelService.running.orchestrator.volumes | list | `[]` | specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelService.running.orchestrator.service.port | int | `8001` | service.port specifies service port |
+| modelService.running.orchestrator.service.targetPort | int | `8001` | service.targetPort specifies service target port |
+| modelService.running.orchestrator.service.type | string | `"ClusterIP"` | service.type specifies service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
+| modelService.running.orchestrator.tolerations | list | `[]` | orchestrator.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelService.running.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
+| modelService.running.orchestrator.volumes | list | `[]` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
-| modelService.running.proxy.image | string | `"nginx:1.25-alpine"` | Define image settings |
+| modelService.running.proxy.image | string | `"nginx:1.25-alpine"` | proxy.image defines image settings |
 | modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.running.proxy.podAnnotations | object | `{}` | Annotations to add to the pod |
-| modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
-| modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| modelService.running.proxy.podAnnotations | object | `{}` | proxy.podAnnotations defines annotations to add to the pod |
+| modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | proxy.podSecurityContext defines pod security context |
+| modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | proxy.pullPolicy specifies image pull policy |
 | modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.running.proxy.replicaCount | int | `1` | Specifies number of replicas |
-| modelService.running.proxy.resources | object | `{}` | Specifies the resources limits and requests |
-| modelService.running.proxy.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
+| modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
+| modelService.running.proxy.securityContext | object | `{"enabled":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.proxy.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
-| modelService.running.proxy.service.port | int | `80` | Specify service port |
-| modelService.running.proxy.service.targetPort | int | `80` | Specify service target port |
-| modelService.running.proxy.service.type | string | `"ClusterIP"` | Specify service type |
+| modelService.running.proxy.service.port | int | `80` | service.port specifies service port |
+| modelService.running.proxy.service.targetPort | int | `80` | service.targetPort specifies service target port |
+| modelService.running.proxy.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | modelService.running.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelService.running.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | modelService.running.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
@@ -374,40 +375,40 @@ modelService:
 | modelService.training.orchestrator.ingress.labels | object | `{}` | Labels to add to the ingress |
 | modelService.training.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelService.training.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.training.orchestrator.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.training.orchestrator.podAnnotations | object | `{}` | Annotations to add to the pod |
-| modelService.training.orchestrator.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| modelService.training.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| modelService.training.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
+| modelService.training.orchestrator.podSecurityContext | object | `{"enabled":true}` | orchestrator.podSecurityContext defines pod security context |
 | modelService.training.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.training.orchestrator.replicaCount | int | `1` | Specifies number of replicas |
-| modelService.training.orchestrator.resources | object | `{}` | Specifies the resources limits and requests |
-| modelService.training.orchestrator.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| modelService.training.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
+| modelService.training.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
+| modelService.training.orchestrator.securityContext | object | `{"enabled":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.training.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"ClusterIP"}` | Define service |
-| modelService.training.orchestrator.service.port | int | `8000` | Specify service port |
-| modelService.training.orchestrator.service.targetPort | int | `8000` | Specify service target port |
-| modelService.training.orchestrator.service.type | string | `"ClusterIP"` | Specify service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
-| modelService.training.orchestrator.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.training.orchestrator.volumeMounts | string | `nil` | Specifies additional volumes to mount |
-| modelService.training.orchestrator.volumes | string | `nil` | Specify additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| modelService.training.orchestrator.service.port | int | `8000` | service.port specifies service port |
+| modelService.training.orchestrator.service.targetPort | int | `8000` | service.targetPort specifies service target port |
+| modelService.training.orchestrator.service.type | string | `"ClusterIP"` | service.type specifies service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
+| modelService.training.orchestrator.tolerations | list | `[]` | orchestrator.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| modelService.training.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
+| modelService.training.orchestrator.volumes | string | `nil` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.training.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
-| modelService.training.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| modelService.training.serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
-| modelService.training.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| modelService.training.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| modelService.training.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
+| modelService.training.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | nameOverride | string | `""` | Override name of app |
-| networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
-| networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
-| networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
+| networkPolicy.denyAll | bool | `false` | networkPolicy.denyAll defines whether to apply denyAll network policy |
+| networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
+| networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | Specifies image repository for Studio |
 | studioEnabled | bool | `true` |  |
 | tag | string | `"1.0.1"` | Specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
-| webClient.affinity | object | `{}` | Allow the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |
 | webClient.environmentVariables | object | `{"API_ENDPOINT":"","KEYCLOAK_CLIENT_ID":"rasa-studio-backend","KEYCLOAK_REALM":"rasa-studio","KEYCLOAK_URL":""}` | Define environment variables for deployment |
 | webClient.environmentVariables.KEYCLOAK_URL | string | `""` | This is your load_balancer or host_name URL to which you plan to deploy Studio with /auth suffixed. For example http://rasa-studio.dev.io/auth |
 | webClient.image | object | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` | Define image settings |
-| webClient.image.name | string | `"studio-web-client"` | Specifies image repository |
-| webClient.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
+| webClient.image.name | string | `"studio-web-client"` | image.name specifies image repository |
+| webClient.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | webClient.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | webClient.ingress.annotations | object | `{}` | Annotations to add to the ingress |
 | webClient.ingress.className | string | `""` | Specifies the ingress className to be used |
@@ -416,18 +417,19 @@ modelService:
 | webClient.ingress.labels | object | `{}` | Labels to add to the ingress |
 | webClient.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | webClient.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| webClient.nodeSelector | object | `{}` | Allow the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| webClient.podAnnotations | object | `{}` | Annotations to add to the pod |
-| webClient.podSecurityContext | object | `{"enabled":true}` | Define pod security context |
+| webClient.nodeSelector | object | `{}` | webClient.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| webClient.podAnnotations | object | `{}` | webClient.podAnnotations defines annotations to add to the pod |
+| webClient.podSecurityContext | object | `{"enabled":true}` | webClient.podSecurityContext defines pod security context |
 | webClient.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| webClient.replicaCount | int | `1` | Specifies number of replicas |
-| webClient.resources | object | `{}` | Specifies the resources limits and requests |
-| webClient.securityContext | object | `{"enabled":true}` | Define security context that allows you to overwrite the pod-level security context |
+| webClient.replicaCount | int | `1` | replicaCount specifies number of replicas |
+| webClient.resources | object | `{}` | webClient.resources specifies the resources limits and requests |
+| webClient.securityContext | object | `{"enabled":true}` | webClient.securityContext defines security context that allows you to overwrite the pod-level security context |
 | webClient.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
-| webClient.service.port | int | `80` | Specify service port |
-| webClient.service.type | string | `"ClusterIP"` | Specify service type |
+| webClient.service.port | int | `80` | service.port specifies service port |
+| webClient.service.targetPort | int | `80` | service.targetPort specifies service target port |
+| webClient.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | webClient.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
-| webClient.serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
-| webClient.serviceAccount.create | bool | `false` | Specifies whether a service account should be created |
-| webClient.serviceAccount.name | string | `""` | The name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| webClient.tolerations | list | `[]` | Tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| webClient.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| webClient.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
+| webClient.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| webClient.tolerations | list | `[]` | webClient.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |

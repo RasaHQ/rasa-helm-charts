@@ -1,8 +1,10 @@
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
-APP VERSION: {{ .Chart.AppVersion }}
 
-** Please be patient while the chart is being deployed **
+Thank you for using Studio Helm Chart! 
+By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available at https://rasa.com/eula/. Please review the EULA carefully before proceeding.
+
+** Please be patient while the chart is being installed. **
 
 1. Access your Studio Backend installation:
 

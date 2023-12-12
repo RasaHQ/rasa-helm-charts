@@ -406,8 +406,7 @@ eventIngestion:
   # -- Define image settings
   image:
     # -- image.name specifies image repository
-    name:
-      "studio-event-ingestion"
+    name: "studio-event-ingestion"
       # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 

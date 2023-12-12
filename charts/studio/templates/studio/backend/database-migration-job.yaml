@@ -60,16 +60,16 @@ spec:
                 key: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.key }}
           {{- end }}
           - name: POSTGRES_HOST
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_HOST.value }}
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_HOST.value | quote }}
           - name: POSTGRES_PORT
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PORT.value }}
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PORT.value | quote }}
           - name: POSTGRES_DATABASE
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_DATABASE.value }}
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_DATABASE.value | quote }}
           - name: POSTGRES_USERNAME
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_USERNAME.value }}
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_USERNAME.value | quote }}
           {{- if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value }}
           - name: POSTGRES_PASSWORD
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value }}
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value | quote }}
           {{- else if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret }}
           - name: POSTGRES_PASSWORD
             valueFrom:

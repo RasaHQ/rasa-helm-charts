@@ -389,8 +389,7 @@ webClient:
   # -- webClient.nodeSelector allows the deployment to be scheduled on selected nodes
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  nodeSelector:
-    {}
+  nodeSelector: {}
 
   # -- webClient.tolerations defines tolerations for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
@@ -407,7 +406,8 @@ eventIngestion:
   # -- Define image settings
   image:
     # -- image.name specifies image repository
-    name: "studio-event-ingestion"
+    name:
+      "studio-event-ingestion"
       # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
@@ -1389,10 +1389,6 @@ modelService:
         # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
         hosts:
           - host: chart-example.local
-            # paths:
-            #   - path: /
-            #     pathType: Prefix
-            # extraPaths: []
         # -- Spefices the TLS configuration for ingress
         # tls: []
         #  - secretName: chart-example-tls

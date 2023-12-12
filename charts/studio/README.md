@@ -278,11 +278,11 @@ modelService:
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
 | modelService.running.orchestrator.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | Specifies image repository |
 | modelService.running.orchestrator.image.tag | string | `"3.2.2"` | Specifies image tag |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"host":"chart-example.local"}],"labels":{}}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local"}],"labels":{}}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | modelService.running.orchestrator.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
+| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |

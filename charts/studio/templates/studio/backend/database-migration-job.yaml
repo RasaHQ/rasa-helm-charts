@@ -59,4 +59,22 @@ spec:
                 name: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.name }}
                 key: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.key }}
           {{- end }}
+          - name: POSTGRES_HOST
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_HOST.value }}
+          - name: POSTGRES_PORT
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PORT.value }}
+          - name: POSTGRES_DATABASE
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_DATABASE.value }}
+          - name: POSTGRES_USERNAME
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_USERNAME.value }}
+          {{- if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value }}
+          - name: POSTGRES_PASSWORD
+            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value }}
+          {{- else if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret }}
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret.name }}
+                key: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret.key }}
+          {{- end }}
 {{- end }}

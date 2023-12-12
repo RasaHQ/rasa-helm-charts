@@ -391,7 +391,7 @@ webClient:
   ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
   nodeSelector: {}
 
-   # -- webClient.tolerations defines tolerations for pod assignment
+  # -- webClient.tolerations defines tolerations for pod assignment
   ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
   tolerations: []
 
@@ -407,7 +407,7 @@ eventIngestion:
   image:
     # -- image.name specifies image repository
     name: "studio-event-ingestion"
-     # -- image.pullPolicy specifies image pull policy
+      # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
   # -- eventIngestion.environmentVariables defines environment variables for deployment
@@ -578,7 +578,7 @@ keycloak:
   image:
     # -- image.name specifies image repository
     name: "studio-keycloak"
-     # -- image.pullPolicy specifies image pull policy
+    # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
   # -- keycloak.environmentVariables defines environment variables for deployment
@@ -667,7 +667,7 @@ keycloak:
 
   # -- Define service
   service:
-   # -- service.type specifies service type
+    # -- service.type specifies service type
     type: ClusterIP
     # -- service.port specifies service port
     port: 80
@@ -703,7 +703,7 @@ keycloak:
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
-     # -- ingress.enabled specifies whether an ingress service should be created
+    # -- ingress.enabled specifies whether an ingress service should be created
     enabled: true
     # -- ingress.className specifies the ingress className to be used
     className: ""
@@ -718,7 +718,7 @@ keycloak:
     hosts:
       - host: chart-example.local
         paths:
-          - path: /api
+          - path: /auth
             pathType: Prefix
         extraPaths: []
     # -- ingress.tls spefices the TLS configuration for ingress
@@ -1293,7 +1293,8 @@ modelService:
 
       # -- orchestrator.volumes specifies additional volumes
       ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-      volumes: []
+      volumes:
+        []
         # - hostPath:
         #   path: <HOST_PATH>
         #   name: <VOLUME_NAME>
@@ -1374,7 +1375,7 @@ modelService:
       ## ref: http://kubernetes.io/docs/user-guide/ingress/
       ingress:
         # -- ingress.enabled specifies whether an ingress service should be created
-        enabled: false
+        enabled: true
         # -- ingress.className specifies the ingress className to be used
         className: ""
         # -- ingress.labels defines labels to add to the ingress
@@ -1387,10 +1388,7 @@ modelService:
         # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
         hosts:
           - host: chart-example.local
-            # paths:
-            #   - path: /
-            #     pathType: Prefix
-            # extraPaths: []
+            extraPaths: []
         # -- Spefices the TLS configuration for ingress
         # tls: []
         #  - secretName: chart-example-tls

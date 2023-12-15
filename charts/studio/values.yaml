@@ -114,13 +114,14 @@ backend:
   # -- backend.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -299,13 +300,14 @@ webClient:
   # -- webClient.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -520,13 +522,13 @@ eventIngestion:
   # -- eventIngestion.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
     # privileged: false
-    # allowPrivilegeEscalation: false
     # capabilities:
     #   drop:
     #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -654,13 +656,14 @@ keycloak:
   # -- keycloak.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -932,13 +935,14 @@ modelService:
       # -- orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context
       securityContext:
         enabled: true
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+          - ALL
+          # add:
         # privileged: false
-        # allowPrivilegeEscalation: false
-        # capabilities:
-        #   drop:
-        #   - ALL
         # readOnlyRootFilesystem: true
-        # runAsNonRoot: true
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
@@ -1151,13 +1155,14 @@ modelService:
       # -- consumer.securityContext defines security context that allows you to overwrite the pod-level security context
       securityContext:
         enabled: true
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+          - ALL
+          # add:
         # privileged: false
-        # allowPrivilegeEscalation: false
-        # capabilities:
-        #   drop:
-        #   - ALL
         # readOnlyRootFilesystem: true
-        # runAsNonRoot: true
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
@@ -1324,13 +1329,14 @@ modelService:
       # -- orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context
       securityContext:
         enabled: true
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+          - ALL
+          # add:
         # privileged: false
-        # allowPrivilegeEscalation: false
-        # capabilities:
-        #   drop:
-        #   - ALL
         # readOnlyRootFilesystem: true
-        # runAsNonRoot: true
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
@@ -1544,13 +1550,14 @@ modelService:
       # -- consumer.securityContext defines security context that allows you to overwrite the pod-level security context
       securityContext:
         enabled: true
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+          - ALL
+          # add:
         # privileged: false
-        # allowPrivilegeEscalation: false
-        # capabilities:
-        #   drop:
-        #   - ALL
         # readOnlyRootFilesystem: true
-        # runAsNonRoot: true
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault
@@ -1634,13 +1641,14 @@ modelService:
       # -- proxy.securityContext defines security context that allows you to overwrite the pod-level security context
       securityContext:
         enabled: true
+        allowPrivilegeEscalation: false
+        runAsNonRoot: true
+        capabilities:
+          drop:
+          - ALL
+          # add:
         # privileged: false
-        # allowPrivilegeEscalation: false
-        # capabilities:
-        #   drop:
-        #   - ALL
         # readOnlyRootFilesystem: true
-        # runAsNonRoot: true
         # runAsUser: 1000
         # seccompProfile:
         #   type: RuntimeDefault

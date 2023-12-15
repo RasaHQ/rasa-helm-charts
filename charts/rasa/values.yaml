@@ -233,13 +233,14 @@ rasa:
   # -- rasa.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -489,13 +490,14 @@ rasaProServices:
   # -- rasaProServices.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -744,13 +746,14 @@ duckling:
   # -- duckling.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault
@@ -985,13 +988,14 @@ actionServer:
   # -- actionServer.securityContext defines security context that allows you to overwrite the pod-level security context
   securityContext:
     enabled: true
+    allowPrivilegeEscalation: false
+    runAsNonRoot: true
+    capabilities:
+      drop:
+      - ALL
+      # add:
     # privileged: false
-    # allowPrivilegeEscalation: false
-    # capabilities:
-    #   drop:
-    #   - ALL
     # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
     # runAsUser: 1000
     # seccompProfile:
     #   type: RuntimeDefault

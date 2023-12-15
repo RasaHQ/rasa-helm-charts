@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.3.7](https://img.shields.io/badge/Version-0.3.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.8](https://img.shields.io/badge/Version-0.3.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.7
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.8
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.7
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.8
 ```
 
 ## General Configuration
@@ -114,7 +114,7 @@ modelService:
 | backend.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | backend.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | backend.resources | object | `{}` | backend.resources specifies the resources limits and requests |
-| backend.securityContext | object | `{"enabled":true}` | backend.securityContext defines security context that allows you to overwrite the pod-level security context |
+| backend.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | backend.securityContext defines security context that allows you to overwrite the pod-level security context |
 | backend.service | object | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` | Define service |
 | backend.service.port | int | `80` | service.port specifies service port |
 | backend.service.targetPort | int | `4000` | service.targetPort specifies service target port |
@@ -159,7 +159,7 @@ modelService:
 | eventIngestion.podSecurityContext | object | `{"enabled":true}` | eventIngestion.podSecurityContext defines pod security context |
 | eventIngestion.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | eventIngestion.resources | object | `{}` | eventIngestion.resources specifies the resources limits and requests |
-| eventIngestion.securityContext | object | `{"enabled":true}` | eventIngestion.securityContext defines security context that allows you to overwrite the pod-level security context |
+| eventIngestion.securityContext | object | `{"allowPrivilegeEscalation":false,"enabled":true,"runAsNonRoot":true}` | eventIngestion.securityContext defines security context that allows you to overwrite the pod-level security context |
 | eventIngestion.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | eventIngestion.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
 | eventIngestion.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
@@ -197,7 +197,7 @@ modelService:
 | keycloak.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | keycloak.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | keycloak.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |
-| keycloak.securityContext | object | `{"enabled":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
+| keycloak.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
 | keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
 | keycloak.service.port | int | `80` | service.port specifies service port |
 | keycloak.service.targetPort | int | `8080` | service.targetPort specifies service target port |
@@ -255,7 +255,7 @@ modelService:
 | modelService.running.consumer.rasaStartupProbe.intervalInSeconds | int | `5` | rasaStartupProbe.intervalInSeconds is interval (in seconds) on which startup check will be performed. |
 | modelService.running.consumer.replicaCount | int | `1` | consumer.replicaCount specifies number of replicas |
 | modelService.running.consumer.resources | object | `{}` | consumer.resources specifies the resources limits and requests |
-| modelService.running.consumer.securityContext | object | `{"enabled":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
+| modelService.running.consumer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.running.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
 | modelService.running.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
@@ -291,7 +291,7 @@ modelService:
 | modelService.running.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | modelService.running.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
 | modelService.running.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
-| modelService.running.orchestrator.securityContext | object | `{"enabled":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
+| modelService.running.orchestrator.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"ClusterIP"}` | Define service |
 | modelService.running.orchestrator.service.port | int | `8001` | service.port specifies service port |
 | modelService.running.orchestrator.service.targetPort | int | `8001` | service.targetPort specifies service target port |
@@ -308,7 +308,7 @@ modelService:
 | modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
 | modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
-| modelService.running.proxy.securityContext | object | `{"enabled":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
+| modelService.running.proxy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.proxy.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
 | modelService.running.proxy.service.port | int | `80` | service.port specifies service port |
 | modelService.running.proxy.service.targetPort | int | `80` | service.targetPort specifies service target port |
@@ -339,7 +339,7 @@ modelService:
 | modelService.training.consumer.podSecurityContext | object | `{"enabled":true}` | consumer.podSecurityContext defines pod security context |
 | modelService.training.consumer.replicaCount | int | `1` | consumer.replicaCount specifies number of replicas |
 | modelService.training.consumer.resources | object | `{}` | consumer.resources specifies the resources limits and requests |
-| modelService.training.consumer.securityContext | object | `{"enabled":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
+| modelService.training.consumer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.training.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.training.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
 | modelService.training.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
@@ -377,7 +377,7 @@ modelService:
 | modelService.training.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | modelService.training.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
 | modelService.training.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
-| modelService.training.orchestrator.securityContext | object | `{"enabled":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
+| modelService.training.orchestrator.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.training.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"ClusterIP"}` | Define service |
 | modelService.training.orchestrator.service.port | int | `8000` | service.port specifies service port |
 | modelService.training.orchestrator.service.targetPort | int | `8000` | service.targetPort specifies service target port |
@@ -419,7 +419,7 @@ modelService:
 | webClient.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | webClient.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | webClient.resources | object | `{}` | webClient.resources specifies the resources limits and requests |
-| webClient.securityContext | object | `{"enabled":true}` | webClient.securityContext defines security context that allows you to overwrite the pod-level security context |
+| webClient.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | webClient.securityContext defines security context that allows you to overwrite the pod-level security context |
 | webClient.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
 | webClient.service.port | int | `80` | service.port specifies service port |
 | webClient.service.targetPort | int | `80` | service.targetPort specifies service target port |

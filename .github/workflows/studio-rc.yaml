@@ -1,4 +1,4 @@
-name: Release Studio Helm Chart
+name: Studio Release Candidate
 
 on:
   push:
@@ -52,7 +52,7 @@ jobs:
           if [[ $VERSION == *-rc* ]]; then
             echo "The Helm chart version is a release candidate."
           else
-            echo "The Helm chart version is not a release candidate and it can't be pushed to the registry."
+            echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
             exit 1
           fi
 

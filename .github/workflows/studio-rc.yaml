@@ -46,6 +46,7 @@ jobs:
           path: charts/studio/
 
       - name: Check if its release candidate
+        if: github.event_name == 'push'
         run: |
           VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
         

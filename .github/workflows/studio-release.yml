@@ -45,17 +45,6 @@ jobs:
         with:
           path: charts/studio/
 
-      - name: Check if its release candidate
-        run: |
-          VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
-    
-          if [[ $VERSION != *-rc* ]]; then
-            echo "The Helm chart version is not a release candidate."
-          else
-            echo "The Helm chart version is a release candidate. Please change version in Chart.yaml to match release versioning."
-            exit 1
-          fi
-
       - name: Package Helm release
         id: package
         run: helm package charts/studio/

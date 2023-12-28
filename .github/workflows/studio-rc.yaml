@@ -1,9 +1,9 @@
-name: Release Studio Helm Chart
+name: Studio Release Candidate
 
 on:
   push:
     branches:
-      - main
+      - release/**
     paths:
       - 'charts/studio/**'
       - '!charts/rasa/**'
@@ -46,13 +46,14 @@ jobs:
           path: charts/studio/
 
       - name: Check if its release candidate
+        if: github.event_name == 'push'
         run: |
           VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
-    
-          if [[ $VERSION != *-rc* ]]; then
-            echo "The Helm chart version is not a release candidate."
+        
+          if [[ $VERSION == *-rc* ]]; then
+            echo "The Helm chart version is a release candidate."
           else
-            echo "The Helm chart version is a release candidate. Please change version in Chart.yaml to match release versioning."
+            echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
             exit 1
           fi
 
@@ -62,35 +63,3 @@ jobs:
 
       - name: Push Helm Charts to Google Artifact Registry
         run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
-
-      - name: Get previous release tag
-        id: previous-release
-        uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42
-
-      - name: Create Studio Release Tag
-        uses: rickstaa/action-create-tag@55450aa830ede05bcbb37fbdad678e36c73e9d15
-        with:
-          tag: "${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}"
-
-      - name: Build Studio changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@6fd5cc6eaf7567dbd0f9666061215bb476f012fc
-        with:
-          configurationJson: |
-            {
-              "categories": [
-                {
-                    "title": "## 🚀 Studio Helm Chart",
-                    "labels": ["studio"]
-                }
-              ]
-            }
-          fromTag: "${{ steps.previous-release.outputs.latestTag }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Studio Release
-        uses: mikepenz/action-gh-release@ac23f2c4388204c6081863ead928a6f05fd7838a
-        with:
-          tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
-          body: ${{ steps.changelog.outputs.changelog }}

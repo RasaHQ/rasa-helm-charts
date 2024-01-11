@@ -238,7 +238,7 @@ rasa:
     capabilities:
       drop:
       - ALL
-      add: ['NET_BIND_SERVICE', 'NET_RAW']
+      # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
     # runAsUser: 1000
@@ -495,7 +495,7 @@ rasaProServices:
     capabilities:
       drop:
       - ALL
-      add: ['NET_BIND_SERVICE', 'NET_RAW']
+      # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
     # runAsUser: 1000
@@ -751,7 +751,7 @@ duckling:
     capabilities:
       drop:
       - ALL
-      add: ['NET_BIND_SERVICE', 'NET_RAW']
+      # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
     # runAsUser: 1000
@@ -993,7 +993,7 @@ actionServer:
     capabilities:
       drop:
       - ALL
-      add: ['NET_BIND_SERVICE', 'NET_RAW']
+      # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
     # runAsUser: 1000

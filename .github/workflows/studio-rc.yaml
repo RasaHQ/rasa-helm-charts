@@ -46,20 +46,24 @@ jobs:
           path: charts/studio/
 
       - name: Check if its release candidate
+        id: rc-check
         if: github.event_name != 'pull_request' && !startsWith(github.base_ref, 'release/')
         run: |
           VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
         
           if [[ $VERSION == *-rc* ]]; then
             echo "The Helm chart version is a release candidate."
+            echo "rc=true" >> $GITHUB_OUTPUT
           else
             echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
-            exit 1
+            echo "rc=false" >> $GITHUB_OUTPUT
           fi
 
       - name: Package Helm release
+        if: steps.rc-check.outputs.rc == 'true'
         id: package
         run: helm package charts/studio/
 
       - name: Push Helm Charts to Google Artifact Registry
+        if: steps.rc-check.outputs.rc == 'true'
         run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}

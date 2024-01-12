@@ -46,7 +46,7 @@ jobs:
           path: charts/studio/
 
       - name: Check if its release candidate
-        if: github.event_name == 'push'
+        if: github.event_name != 'pull_request' && !startsWith(github.base_ref, 'release/')
         run: |
           VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
         

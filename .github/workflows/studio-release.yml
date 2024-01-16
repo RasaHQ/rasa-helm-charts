@@ -50,8 +50,49 @@ jobs:
         run: helm package charts/studio/
 
       - name: Push Helm Charts to Google Artifact Registry
+        id: release
         run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
 
+      - name: Notify Slack of successful release 💬
+        if: steps.release.outcome == 'success'
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "🚀 New *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!""
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_PRODUCT_WEBH0OK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack of successful release ⛔️
+        if: steps.release.outcome == 'failure'
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+        with:
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "⛔️ *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>""
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_RELEASE_PRODUCT_WEBH0OK }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+          
       - name: Get previous release tag
         id: previous-release
         uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42

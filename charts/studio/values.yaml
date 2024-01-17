@@ -118,7 +118,7 @@ backend:
     runAsNonRoot: true
     capabilities:
       drop:
-      - ALL
+        - ALL
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
@@ -304,7 +304,7 @@ webClient:
     runAsNonRoot: true
     capabilities:
       drop:
-      - ALL
+        - ALL
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
@@ -319,14 +319,14 @@ webClient:
     # -- service.port specifies service port
     port: 80
     # -- service.targetPort specifies service target port
-    targetPort: 80
+    targetPort: 8080
 
   # -- Override default liveness probe settings
   livenessProbe:
     enabled: true
     httpGet:
       path: /
-      port: http
+      port: 8080
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15
@@ -339,7 +339,7 @@ webClient:
     enabled: true
     httpGet:
       path: /
-      port: http
+      port: 8080
       scheme: HTTP
     initialDelaySeconds: 15
     periodSeconds: 15
@@ -408,7 +408,8 @@ eventIngestion:
   # -- Define image settings
   image:
     # -- image.name specifies image repository
-    name: "studio-event-ingestion"
+    name:
+      "studio-event-ingestion"
       # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
@@ -526,7 +527,7 @@ eventIngestion:
     runAsNonRoot: true
     capabilities:
       drop:
-      - ALL
+        - ALL
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
@@ -661,7 +662,7 @@ keycloak:
     runAsNonRoot: true
     capabilities:
       drop:
-      - ALL
+        - ALL
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
     # privileged: false
     # readOnlyRootFilesystem: true
@@ -940,7 +941,7 @@ modelService:
         runAsNonRoot: true
         capabilities:
           drop:
-          - ALL
+            - ALL
           # add: ['NET_BIND_SERVICE', 'NET_RAW']
         # privileged: false
         # readOnlyRootFilesystem: true
@@ -1160,7 +1161,7 @@ modelService:
         runAsNonRoot: true
         capabilities:
           drop:
-          - ALL
+            - ALL
           # add: ['NET_BIND_SERVICE', 'NET_RAW']
         # privileged: false
         # readOnlyRootFilesystem: true
@@ -1334,7 +1335,7 @@ modelService:
         runAsNonRoot: true
         capabilities:
           drop:
-          - ALL
+            - ALL
           # add: ['NET_BIND_SERVICE', 'NET_RAW']
         # privileged: false
         # readOnlyRootFilesystem: true
@@ -1555,7 +1556,7 @@ modelService:
         runAsNonRoot: true
         capabilities:
           drop:
-          - ALL
+            - ALL
           # add: ['NET_BIND_SERVICE', 'NET_RAW']
         # privileged: false
         # readOnlyRootFilesystem: true
@@ -1646,7 +1647,7 @@ modelService:
         runAsNonRoot: true
         capabilities:
           drop:
-          - ALL
+            - ALL
           # add: ['NET_BIND_SERVICE', 'NET_RAW']
         # privileged: false
         # readOnlyRootFilesystem: true

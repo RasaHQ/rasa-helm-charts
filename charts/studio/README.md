@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.3.9](https://img.shields.io/badge/Version-0.3.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.9-rc1](https://img.shields.io/badge/Version-0.3.9--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.9
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.9-rc1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.9
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.3.9-rc1
 ```
 
 ## General Configuration
@@ -412,17 +412,17 @@ modelService:
 | webClient.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
 | webClient.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | webClient.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| webClient.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| webClient.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | webClient.nodeSelector | object | `{}` | webClient.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | webClient.podAnnotations | object | `{}` | webClient.podAnnotations defines annotations to add to the pod |
 | webClient.podSecurityContext | object | `{"enabled":true}` | webClient.podSecurityContext defines pod security context |
-| webClient.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":"http","scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| webClient.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | webClient.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | webClient.resources | object | `{}` | webClient.resources specifies the resources limits and requests |
 | webClient.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | webClient.securityContext defines security context that allows you to overwrite the pod-level security context |
-| webClient.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
+| webClient.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
 | webClient.service.port | int | `80` | service.port specifies service port |
-| webClient.service.targetPort | int | `80` | service.targetPort specifies service target port |
+| webClient.service.targetPort | int | `8080` | service.targetPort specifies service target port |
 | webClient.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | webClient.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
 | webClient.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |

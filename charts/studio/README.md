@@ -300,7 +300,7 @@ modelService:
 | modelService.running.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
 | modelService.running.orchestrator.volumes | list | `[]` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
-| modelService.running.proxy.image | string | `"nginx:1.25-alpine"` | proxy.image defines image settings |
+| modelService.running.proxy.image | string | `"nginxinc/nginx-unprivileged:1.25-alpine"` | proxy.image defines image settings |
 | modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.proxy.podAnnotations | object | `{}` | proxy.podAnnotations defines annotations to add to the pod |
 | modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | proxy.podSecurityContext defines pod security context |

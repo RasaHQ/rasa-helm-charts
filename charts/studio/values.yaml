@@ -1615,7 +1615,7 @@ modelService:
       # -- proxy.replicaCount specifies number of replicas
       replicaCount: 1
       # -- proxy.image defines image settings
-      image: "nginx:1.25-alpine"
+      image: "nginxinc/nginx-unprivileged:1.25-alpine"
       # -- proxy.pullPolicy specifies image pull policy
       pullPolicy: IfNotPresent
       # proxy.botTalkSubPath defines the path to talk to your bot

@@ -1628,7 +1628,7 @@ modelService:
         # -- service.port specifies service port
         port: 80
         # -- service.targetPort specifies service target port
-        targetPort: 80
+        targetPort: 8080
 
       # -- proxy.podAnnotations defines annotations to add to the pod
       podAnnotations:

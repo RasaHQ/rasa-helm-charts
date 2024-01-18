@@ -309,9 +309,9 @@ modelService:
 | modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
 | modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
 | modelService.running.proxy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.running.proxy.service | object | `{"port":80,"targetPort":80,"type":"ClusterIP"}` | Define service |
+| modelService.running.proxy.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
 | modelService.running.proxy.service.port | int | `80` | service.port specifies service port |
-| modelService.running.proxy.service.targetPort | int | `80` | service.targetPort specifies service target port |
+| modelService.running.proxy.service.targetPort | int | `8080` | service.targetPort specifies service target port |
 | modelService.running.proxy.service.type | string | `"ClusterIP"` | service.type specifies service type |
 | modelService.running.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
 | modelService.running.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |

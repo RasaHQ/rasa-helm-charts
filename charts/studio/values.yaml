@@ -1660,7 +1660,7 @@ modelService:
         enabled: true
         httpGet:
           path: /healthz
-          port: 80
+          port: 8080
           scheme: HTTP
         initialDelaySeconds: 15
         periodSeconds: 15
@@ -1673,7 +1673,7 @@ modelService:
         enabled: true
         httpGet:
           path: /healthz
-          port: 80
+          port: 8080
           scheme: HTTP
         initialDelaySeconds: 15
         periodSeconds: 15

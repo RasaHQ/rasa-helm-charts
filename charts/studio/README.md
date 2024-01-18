@@ -301,11 +301,11 @@ modelService:
 | modelService.running.orchestrator.volumes | list | `[]` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
 | modelService.running.proxy.image | string | `"nginxinc/nginx-unprivileged:1.25-alpine"` | proxy.image defines image settings |
-| modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.proxy.podAnnotations | object | `{}` | proxy.podAnnotations defines annotations to add to the pod |
 | modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | proxy.podSecurityContext defines pod security context |
 | modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | proxy.pullPolicy specifies image pull policy |
-| modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":80,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
 | modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
 | modelService.running.proxy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |

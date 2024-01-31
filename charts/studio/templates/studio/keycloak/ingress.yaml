@@ -40,15 +40,11 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    {{- range .Values.keycloak.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ $.Values.config.ingressHost | quote }}
       http:
         paths:
-          {{- range .paths }}
-          - path: {{ .path }}
-            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ .pathType }}
-            {{- end }}
+          - path: /auth
+            pathType: Prefix
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
@@ -59,24 +55,4 @@ spec:
               serviceName: {{ $fullName }}-keycloak
               servicePort: {{ $svcPort }}
               {{- end }}
-          {{- end }}
-          {{- if .extraPaths }}
-          {{- range .extraPaths }}
-          - path: {{ .path }}
-            {{- if and .pathType (semverCompare ">=1.18-0" $.Capabilities.KubeVersion.GitVersion) }}
-            pathType: {{ .pathType }}
-            {{- end }}
-            backend:
-              {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
-              service:
-                name: {{ .serviceName }}
-                port:
-                  number: {{ .servicePort }}
-              {{- else }}
-              serviceName: {{ .serviceName }}
-              servicePort: {{ .servicePort }}
-              {{- end }}
-          {{- end }}
-          {{- end }}
-    {{- end }}
 {{- end }}

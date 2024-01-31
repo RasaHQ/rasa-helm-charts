@@ -24,7 +24,24 @@ studioEnabled: true
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
-tag: "1.0.2"
+tag: "1.0.3"
+
+config:
+  ingressHost: rasa.bot.com
+  database:
+    host: ""
+    port: "5432"
+    username: ""
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+    modelServiceDatabaseName: "modelservice"
+    keycloakDatabaseName: "keycloak"
+  keycloak:
+    adminUsername: "kcadmin"
+    adminPassword:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_ADMIN_PASSWORD"
 
 # Studio Backend component specific configuration
 backend:
@@ -63,18 +80,8 @@ backend:
       secret:
         name: "studio-secrets"
         key: "KEYCLOAK_API_PASSWORD"
-    KEYCLOAK_ADMIN_USERNAME:
-      value: "kcadmin"
-    # -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.
-    KEYCLOAK_ADMIN_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_ADMIN_PASSWORD"
     KEYCLOAK_API_GRANT_TYPE:
       value: "password"
-    # -- The host of the web application.
-    WEB_CLIENT_URL:
-      value: ""
     # -- The complete registry URL of the RASA Pro docker image used for training
     DOCKER_IMAGE_TAG:
       value: ""
@@ -186,13 +193,6 @@ backend:
       {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-    # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
-    hosts:
-      - host: chart-example.local
-        paths:
-          - path: /api
-            pathType: Prefix
-        extraPaths: []
     # -- ingress.tls spefices the TLS configuration for ingress
     tls: []
     #  - secretName: chart-example-tls
@@ -258,10 +258,6 @@ webClient:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- # -- This is your load_balancer or host_name URL to which you plan to deploy Studio with /api suffixed. For example http://rasa-studio.dev.io/api
-    API_ENDPOINT: ""
-    # -- This is your load_balancer or host_name URL to which you plan to deploy Studio with /auth suffixed. For example http://rasa-studio.dev.io/auth
-    KEYCLOAK_URL: ""
     KEYCLOAK_REALM: "rasa-studio"
     KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
@@ -361,13 +357,6 @@ webClient:
       {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-    # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
-    hosts:
-      - host: chart-example.local
-        paths:
-          - path: /
-            pathType: Prefix
-        extraPaths: []
     # -- ingress.tls spefices the TLS configuration for ingress
     tls: []
     #  - secretName: chart-example-tls
@@ -594,25 +583,6 @@ keycloak:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- Database URL for storing user and RBAC data used by Keycloak. The connection string should be of the format jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}. Please note that if you are using pgbouncer in your database cluster the transaction pool mode is not compatible with Keycloak. Instead, use the session mode.
-    KC_DB_URL:
-      value: ""
-    # -- Admin user name to for Keycloak admin interface. This is the user that you can use to create/modify users for Studio
-    KEYCLOAK_ADMIN:
-      value: "kcadmin"
-    # -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.
-    KEYCLOAK_ADMIN_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_ADMIN_PASSWORD"
-    # -- Keycloak database username
-    KC_DB_USERNAME:
-      value: ""
-    # -- Keycloak database password
-    KC_DB_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KC_DB_PASSWORD"
     # Use SSL for Keycloak database connection used during db migration
     KC_DB_SSL:
       value: "true"
@@ -719,13 +689,6 @@ keycloak:
       {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-    # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
-    hosts:
-      - host: chart-example.local
-        paths:
-          - path: /auth
-            pathType: Prefix
-        extraPaths: []
     # -- ingress.tls spefices the TLS configuration for ingress
     tls: []
     #  - secretName: chart-example-tls
@@ -761,6 +724,11 @@ keycloak:
 
 # Model training and running service specific configuration
 modelService:
+  # -- repository specifies image repository for Studio
+  repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
+  # -- tag specifies image tag for Studio
+  tag: "3.2.2"
+
   # -- GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage.
   gcpCredentials:
     secretName:
@@ -800,6 +768,30 @@ modelService:
     # -- kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
     sslCaLocation: ""
 
+  storage:
+    # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
+    type: ""
+    # -- Name of the storage bucket. Make sure to pre-create this bucket.  This bucket is the same one used for TRAINING_STORAGE_BUCKET variable
+    bucketName: ""
+    # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
+    regionName: ""
+    # -- Needed if STORAGE_TYPE is set to aws_s3
+    awsAccessKeyId:
+      secretName: "studio-secrets"
+      secretKey: "AWS_ACCESS_KEY_ID"
+    # -- Needed if STORAGE_TYPE is set to aws_s3
+    awsSecretAccessKey:
+      secretName: "studio-secrets"
+      secretKey: "AWS_SECRET_ACCESS_KEY"
+    # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
+    googleCloudProject: ""
+    # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
+    cloudskdComputeZone: ""
+    # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
+    trainingStorageServiceAccount:
+      secretName: "studio-secrets"
+      secretKey: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+
   # Model Training Service specific configuration
   training:
     enabled: true
@@ -819,12 +811,8 @@ modelService:
       replicaCount: 1
       # Define image settings
       image:
-        # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
         name: "model-training-orchestrator"
-        # -- Specifies image tag
-        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -848,56 +836,6 @@ modelService:
         # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
         KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
           value: "training-status-update"
-        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
-        STORAGE_TYPE:
-          value: ""
-        # -- Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for BUCKET_NAME variable
-        TRAINING_STORAGE_BUCKET:
-          value: ""
-        # -- Studio supports only postgres as a database backend
-        PERSISTOR_BACKEND:
-          value: "postgres"
-        # -- The URL of the database host
-        POSTGRES_HOST:
-          value: ""
-        # -- The port of the database host
-        POSTGRES_PORT:
-          value: ""
-        # -- The name of the database. This should be different from the one used for "backend" and "eventIngestion" pods. Please make sure to pre-create this database.
-        POSTGRES_DATABASE:
-          value: ""
-        # -- The username of the database user
-        POSTGRES_USERNAME:
-          value: ""
-        # -- The password of the database user
-        POSTGRES_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "MODEL_SERVICE_DB_PASSWORD"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_ACCESS_KEY_ID:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_ACCESS_KEY_ID"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_SECRET_ACCESS_KEY:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_SECRET_ACCESS_KEY"
-        # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
-        # REGION_NAME:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
-        # GOOGLE_CLOUD_PROJECT:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
-        # CLOUDSDK_COMPUTE_ZONE:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-        # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- orchestrator.envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1044,12 +982,7 @@ modelService:
       replicaCount: 1
       # Define image settings
       image:
-        # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services"
-        # -- Specifies image name
         name: "model-training-job-consumer"
-        # -- Specifies image tag
-        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -1070,12 +1003,6 @@ modelService:
         # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
         KAFKA_RESULT_TOPIC:
           value: "training-result"
-        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
-        STORAGE_TYPE:
-          value: ""
-        # -- Name of the storage bucket. Make sure to pre-create this bucket.  This bucket is the same one used for TRAINING_STORAGE_BUCKET variable
-        BUCKET_NAME:
-          value: ""
         KUBERNETES_BASE_TRAINING_DATA_PATH:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:
@@ -1092,30 +1019,6 @@ modelService:
         # -- Value of Memory limit to allocate to the container for model training
         RASA_LIMITS_MEMORY:
           value: "1Gi"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_ACCESS_KEY_ID:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_ACCESS_KEY_ID"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_SECRET_ACCESS_KEY:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_SECRET_ACCESS_KEY"
-        # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
-        # REGION_NAME:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
-        # GOOGLE_CLOUD_PROJECT:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
-        # CLOUDSDK_COMPUTE_ZONE:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-        # TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- consumer.envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1215,12 +1118,8 @@ modelService:
       replicaCount: 1
       # Define image settings
       image:
-        # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
         name: "model-running-orchestrator"
-        # -- Specifies image tag
-        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -1241,56 +1140,6 @@ modelService:
         # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
         DEPLOYMENT_JOB_TOPIC:
           value: "deployment-job"
-        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
-        STORAGE_TYPE:
-          value: ""
-        # -- Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for BUCKET_NAME variable
-        DEPLOYMENT_STORAGE_BUCKET:
-          value: ""
-        # -- Studio supports only postgres as a database backend
-        PERSISTOR_BACKEND:
-          value: "postgres"
-        # -- The URL of the database host
-        POSTGRES_HOST:
-          value: ""
-        # -- The port of the database host
-        POSTGRES_PORT:
-          value: ""
-        # -- The name of the database. This should be different from the one used for "backend" and "eventIngestion" pods. Please make sure to pre-create this database.
-        POSTGRES_DATABASE:
-          value: ""
-        # -- The username of the database user
-        POSTGRES_USERNAME:
-          value: ""
-        # -- The password of the database user
-        POSTGRES_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "MODEL_SERVICE_DB_PASSWORD"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_ACCESS_KEY_ID:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_ACCESS_KEY_ID"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_SECRET_ACCESS_KEY:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_SECRET_ACCESS_KEY"
-        # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
-        # REGION_NAME:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
-        # GOOGLE_CLOUD_PROJECT:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
-        # CLOUDSDK_COMPUTE_ZONE:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-        # DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- orchestrator.envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -1435,12 +1284,8 @@ modelService:
       replicaCount: 1
       # Define image settings
       image:
-        # -- Specifies image repository
-        repository: "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"
         # -- Specifies image name
         name: "model-running-job-consumer"
-        # -- Specifies image tag
-        tag: "3.2.2"
         # -- Specifies image pull policy
         pullPolicy: IfNotPresent
 
@@ -1461,12 +1306,6 @@ modelService:
         # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
           value: "deployment-result"
-        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
-        STORAGE_TYPE:
-          value: ""
-        # -- Name of the storage bucket. Make sure to pre-create this bucket. This bucket is the same one used for TRAINING_STORAGE_BUCKET variable
-        BUCKET_NAME:
-          value: ""
         # -- Domain name of the deployment which is mapped to ingress resource. Example: "http://my-domain.com"
         BASE_DOMAIN:
           value: ""
@@ -1487,30 +1326,6 @@ modelService:
         # -- Value of Memory limit to allocate to the container for model training
         RASA_LIMITS_MEMORY:
           value: "1Gi"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_ACCESS_KEY_ID:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_ACCESS_KEY_ID"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        # AWS_SECRET_ACCESS_KEY:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "AWS_SECRET_ACCESS_KEY"
-        # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
-        # REGION_NAME:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
-        # GOOGLE_CLOUD_PROJECT:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
-        # CLOUDSDK_COMPUTE_ZONE:
-        #   value: ""
-        # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-        # DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT:
-        #   secret:
-        #     name: "studio-secrets"
-        #     key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
       # -- consumer.envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:

@@ -29,7 +29,58 @@ Environment Variables shared between MTS and MRS
     secretKeyRef:
       name: {{ .rasaProLicense.secretName}}
       key: {{ .rasaProLicense.secretKey}}
+- name: STORAGE_TYPE
+  value: {{ .storage.type | quote }}
+{{- if eq .storage.type "aws_s3" }}
+- name: AWS_ACCESS_KEY_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .storage.awsSecretAccessKey.secretName | quote }}
+      key: {{ .storage.awsSecretAccessKey.secretKey | quote }}
+- name: AWS_SECRET_ACCESS_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .storage.awsSecretAccessKey.secretName | quote }}
+      key: {{ .storage.awsSecretAccessKey.secretKey | quote }}
+- name: REGION_NAME
+  value: {{ .storage.regionName | quote }}
 {{- end }}
+{{- if eq .storage.type "gcs" }}
+- name: GOOGLE_CLOUD_PROJECT
+  value: {{ .storage.googleCloudProject | quote }}
+- name: CLOUDSDK_COMPUTE_ZONE
+  value: {{ .storage.cloudskdComputeZone | quote }}
+- name: TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
+  valueFrom:
+    secretKeyRef:
+      name: {{ .storage.trainingStorageServiceAccount.secretName | quote }}
+      key: {{ .storage.trainingStorageServiceAccount.secretKey | quote }}
+{{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
+Environment Variables for Model Service Training Orchestrator
+*/}}
+{{- define "modelServiceTraining.orchestrator.env" -}}
+- name: TRAINING_STORAGE_BUCKET
+  value: {{ .Values.modelService.storage.bucketName | quote }}
+# -- Studio supports only postgres as a database backend
+- name: PERSISTOR_BACKEND
+  value: "postgres"
+- name: POSTGRES_HOST
+  value: {{ .Values.config.database.host | quote }}
+- name: POSTGRES_PORT
+  value: {{ .Values.config.database.port | quote }}
+- name: POSTGRES_DATABASE
+  value: {{ .Values.config.database.modelServiceDatabaseName | quote }}
+- name: POSTGRES_USERNAME
+  value: {{ .Values.config.database.username | quote }}
+- name: POSTGRES_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.database.password.secretName | quote }}
+      key: {{ .Values.config.database.password.secretKey | quote }}
 {{- end -}}
 
 {{/*
@@ -47,7 +98,33 @@ Environment Variables for Model Service Training Consumer
   value: {{ .openAiKey.secretName | quote }}
 - name: OPENAI_API_KEY_SECRET_KEY
   value: {{ .openAiKey.secretKey | quote }}
+- name: BUCKET_NAME
+  value: {{ .storage.bucketName | quote }}
 {{- end }}
+{{- end -}}
+
+{{/*
+Environment Variables for Model Service Running Orchestrator
+*/}}
+{{- define "modelServiceRunning.orchestrator.env" -}}
+- name: DEPLOYMENT_STORAGE_BUCKET
+  value: {{ .Values.modelService.storage.bucketName | quote }}
+# -- Studio supports only postgres as a database backend
+- name: PERSISTOR_BACKEND
+  value: "postgres"
+- name: POSTGRES_HOST
+  value: {{ .Values.config.database.host | quote }}
+- name: POSTGRES_PORT
+  value: {{ .Values.config.database.port | quote }}
+- name: POSTGRES_DATABASE
+  value: {{ .Values.config.database.modelServiceDatabaseName | quote }}
+- name: POSTGRES_USERNAME
+  value: {{ .Values.config.database.username | quote }}
+- name: POSTGRES_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.database.password.secretName | quote | quote }}
+      key: {{ .Values.config.database.password.secretKey | quote }}
 {{- end -}}
 
 {{/*
@@ -65,6 +142,8 @@ Environment Variables for Model Service Running Consumer
   value: {{ .openAiKey.secretName | quote }}
 - name: OPENAI_API_KEY_SECRET_KEY
   value: {{ .openAiKey.secretKey | quote }}
+- name: BUCKET_NAME
+  value: {{ .storage.bucketName | quote }}
 {{- end }}
 {{- with .Values.modelService.running.consumer }}
 - name: RASA_READINESS_CHECK_INITIAL_DELAY_SECONDS

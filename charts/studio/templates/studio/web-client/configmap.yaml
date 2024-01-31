@@ -5,8 +5,8 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    window.API_ENDPOINT = {{ .Values.webClient.environmentVariables.API_ENDPOINT | quote }}; 
-    window.KEYCLOAK_URL = {{ .Values.webClient.environmentVariables.KEYCLOAK_URL | quote }}; 
+    window.API_ENDPOINT = "{{ .Values.config.ingressHost }}/api"; 
+    window.KEYCLOAK_URL = "{{ .Values.config.ingressHost }}/auth"; 
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; 
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
     window.FEATURE_FLAG_FLOWS = {{ .Values.webClient.environmentVariables.FEATURE_FLAG_FLOWS | default true | quote }};

@@ -41,7 +41,7 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.modelService.training.orchestrator.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ $.Values.config.ingressHost | quote }}
       http:
         paths:
           {{- range .paths }}

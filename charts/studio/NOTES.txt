@@ -9,10 +9,7 @@ By installing and using this software, you agree to be bound by the terms and co
 1. Access your Studio Backend installation:
 
 {{- if .Values.backend.ingress.enabled }}
-{{- range $host := .Values.backend.ingress.hosts }}
-  {{- range .paths }}
-  http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
-  {{- end }}
+http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/api
 {{- end }}
 
 {{- else if contains "NodePort" .Values.backend.service.type }}
@@ -38,10 +35,7 @@ By installing and using this software, you agree to be bound by the terms and co
 2. Access your Studio Web Client installation:
 
 {{- if .Values.webClient.ingress.enabled }}
-{{- range $host := .Values.webClient.ingress.hosts }}
-  {{- range .paths }}
-  http{{ if $.Values.webClient.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
-  {{- end }}
+http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}
 {{- end }}
 
 {{- else if contains "NodePort" .Values.webClient.service.type }}
@@ -67,10 +61,7 @@ By installing and using this software, you agree to be bound by the terms and co
 3. Access your Studio Keycloak installation:
 
 {{- if .Values.keycloak.ingress.enabled }}
-{{- range $host := .Values.keycloak.ingress.hosts }}
-  {{- range .paths }}
-  http{{ if $.Values.keycloak.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
-  {{- end }}
+http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/auth
 {{- end }}
 
 {{- else if contains "NodePort" .Values.keycloak.service.type }}

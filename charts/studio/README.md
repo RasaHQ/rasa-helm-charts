@@ -121,17 +121,16 @@ modelService:
 | backend.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| config.database.host | string | `""` |  |
-| config.database.keycloakDatabaseName | string | `"keycloak"` |  |
-| config.database.modelServiceDatabaseName | string | `"modelservice"` |  |
-| config.database.password.secretKey | string | `"DATABASE_PASSWORD"` |  |
-| config.database.password.secretName | string | `"studio-secrets"` |  |
-| config.database.port | string | `"5432"` |  |
-| config.database.username | string | `""` |  |
-| config.ingressHost | string | `"rasa.bot.com"` |  |
-| config.keycloak.adminPassword.secretKey | string | `"KEYCLOAK_ADMIN_PASSWORD"` |  |
-| config.keycloak.adminPassword.secretName | string | `"studio-secrets"` |  |
-| config.keycloak.adminUsername | string | `"kcadmin"` |  |
+| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","username":""}` | The postgres database instance details for Studio to connect to. |
+| config.database.host | string | `""` | The database host name |
+| config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
+| config.database.modelServiceDatabaseName | string | `"modelservice"` | The database name for model training and running service |
+| config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password |
+| config.database.port | string | `"5432"` | The database port |
+| config.database.username | string | `""` | The database username |
+| config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
+| config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
+| config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |
 | deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio deployments |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Studio deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
@@ -144,7 +143,7 @@ modelService:
 | eventIngestion.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | eventIngestion.envFrom | list | `[]` | eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret |
-| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":""},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | eventIngestion.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| eventIngestion.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CLIENT_ID":{"value":"kafka-python-rasa"},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` | eventIngestion.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | eventIngestion.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public. This should be same as the one defined for backend. |
 | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | `{"value":""}` | Kafka broker address |
 | eventIngestion.environmentVariables.KAFKA_CA_FILE | object | `{"value":""}` | Path to the CA file |
@@ -153,10 +152,10 @@ modelService:
 | eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL | object | `{"value":""}` | Set to true if you want to use SSL with custom certs |
 | eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC | object | `{"value":"rasa-events-dlq"}` | Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own. |
 | eventIngestion.environmentVariables.KAFKA_ENABLE_SSL | object | `{"value":""}` | Set to true if you want to use SSL |
-| eventIngestion.environmentVariables.KAFKA_GROUP_ID | object | `{"value":""}` | This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic. |
+| eventIngestion.environmentVariables.KAFKA_GROUP_ID | object | `{"value":"studio"}` | This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic. |
 | eventIngestion.environmentVariables.KAFKA_KEY_FILE | object | `{"value":""}` | Path to the client key file |
 | eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED | object | `{"value":""}` | Defaults to true, the server certificate is verified against the list of supplied CA |
-| eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM | object | `{"value":""}` | Supported values are plain, scram-sha-256 or scram-sha-512. You can leave it empty if you are not using SASL. |
+| eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM | object | `{"value":""}` | Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL. |
 | eventIngestion.environmentVariables.KAFKA_TOPIC | object | `{"value":"rasa-events"}` | Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own. |
 | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | `{"value":""}` | Instructs the application to allow untrusted certificates. Set this to 0 if using untrusted certificates for Kafka. |
 | eventIngestion.image | object | `{"name":"studio-event-ingestion","pullPolicy":"IfNotPresent"}` | Define image settings |
@@ -252,7 +251,7 @@ modelService:
 | modelService.running.consumer.rasaStartupProbe.failureThreshold | int | `50` | rasaStartupProbe.failureThreshold is allowed number of failed startup checks until Rasa app inside the container is considered not started. # Total possible startup check = initial delay + check interval x failure threshold |
 | modelService.running.consumer.rasaStartupProbe.initialDelaySeconds | int | `10` | rasaStartupProbe.initialDelaySeconds is initial delay after which startup probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa application is ready. |
 | modelService.running.consumer.rasaStartupProbe.intervalInSeconds | int | `5` | rasaStartupProbe.intervalInSeconds is interval (in seconds) on which startup check will be performed. |
-| modelService.running.consumer.replicaCount | int | `1` | consumer.replicaCount specifies number of replicas |
+| modelService.running.consumer.replicaCount | int | `2` | consumer.replicaCount specifies number of replicas |
 | modelService.running.consumer.resources | object | `{}` | consumer.resources specifies the resources limits and requests |
 | modelService.running.consumer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |

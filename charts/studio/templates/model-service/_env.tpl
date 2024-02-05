@@ -123,7 +123,7 @@ Environment Variables for Model Service Running Orchestrator
 - name: POSTGRES_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.database.password.secretName | quote | quote }}
+      name: {{ .Values.config.database.password.secretName | quote }}
       key: {{ .Values.config.database.password.secretKey | quote }}
 {{- end -}}
 

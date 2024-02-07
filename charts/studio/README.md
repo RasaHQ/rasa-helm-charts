@@ -122,12 +122,13 @@ modelService:
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost |
-| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","username":""}` | The postgres database instance details for Studio to connect to. |
+| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"false","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
 | config.database.host | string | `""` | The database host name |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
 | config.database.modelServiceDatabaseName | string | `"modelservice"` | The database name for model training and running service |
 | config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password |
 | config.database.port | string | `"5432"` | The database port |
+| config.database.preferSSL | string | `"false"` | Set to true if you want to use SSL |
 | config.database.username | string | `""` | The database username |
 | config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
@@ -182,7 +183,7 @@ modelService:
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | keycloak.affinity | object | `{}` | keycloak.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
-| keycloak.environmentVariables | object | `{"KC_DB_SSL":{"value":"true"},"KC_PROXY":{"value":"edge"},"KC_REJECT_UNAUTHORIZED":{"value":""}}` | keycloak.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| keycloak.environmentVariables | object | `{"KC_PROXY":{"value":"edge"}}` | keycloak.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | image.name specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |

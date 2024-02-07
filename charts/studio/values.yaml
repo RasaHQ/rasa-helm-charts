@@ -28,7 +28,7 @@ tag: "1.0.4"
 
 config:
   # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
-  ingressHost: rasa.bot.com
+  ingressHost: "rasa.bot.com"
   # -- Define if you will be using https or http with the ingressHost
   connectionType: "http"
   # -- The postgres database instance details for Studio to connect to.
@@ -43,6 +43,10 @@ config:
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
+    # -- Set to true if you want to use SSL for db connection
+    preferSSL: "false"
+    # If true the server will reject db connection which is not present list of supplied CAs.
+    rejectUnauthorized: ""
     # -- The database name for model training and running service
     modelServiceDatabaseName: "modelservice"
     # -- The database name for keycloak user management service
@@ -75,7 +79,7 @@ backend:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
+    # -- The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public
     DATABASE_URL:
       secret:
         name: "studio-secrets"
@@ -84,17 +88,15 @@ backend:
       value: "rasa-studio"
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
-    # -- We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
+    # -- These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
     KEYCLOAK_API_USERNAME:
       value: "realmadmin"
-    # -- We recommend changing this default value. These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
+    # -- These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
     KEYCLOAK_API_PASSWORD:
       secret:
         name: "studio-secrets"
         key: "KEYCLOAK_API_PASSWORD"
-    KEYCLOAK_API_GRANT_TYPE:
-      value: "password"
-    # -- The complete registry URL of the RASA Pro docker image used for training
+    # -- The complete registry URL of the Rasa Plus docker image to be used for training
     DOCKER_IMAGE_TAG:
       value: ""
 
@@ -270,7 +272,9 @@ webClient:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
+    # -- Keycloak realm name
     KEYCLOAK_REALM: "rasa-studio"
+    # -- Keycloak client id
     KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
   # -- webClient.envFrom is used to add environment variables from ConfigMap or Secret
@@ -467,9 +471,6 @@ eventIngestion:
     # -- Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
     KAFKA_DLQ_TOPIC:
       value: "rasa-events-dlq"
-    # -- Kafka internal client id. Please do not change this value.
-    KAFKA_CLIENT_ID:
-      value: "kafka-python-rasa"
     # -- This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic.
     KAFKA_GROUP_ID:
       value: "studio"
@@ -595,12 +596,6 @@ keycloak:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # Use SSL for Keycloak database connection used during db migration
-    KC_DB_SSL:
-      value: "true"
-    # If true the server will reject db connection which is not authorized with the list of supplied CAs.
-    KC_REJECT_UNAUTHORIZED:
-      value: ""
     # Set value to edge to enable communication through HTTP between the proxy/load balancer and Keycloak. Useful for highly secure internal network where the reverse proxy keeps a secure connection (HTTP over TLS) with clients while communicating with Keycloak using HTTP.
     KC_PROXY:
       value: "edge"
@@ -743,7 +738,9 @@ modelService:
 
   # -- GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage.
   gcpCredentials:
+    # -- gcpCredentials.secretName defines the name of the secret ("studio-secrets") that contains the GCP service account JSON
     secretName:
+    # -- gcpCredentials.secretName defines the Key in the secret ("studio-secrets") under which GCP service account JSON is stored
     secretKey:
 
   # -- modelService.runsInCluster describes if service is run inside cluster or not.
@@ -783,7 +780,7 @@ modelService:
   storage:
     # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
     type: ""
-    # -- Name of the storage bucket. Make sure to pre-create this bucket.  This bucket is the same one used for TRAINING_STORAGE_BUCKET variable
+    # -- Name of the storage bucket. Make sure to pre-create this bucket.
     bucketName: ""
     # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
     regionName: ""

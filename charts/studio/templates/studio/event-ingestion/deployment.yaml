@@ -64,6 +64,12 @@ spec:
             {{- toYaml .Values.eventIngestion.volumeMounts | nindent 12 }}
           {{- end }}
           env:
+            - name: KAFKA_CLIENT_ID
+              {{- if .Values.eventIngestion.kafkaClientId }}
+              value: {{ .Values.eventIngestion.kafkaClientId | quote }}
+              {{- else }}
+              value: "kafka-python-rasa"
+              {{- end }}
             {{- range $key, $value := .Values.eventIngestion.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}

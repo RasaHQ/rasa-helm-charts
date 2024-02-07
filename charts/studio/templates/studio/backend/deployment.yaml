@@ -81,6 +81,12 @@ spec:
               value: "false"
             - name: MODEL_RUNNING_MOCK_ENABLED
               value: "false"
+            - name: KEYCLOAK_API_GRANT_TYPE
+              {{- if .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE }}
+              value: {{ .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE.value | quote }}
+              {{- else }}
+              value: "password"
+              {{- end }}
             - name: MTS_API_URL
               {{- if .Values.backend.environmentVariables.MTS_API_URL }}
               value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}

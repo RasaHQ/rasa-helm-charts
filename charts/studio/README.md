@@ -121,6 +121,7 @@ modelService:
 | backend.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost |
 | config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","username":""}` | The postgres database instance details for Studio to connect to. |
 | config.database.host | string | `""` | The database host name |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
@@ -210,10 +211,10 @@ modelService:
 | keycloak.tolerations | list | `[]` | keycloak.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage. |
 | modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL of the Kafka broker to which to connect to. |
-| modelService.kafka.saslMechanism | string | `"SCRAM-SHA-256"` | kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512 |
+| modelService.kafka.saslMechanism | string | `""` | kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512. You can leave this empty if you are not using SASL. |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |
-| modelService.kafka.securityProtocol | string | `"SASL_SSL"` | kafka.securityProtocol defines security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
+| modelService.kafka.securityProtocol | string | `""` | kafka.securityProtocol defines security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |

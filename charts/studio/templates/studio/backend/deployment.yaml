@@ -74,7 +74,7 @@ spec:
           env:
             {{- include "studio.shared.env" . | nindent 12 }}
             - name: WEB_CLIENT_URL
-              value: "http://{{ .Values.config.ingressHost}}"
+              value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
             - name: KEYCLOAK_URL
               value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
             - name: MODEL_TRAINING_MOCK_ENABLED

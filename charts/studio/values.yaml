@@ -29,6 +29,8 @@ tag: "1.0.4"
 config:
   # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
   ingressHost: rasa.bot.com
+  # -- Define if you will be using https or http with the ingressHost
+  connectionType: "http"
   # -- The postgres database instance details for Studio to connect to.
   database:
     # -- The database host name
@@ -765,10 +767,10 @@ modelService:
     brokerAddress: ""
     # -- kafka.securityProtocol defines security protocol used to connect to Kafka broker.
     ## Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL
-    securityProtocol: "SASL_SSL"
+    securityProtocol: ""
     # -- kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker.
-    ## Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512
-    saslMechanism: "SCRAM-SHA-256"
+    ## Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512. You can leave this empty if you are not using SASL.
+    saslMechanism: ""
     # -- kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled.
     saslUsername: ""
     # -- kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled.

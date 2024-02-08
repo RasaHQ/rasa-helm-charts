@@ -46,8 +46,6 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          - name: KC_DB_URL
-            value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
           - name: POSTGRES_HOST
             value: {{ .Values.config.database.host | quote }}
           - name: POSTGRES_PORT

@@ -1315,11 +1315,6 @@ modelService:
         # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
         KAFKA_DEPLOYMENT_RESULT_TOPIC:
           value: "deployment-result"
-        # -- Domain name of the deployment which is mapped to ingress resource. Example: "http://my-domain.com"
-        BASE_DOMAIN:
-          value: ""
-        BOT_TALK_SUB_PATH:
-          value: "talk"
         KUBERNETES_BASE_BOT_DATA_PATH:
           value: "/home"
         KUBERNETES_JOB_BOT_CONFIG_MOUNT:

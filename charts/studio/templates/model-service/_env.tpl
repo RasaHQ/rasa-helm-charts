@@ -35,8 +35,8 @@ Environment Variables shared between MTS and MRS
 - name: AWS_ACCESS_KEY_ID
   valueFrom:
     secretKeyRef:
-      name: {{ .storage.awsSecretAccessKey.secretName | quote }}
-      key: {{ .storage.awsSecretAccessKey.secretKey | quote }}
+      name: {{ .storage.awsAccessKeyId.secretName | quote }}
+      key: {{ .storage.awsAccessKeyId.secretKey | quote }}
 - name: AWS_SECRET_ACCESS_KEY
   valueFrom:
     secretKeyRef:

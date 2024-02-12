@@ -67,6 +67,10 @@ spec:
             {{- include "modelServiceRunning.consumer.env" . | nindent 12 }}
             - name: ORCHESTRATOR_HTTP_API_URL
               value: "http://model-running-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.running.orchestrator.service.port }}"
+            - name: BASE_DOMAIN
+              value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
+            - name: BOT_TALK_SUB_PATH
+              value: "talk"
             {{- if .Values.modelService.gcpCredentials.secretName }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"

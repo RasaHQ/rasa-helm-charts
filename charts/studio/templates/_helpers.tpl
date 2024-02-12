@@ -228,10 +228,10 @@ Return image repository with tag and image name for Keycloak
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelService.training.consumer.image.repository -}}
-"{{ .Values.modelService.training.consumer.image.repository }}{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.training.consumer.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.repository -}}
+"{{ .Values.modelService.repository }}{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.tag }}"
 {{- else -}}
-"{{ .Values.modelService.training.consumer.image.repository }}/{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.training.consumer.image.tag }}"
+"{{ .Values.modelService.repository }}/{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -239,10 +239,10 @@ Return image repository with tag and image name for Model Training Service
 Return image repository with tag and image name for Model Training Service
 */}}
 {{- define "modelTrainingService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelService.training.orchestrator.image.repository -}}
-"{{ .Values.modelService.training.orchestrator.image.repository }}{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.training.orchestrator.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.repository -}}
+"{{ .Values.modelService.repository }}{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
 {{- else -}}
-"{{ .Values.modelService.training.orchestrator.image.repository }}/{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.training.orchestrator.image.tag }}"
+"{{ .Values.modelService.repository }}/{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -250,10 +250,10 @@ Return image repository with tag and image name for Model Training Service
 Return image repository with tag and image name for Model Running Service
 */}}
 {{- define "modelRunningService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelService.running.consumer.image.repository -}}
-"{{ .Values.modelService.running.consumer.image.repository }}{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.running.consumer.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.repository -}}
+"{{ .Values.modelService.repository }}{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.tag }}"
 {{- else -}}
-"{{ .Values.modelService.running.consumer.image.repository }}/{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.running.consumer.image.tag }}"
+"{{ .Values.modelService.repository }}/{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -261,10 +261,10 @@ Return image repository with tag and image name for Model Running Service
 Return image repository with tag and image name for Model Running Service
 */}}
 {{- define "modelRunningService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelService.running.orchestrator.image.repository -}}
-"{{ .Values.modelService.running.orchestrator.image.repository }}{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.running.orchestrator.image.tag }}"
+{{- if hasSuffix "/" .Values.modelService.repository -}}
+"{{ .Values.modelService.repository }}{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
 {{- else -}}
-"{{ .Values.modelService.running.orchestrator.image.repository }}/{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.running.orchestrator.image.tag }}"
+"{{ .Values.modelService.repository }}/{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
 {{- end -}}
 {{- end -}}
 

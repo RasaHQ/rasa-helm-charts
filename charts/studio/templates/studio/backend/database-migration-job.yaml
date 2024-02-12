@@ -31,6 +31,7 @@ spec:
         image: {{ include "studio.migration.image" . }}
         imagePullPolicy: {{ .Values.backend.migration.image.pullPolicy }}
         env:
+          {{- include "studio.keycloak.env" . | nindent 10 }}
           {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
           - name: DATABASE_URL
             value: {{ .Values.backend.environmentVariables.DATABASE_URL.value | quote }}
@@ -41,40 +42,21 @@ spec:
                 name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
                 key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
           {{- end }}
-          - name: KC_DB_SSL
-            value: {{ .Values.keycloak.environmentVariables.KC_DB_SSL.value | quote }}
-          - name: KC_REJECT_UNAUTHORIZED
-            value: {{ .Values.keycloak.environmentVariables.KC_REJECT_UNAUTHORIZED.value | quote }}
-          - name: KC_DB_URL
-            value: {{ .Values.keycloak.environmentVariables.KC_DB_URL.value | quote }}
-          - name: KC_DB_USERNAME
-            value: {{ .Values.keycloak.environmentVariables.KC_DB_USERNAME.value | quote }}
-          {{- if .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value }}
-          - name: KC_DB_PASSWORD
-            value: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.value | quote }}
-          {{- else if .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret }}
-          - name: KC_DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.name }}
-                key: {{ .Values.keycloak.environmentVariables.KC_DB_PASSWORD.secret.key }}
-          {{- end }}
+          - name: DB_SSL
+            value: {{ .Values.config.database.preferSSL | quote }}
+          - name: DB_REJECT_UNAUTHORIZED
+            value: {{ .Values.config.database.rejectUnauthorized | quote }}
           - name: POSTGRES_HOST
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_HOST.value | quote }}
+            value: {{ .Values.config.database.host | quote }}
           - name: POSTGRES_PORT
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PORT.value | quote }}
+            value: {{ .Values.config.database.port | quote }}
           - name: POSTGRES_DATABASE
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_DATABASE.value | quote }}
+            value: {{ .Values.config.database.modelServiceDatabaseName | quote }}
           - name: POSTGRES_USERNAME
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_USERNAME.value | quote }}
-          {{- if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value }}
-          - name: POSTGRES_PASSWORD
-            value: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.value | quote }}
-          {{- else if .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret }}
+            value: {{ .Values.config.database.username | quote }}
           - name: POSTGRES_PASSWORD
             valueFrom:
               secretKeyRef:
-                name: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret.name }}
-                key: {{ .Values.modelService.training.orchestrator.environmentVariables.POSTGRES_PASSWORD.secret.key }}
-          {{- end }}
+                name: {{ .Values.config.database.password.secretName | quote }}
+                key: {{ .Values.config.database.password.secretKey | quote }}
 {{- end }}

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.0.0](https://img.shields.io/badge/Version-1.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.0
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.2
 ```
 
 ## General Configuration

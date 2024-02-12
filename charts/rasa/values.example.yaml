@@ -13,6 +13,7 @@ rasaProLicense:
 # Rasa Open Source
 rasa:
   enabled: true
+  deployOSS: false
   replicaCount: 1
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"

@@ -212,7 +212,7 @@ modelService:
 | modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage. |
 | modelService.gcpCredentials.secretKey | string | `nil` | gcpCredentials.secretName defines the Key in the secret ("studio-secrets") under which GCP service account JSON is stored |
 | modelService.gcpCredentials.secretName | string | `nil` | gcpCredentials.secretName defines the name of the secret ("studio-secrets") that contains the GCP service account JSON |
-| modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL of the Kafka broker to which to connect to. |
+| modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL:portNumber of the Kafka broker to which to connect to. For example "mykafka-88233-us1-kafka.upstash.io:9092" |
 | modelService.kafka.saslMechanism | string | `""` | kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512. You can leave this empty if you are not using SASL. |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |

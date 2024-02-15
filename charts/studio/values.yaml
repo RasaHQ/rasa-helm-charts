@@ -760,7 +760,7 @@ modelService:
     secretKey: "OPENAI_API_KEY_SECRET_KEY"
 
   kafka:
-    # -- kafka.brokerAddress is the URL of the Kafka broker to which to connect to.
+    # -- kafka.brokerAddress is the URL:portNumber of the Kafka broker to which to connect to. For example "mykafka-88233-us1-kafka.upstash.io:9092"
     brokerAddress: ""
     # -- kafka.securityProtocol defines security protocol used to connect to Kafka broker.
     ## Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL

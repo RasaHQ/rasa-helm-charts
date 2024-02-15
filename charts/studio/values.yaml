@@ -784,11 +784,11 @@ modelService:
     bucketName: ""
     # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
     regionName: ""
-    # -- Needed if STORAGE_TYPE is set to aws_s3
+    # -- Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication.
     awsAccessKeyId:
       secretName: "studio-secrets"
       secretKey: "AWS_ACCESS_KEY_ID"
-    # -- Needed if STORAGE_TYPE is set to aws_s3
+    # -- Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication.
     awsSecretAccessKey:
       secretName: "studio-secrets"
       secretKey: "AWS_SECRET_ACCESS_KEY"
@@ -1251,12 +1251,12 @@ modelService:
           {}
           # kubernetes.io/ingress.class: nginx
           # kubernetes.io/tls-acme: "true"
-        # -- Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects
+        # -- Specifies additional hosts for this ingress. Additional hosts are NOT required since a default host is added automatically.
         hosts:
-          - host: chart-example.local
+          - host:
             extraPaths: []
         # -- Spefices the TLS configuration for ingress
-        # tls: []
+        tls: []
         #  - secretName: chart-example-tls
         #    hosts:
         #      - chart-example.local

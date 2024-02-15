@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.1
 ```
 
 ## General Configuration
@@ -268,12 +268,13 @@ modelService:
 | modelService.running.orchestrator.environmentVariables.DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.running.orchestrator.image.name | string | `"model-running-orchestrator"` | Specifies image name |
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local"}],"labels":{}}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":null}],"labels":{},"tls":[]}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | modelService.running.orchestrator.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
+| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":null}]` | Specifies additional hosts for this ingress. Additional hosts are NOT required since a default host is added automatically. |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
+| modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
@@ -308,8 +309,8 @@ modelService:
 | modelService.running.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | modelService.running.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | modelService.runsInCluster | bool | `true` | modelService.runsInCluster describes if service is run inside cluster or not. # It is used during the initialization procedure or API clients which communicate with K8S API. |
-| modelService.storage.awsAccessKeyId | object | `{"secretKey":"AWS_ACCESS_KEY_ID","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3 |
-| modelService.storage.awsSecretAccessKey | object | `{"secretKey":"AWS_SECRET_ACCESS_KEY","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3 |
+| modelService.storage.awsAccessKeyId | object | `{"secretKey":"AWS_ACCESS_KEY_ID","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication. |
+| modelService.storage.awsSecretAccessKey | object | `{"secretKey":"AWS_SECRET_ACCESS_KEY","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication. |
 | modelService.storage.bucketName | string | `""` | Name of the storage bucket. Make sure to pre-create this bucket. |
 | modelService.storage.cloudskdComputeZone | string | `""` | Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located. |
 | modelService.storage.googleCloudProject | string | `""` | Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project. |

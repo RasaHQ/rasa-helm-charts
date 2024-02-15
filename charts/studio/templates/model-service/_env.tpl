@@ -32,16 +32,21 @@ Environment Variables shared between MTS and MRS
 - name: STORAGE_TYPE
   value: {{ .storage.type | quote }}
 {{- if eq .storage.type "aws_s3" }}
+# Accept the AWS credentials only if they are provided
+{{- if .storage.awsAccessKeyId }}
 - name: AWS_ACCESS_KEY_ID
   valueFrom:
     secretKeyRef:
       name: {{ .storage.awsAccessKeyId.secretName | quote }}
       key: {{ .storage.awsAccessKeyId.secretKey | quote }}
+{{- end }}
+{{- if .storage.awsSecretAccessKey }}
 - name: AWS_SECRET_ACCESS_KEY
   valueFrom:
     secretKeyRef:
       name: {{ .storage.awsSecretAccessKey.secretName | quote }}
       key: {{ .storage.awsSecretAccessKey.secretKey | quote }}
+{{- end }}
 - name: REGION_NAME
   value: {{ .storage.regionName | quote }}
 {{- end }}

@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: model-training-service-consumer
+  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: model-training-service-consumer
@@ -66,7 +67,7 @@ spec:
             {{- include "modelService.shared.env" . | nindent 12 }}
             {{- include "modelServiceTraining.consumer.env" . | nindent 12 }}
             - name: ORCHESTRATOR_HTTP_API_URL
-              value: "http://model-training-service.{{ .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
+              value: "http://model-training-service.{{ .Values.modelService.namespace | default .Release.Namespace }}.svc.cluster.local:{{ .Values.modelService.training.orchestrator.service.port }}"
             {{- if .Values.modelService.gcpCredentials.secretName }}
             - name: GOOGLE_APPLICATION_CREDENTIALS
               value: "/config/gcloud/credentials.json"
@@ -92,7 +93,7 @@ spec:
       volumes:
         - name: training-data
           persistentVolumeClaim:
-            claimName: model-training-service-data-pvc-{{ .Release.Namespace }}
+            claimName: model-training-service-data-pvc-{{ .Values.modelService.namespace | default .Release.Namespace }}
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.training.consumer.volumes }}
         {{- toYaml .Values.modelService.training.consumer.volumes | nindent 8 }}

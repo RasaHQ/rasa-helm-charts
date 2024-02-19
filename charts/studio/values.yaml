@@ -193,6 +193,8 @@ backend:
       # -- image.pullPolicy specifies image pull policy
       pullPolicy: IfNotPresent
 
+    waitForIt: false
+
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -746,6 +748,7 @@ modelService:
   # -- modelService.runsInCluster describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
   runsInCluster: true
+  namespace: ""
 
   rasaProLicense:
     # -- rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored.
@@ -797,9 +800,9 @@ modelService:
     # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
     cloudskdComputeZone: ""
     # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-    trainingStorageServiceAccount:
+    storageServiceAccount:
       secretName: "studio-secrets"
-      secretKey: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+      secretKey: "STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
   # Model Training Service specific configuration
   training:

@@ -13,3 +13,7 @@ maintainers:
   - name: Rasa Infrastructure and Security Team
     url: https://github.com/RasaHQ/rasa-helm-charts
     email: support@rasa.com
+dependencies:
+  - name: replicated
+    repository: oci://registry.replicated.com/library
+    version: 1.0.0-beta.14

@@ -3,6 +3,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: model-running-service
+  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
   labels:
     {{- include "studio.labels" . | nindent 4 }}
 spec:

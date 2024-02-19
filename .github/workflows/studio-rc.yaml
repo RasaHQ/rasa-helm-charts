@@ -62,7 +62,7 @@ jobs:
       - name: Package Helm release
         if: steps.rc-check.outputs.rc == 'true'
         id: package
-        run: helm package charts/studio/
+        run: helm package charts/studio/ --dependency-update
 
       - name: Push Helm Charts to Google Artifact Registry
         if: steps.rc-check.outputs.rc == 'true'

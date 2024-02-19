@@ -47,7 +47,7 @@ jobs:
 
       - name: Package Helm release
         id: package
-        run: helm package charts/studio/
+        run: helm package charts/studio/ --dependency-update
 
       - name: Push Helm Charts to Google Artifact Registry
         id: release

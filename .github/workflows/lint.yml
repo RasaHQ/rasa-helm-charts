@@ -71,8 +71,11 @@ jobs:
         with:
           version: v3.11.2
 
+      - name: Update dependencies
+        run: helm dependency build ./charts/${{ matrix.charts }}
+
       - name: Generate Helm template
-        run: helm template ./charts/${{ matrix.charts }} --dependency-update --output-dir ./output
+        run: helm template ./charts/${{ matrix.charts }} --output-dir ./output
 
       - name: Scan chart with Snyk IAC
         uses: snyk/actions/iac@master

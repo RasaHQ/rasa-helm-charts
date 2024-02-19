@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: model-running-service-data-pv-{{ .Release.Namespace }}
+  name: model-running-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
   labels:
-    name: model-running-service-data-pv-{{ .Release.Namespace }}
+    name: model-running-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
 spec:
   capacity:
     storage: {{ .Values.modelService.persistence.storageCapacity }}
@@ -39,7 +39,8 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: model-running-service-data-pvc-{{ .Release.Namespace }}
+  name: model-running-service-data-pvc-{{ .Values.modelService.namespace | default .Release.Namespace }}
+  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -50,6 +51,6 @@ spec:
   storageClassName: {{ .Values.modelService.persistence.storageClassName }} 
   selector:
     matchLabels:
-      name: model-running-service-data-pv-{{ .Release.Namespace }}
+      name: model-running-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
 ---
 {{- end }}

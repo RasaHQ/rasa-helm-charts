@@ -44,7 +44,7 @@ config:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
     # -- Set to true if you want to use SSL for db connection
-    preferSSL: "false"
+    preferSSL: "true"
     # If true the server will reject db connection which is not present list of supplied CAs.
     rejectUnauthorized: ""
     # -- The database name for model training and running service
@@ -785,21 +785,21 @@ modelService:
     # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
     regionName: ""
     # -- Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication.
-    awsAccessKeyId:
-      secretName: "studio-secrets"
-      secretKey: "AWS_ACCESS_KEY_ID"
+    # awsAccessKeyId:
+    #   secretName: "studio-secrets"
+    #   secretKey: "AWS_ACCESS_KEY_ID"
     # -- Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication.
-    awsSecretAccessKey:
-      secretName: "studio-secrets"
-      secretKey: "AWS_SECRET_ACCESS_KEY"
+    # awsSecretAccessKey:
+    #   secretName: "studio-secrets"
+    #   secretKey: "AWS_SECRET_ACCESS_KEY"
     # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
     googleCloudProject: ""
     # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
     cloudskdComputeZone: ""
     # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-    trainingStorageServiceAccount:
-      secretName: "studio-secrets"
-      secretKey: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+    # trainingStorageServiceAccount:
+    #   secretName: "studio-secrets"
+    #   secretKey: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
   # Model Training Service specific configuration
   training:

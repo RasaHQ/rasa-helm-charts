@@ -122,13 +122,13 @@ modelService:
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost |
-| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"false","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
+| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
 | config.database.host | string | `""` | The database host name |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
 | config.database.modelServiceDatabaseName | string | `"modelservice"` | The database name for model training and running service |
 | config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password |
 | config.database.port | string | `"5432"` | The database port |
-| config.database.preferSSL | string | `"false"` | Set to true if you want to use SSL for db connection |
+| config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
 | config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
@@ -309,13 +309,10 @@ modelService:
 | modelService.running.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | modelService.running.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | modelService.runsInCluster | bool | `true` | modelService.runsInCluster describes if service is run inside cluster or not. # It is used during the initialization procedure or API clients which communicate with K8S API. |
-| modelService.storage.awsAccessKeyId | object | `{"secretKey":"AWS_ACCESS_KEY_ID","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication. |
-| modelService.storage.awsSecretAccessKey | object | `{"secretKey":"AWS_SECRET_ACCESS_KEY","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3. Do not pass this value if you are using AWS IAM roles for authentication. |
 | modelService.storage.bucketName | string | `""` | Name of the storage bucket. Make sure to pre-create this bucket. |
 | modelService.storage.cloudskdComputeZone | string | `""` | Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located. |
 | modelService.storage.googleCloudProject | string | `""` | Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project. |
 | modelService.storage.regionName | string | `""` | Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located. |
-| modelService.storage.trainingStorageServiceAccount | object | `{"secretKey":"TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to gcs. The service account email address. |
 | modelService.storage.type | string | `""` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
 | modelService.tag | string | `"3.2.2"` | tag specifies image tag for Studio |
 | modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |

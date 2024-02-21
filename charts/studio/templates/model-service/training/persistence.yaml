@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: model-training-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
+  name: model-training-service-data-pv-{{ .Release.Namespace }}
   labels:
-    name: model-training-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
+    name: model-training-service-data-pv-{{ .Release.Namespace }}
 spec:
   capacity:
     storage: {{ .Values.modelService.persistence.storageCapacity }}
@@ -12,7 +12,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
+  storageClassName: {{ .Values.modelService.persistence.storageClassName }} 
   {{- if .Values.modelService.persistence.aws }}
   csi:
     driver: efs.csi.aws.com
@@ -39,8 +39,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: model-training-service-data-pvc-{{ .Values.modelService.namespace | default .Release.Namespace }}
-  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
+  name: model-training-service-data-pvc-{{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -48,9 +47,9 @@ spec:
   resources:
     requests:
       storage: {{ .Values.modelService.persistence.storageRequests }}
-  storageClassName: {{ .Values.modelService.persistence.storageClassName | default "standard-rwo" }} 
+  storageClassName: {{ .Values.modelService.persistence.storageClassName }} 
   selector:
     matchLabels:
-      name: model-training-service-data-pv-{{ .Values.modelService.namespace | default .Release.Namespace }}
+      name: model-training-service-data-pv-{{ .Release.Namespace }}
 ---
 {{- end }}

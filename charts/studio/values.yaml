@@ -748,7 +748,6 @@ modelService:
   # -- modelService.runsInCluster describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
   runsInCluster: true
-  namespace: ""
 
   rasaProLicense:
     # -- rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored.
@@ -1528,7 +1527,7 @@ modelService:
     # -- FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd"
     efs_id: ""
     # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server.
-    storageClassName: ""
+    storageClassName: "standard-rwo"
     # -- Storage Capacity for PV
     storageCapacity: 1Gi
     # -- Storage requests for PVC

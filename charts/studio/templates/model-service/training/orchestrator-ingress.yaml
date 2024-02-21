@@ -16,7 +16,6 @@ apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:
   name: model-training-service-orchestrator
-  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
   labels:
     {{- include "studio.labels" . | nindent 4 }}
     {{- if .Values.modelService.training.orchestrator.ingress.labels }}

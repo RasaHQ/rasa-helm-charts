@@ -3,7 +3,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: nginx-reverse-proxy
-  namespace: {{ .Values.modelService.namespace | default .Release.Namespace }}
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     {{- if .Values.deploymentLabels }}

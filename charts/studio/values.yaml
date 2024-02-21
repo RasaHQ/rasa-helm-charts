@@ -748,7 +748,6 @@ modelService:
   # -- modelService.runsInCluster describes if service is run inside cluster or not.
   ## It is used during the initialization procedure or API clients which communicate with K8S API.
   runsInCluster: true
-  namespace: ""
 
   rasaProLicense:
     # -- rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored.

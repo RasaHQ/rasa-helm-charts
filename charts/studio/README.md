@@ -218,7 +218,6 @@ modelService:
 | modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.securityProtocol | string | `""` | kafka.securityProtocol defines security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.namespace | string | `""` |  |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |

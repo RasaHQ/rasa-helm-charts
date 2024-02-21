@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.4.1-rc1](https://img.shields.io/badge/Version-0.4.1--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.4.2-rc1](https://img.shields.io/badge/Version-0.4.2--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.1-rc1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.2-rc1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.1-rc1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.2-rc1
 ```
 
 ## General Configuration
@@ -218,7 +218,6 @@ modelService:
 | modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.securityProtocol | string | `""` | kafka.securityProtocol defines security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
 | modelService.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.namespace | string | `""` |  |
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
@@ -228,7 +227,7 @@ modelService:
 | modelService.persistence.localNodeName | string | `""` | Node on which the PV will be created This value is used only when type is set to local |
 | modelService.persistence.nfsServer | string | `""` | DNS name or IP address of the NFS server. This value is used only when type is set to nfs |
 | modelService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelService.persistence.storageClassName | string | `""` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server. |
+| modelService.persistence.storageClassName | string | `"standard-rwo"` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server. |
 | modelService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
 | modelService.persistence.type | string | `""` | Type of the volume that will be used to store the training data Valid values: local, nfs. Leave this empty if you are using AWS EFS. |
 | modelService.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | rasaProLicense.secretKey defines the key in the K8s under which Rasa Pro License is stored. |

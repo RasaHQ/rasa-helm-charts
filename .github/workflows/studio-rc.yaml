@@ -145,4 +145,4 @@ jobs:
           replicated-api-origin: https://api.replicated.com/vendor
           yaml-dir: ./replicated
           promote-channel: "Development"
-          version: ${{ steps.chart-info.outputs.chart-version }}
+          version: ${{ steps.chart-info.outputs.version }}

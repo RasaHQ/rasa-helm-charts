@@ -191,7 +191,7 @@ jobs:
         uses: replicatedhq/replicated-actions/create-customer@v1
         with:
           app-slug: ${{ secrets.REPLICATED_APP }}
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
+          api-token: ${{ secrets.REPLICATED_TOKEN }}
           customer-name: ${{ steps.chart-info.outputs.name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
           channel-slug: development
           customer-email: ${{ steps.chart-info.outputs.name }}@example.com
@@ -212,7 +212,7 @@ jobs:
         uses: replicatedhq/replicated-actions/remove-cluster@v1
         continue-on-error: true # It could be that the cluster is already removed
         with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
+          api-token: ${{ secrets.REPLICATED_TOKEN }}
           cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
 
       - name: Archive Customer
@@ -220,5 +220,5 @@ jobs:
         if: always()
         uses: replicatedhq/replicated-actions/archive-customer@v1
         with:
-          api-token: ${{ secrets.REPLICATED_API_TOKEN }}
+          api-token: ${{ secrets.REPLICATED_TOKEN }}
           customer-id: ${{ steps.create-customer.outputs.customer-id }}

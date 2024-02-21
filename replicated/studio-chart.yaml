@@ -6,7 +6,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 0.4.1
+    chartVersion: 0.4.2
   
   releaseName: studio
   # values are used in the customer environment, as a pre-render step

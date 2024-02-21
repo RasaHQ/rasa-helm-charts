@@ -103,6 +103,10 @@ jobs:
         with:
           path: charts/studio/
 
+      - name: Add Helm Chart repositories
+        run: |
+          helm repo add ingress-nginx https://kubernetes.github.io/ingress-nginx
+
       - name: Pull Helm Charts
         id: get_chart
         run: |

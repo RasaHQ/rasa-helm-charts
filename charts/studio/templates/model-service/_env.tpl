@@ -3,7 +3,7 @@ Environment Variables shared between MTS and MRS
 */}}
 {{- define "modelService.shared.env" -}}
 - name: KUBERNETES_NAMESPACE
-  value: {{ .Values.modelService.namespace | default .Release.Namespace | quote }}
+  value: {{ .Release.Namespace | quote }}
 {{- with .Values.modelService }}
 - name: RUNS_IN_CLUSTER
   value: {{ .runsInCluster | quote }}
@@ -91,7 +91,7 @@ Environment Variables for Model Service Training Consumer
   value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
-  value: "model-training-service-data-pvc-{{ .namespace | default $.Release.Namespace }}"
+  value: "model-training-service-data-pvc-{{ $.Release.Namespace }}"
 - name: RASA_PRO_LICENSE_SECRET_NAME
   value: {{ .rasaProLicense.secretName | quote }}
 - name: RASA_PRO_LICENSE_SECRET_KEY
@@ -147,7 +147,7 @@ Environment Variables for Model Service Running Consumer
   value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
-  value: "model-running-service-data-pvc-{{ .namespace | default $.Release.Namespace }}"
+  value: "model-running-service-data-pvc-{{ $.Release.Namespace }}"
 - name: RASA_PRO_LICENSE_SECRET_NAME
   value: {{ .rasaProLicense.secretName | quote }}
 - name: RASA_PRO_LICENSE_SECRET_KEY

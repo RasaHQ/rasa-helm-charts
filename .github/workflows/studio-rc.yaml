@@ -180,7 +180,7 @@ jobs:
           path: charts/studio/
 
       - id: create-cluster
-        uses: replicatedhq/compatibility-actions/create-cluster@v1
+        uses: replicatedhq/replicated-actions/create-cluster@v1
         with:
           api-token: ${{ secrets.REPLICATED_TOKEN }}
           kubernetes-distribution: ${{ matrix.cluster.distribution }}

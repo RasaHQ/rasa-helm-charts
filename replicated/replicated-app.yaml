@@ -1,0 +1,24 @@
+apiVersion: kots.io/v1beta1
+kind: Application
+metadata:
+  name: studio
+spec:
+  title: Studio
+  icon: https://info.rasa.com/hubfs/Rasa_January2020/Images/rasa-logo-square-ef3444fc36faec97ae8bd7bfb568996d.svg
+  requireMinimalRBACPrivileges: false
+  allowRollback: true
+  minKotsVersion: 1.79.0
+  additionalNamespaces:
+    - "ingress"
+    - "postgresql"
+    - "kafka"
+  statusInformers:
+    - deployment/studio-backend
+    - deployment/studio-keycloak
+    - deployment/studio-event-ingestion
+    - deployment/studio-web-client
+    - deployment/model-running-service-orchestrator
+    - deployment/model-running-service-consumer
+    - deployment/model-training-service-orchestrator
+    - deployment/model-training-service-consumer
+    - deployment/nginx-reverse-proxy

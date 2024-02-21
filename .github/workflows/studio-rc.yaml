@@ -154,9 +154,9 @@ jobs:
           - { distribution: k3s, version: v1.26 }
           - { distribution: k3s, version: v1.27 }
           - { distribution: k3s, version: v1.28 }
-          - { distribution: gke, version: v1.29 }
-          - { distribution: eks, version: v1.29 }
-          - { distribution: aks, version: v1.29 }
+          - { distribution: gke, version: v1.28 }
+          - { distribution: eks, version: v1.28 }
+          - { distribution: aks, version: v1.28 }
           - { distribution: openshift, version: v4.14.0-okd }
     runs-on: ubuntu-22.04
 

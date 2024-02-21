@@ -118,22 +118,22 @@ jobs:
       - name: Update Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.version = "${{ steps.chart-info.outputs.chart-version }}"' replicated/studio-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ steps.chart-info.outputs.chart-version }}"' replicated/studio-chart.yaml
 
       - name: Update Kafka Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.version = "${{ env.KAFKA_HELM_VERSION }}"' replicated/kafka-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ env.KAFKA_HELM_VERSION }}"' replicated/kafka-chart.yaml
 
       - name: Update PostgresSQL Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.version = "${{ env.POSTGRESQL_HELM_VERSION }}"' replicated/postgresql-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ env.POSTGRESQL_HELM_VERSION }}"' replicated/postgresql-chart.yaml
 
       - name: Update Nginx Ingress Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.version = "${{ env.NGINX_HELM_VERSION }}"' replicated/ingress-nginx-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ env.NGINX_HELM_VERSION }}"' replicated/ingress-nginx-chart.yaml
 
       - name: Create the development release
         uses: replicatedhq/action-kots-release@configurable-endpoint

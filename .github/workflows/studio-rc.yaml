@@ -120,7 +120,7 @@ jobs:
       - name: Update Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.version = "${{ steps.chart-info.outputs.chart-version }}"' replicated/studio-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ steps.chart-info.outputs.version }}"' replicated/studio-chart.yaml
 
       - name: Update Kafka Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5

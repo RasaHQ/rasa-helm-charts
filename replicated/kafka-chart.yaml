@@ -1,0 +1,70 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: kafka
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
+  chart:
+    name: kafka
+    chartVersion: 26.8.0
+  
+  releaseName: kafka
+  namespace: kafka
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    replicaCount: 2
+    listeners:
+      client:
+        protocol: PLAINTEXT
+      interbroker:
+        protocol: PLAINTEXT
+    provisioning:
+      enabled: true
+      topics:
+        - name: training-job
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: training-result
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: rasa-events
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: training-status-update
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: rasa-events-dlq
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: deployment-result
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: deployment-job
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+    kraft:
+      enabled: true
+    zookeeper:
+      enabled: false

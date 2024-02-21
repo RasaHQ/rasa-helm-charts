@@ -1,0 +1,269 @@
+apiVersion: kots.io/v1beta1
+kind: Config
+metadata:
+  name: studio-config
+spec:
+  groups:
+    - name: APIs and Credentials
+      description: >
+        This section configures your API Keys and Credentials
+      title: APIs and Credentials
+      items:
+        - name: studio_image_tag
+          type: text
+          title: Studio Version
+          default: "1.0.4"
+        - name: docker_image_tag
+          type: text
+          title: Rasa Pro Version
+          default: 3.7.4-latest
+        - name: openai_api_key
+          type: text
+          title: OpenAI API Key
+          required: true
+        - name: gcp_credentials
+          type: text
+          title: GCP SA Base64Encoded
+          required: true
+    - name: Database
+      description: >
+        This section can be used to configure the database required by Rasa Studio.
+      title: Database
+      items:
+        - name: postgres_type
+          type: select_one
+          title: PostgresSQL
+          default: embedded_postgres
+          items:
+            - name: embedded_postgres
+              title: Embedded Postgres
+            - name: external_postgres
+              title: External Postgres
+        - name: wait_for_it
+          type: bool
+          title: Wait for PostgresSQL to be ready
+          default: "0"
+          help_text: Enable this if you are using Embedded PostgresSQL
+          when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+        - name: database_host
+          type: text
+          title: Database Host
+          required: true
+          default: postgresql.postgresql.svc.cluster.local
+        - name: database_username
+          type: text
+          title: Database Username
+          required: true
+          default: postgres
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: database_password
+          type: text
+          title: Database Password
+          default: postgres
+          required: true
+        - name: database_port
+          type: text
+          title: Database port
+          required: true
+          default: "5432"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: model_service_database
+          type: text
+          title: MTS DB database
+          default: modelservice
+        - name: keycloak_database
+          type: text
+          title: Keycloak DB database
+          default: keycloak
+    - name: Kafka
+      description: >
+        This section covers Kafka configuration
+      title: Kafka
+      items:
+        - name: kafka_type
+          type: select_one
+          title: Kafka
+          default: embedded_kafka
+          items:
+            - name: embedded_kafka
+              title: Embedded Kafka
+            - name: external_kafka
+              title: External Kafka
+        - name: kafka_sasl_mechanism
+          type: text
+          title: Kafka SASL Mechanism
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_username
+          type: text
+          title: Kafka SASL Username
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_password
+          type: text
+          title: Kafka SASL Password
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          default: kafka
+        - name: kafka_broker
+          type: text
+          title: Kafka Broker Address
+          default: "kafka.kafka.svc.cluster.local:9092"
+        - name: kafka_ssl
+          type: text
+          title: Kafka Enable SSL
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_security_protocol
+          type: text
+          title: Kafka Security Protocol
+          default: PLAINTEXT
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+    - name: Keycloak
+      description: >
+        This section covers Keycloak section
+      title: Keycloak
+      items:
+        - name: keycloak_api_password
+          type: text
+          title: Keycloak API Password
+          required: true
+          default: realmadmin
+          hidden: true
+        - name: keycloak_admin_password
+          type: text
+          title: Keycloak Admin Password
+          required: true
+          default: studio
+        - name: keycloak_client_id
+          type: text
+          title: Keycloak Client ID
+          default: rasa-studio-backend
+    - name: S3 Storage
+      description: >
+        This section covers S3 storage for MTS/MRS
+      title: S3 Storage
+      items:
+        - name: bucket_provider
+          type: select_one
+          title: Bucket Provider
+          default: gcp_bucket
+          items:
+            - name: gcp_bucket
+              title: Google Cloud Storage
+            - name: aws_bucket
+              title: AWS S3 Bucket
+        - name: storage_type
+          type: text
+          title: Storage Type
+          default: "gcs" #'{{repl ternary (ConfigOptionEquals "bucket_provider" "gcp_bucket") "gcs" "aws"}}'
+          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
+        - name: bucket_name
+          type: text
+          title: Bucket Name
+          default: "replicated-demo"
+        - name: google_cloud_project
+          type: text
+          title: Google Cloud project
+          default: "infrastructure-playground-1"
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: cloudsdk_compute_zone
+          type: text
+          title: CloudSDK Compute Zone
+          default: "europe-west3"
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: url_service_account
+          type: text
+          title: Storage Signed Url Service Account Email
+          default: "studio-helm-ci@rasa-releases.iam.gserviceaccount.com"
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: aws_access_key_id
+          type: text
+          title: AWS Access Key ID
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+        - name: aws_secret_access_key
+          type: text
+          title: AWS Secret Access Key
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+        - name: aws_region_name
+          type: text
+          title: AWS Region Name
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+    - name: NFS
+      description: >
+        This section covers NFS server configuration
+      title: NFS Server
+      items:
+        - name: nfs_type
+          type: select_one
+          title: NFS Server
+          default: embedded_nfs
+          items:
+            - name: embedded_nfs
+              title: Embedded NFS
+            - name: external_nfs
+              title: External NFS
+        - name: persistence_type
+          type: text
+          title: Persistence Type
+          default: "local"
+          help_text: Type of the volume that will be used to store the training data. Valid values are `local`, `nfs`. Leave this empty if you are using AWS EFS.
+        - name: nfs_aws_type
+          type: bool
+          title: Using AWS NFS
+          default: "0"
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+        - name: efs_id
+          type: text
+          title: AWS EFS volume ID
+          default: ""
+          help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
+          when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
+        - name: host_path
+          type: text
+          title: Host Path
+          default: /
+          help_text: Directory from the host machine that will be mounted to the container for training data.
+          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+        - name: local_node_name
+          type: text
+          title: Local Node Name
+          default: ""
+          help_text: Node on which the PV will be created
+          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+        - name: storage_class_name
+          type: text
+          title: Storage Class name
+          default: "openebs-hostpath"
+          help_text: Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's `standard-rwo` if you are using NFS server.
+        - name: nfs_server
+          type: text
+          title: NFS Server Address
+          help_text:  DNS name or IP address of the NFS server. This value is used only when type is set to nfs
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    - name: Ingress
+      description: >
+        This section covers Ingress configuration
+      title: Ingress
+      items:
+        - name: install_nginx
+          type: select_one
+          title: Deploying On
+          default: on_vm
+          items:
+            - name: on_vm
+              title: Virtual Machine Deployment
+            - name: on_kubernetes
+              title: Kubernetes Deployment
+        - name: ingress_hostname
+          type: text
+          title: Ingress DNS Hostname
+          default: replicated.studio.rasa-dev.io
+          required: true
+        - name: ingress_class
+          type: text
+          title: Ingress Class Name
+          default: nginx
+        - name: annotations
+          type: textarea
+          title: Annotations
+          help_text: |
+            Use this textarea to provide annotations specific to your ingress controller.
+            For example, `kubernetes.io/tls-acme: true` when using the Nginx ingress controller.
+          default: "{}"

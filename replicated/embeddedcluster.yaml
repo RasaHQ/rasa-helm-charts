@@ -1,9 +1,9 @@
 apiVersion: embeddedcluster.replicated.com/v1beta1
 kind: Config
 metadata:
-  name: hello-replicated
+  name: vm-config
 spec:
-  version: 1.29.1+ec.3
+  version: 1.29.1+ec.4
   unsupportedOverrides:
     k0s: |
       config:

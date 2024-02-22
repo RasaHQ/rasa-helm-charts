@@ -6,7 +6,7 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
   chart:
     name: kafka
-    chartVersion: 26.8.0
+    chartVersion: 26.11.1
   
   releaseName: kafka
   namespace: kafka
@@ -22,43 +22,43 @@ spec:
     provisioning:
       enabled: true
       topics:
-        - name: training-job
+        - name: '{{repl ConfigOption "training_job_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: training-result
+        - name: '{{repl ConfigOption "training_result_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: rasa-events
+        - name: '{{repl ConfigOption "kafka_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: training-status-update
+        - name: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: rasa-events-dlq
+        - name: '{{repl ConfigOption "kafka_dlq_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: deployment-result
+        - name: '{{repl ConfigOption "deployment_result_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:
             max.message.bytes: 64000
             flush.messages: 1
-        - name: deployment-job
+        - name: '{{repl ConfigOption "deployment_job_topic" }}'
           partitions: 1
           replicationFactor: 1
           config:

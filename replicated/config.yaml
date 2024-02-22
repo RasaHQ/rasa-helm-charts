@@ -21,10 +21,6 @@ spec:
           type: text
           title: OpenAI API Key
           required: true
-        - name: gcp_credentials
-          type: text
-          title: GCP SA Base64Encoded
-          required: true
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.
@@ -152,12 +148,16 @@ spec:
         - name: storage_type
           type: text
           title: Storage Type
-          default: "gcs" #'{{repl ternary (ConfigOptionEquals "bucket_provider" "gcp_bucket") "gcs" "aws"}}'
+          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
         - name: bucket_name
           type: text
           title: Bucket Name
           default: "replicated-demo"
+        - name: gcp_credentials
+          type: text
+          title: GCP SA Base64Encoded
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: google_cloud_project
           type: text
           title: Google Cloud project

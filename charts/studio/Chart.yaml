@@ -2,7 +2,7 @@ apiVersion: v2
 name: studio
 description: This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 type: application
-version: 0.4.2-rc13
+version: 0.4.2-rc14
 home: https://rasa.com
 sources:
   - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio

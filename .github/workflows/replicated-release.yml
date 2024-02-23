@@ -1,10 +1,6 @@
 name: Replicated Testing
 
 on:
-  push:
-    branches:
-      - release/replicated
-
   workflow_dispatch:
 
 env:

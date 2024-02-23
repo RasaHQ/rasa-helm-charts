@@ -82,12 +82,10 @@ jobs:
       - name: Update Kots config file
         uses: mikefarah/yq@v4.40.5
         with:
-          replicated-app: ${{ secrets.REPLICATED_APP }}
-          replicated-api-token: ${{ secrets.REPLICATED_TOKEN }}
-          replicated-api-origin: https://api.replicated.com/vendor
-          yaml-dir: ./replicated
-          promote-channel: "infrasec"
-          version: ${{ steps.chart-info.outputs.version }}
+          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
+    
+      - name: test
+        run: cat .github/kots-config.yaml
 
   compatibility-matrix:
     needs: release-to-replicated

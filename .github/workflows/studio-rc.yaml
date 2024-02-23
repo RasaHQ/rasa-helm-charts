@@ -153,9 +153,6 @@ jobs:
       fail-fast: false
       matrix:
         cluster:
-          - { distribution: k3s, version: v1.26 }
-          - { distribution: k3s, version: v1.27 }
-          - { distribution: k3s, version: v1.28 }
           - { distribution: gke, version: v1.28 }
           - { distribution: eks, version: v1.28 }
           - { distribution: aks, version: v1.28 }
@@ -178,6 +175,11 @@ jobs:
         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
         with:
           path: charts/studio/
+
+      - name: Update Kots config file
+        uses: mikefarah/yq@v4.40.5
+        with:
+          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' ./github/kots-config.yaml
 
       - id: create-cluster
         uses: replicatedhq/replicated-actions/create-cluster@v1
@@ -207,6 +209,17 @@ jobs:
           app-slug: ${{ secrets.REPLICATED_APP }}/development
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
+          namespace: studio
+          config-values: .github/kots-config.yaml
+      
+      - name: save the kubeconfig as a tmp file, saving the filename as an output
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > ~/.kube/config
+
+      - name: wait for the replicated pod to be running
+        run: |
+          kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
 
       - name: Remove Cluster
         id: remove-cluster

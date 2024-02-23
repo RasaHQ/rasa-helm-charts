@@ -294,7 +294,7 @@ spec:
         - name: storage_type
           type: text
           title: Storage Type
-          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
+          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
           hidden: true
         - name: bucket_name

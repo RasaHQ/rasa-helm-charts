@@ -84,7 +84,7 @@ jobs:
           cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
     
       - name: test
-        run: echo 'cat .github/kots-config.yaml'
+        run: cat .github/kots-config.yaml
 
     #   - name: Create the infrasec release
     #     uses: replicatedhq/action-kots-release@configurable-endpoint

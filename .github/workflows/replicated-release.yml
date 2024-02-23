@@ -3,7 +3,7 @@ name: Replicated Testing
 on:
   push:
     branches:
-      - release/replicaed
+      - release/replicated
   workflow_dispatch:
 
 env:

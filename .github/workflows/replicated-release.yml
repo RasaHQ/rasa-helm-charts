@@ -79,8 +79,8 @@ jobs:
         with:
           cmd: yq -i '.spec.chart.chartVersion = "${{ env.NGINX_HELM_VERSION }}"' replicated/ingress-nginx-chart.yaml
 
-      - name: Create the infrasec release
-        uses: replicatedhq/action-kots-release@configurable-endpoint
+      - name: Update Kots config file
+        uses: mikefarah/yq@v4.40.5
         with:
           replicated-app: ${{ secrets.REPLICATED_APP }}
           replicated-api-token: ${{ secrets.REPLICATED_TOKEN }}

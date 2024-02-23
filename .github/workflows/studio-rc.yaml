@@ -176,10 +176,10 @@ jobs:
         with:
           path: charts/studio/
 
-      # - name: Update Kots config file
-      #   uses: mikefarah/yq@v4.40.5
-      #   with:
-      #     cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
+      - name: Update Kots config file
+        uses: mikefarah/yq@v4.40.5
+        with:
+          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
 
       - id: create-cluster
         uses: replicatedhq/replicated-actions/create-cluster@v1
@@ -210,7 +210,7 @@ jobs:
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
-          config-values: .github/kots-config.yaml
+          config-values: '.github/kots-config.yaml'
       
       - name: save the kubeconfig as a tmp file, saving the filename as an output
         run: |

@@ -1,7 +1,5 @@
 apiVersion: kots.io/v1beta1
 kind: ConfigValues
-metadata:
-  creationTimestamp: null
 spec:
   values:
     annotations:
@@ -128,4 +126,3 @@ spec:
       default: studio-helm-ci@rasa-releases.iam.gserviceaccount.com
     wait_for_it:
       default: "1"
-status: {}

@@ -175,10 +175,10 @@ jobs:
         with:
           path: charts/studio/
 
-      - name: Update Kots config file
-        uses: mikefarah/yq@v4.40.5
-        with:
-          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
+      # - name: Update Kots config file
+      #   uses: mikefarah/yq@v4.40.5
+      #   with:
+      #     cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
 
       - id: create-cluster
         uses: replicatedhq/replicated-actions/create-cluster@v1

@@ -1,0 +1,131 @@
+apiVersion: kots.io/v1beta1
+kind: ConfigValues
+metadata:
+  creationTimestamp: null
+spec:
+  values:
+    annotations:
+      default: '{}'
+    aws_access_key_id: {}
+    aws_region_name: {}
+    aws_secret_access_key: {}
+    bucket_name:
+      default: replicated-demo
+    bucket_provider:
+      default: gcp_bucket
+    cloudsdk_compute_zone:
+      default: europe-west3
+    connection_type:
+      default: http
+    database_host:
+      default: postgresql.postgresql.svc.cluster.local
+    database_password:
+      default: postgres
+    database_port:
+      default: "5432"
+    database_username:
+      default: postgres
+    deployment_job_topic:
+      default: deployment-job
+    deployment_result_topic:
+      default: deployment-result
+    docker_image_tag:
+      default: 3.7.4-latest
+    efs_id: {}
+    gcp_credentials:
+      value: gcp_bucket_credentials
+    google_cloud_project:
+      default: infrastructure-playground-1
+    host_path:
+      default: /
+    ingress_class:
+      default: nginx
+    ingress_hostname:
+      default: replicated.studio.rasa-dev.io
+    install_nginx:
+      default: on_vm
+      value: no_ingress
+    kafka_broker:
+      default: kafka.kafka.svc.cluster.local:9092
+    kafka_ca_file: {}
+    kafka_cert_file: {}
+    kafka_custom_ssl: {}
+    kafka_dlq_topic:
+      default: rasa-events-dlq
+    kafka_group_id:
+      default: studio
+    kafka_key_file: {}
+    kafka_password:
+      default: kafka
+    kafka_reject_unauthorized: {}
+    kafka_sasl_mechanism: {}
+    kafka_security_protocol:
+      default: PLAINTEXT
+    kafka_ssl: {}
+    kafka_topic:
+      default: rasa-events
+    kafka_training_status_update_topic:
+      default: training-status-update
+    kafka_type:
+      default: embedded_kafka
+    kafka_username: {}
+    keycloak_admin_password:
+      default: studio
+    keycloak_admin_username:
+      default: kcadmin
+    keycloak_api_client_id:
+      default: admin-cli
+    keycloak_api_password:
+      default: realmadmin
+    keycloak_api_username:
+      default: realmadmin
+    keycloak_client_id:
+      default: rasa-studio-backend
+    keycloak_database:
+      default: keycloak
+    keycloak_proxy:
+      default: edge
+    keycloak_realm:
+      default: rasa-studio
+    local_node_name: {}
+    model_service_database:
+      default: modelservice
+    model_service_image_tag:
+      default: 3.2.2
+    nfs_aws_type:
+      default: "0"
+    nfs_server:
+      value: 35.223.231.182
+    nfs_type:
+      default: embedded_nfs
+      value: external_nfs
+    node_tls_reject_unauthorized: {}
+    openai_api_key:
+      value: openai_api_key
+    persistence_type:
+      value: nfs
+    postgres_type:
+      default: embedded_postgres
+    prefer_ssl:
+      default: "false"
+    reject_unauthorized: {}
+    storage_capacity:
+      default: 1Gi
+    storage_class_name:
+      default: openebs-hostpath
+      value: standard-rwo
+    storage_requests:
+      default: 1Gi
+    storage_type:
+      default: gcs
+    studio_image_tag:
+      default: 1.0.4
+    training_job_topic:
+      default: training-job
+    training_result_topic:
+      default: training-result
+    url_service_account:
+      default: studio-helm-ci@rasa-releases.iam.gserviceaccount.com
+    wait_for_it:
+      default: "1"
+status: {}

@@ -79,8 +79,8 @@ jobs:
         with:
           cmd: yq -i '.spec.chart.chartVersion = "${{ env.NGINX_HELM_VERSION }}"' replicated/ingress-nginx-chart.yaml
 
-      - name: Update Kots config file
-        uses: mikefarah/yq@v4.40.5
+      - name: Create the infrasec release
+        uses: replicatedhq/action-kots-release@configurable-endpoint
         with:
           cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
     

@@ -77,7 +77,8 @@ spec:
       default: training-status-update
     kafka_type:
       default: embedded_kafka
-    kafka_username: {}
+    kafka_username:
+      default: ""
     keycloak_admin_password:
       default: studio
     keycloak_admin_username:

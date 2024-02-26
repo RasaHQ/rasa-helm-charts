@@ -118,11 +118,15 @@ jobs:
       - name: Update Kots config file
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' ../kots-config.yaml
+          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
 
-      - name: cat yaml
+      - name: Add Kots config as an environment variable
         run: |
-          cd ../kots-config.yaml
+          {
+            echo 'KOTS_CONFIG<<EOF'
+            cat .github/kots-config.yaml
+            echo EOF
+          } >> "$GITHUB_ENV"
 
       - name: Create Customer 
         id: create-customer
@@ -155,16 +159,11 @@ jobs:
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
-          config-values: ../kots-config.yaml
+          config-values: $KOTS_CONFIG
 
-      - name: cat yaml
+      - name: wait for the replicated pod to be running
         run: |
-          cd /tmp/
-          cat tmp-*.yaml
-
-      # - name: wait for the replicated pod to be running
-      #   run: |
-      #     kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
+          kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
 
       - name: Remove Cluster
         id: remove-cluster

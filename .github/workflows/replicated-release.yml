@@ -163,10 +163,6 @@ jobs:
 
       - name: wait for the replicated pod to be running
         run: |
-          kubectl wait --for=condition=available --timeout=60s deployment/replicated -n studio --timeout=300s
-
-      - name: wait for the replicated pod to be running
-        run: |
           kubectl wait --for=condition=available --timeout=60s deployment/studio-backend -n studio --timeout=300s
 
       - name: Remove Cluster

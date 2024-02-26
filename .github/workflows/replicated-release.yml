@@ -163,9 +163,9 @@ jobs:
 
       - name: wait for the replicated pod to be running
         run: |
-          kubectl wait --for=condition=available --timeout=300s deployment/studio-web-client -n studio --timeout=500s
-          kubectl wait --for=condition=available --timeout=300s deployment/studio-event-ingestion -n studio --timeout=500s
-          kubectl wait --for=condition=available --timeout=300s deployment/studio-backend -n studio --timeout=500s
+          kubectl rollout status sts/postgresql -n postgresql
+          kubectl rollout status sts/kafka-controller -n kafka
+          kubectl rollout status deployment/kotsadm -n studio
 
       - name: Remove Cluster
         id: remove-cluster

@@ -4,9 +4,12 @@ spec:
   values:
     annotations:
       default: '{}'
-    aws_access_key_id: {}
-    aws_region_name: {}
-    aws_secret_access_key: {}
+    aws_access_key_id:
+      default: ""
+    aws_region_name:
+      default: ""
+    aws_secret_access_key:
+      default: ""
     bucket_name:
       default: replicated-demo
     bucket_provider:
@@ -29,9 +32,10 @@ spec:
       default: deployment-result
     docker_image_tag:
       default: 3.7.4-latest
-    efs_id: {}
+    efs_id:
+      default: ""
     gcp_credentials:
-      value: gcp_bucket_credentials
+      value: gcp_credentials
     google_cloud_project:
       default: infrastructure-playground-1
     host_path:
@@ -45,21 +49,28 @@ spec:
       value: no_ingress
     kafka_broker:
       default: kafka.kafka.svc.cluster.local:9092
-    kafka_ca_file: {}
-    kafka_cert_file: {}
-    kafka_custom_ssl: {}
+    kafka_ca_file:
+      default: ""
+    kafka_cert_file:
+      default: ""
+    kafka_custom_ssl:
+      default: ""
     kafka_dlq_topic:
       default: rasa-events-dlq
     kafka_group_id:
       default: studio
-    kafka_key_file: {}
+    kafka_key_file:
+      default: ""
     kafka_password:
       default: kafka
-    kafka_reject_unauthorized: {}
-    kafka_sasl_mechanism: {}
+    kafka_reject_unauthorized:
+      default: ""
+    kafka_sasl_mechanism:
+      default: ""
     kafka_security_protocol:
       default: PLAINTEXT
-    kafka_ssl: {}
+    kafka_ssl:
+      default: ""
     kafka_topic:
       default: rasa-events
     kafka_training_status_update_topic:
@@ -85,7 +96,8 @@ spec:
       default: edge
     keycloak_realm:
       default: rasa-studio
-    local_node_name: {}
+    local_node_name:
+      default: ""
     model_service_database:
       default: modelservice
     model_service_image_tag:
@@ -97,7 +109,8 @@ spec:
     nfs_type:
       default: embedded_nfs
       value: external_nfs
-    node_tls_reject_unauthorized: {}
+    node_tls_reject_unauthorized:
+      default: ""
     openai_api_key:
       value: openai_api_key
     persistence_type:
@@ -106,7 +119,8 @@ spec:
       default: embedded_postgres
     prefer_ssl:
       default: "false"
-    reject_unauthorized: {}
+    reject_unauthorized:
+      default: ""
     storage_capacity:
       default: 1Gi
     storage_class_name:

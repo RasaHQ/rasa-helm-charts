@@ -2,109 +2,158 @@ apiVersion: kots.io/v1beta1
 kind: ConfigValues
 spec:
   values:
-    # annotations:
-    #   default: '{}'
+    annotations:
+      default: '{}'
+      value: '{}'
     aws_access_key_id:
       default: ""
+      value: ""
     aws_region_name:
       default: ""
+      value: ""
     aws_secret_access_key:
       default: ""
+      value: ""
     bucket_name:
       default: replicated-demo
+      value: replicated-demo
     bucket_provider:
       default: gcp_bucket
+      value: gcp_bucket
     cloudsdk_compute_zone:
       default: europe-west3
+      value: europe-west3
     connection_type:
       default: http
+      value: http
     database_host:
       default: postgresql.postgresql.svc.cluster.local
+      value: postgresql.postgresql.svc.cluster.local
     database_password:
       default: postgres
+      value: postgres
     database_port:
       default: "5432"
+      value:  "5432"
     database_username:
       default: postgres
+      value: postgres
     deployment_job_topic:
       default: deployment-job
+      value: deployment-job
     deployment_result_topic:
       default: deployment-result
+      value: deployment-result
     docker_image_tag:
       default: 3.7.4-latest
+      value: 3.7.4-latest
     efs_id:
       default: ""
+      value: ""
     gcp_credentials:
       value: gcp_credentials
     google_cloud_project:
       default: infrastructure-playground-1
+      value: infrastructure-playground-1
     host_path:
       default: /
+      value: /
     ingress_class:
       default: nginx
+      value: nginx
     ingress_hostname:
       default: replicated.studio.rasa-dev.io
+      value: replicated.studio.rasa-dev.io
     install_nginx:
       default: on_vm
       value: no_ingress
     kafka_broker:
       default: kafka.kafka.svc.cluster.local:9092
+      value: kafka.kafka.svc.cluster.local:9092
     kafka_ca_file:
       default: ""
+      value: ""
     kafka_cert_file:
       default: ""
+      value: ""
     kafka_custom_ssl:
       default: ""
+      value: ""
     kafka_dlq_topic:
       default: rasa-events-dlq
+      value: rasa-events-dlq
     kafka_group_id:
       default: studio
+      value: studio
     kafka_key_file:
       default: ""
+      value: ""
     kafka_password:
       default: kafka
+      value: kafka
     kafka_reject_unauthorized:
       default: ""
+      value: ""
     kafka_sasl_mechanism:
       default: ""
+      value: ""
     kafka_security_protocol:
       default: PLAINTEXT
+      value: PLAINTEXT
     kafka_ssl:
       default: ""
+      value: ""
     kafka_topic:
       default: rasa-events
+      value: rasa-events
     kafka_training_status_update_topic:
       default: training-status-update
+      value: training-status-update
     kafka_type:
       default: embedded_kafka
+      value: embedded_kafka
     kafka_username:
       default: ""
+      value: ""
     keycloak_admin_password:
       default: studio
+      value: studio
     keycloak_admin_username:
       default: kcadmin
+      value: kcadmin
     keycloak_api_client_id:
       default: admin-cli
+      value: admin-cli
     keycloak_api_password:
       default: realmadmin
+      value: realmadmin
     keycloak_api_username:
       default: realmadmin
+      value: realmadmin
     keycloak_client_id:
       default: rasa-studio-backend
+      value: rasa-studio-backend
     keycloak_database:
       default: keycloak
+      value: keycloak
     keycloak_proxy:
       default: edge
+      value: edge
     keycloak_realm:
       default: rasa-studio
+      value: rasa-studio
     local_node_name:
       default: ""
+      value: ""
     model_service_database:
       default: modelservice
+      value: modelservice
     model_service_image_tag:
       default: 3.2.2
+      value: 3.2.2
     nfs_aws_type:
       default: "0"
+      value: "0"
     nfs_server:
       value: 35.223.231.182
     nfs_type:
@@ -112,32 +161,44 @@ spec:
       value: external_nfs
     node_tls_reject_unauthorized:
       default: ""
+      value: ""
     openai_api_key:
       value: openai_api_key
     persistence_type:
       value: nfs
     postgres_type:
       default: embedded_postgres
+      value: embedded_postgres
     prefer_ssl:
       default: "false"
+      value: "false"
     reject_unauthorized:
       default: ""
+      value: ""
     storage_capacity:
       default: 1Gi
+      value: 1Gi
     storage_class_name:
       default: openebs-hostpath
       value: standard-rwo
     storage_requests:
       default: 1Gi
+      value: 1Gi
     storage_type:
       default: gcs
+      value: gcs
     studio_image_tag:
       default: 1.0.4
+      value: 1.0.4
     training_job_topic:
       default: training-job
+      value: training-job
     training_result_topic:
       default: training-result
+      value: training-result
     url_service_account:
       default: studio-helm-ci@rasa-releases.iam.gserviceaccount.com
+      value: studio-helm-ci@rasa-releases.iam.gserviceaccount.com
     wait_for_it:
       default: "1"
+      value: "1"

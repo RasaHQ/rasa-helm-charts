@@ -2,8 +2,8 @@ apiVersion: kots.io/v1beta1
 kind: ConfigValues
 spec:
   values:
-    annotations:
-      default: '{}'
+    # annotations:
+    #   default: '{}'
     aws_access_key_id:
       default: ""
     aws_region_name:

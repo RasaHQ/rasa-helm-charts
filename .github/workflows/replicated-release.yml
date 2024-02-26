@@ -165,7 +165,9 @@ jobs:
         run: |
           sleep 30
           kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
+          sleep 30
           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
+          sleep 30
           kubectl rollout status deployment/kotsadm -n studio --watch --timeout=300s
 
       - name: Remove Cluster

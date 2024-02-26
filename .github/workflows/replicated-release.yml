@@ -122,9 +122,11 @@ jobs:
 
       - name: Add Kots config as an environment variable
         run: |
-          echo "KOTS_CONFIG<<EOF" >> $GITHUB_ENV
-          cat .github/kots-config.yaml >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          {
+            echo 'KOTS_CONFIG<<EOF'
+            cat .github/kots-config.yaml
+            echo EOF
+          } >> "$GITHUB_ENV"
 
       - name: Create Customer 
         id: create-customer
@@ -157,7 +159,7 @@ jobs:
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
-          config-values: $KOTS_CONFIG
+          config-values: ${{ env.KOTS_CONFIG }}
 
       - name: wait for the replicated pod to be running
         run: |

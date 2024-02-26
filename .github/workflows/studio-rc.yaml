@@ -215,7 +215,9 @@ jobs:
           config-values: .github/kots-config.yaml
 
       - name: cat yaml
-        run: cat  /tmp/*.yaml
+        run: |
+          cd /tmp/
+          cat *.yaml
 
       # - name: wait for the replicated pod to be running
       #   run: |

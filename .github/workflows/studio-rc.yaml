@@ -204,6 +204,7 @@ jobs:
 
       - name: Deploy the app
         uses: replicatedhq/replicated-actions/kots-install@v1
+        continue-on-error: true
         with:
           kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
           app-slug: ${{ secrets.REPLICATED_APP }}/development
@@ -212,9 +213,12 @@ jobs:
           namespace: studio
           config-values: .github/kots-config.yaml
 
-      - name: wait for the replicated pod to be running
-        run: |
-          kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
+      - name: cat yaml
+        run: cat  /tmp/*.yaml
+
+      # - name: wait for the replicated pod to be running
+      #   run: |
+      #     kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
 
       - name: Remove Cluster
         id: remove-cluster

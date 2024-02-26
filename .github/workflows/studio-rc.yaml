@@ -181,20 +181,6 @@ jobs:
         with:
           cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
 
-      - id: create-cluster
-        uses: replicatedhq/replicated-actions/create-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_TOKEN }}
-          kubernetes-distribution: ${{ matrix.cluster.distribution }}
-          kubernetes-version: ${{ matrix.cluster.version }}
-          ttl: 30m
-          cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
-
-      - name: save the kubeconfig as a tmp file, saving the filename as an output
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > ~/.kube/config
-
       - name: Create Customer 
         id: create-customer
         uses: replicatedhq/replicated-actions/create-customer@v1
@@ -205,7 +191,17 @@ jobs:
           channel-slug: development
           customer-email: ${{ steps.chart-info.outputs.name }}@example.com
           expires-in: 2
-          license-type: test
+          is-kots-install-enabled: true
+
+      - id: create-cluster
+        uses: replicatedhq/replicated-actions/create-cluster@v1
+        with:
+          api-token: ${{ secrets.REPLICATED_TOKEN }}
+          kubernetes-distribution: ${{ matrix.cluster.distribution }}
+          kubernetes-version: ${{ matrix.cluster.version }}
+          ttl: 30m
+          cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
+          export-kubeconfig: true
 
       - name: Deploy the app
         uses: replicatedhq/replicated-actions/kots-install@v1
@@ -215,7 +211,7 @@ jobs:
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
-          config-values: '.github/kots-config.yaml'
+          config-values: .github/kots-config.yaml
 
       - name: wait for the replicated pod to be running
         run: |

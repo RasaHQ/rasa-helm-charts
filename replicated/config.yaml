@@ -27,6 +27,7 @@ spec:
         - name: openai_api_key
           type: text
           title: OpenAI API key
+          default: ""
           required: true
           help_text: OpenAI API key to be used
     - name: Database
@@ -119,11 +120,13 @@ spec:
         - name: kafka_sasl_mechanism
           type: text
           title: Kafka SASL mechanism
+          default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
         - name: kafka_username
           type: text
           title: Kafka SASL username
+          default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka SASL username
         - name: kafka_password
@@ -328,16 +331,19 @@ spec:
         - name: aws_access_key_id
           type: text
           title: AWS Access Key ID
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: AWS access key ID used for S3
         - name: aws_secret_access_key
           type: text
           title: AWS Secret Access Key
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: AWS secret access key ID used for S3
         - name: aws_region_name
           type: text
           title: AWS Region Name
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: The region where the bucket is located.
     - name: NFS
@@ -403,6 +409,7 @@ spec:
         - name: nfs_server
           type: text
           title: NFS Server Address
+          default: ""
           help_text:  DNS name or IP address of the NFS server. This value is used only when type is set to nfs
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Ingress

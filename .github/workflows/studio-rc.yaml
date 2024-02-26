@@ -190,6 +190,11 @@ jobs:
           ttl: 30m
           cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
 
+      - name: save the kubeconfig as a tmp file, saving the filename as an output
+        run: |
+          mkdir -p ~/.kube
+          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > ~/.kube/config
+
       - name: Create Customer 
         id: create-customer
         uses: replicatedhq/replicated-actions/create-customer@v1
@@ -211,11 +216,6 @@ jobs:
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
           config-values: '.github/kots-config.yaml'
-      
-      - name: save the kubeconfig as a tmp file, saving the filename as an output
-        run: |
-          mkdir -p ~/.kube
-          echo "${{ steps.create-cluster.outputs.cluster-kubeconfig }}" > ~/.kube/config
 
       - name: wait for the replicated pod to be running
         run: |

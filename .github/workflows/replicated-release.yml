@@ -171,9 +171,11 @@ jobs:
           sleep 30
           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
           sleep 30
-          kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
+          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
           sleep 30
           kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
           sleep 30
           kubectl rollout status deployment/studio-backend -n studio --watch --timeout=300s
 

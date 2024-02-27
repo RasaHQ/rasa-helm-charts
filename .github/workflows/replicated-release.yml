@@ -166,10 +166,12 @@ jobs:
 
       - name: Wait for deployments to be ready
         run: |
-          sleep 30
+          sleep 60
           kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
           sleep 30
           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
+          sleep 30
+          kubectl rollout status job/studio-database-migration -n studio --watch --timeout=300s
           sleep 30
           kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
           sleep 30

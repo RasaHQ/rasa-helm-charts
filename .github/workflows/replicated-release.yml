@@ -95,7 +95,10 @@ jobs:
       fail-fast: false
       matrix:
         cluster:
-          - { distribution: gke, version: v1.28 }
+          - { distribution: gke, version: v1.28, instance-type: n2-standard-4 }
+          - { distribution: eks, version: v1.28, instance-type: m6i.xlarge }
+          - { distribution: aks, version: v1.28, instance-type: Standard_B4ms }
+          - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium }
     runs-on: ubuntu-22.04
 
     steps:
@@ -149,10 +152,10 @@ jobs:
           ttl: 30m
           cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
           export-kubeconfig: true
+          instance-type: ${{ matrix.cluster.instance-type }}
 
       - name: Deploy the app
         uses: replicatedhq/replicated-actions/kots-install@v1
-        continue-on-error: true
         with:
           kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
           app-slug: ${{ secrets.REPLICATED_APP }}/infrasec
@@ -161,14 +164,18 @@ jobs:
           namespace: studio
           config-values: ${{ env.KOTS_CONFIG }}
 
-      - name: wait for the replicated pod to be running
+      - name: Wait for deployments to be ready
         run: |
           sleep 30
           kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
           sleep 30
           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
           sleep 30
-          kubectl rollout status deployment/kotsadm -n studio --watch --timeout=300s
+          kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-backend -n studio --watch --timeout=300s
 
       - name: Remove Cluster
         id: remove-cluster

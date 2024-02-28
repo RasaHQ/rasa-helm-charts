@@ -147,18 +147,18 @@ jobs:
           promote-channel: "Development"
           version: ${{ steps.chart-info.outputs.version }}
 
-  compatibility-matrix:
+  distribution-test-matrix:
     needs: release-to-replicated
     strategy:
       fail-fast: false
       matrix:
         cluster:
-          - { distribution: gke, version: v1.28 }
-          - { distribution: eks, version: v1.28 }
-          - { distribution: aks, version: v1.28 }
-          - { distribution: openshift, version: v4.14.0-okd }
+          - { distribution: gke, version: v1.28, instance-type: n2-standard-4 }
+          - { distribution: eks, version: v1.28, instance-type: m6i.xlarge }
+          - { distribution: aks, version: v1.28, instance-type: Standard_B4ms }
+        #   - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium } # its using cri-o runtime
     runs-on: ubuntu-22.04
-
+  
     steps:
       - name: Checkout repository
         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
@@ -179,7 +179,15 @@ jobs:
       - name: Update Kots config file
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' ./github/kots-config.yaml
+          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
+
+      - name: Add Kots config as an environment variable
+        run: |
+          {
+            echo 'KOTS_CONFIG<<EOF'
+            cat .github/kots-config.yaml
+            echo EOF
+          } >> "$GITHUB_ENV"
 
       - name: Create Customer 
         id: create-customer
@@ -190,7 +198,8 @@ jobs:
           customer-name: ${{ steps.chart-info.outputs.name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
           channel-slug: development
           customer-email: ${{ steps.chart-info.outputs.name }}@example.com
-          expires-in: 2
+          expires-in: 1
+          license-type: test
           is-kots-install-enabled: true
 
       - id: create-cluster
@@ -202,24 +211,32 @@ jobs:
           ttl: 30m
           cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
           export-kubeconfig: true
-
+          instance-type: ${{ matrix.cluster.instance-type }}
+  
       - name: Deploy the app
         uses: replicatedhq/replicated-actions/kots-install@v1
-        continue-on-error: true
         with:
           kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
           app-slug: ${{ secrets.REPLICATED_APP }}/development
           license-file: ${{ steps.create-customer.outputs.license-file }}
           app-version-label: ${{ steps.chart-info.outputs.version }}
           namespace: studio
-          config-values: .github/kots-config.yaml
+          config-values: ${{ env.KOTS_CONFIG }}
 
-      - name: cat yaml
-        run: cat  /tmp/*.yaml
-
-      # - name: wait for the replicated pod to be running
-      #   run: |
-      #     kubectl wait --for=condition=available --timeout=60s deployment/replicated  -n slackernews --timeout=300s
+      - name: Wait for deployments to be ready # this needs fixing, need to find a better way to check this
+        run: |
+          sleep 90
+          kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
+          sleep 60
+          kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
+          sleep 60
+          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
+          sleep 30
+          kubectl rollout status deployment/studio-backend -n studio --watch --timeout=300s
 
       - name: Remove Cluster
         id: remove-cluster

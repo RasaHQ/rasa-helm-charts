@@ -27,5 +27,3 @@ spec:
               nodePorts:
                 http: "80"
                 https: "443"
-            scope:
-              enabled: true

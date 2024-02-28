@@ -140,7 +140,7 @@ jobs:
           customer-name: ${{ steps.chart-info.outputs.name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
           channel-slug: infrasec
           customer-email: ${{ steps.chart-info.outputs.name }}@example.com
-          expires-in: 2
+          expires-in: 1
           license-type: test
           is-kots-install-enabled: true
 

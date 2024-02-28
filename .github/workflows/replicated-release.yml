@@ -98,7 +98,7 @@ jobs:
           - { distribution: gke, version: v1.28, instance-type: n2-standard-4 }
           - { distribution: eks, version: v1.28, instance-type: m6i.xlarge }
           - { distribution: aks, version: v1.28, instance-type: Standard_B4ms }
-          - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium }
+        #   - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium } # its using cri-o runtime
     runs-on: ubuntu-22.04
 
     steps:
@@ -170,7 +170,7 @@ jobs:
           kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
           sleep 30
           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
-          sleep 30
+          sleep 60
           kubectl rollout status job/studio-database-migration -n studio --watch --timeout=300s
           sleep 30
           kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s

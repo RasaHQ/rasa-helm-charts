@@ -198,7 +198,7 @@ spec:
             KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
               value: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
         consumer:
-          replicaCount: 1
+          replicaCount: '{{repl ConfigOption "training_consumer_replicas" }}'
           environmentVariables:
             # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
             KAFKA_JOB_TOPIC:
@@ -242,7 +242,7 @@ spec:
             className: '{{repl ConfigOption "ingress_class" }}'
             annotations: repl{{ ConfigOption "annotations" | nindent 14 }}
         consumer:
-          replicaCount: 1
+          replicaCount: '{{repl ConfigOption "running_consumer_replicas" }}'
           environmentVariables:
             # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
             DEPLOYMENT_JOB_KAFKA_TOPIC:

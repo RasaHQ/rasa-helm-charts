@@ -39,12 +39,12 @@ spec:
           type: text
           title: Number of training consumer replicas
           default: "2"
-          help_text: More information (here)[https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of].
+          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
         - name: running_consumer_replicas
           type: text
           title: Number of running consumer replicas
           default: "2"
-          help_text: More information (here)[https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of].
+          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.

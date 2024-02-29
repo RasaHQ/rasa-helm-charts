@@ -98,7 +98,7 @@ backend:
         key: "KEYCLOAK_API_PASSWORD"
     # -- The complete registry URL of the Rasa Plus docker image to be used for training
     DOCKER_IMAGE_TAG:
-      value: ""
+      value: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus:3.7.7"
 
   # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:

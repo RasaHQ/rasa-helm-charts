@@ -464,4 +464,4 @@ spec:
           help_text: |
             Use this textarea to provide annotations specific to your ingress controller.
             For example, `kubernetes.io/tls-acme: true`.
-          default: "{}"
+          default: ""

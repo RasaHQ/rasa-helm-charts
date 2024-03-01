@@ -82,10 +82,12 @@ jobs:
       - name: Create the infrasec release
         uses: replicatedhq/action-kots-release@configurable-endpoint
         with:
-          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
-    
-      - name: test
-        run: cat .github/kots-config.yaml
+          replicated-app: ${{ secrets.REPLICATED_APP }}
+          replicated-api-token: ${{ secrets.REPLICATED_TOKEN }}
+          replicated-api-origin: https://api.replicated.com/vendor
+          yaml-dir: ./replicated
+          promote-channel: "infrasec"
+          version: ${{ steps.chart-info.outputs.version }}
 
 #   compatibility-matrix:
 #     needs: release-to-replicated

@@ -434,13 +434,13 @@ spec:
       items:
         - name: install_nginx
           type: select_one
-          title: Deploying On
+          title: Deploy on
           default: on_vm
           items:
             - name: on_vm
-              title: Virtual Machine Deployment
+              title: Virtual Machine
             - name: on_kubernetes
-              title: Kubernetes Deployment
+              title: Kubernetes
             - name: no_ingress
               title: Do not install
         - name: ingress_hostname

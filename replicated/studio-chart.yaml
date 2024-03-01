@@ -86,7 +86,11 @@ spec:
         KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     eventIngestion:
       environmentVariables:
@@ -135,7 +139,11 @@ spec:
           value: '{{repl ConfigOption "keycloak_proxy" }}'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     modelService:
       # -- repository specifies image repository for Studio
@@ -244,7 +252,11 @@ spec:
               value: '{{repl ConfigOption "deployment_job_topic" }}'
           ingress:
             className: '{{repl ConfigOption "ingress_class" }}'
-            annotations: repl{{ ConfigOption "annotations" | nindent 14 }}
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+              nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+              kots.io/placeholder: |-
+                repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 14 }}repl{{ end }}
         consumer:
           replicaCount: '{{repl ConfigOption "running_consumer_replicas" }}'
           environmentVariables:

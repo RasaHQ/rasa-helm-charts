@@ -3,7 +3,8 @@ kind: HelmChart
 metadata:
   name: ingress-nginx
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `install_nginx` `on_vm` }}'
+  # exclude: 'repl{{ ConfigOptionEquals `install_nginx` `on_vm` }}'
+  exclude: repl{{ if ConfigOptionNotEquals `install_nginx` `on_kubernetes` }}repl{{ ConfigOptionEquals `install_nginx` `on_vm` }}repl{{ end }}
   chart:
     name: ingress-nginx
     chartVersion: 4.9.1

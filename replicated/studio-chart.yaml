@@ -6,7 +6,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 0.4.1
+    chartVersion: 0.4.2
   
   releaseName: studio
   # values are used in the customer environment, as a pre-render step
@@ -72,7 +72,11 @@ spec:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations: 
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
     
     webClient:
       environmentVariables:
@@ -82,7 +86,11 @@ spec:
         KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     eventIngestion:
       environmentVariables:
@@ -131,7 +139,11 @@ spec:
           value: '{{repl ConfigOption "keycloak_proxy" }}'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     modelService:
       # -- repository specifies image repository for Studio
@@ -198,7 +210,7 @@ spec:
             KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
               value: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
         consumer:
-          replicaCount: 1
+          replicaCount: repl{{ ConfigOption "training_consumer_replicas" }}
           environmentVariables:
             # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
             KAFKA_JOB_TOPIC:
@@ -214,16 +226,16 @@ spec:
               value: "/app"
             # -- Value of CPU limit to allocate to the container for model training
             RASA_REQUESTS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_REQUESTS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_requests_memory" }}'
             # -- Value of CPU limit to allocate to the container for model training
             RASA_LIMITS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_LIMITS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_limits_memory" }}'
 
       running:
         orchestrator:
@@ -240,9 +252,13 @@ spec:
               value: '{{repl ConfigOption "deployment_job_topic" }}'
           ingress:
             className: '{{repl ConfigOption "ingress_class" }}'
-            annotations: repl{{ ConfigOption "annotations" | nindent 14 }}
+            annotations:
+              nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+              nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+              kots.io/placeholder: |-
+                repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 14 }}repl{{ end }}
         consumer:
-          replicaCount: 1
+          replicaCount: repl{{ ConfigOption "running_consumer_replicas" }}
           environmentVariables:
             # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
             DEPLOYMENT_JOB_KAFKA_TOPIC:
@@ -257,16 +273,16 @@ spec:
             KUBERNETES_JOB_BOT_CONFIG_MOUNT:
               value: "/app"
             RASA_REQUESTS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_REQUESTS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_requests_memory" }}'
             # -- Value of CPU limit to allocate to the container for model training
             RASA_LIMITS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_LIMITS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_limits_memory" }}'
 
       persistence:
         # -- Should the PV and PVC be created

@@ -72,7 +72,12 @@ spec:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
-        annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        # annotations: repl{{ ConfigOption "annotations" | nindent 10 }}
+        annotations: 
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
     
     webClient:
       environmentVariables:

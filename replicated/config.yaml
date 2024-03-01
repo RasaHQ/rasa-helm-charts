@@ -100,6 +100,7 @@ spec:
           required: true
           default: postgresql.postgresql.svc.cluster.local
           help_text: The database host name
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: database_username
           type: text
           title: Database Username
@@ -113,6 +114,7 @@ spec:
           default: postgres
           required: true
           help_text: The database password
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: database_port
           type: text
           title: Database port
@@ -125,11 +127,13 @@ spec:
           title: MTS DB database
           default: modelservice
           help_text: The database name for model training and running service
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: keycloak_database
           type: text
           title: Keycloak DB database
           default: keycloak
           help_text: The database name for keycloak user management service
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: prefer_ssl
           type: text
           title: Prefer SSL
@@ -161,6 +165,7 @@ spec:
           title: Kafka broker address
           default: "kafka.kafka.svc.cluster.local:9092"
           help_text: Kafka broker address
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_sasl_mechanism
           type: text
           title: Kafka SASL mechanism
@@ -284,6 +289,7 @@ spec:
           type: text
           title: Keycloak realm
           default: rasa-studio
+          hidden: true
           help_text: Keycloak realm name
         - name: keycloak_api_username
           type: text
@@ -303,6 +309,7 @@ spec:
           type: text
           title: Keycloak API client ID
           default: admin-cli
+          hidden: true
           help_text: Keycloak API client ID
         - name: keycloak_admin_username
           type: text
@@ -319,6 +326,7 @@ spec:
           type: text
           title: Keycloak Client ID
           default: rasa-studio-backend
+          hidden: true
           help_text: Keycloak client id
         - name: keycloak_proxy
           type: text
@@ -358,19 +366,19 @@ spec:
         - name: google_cloud_project
           type: text
           title: Google Cloud project
-          default: "infrastructure-playground-1"
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The project ID of the GCP project.
         - name: cloudsdk_compute_zone
           type: text
           title: CloudSDK Compute Zone
-          default: "europe-west3"
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The zone where the bucket is located.
         - name: url_service_account
           type: text
           title: Storage Signed Url Service Account Email
-          default: "studio-helm-ci@rasa-releases.iam.gserviceaccount.com"
+          default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The service account email address.
         - name: aws_access_key_id
@@ -409,7 +417,8 @@ spec:
           type: text
           title: Persistence Type
           default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
-          help_text: Type of the volume that will be used to store the training data. Valid values are `local`, `nfs`. Leave this empty if you are using AWS EFS.
+          help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
         - name: nfs_aws_type
           type: bool
           title: Using AWS NFS
@@ -439,6 +448,7 @@ spec:
           title: Storage Class name
           default: "openebs-hostpath"
           help_text: Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's `standard-rwo` if you are using NFS server.
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
         - name: storage_capacity
           type: text
           title: Storage Capacity
@@ -476,7 +486,7 @@ spec:
         - name: ingress_hostname
           type: text
           title: Ingress DNS Hostname
-          default: replicated.studio.rasa-dev.io
+          default: ""
           help_text: Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
         - name: connection_type
           type: text
@@ -488,6 +498,7 @@ spec:
           title: Ingress Class Name
           default: nginx
           help_text: Ingress class name
+          when: '{{repl ConfigOptionEquals "install_nginx" "no_ingress"}}'
         - name: annotations
           type: textarea
           title: Annotations

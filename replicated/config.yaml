@@ -45,6 +45,35 @@ spec:
           title: Number of running consumer replicas
           default: "2"
           help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+        - name: configure_rasa_resources
+          type: bool
+          title: Configure Rasa Bot resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for model training/running
+        - name: rasa_requests_cpu
+          type: text
+          title: Rasa requests CPU
+          default: "1000m"
+          help_text: Value of CPU requests to allocate to the container for model training/running
+          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
+        - name: rasa_requests_memory
+          type: text
+          title: Rasa requests memory
+          default: "1Gi"
+          help_text: Value of Memory requests to allocate to the container for model training/running
+          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
+        - name: rasa_limits_cpu
+          type: text
+          title: Rasa limits CPU
+          default: "1000m"
+          help_text: Value of Memory limits to allocate to the container for model training/running
+          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
+        - name: rasa_limits_memory
+          type: text
+          title: Rasa limits memory
+          default: "1Gi"
+          help_text: Value of Memory limits to allocate to the container for model training/running
+          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.
@@ -318,7 +347,7 @@ spec:
         - name: bucket_name
           type: text
           title: Bucket Name
-          default: "replicated-demo"
+          default: ""
           help_text: Name of the storage bucket. Make sure to pre-create this bucket.
         - name: gcp_credentials
           type: text

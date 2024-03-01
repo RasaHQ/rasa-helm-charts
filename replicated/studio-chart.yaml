@@ -226,16 +226,16 @@ spec:
               value: "/app"
             # -- Value of CPU limit to allocate to the container for model training
             RASA_REQUESTS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_REQUESTS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_requests_memory" }}'
             # -- Value of CPU limit to allocate to the container for model training
             RASA_LIMITS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_LIMITS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_limits_memory" }}'
 
       running:
         orchestrator:
@@ -273,16 +273,16 @@ spec:
             KUBERNETES_JOB_BOT_CONFIG_MOUNT:
               value: "/app"
             RASA_REQUESTS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_REQUESTS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_requests_memory" }}'
             # -- Value of CPU limit to allocate to the container for model training
             RASA_LIMITS_CPU:
-              value: "1000m"
+              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
             # -- Value of Memory limit to allocate to the container for model training
             RASA_LIMITS_MEMORY:
-              value: "1Gi"
+              value: '{{repl ConfigOption "rasa_limits_memory" }}'
 
       persistence:
         # -- Should the PV and PVC be created

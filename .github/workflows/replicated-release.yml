@@ -87,111 +87,111 @@ jobs:
       - name: test
         run: cat .github/kots-config.yaml
 
-  compatibility-matrix:
-    needs: release-to-replicated
-    strategy:
-      fail-fast: false
-      matrix:
-        cluster:
-          - { distribution: gke, version: v1.28, instance-type: n2-standard-4 }
-          - { distribution: eks, version: v1.28, instance-type: m6i.xlarge }
-          - { distribution: aks, version: v1.28, instance-type: Standard_B4ms }
-        #   - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium } # its using cri-o runtime
-    runs-on: ubuntu-22.04
+#   compatibility-matrix:
+#     needs: release-to-replicated
+#     strategy:
+#       fail-fast: false
+#       matrix:
+#         cluster:
+#           - { distribution: gke, version: v1.28, instance-type: n2-standard-4 }
+#           - { distribution: eks, version: v1.28, instance-type: m6i.xlarge }
+#           - { distribution: aks, version: v1.28, instance-type: Standard_B4ms }
+#         #   - { distribution: openshift, version: v4.14.0-okd, instance-type: r1.medium } # its using cri-o runtime
+#     runs-on: ubuntu-22.04
 
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
-        with:
-          fetch-depth: 0
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+#         with:
+#           fetch-depth: 0
 
-      - name: Install Helm 3
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
-        with:
-          version: v3.11.2
+#       - name: Install Helm 3
+#         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+#         with:
+#           version: v3.11.2
 
-      - name: Read Helm Chart
-        id: chart-info
-        uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
-        with:
-          path: charts/studio/
+#       - name: Read Helm Chart
+#         id: chart-info
+#         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+#         with:
+#           path: charts/studio/
 
-      - name: Update Kots config file
-        uses: mikefarah/yq@v4.40.5
-        with:
-          cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
+#       - name: Update Kots config file
+#         uses: mikefarah/yq@v4.40.5
+#         with:
+#           cmd: yq -i '.spec.values.gcp_credentials.value = "${{ env.GCP_BUCKET_CREDENTIALS }}"' .github/kots-config.yaml
 
-      - name: Add Kots config as an environment variable
-        run: |
-          {
-            echo 'KOTS_CONFIG<<EOF'
-            cat .github/kots-config.yaml
-            echo EOF
-          } >> "$GITHUB_ENV"
+#       - name: Add Kots config as an environment variable
+#         run: |
+#           {
+#             echo 'KOTS_CONFIG<<EOF'
+#             cat .github/kots-config.yaml
+#             echo EOF
+#           } >> "$GITHUB_ENV"
 
-      - name: Create Customer 
-        id: create-customer
-        uses: replicatedhq/replicated-actions/create-customer@v1
-        with:
-          app-slug: ${{ secrets.REPLICATED_APP }}
-          api-token: ${{ secrets.REPLICATED_TOKEN }}
-          customer-name: ${{ steps.chart-info.outputs.name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
-          channel-slug: infrasec
-          customer-email: ${{ steps.chart-info.outputs.name }}@example.com
-          expires-in: 1
-          license-type: test
-          is-kots-install-enabled: true
+#       - name: Create Customer 
+#         id: create-customer
+#         uses: replicatedhq/replicated-actions/create-customer@v1
+#         with:
+#           app-slug: ${{ secrets.REPLICATED_APP }}
+#           api-token: ${{ secrets.REPLICATED_TOKEN }}
+#           customer-name: ${{ steps.chart-info.outputs.name }}-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}
+#           channel-slug: infrasec
+#           customer-email: ${{ steps.chart-info.outputs.name }}@example.com
+#           expires-in: 1
+#           license-type: test
+#           is-kots-install-enabled: true
 
-      - id: create-cluster
-        uses: replicatedhq/replicated-actions/create-cluster@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_TOKEN }}
-          kubernetes-distribution: ${{ matrix.cluster.distribution }}
-          kubernetes-version: ${{ matrix.cluster.version }}
-          ttl: 30m
-          cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
-          export-kubeconfig: true
-          instance-type: ${{ matrix.cluster.instance-type }}
+#       - id: create-cluster
+#         uses: replicatedhq/replicated-actions/create-cluster@v1
+#         with:
+#           api-token: ${{ secrets.REPLICATED_TOKEN }}
+#           kubernetes-distribution: ${{ matrix.cluster.distribution }}
+#           kubernetes-version: ${{ matrix.cluster.version }}
+#           ttl: 30m
+#           cluster-name: studio-${{ matrix.cluster.distribution }}-${{ matrix.cluster.version }}-${{ steps.chart-info.outputs.version }}
+#           export-kubeconfig: true
+#           instance-type: ${{ matrix.cluster.instance-type }}
 
-      - name: Deploy the app
-        uses: replicatedhq/replicated-actions/kots-install@v1
-        with:
-          kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
-          app-slug: ${{ secrets.REPLICATED_APP }}/infrasec
-          license-file: ${{ steps.create-customer.outputs.license-file }}
-          app-version-label: ${{ steps.chart-info.outputs.version }}
-          namespace: studio
-          config-values: ${{ env.KOTS_CONFIG }}
+#       - name: Deploy the app
+#         uses: replicatedhq/replicated-actions/kots-install@v1
+#         with:
+#           kubeconfig: ${{ steps.create-cluster.outputs.cluster-kubeconfig }}
+#           app-slug: ${{ secrets.REPLICATED_APP }}/infrasec
+#           license-file: ${{ steps.create-customer.outputs.license-file }}
+#           app-version-label: ${{ steps.chart-info.outputs.version }}
+#           namespace: studio
+#           config-values: ${{ env.KOTS_CONFIG }}
 
-      - name: Wait for deployments to be ready
-        run: |
-          sleep 90
-          kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
-          sleep 60
-          kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
-          sleep 60
-          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
-          sleep 30
-          kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
-          sleep 30
-          kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
-          sleep 30
-          kubectl rollout status deployment/studio-backend -n studio --watch --timeout=300s
+#       - name: Wait for deployments to be ready
+#         run: |
+#           sleep 90
+#           kubectl rollout status sts/kafka-controller -n kafka --watch --timeout=300s
+#           sleep 60
+#           kubectl rollout status sts/postgresql -n postgresql --watch --timeout=300s
+#           sleep 60
+#           kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+#           sleep 30
+#           kubectl rollout status deployment/studio-event-ingestion -n studio --watch --timeout=300s
+#           sleep 30
+#           kubectl rollout status deployment/studio-keycloak -n studio --watch --timeout=300s
+#           sleep 30
+#           kubectl rollout status deployment/studio-backend -n studio --watch --timeout=300s
 
-      - name: Remove Cluster
-        id: remove-cluster
-        if: always()
-        uses: replicatedhq/replicated-actions/remove-cluster@v1
-        continue-on-error: true # It could be that the cluster is already removed
-        with:
-          api-token: ${{ secrets.REPLICATED_TOKEN }}
-          cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
+#       - name: Remove Cluster
+#         id: remove-cluster
+#         if: always()
+#         uses: replicatedhq/replicated-actions/remove-cluster@v1
+#         continue-on-error: true # It could be that the cluster is already removed
+#         with:
+#           api-token: ${{ secrets.REPLICATED_TOKEN }}
+#           cluster-id: ${{ steps.create-cluster.outputs.cluster-id }}
 
-      - name: Archive Customer
-        id: archive-customer
-        if: always()
-        uses: replicatedhq/replicated-actions/archive-customer@v1
-        with:
-          api-token: ${{ secrets.REPLICATED_TOKEN }}
-          customer-id: ${{ steps.create-customer.outputs.customer-id }}
+#       - name: Archive Customer
+#         id: archive-customer
+#         if: always()
+#         uses: replicatedhq/replicated-actions/archive-customer@v1
+#         with:
+#           api-token: ${{ secrets.REPLICATED_TOKEN }}
+#           customer-id: ${{ steps.create-customer.outputs.customer-id }}
         

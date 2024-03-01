@@ -89,8 +89,6 @@ Environment Variables for Model Service Training Orchestrator
 Environment Variables for Model Service Training Consumer
 */}}
 {{- define "modelServiceTraining.consumer.env" -}}
-- name: BASE_DOMAIN
-  value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
   value: "model-training-service-data-pvc-{{ $.Release.Namespace }}"
@@ -149,8 +147,6 @@ Environment Variables for Model Service Running Orchestrator
 Environment Variables for Model Service Running Consumer
 */}}
 {{- define "modelServiceRunning.consumer.env" -}}
-- name: BASE_DOMAIN
-  value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
 {{- with .Values.modelService }}
 - name: KUBERNETES_DATA_PVC
   value: "model-running-service-data-pvc-{{ $.Release.Namespace }}"

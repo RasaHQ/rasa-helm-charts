@@ -5,9 +5,9 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"; 
-    window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/auth"; 
-    window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }}; 
+    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api";
+    window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/auth";
+    window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }};
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
     window.CONVERSATION_VIEW_ENABLED = {{ .Values.webClient.environmentVariables.CONVERSATION_VIEW_ENABLED | quote | default "false" }};
     window.NLU_PAGE_ENABLED = {{ .Values.webClient.environmentVariables.NLU_PAGE_ENABLED | quote | default "false" }};

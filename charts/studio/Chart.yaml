@@ -2,7 +2,7 @@ apiVersion: v2
 name: studio
 description: This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 type: application
-version: 0.4.3
+version: 0.4.4-rc
 home: https://rasa.com
 sources:
   - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
@@ -15,5 +15,6 @@ maintainers:
     email: support@rasa.com
 dependencies:
   - name: replicated
+    condition: replicated.enabled
     repository: oci://registry.replicated.com/library
     version: 1.0.0-beta.14

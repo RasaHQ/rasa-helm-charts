@@ -1581,3 +1581,6 @@ deploymentLabels: {}
 
 # -- podLabels defines labels to add to all Studio pod(s)
 podLabels: {}
+
+replicated:
+  enabled: false

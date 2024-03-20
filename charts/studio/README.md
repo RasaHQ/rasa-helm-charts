@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 0.4.3](https://img.shields.io/badge/Version-0.4.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.4.4-rc](https://img.shields.io/badge/Version-0.4.4--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.4-rc
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 0.4.4-rc
 ```
 
 ## General Configuration
@@ -379,6 +379,7 @@ modelService:
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
+| replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |
 | tag | string | `"1.1.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |

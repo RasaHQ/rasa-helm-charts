@@ -35,24 +35,6 @@ spec:
           maxAge: 720h
   analyzers: {{- include "troubleshoot.analyzers.shared" .  | nindent 4 }}
     - deploymentStatus:
-        name: {{ include "studio.fullname" . }}-backend
-        namespace: {{ .Release.Namespace }}
-        outcomes:
-          - fail:
-              when: "absent" # note that the "absent" failure state must be listed first if used.
-              message: The Studio deployment is not present.
-          - fail:
-              when: "< 1"
-              message: The Studio deployment does not have any ready replicas.
-          - warn:
-              when: "< 1"
-              message: The Studio deployment has less than the required number of replicas.
-          - warn:
-              when: "= 1"
-              message: The Studio deployment has only a single ready replica.
-          - pass:
-              message: There are multiple replicas of the Studio deployment ready.
-    - deploymentStatus:
         name: replicated
         namespace: {{ .Release.Namespace }}
         outcomes:

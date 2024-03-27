@@ -63,21 +63,12 @@
           when: "== aks"
           message: Azure Kubernetes Services is a supported Kubernetes distributiion to run Rasa Studio in production
       - pass:
-          when: "== tanzu"
-          message: VMware Tanzu is a supported Kubernetes distribution to run Rasa Studio in production
-      - pass:
-          when: "== kurl"
-          message: The Replicated embedded Kubernetes distribution is supported to run Rasa Studio in production
-      - pass:
-          when: "== digitalocean"
-          message: DigitalOcean is a supported Kubernetes distribution to run Rasa Studio in production
-      - pass:
           message: We are unable to detect the Kubernetes distribution you are running but you should give it a try
 - nodeResources:
     checkName: Are sufficient CPU resources available in the cluster
     outcomes:
       - fail:
-          when: "sum(cpuAllocatable) < 250m"
+          when: "sum(cpuAllocatable) < 4000m"
           message: Your cluster currently has too few CPU resources available to install Rasa Studio
       - pass:
           message: Your cluster has sufficient CPU resources available to install Rasa Studio
@@ -85,7 +76,7 @@
     checkName: Is sufficient memory available in the cluster
     outcomes:
       - fail:
-          when: "min(memoryAllocatable) < 256Mi" 
+          when: "min(memoryAllocatable) < 8Gi" 
           message: Your cluster currently has too little memory available to install Rasa Studio
       - pass:
           message: Your cluster has sufficient memory available to install Rasa Studio

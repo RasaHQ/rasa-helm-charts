@@ -12,12 +12,12 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio version
-          default: "1.0.4"
+          default: "1.1.2"
           help_text: Specifies image tag for Studio
         - name: docker_image_tag
           type: text
           title: Rasa Pro version
-          default: 3.7.4-latest
+          default: 3.7.9
           help_text: Rasa Plus docker image to be used for training
         - name: model_service_image_tag
           type: text
@@ -333,10 +333,10 @@ spec:
           title: Keycloak proxy
           hidden: true
           default: "edge"
-    - name: S3 Storage
+    - name: Object Storage
       description: >
-        This section covers S3 storage for MTS/MRS
-      title: S3 Storage
+        This section covers object storage for MTS/MRS
+      title: Object Storage
       items:
         - name: bucket_provider
           type: select_one

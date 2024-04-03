@@ -25,7 +25,7 @@ data:
 {{- if .lockStore.enabled }}
     lock_store:
       {{- if and $.Values.rasa.enabled .lockStore.useConcurrent ( not $.Values.rasa.deployOSS ) }}
-      type: "rasa_plus.components.concurrent_lock_store.ConcurrentRedisLockStore"
+      type: "concurrent_redis"
       host: {{ .lockStore.url }}
       {{- else }}
       type: {{ .lockStore.type }}

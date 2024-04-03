@@ -18,7 +18,7 @@ rasa:
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     pullPolicy: IfNotPresent
-    tag: "3.8.0-20240403"
+    tag: "3.8.0-latest"
   settings:
     port: 5005
     scheme: http
@@ -102,7 +102,7 @@ rasaProServices:
   replicaCount: 1
   image:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"
-    tag: "3.1.1-latest"
+    tag: "3.2.3-latest"
   service:
     type: ClusterIP
     port: 8732

@@ -532,11 +532,11 @@ spec:
           when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
         - name: set_backend_requests_cpu
           type: text
-          title: Backend CPU limit
-          help_text: Configure Backend resource limit for CPU
+          title: Backend CPU requests
+          help_text: Configure Backend resource requests for CPU
           when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
         - name: set_backend_requests_memory
           type: text
-          title: Backend Memory limit
-          help_text: Configure Backend resource limit for Memory
+          title: Backend Memory requests
+          help_text: Configure Backend resource requests for Memory
           when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'

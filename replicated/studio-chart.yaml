@@ -310,3 +310,15 @@ spec:
         # -- Node on which the PV will be created
         # This value is used only when type is set to local
         localNodeName: '{{repl ConfigOption "local_node_name" }}'
+
+  optionalValues:
+    - when: "repl{{ ConfigOptionEquals `resource_management` `resources_configure`}}"
+      values:
+        backend:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_backend_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_backend_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_backend_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_backend_requests_memory" }}'

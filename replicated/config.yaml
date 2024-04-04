@@ -506,3 +506,37 @@ spec:
             Use this textarea to provide annotations specific to your ingress controller.
             For example, `kubernetes.io/tls-acme: true`.
           default: ""
+    - name: Resource Management
+      description: >
+        Set resource limits and requests for pods
+      title: Resource Management
+      items:
+        - name: resource_management
+          type: select_one
+          title: Manage resources
+          default: resources_skip
+          items:
+            - name: resources_skip
+              title: Skip configuration
+            - name: resources_configure
+              title: Configure resources
+        - name: set_backend_limits_cpu
+          type: text
+          title: Backend CPU limit
+          help_text: Configure Backend resource limit for CPU
+          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+        - name: set_backend_limits_memory
+          type: text
+          title: Backend Memory limit
+          help_text: Configure Backend resource limit for Memory
+          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+        - name: set_backend_requests_cpu
+          type: text
+          title: Backend CPU limit
+          help_text: Configure Backend resource limit for CPU
+          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+        - name: set_backend_requests_memory
+          type: text
+          title: Backend Memory limit
+          help_text: Configure Backend resource limit for Memory
+          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'

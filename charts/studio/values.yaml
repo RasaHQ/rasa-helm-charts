@@ -193,6 +193,8 @@ backend:
       # -- image.pullPolicy specifies image pull policy
       pullPolicy: IfNotPresent
 
+    waitForIt: false
+
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -797,9 +799,9 @@ modelService:
     # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
     cloudskdComputeZone: ""
     # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-    trainingStorageServiceAccount:
+    storageServiceAccount:
       secretName: "studio-secrets"
-      secretKey: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+      secretKey: "STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
 
   # Model Training Service specific configuration
   training:
@@ -1525,7 +1527,7 @@ modelService:
     # -- FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd"
     efs_id: ""
     # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server.
-    storageClassName: ""
+    storageClassName: "standard-rwo"
     # -- Storage Capacity for PV
     storageCapacity: 1Gi
     # -- Storage requests for PVC
@@ -1579,3 +1581,6 @@ deploymentLabels: {}
 
 # -- podLabels defines labels to add to all Studio pod(s)
 podLabels: {}
+
+replicated:
+  enabled: false

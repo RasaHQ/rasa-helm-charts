@@ -1,0 +1,70 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: kafka
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
+  chart:
+    name: kafka
+    chartVersion: 26.11.1
+  
+  releaseName: kafka
+  namespace: kafka
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    replicaCount: 2
+    listeners:
+      client:
+        protocol: PLAINTEXT
+      interbroker:
+        protocol: PLAINTEXT
+    provisioning:
+      enabled: true
+      topics:
+        - name: '{{repl ConfigOption "training_job_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "training_result_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "kafka_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "kafka_dlq_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "deployment_result_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+        - name: '{{repl ConfigOption "deployment_job_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
+    kraft:
+      enabled: true
+    zookeeper:
+      enabled: false

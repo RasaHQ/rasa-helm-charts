@@ -1,0 +1,22 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: postgresql
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `postgres_type` `external_postgres` }}'
+  chart:
+    name: postgresql
+    chartVersion: 13.4.0
+  
+  releaseName: postgresql
+  namespace: postgresql
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    global:
+      postgresql:
+        auth:
+          postgresPassword: "postgres"
+          username: '{{repl ConfigOption "database_username" }}'
+          password: '{{repl ConfigOption "database_password" }}'
+          database: studio

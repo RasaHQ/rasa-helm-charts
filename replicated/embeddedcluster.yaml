@@ -1,0 +1,29 @@
+apiVersion: embeddedcluster.replicated.com/v1beta1
+kind: Config
+metadata:
+  name: vm-config
+spec:
+  version: 1.29.1+ec.4
+  unsupportedOverrides:
+    k0s: |
+      config:
+        spec:
+          api:
+            extraArgs:
+              service-node-port-range: 80-32767
+  extensions:
+    helm:
+      repositories:
+      - name: ingress-nginx
+        url: https://kubernetes.github.io/ingress-nginx
+      charts:
+      - name: ingress-nginx
+        chartname: ingress-nginx/ingress-nginx
+        namespace: ingress-nginx
+        values: |
+          controller:
+            service:
+              type: NodePort
+              nodePorts:
+                http: "80"
+                https: "443"

@@ -313,6 +313,7 @@ spec:
 
   optionalValues:
     - when: "repl{{ ConfigOptionEquals `resource_management` `resources_configure`}}"
+      recursiveMerge: true
       values:
         backend:
           resources:
@@ -323,6 +324,7 @@ spec:
               cpu: '{{repl ConfigOption "set_backend_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_backend_requests_memory" }}'
     - when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+      recursiveMerge: true
       values:
         webClient:
           resources:

@@ -524,6 +524,7 @@ spec:
           type: bool
           title: Configure webclient resources
           default: "0"
+          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
         - name: set_backend_limits_cpu
           type: text
           title: Backend CPU limit

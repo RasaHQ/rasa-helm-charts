@@ -312,7 +312,7 @@ spec:
         localNodeName: '{{repl ConfigOption "local_node_name" }}'
 
   optionalValues:
-    - when: "repl{{ ConfigOptionEquals `resource_management` `resources_configure`}}"
+    - when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
       recursiveMerge: true
       values:
         backend:
@@ -334,3 +334,25 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_webclient_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_webclient_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        eventIngestion:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_eventingestion_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_eventingestion_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_eventingestion_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_eventingestion_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        keycloak:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_keycloak_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_keycloak_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_keycloak_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_keycloak_requests_memory" }}'

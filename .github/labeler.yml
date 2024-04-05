@@ -3,3 +3,6 @@ rasa:
 
 studio:
 - charts/studio/**
+
+replicated:
+- replicated/**

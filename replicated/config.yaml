@@ -511,57 +511,99 @@ spec:
         Set resource limits and requests for pods
       title: Resource Management
       items:
-        - name: resource_management
-          type: select_one
-          title: Manage resources
-          default: resources_skip
-          items:
-            - name: resources_skip
-              title: Skip configuration
-            - name: resources_configure
-              title: Configure resources
+        - name: set_backend_resources
+          type: bool
+          title: Configure Backend resources
+          default: "0"
         - name: set_webclient_resources
           type: bool
-          title: Configure webclient resources
+          title: Configure Web client resources
           default: "0"
-          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+        - name: set_eventingestion_resources
+          type: bool
+          title: Configure Event ingestion resources
+          default: "0"
+        - name: set_keycloak_resources
+          type: bool
+          title: Configure Keycloak resources
+          default: "0"
         - name: set_backend_limits_cpu
           type: text
           title: Backend CPU limit
           help_text: Configure Backend resource limit for CPU
-          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
         - name: set_backend_limits_memory
           type: text
           title: Backend Memory limit
           help_text: Configure Backend resource limit for Memory
-          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
         - name: set_backend_requests_cpu
           type: text
           title: Backend CPU requests
           help_text: Configure Backend resource requests for CPU
-          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
         - name: set_backend_requests_memory
           type: text
           title: Backend Memory requests
           help_text: Configure Backend resource requests for Memory
-          when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
         - name: set_webclient_limits_cpu
           type: text
-          title: webclient CPU limit
-          help_text: Configure webclient resource limit for CPU
+          title: Web client CPU limit
+          help_text: Configure Web client resource limit for CPU
           when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
         - name: set_webclient_limits_memory
           type: text
-          title: webclient Memory limit
-          help_text: Configure webclient resource limit for Memory
+          title: Web client Memory limit
+          help_text: Configure Web client resource limit for Memory
           when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
         - name: set_webclient_requests_cpu
           type: text
-          title: webclient CPU requests
-          help_text: Configure webclient resource requests for CPU
+          title: Web client CPU requests
+          help_text: Configure Web client resource requests for CPU
           when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
         - name: set_webclient_requests_memory
           type: text
-          title: webclient Memory requests
-          help_text: Configure webclient resource requests for Memory
+          title: Web client Memory requests
+          help_text: Configure Web client resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_eventingestion_limits_cpu
+          type: text
+          title: Event ingestion CPU limit
+          help_text: Configure Event ingestion resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_limits_memory
+          type: text
+          title: Event ingestion Memory limit
+          help_text: Configure Event ingestion resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_requests_cpu
+          type: text
+          title: Event ingestion CPU requests
+          help_text: Configure Event ingestion resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_requests_memory
+          type: text
+          title: Event ingestion Memory requests
+          help_text: Configure Event ingestion resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_keycloak_limits_cpu
+          type: text
+          title: Keycloak CPU limit
+          help_text: Configure Keycloak resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_limits_memory
+          type: text
+          title: Keycloak Memory limit
+          help_text: Configure Keycloak resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_cpu
+          type: text
+          title: Keycloak CPU requests
+          help_text: Configure Keycloak resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_memory
+          type: text
+          title: Keycloak Memory requests
+          help_text: Configure Keycloak resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'

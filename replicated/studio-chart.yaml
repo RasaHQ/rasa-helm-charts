@@ -322,3 +322,13 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_backend_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_backend_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+      values:
+        webClient:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_webclient_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_webclient_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_webclient_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_webclient_requests_memory" }}'

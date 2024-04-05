@@ -520,6 +520,10 @@ spec:
               title: Skip configuration
             - name: resources_configure
               title: Configure resources
+        - name: set_webclient_resources
+          type: bool
+          title: Configure webclient resources
+          default: "0"
         - name: set_backend_limits_cpu
           type: text
           title: Backend CPU limit
@@ -540,3 +544,23 @@ spec:
           title: Backend Memory requests
           help_text: Configure Backend resource requests for Memory
           when: '{{repl ConfigOptionEquals "resource_management" "resources_configure"}}'
+        - name: set_webclient_limits_cpu
+          type: text
+          title: webclient CPU limit
+          help_text: Configure webclient resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_limits_memory
+          type: text
+          title: webclient Memory limit
+          help_text: Configure webclient resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_requests_cpu
+          type: text
+          title: webclient CPU requests
+          help_text: Configure webclient resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_requests_memory
+          type: text
+          title: webclient Memory requests
+          help_text: Configure webclient resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'

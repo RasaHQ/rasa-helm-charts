@@ -356,3 +356,45 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_keycloak_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_keycloak_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        modelService:
+          training:
+            orchestrator:
+              resources:
+                limits:
+                  cpu: '{{repl ConfigOption "set_model_training_orchestrator_limits_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_training_orchestrator_limits_memory" }}'
+                requests:
+                  cpu: '{{repl ConfigOption "set_model_training_orchestrator_requests_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_training_orchestrator_requests_memory" }}'
+            consumer:
+              resources:
+                limits:
+                  cpu: '{{repl ConfigOption "set_model_training_consumer_limits_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_training_consumer_limits_memory" }}'
+                requests:
+                  cpu: '{{repl ConfigOption "set_model_training_consumer_requests_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_training_consumer_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        modelService:
+          running:
+            orchestrator:
+              resources:
+                limits:
+                  cpu: '{{repl ConfigOption "set_model_running_orchestrator_limits_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_running_orchestrator_limits_memory" }}'
+                requests:
+                  cpu: '{{repl ConfigOption "set_model_running_orchestrator_requests_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_running_orchestrator_requests_memory" }}'
+            consumer:
+              resources:
+                limits:
+                  cpu: '{{repl ConfigOption "set_model_running_consumer_limits_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_running_consumer_limits_memory" }}'
+                requests:
+                  cpu: '{{repl ConfigOption "set_model_running_consumer_requests_cpu" }}'
+                  memory: '{{repl ConfigOption "set_model_running_consumer_requests_memory" }}'

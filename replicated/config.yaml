@@ -17,7 +17,7 @@ spec:
         - name: docker_image_tag
           type: text
           title: Rasa Pro version
-          default: 3.7.9
+          default: "3.7.9"
           help_text: Rasa Plus docker image to be used for training
         - name: model_service_image_tag
           type: text
@@ -49,31 +49,121 @@ spec:
           type: bool
           title: Configure Rasa Bot resources
           default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for model training/running
+          help_text: Check this option if you want to configure resource requests/limits for Rasa bots
         - name: rasa_requests_cpu
           type: text
           title: Rasa requests CPU
           default: "1000m"
-          help_text: Value of CPU requests to allocate to the container for model training/running
+          help_text: Value of CPU requests to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
         - name: rasa_requests_memory
           type: text
           title: Rasa requests memory
           default: "1Gi"
-          help_text: Value of Memory requests to allocate to the container for model training/running
+          help_text: Value of Memory requests to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
         - name: rasa_limits_cpu
           type: text
           title: Rasa limits CPU
           default: "1000m"
-          help_text: Value of Memory limits to allocate to the container for model training/running
+          help_text: Value of Memory limits to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
         - name: rasa_limits_memory
           type: text
           title: Rasa limits memory
           default: "1Gi"
-          help_text: Value of Memory limits to allocate to the container for model training/running
+          help_text: Value of Memory limits to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
+        - name: set_model_training_resources
+          type: bool
+          title: Configure MTS resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Model Traning Service
+        - name: set_model_training_orchestrator_limits_cpu
+          type: text
+          title: MTS orchestrator CPU limit
+          help_text: Configure MTS orchestrator resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_orchestrator_limits_memory
+          type: text
+          title: MTS orchestrator Memory limit
+          help_text: Configure MTS orchestrator resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_orchestrator_requests_cpu
+          type: text
+          title: MTS orchestrator CPU requests
+          help_text: Configure MTS orchestrator resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_orchestrator_requests_memory
+          type: text
+          title: MTS orchestrator Memory requests
+          help_text: Configure MTS orchestrator resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_consumer_limits_cpu
+          type: text
+          title: MTS consumer CPU limit
+          help_text: Configure MTS consumer resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_consumer_limits_memory
+          type: text
+          title: MTS consumer Memory limit
+          help_text: Configure MTS consumer resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_consumer_requests_cpu
+          type: text
+          title: MTS consumer CPU requests
+          help_text: Configure MTS consumer resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_training_consumer_requests_memory
+          type: text
+          title: MTS consumer Memory requests
+          help_text: Configure MTS consumer resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
+        - name: set_model_running_resources
+          type: bool
+          title: Configure MRS resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Model Running Service
+        - name: set_model_running_orchestrator_limits_cpu
+          type: text
+          title: MRS orchestrator CPU limit
+          help_text: Configure MRS orchestrator resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_orchestrator_limits_memory
+          type: text
+          title: MRS orchestrator Memory limit
+          help_text: Configure MRS orchestrator resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_orchestrator_requests_cpu
+          type: text
+          title: MRS orchestrator CPU requests
+          help_text: Configure MRS orchestrator resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_orchestrator_requests_memory
+          type: text
+          title: MRS orchestrator Memory requests
+          help_text: Configure MRS orchestrator resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_consumer_limits_cpu
+          type: text
+          title: MRS consumer CPU limit
+          help_text: Configure MRS consumer resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_consumer_limits_memory
+          type: text
+          title: MRS consumer Memory limit
+          help_text: Configure MRS consumer resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_consumer_requests_cpu
+          type: text
+          title: MRS consumer CPU requests
+          help_text: Configure MRS consumer resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
+        - name: set_model_running_consumer_requests_memory
+          type: text
+          title: MRS consumer Memory requests
+          help_text: Configure MRS consumer resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.
@@ -279,7 +369,6 @@ spec:
           title: Node TLS reject unauthorized
           default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-
     - name: Keycloak
       description: >
         This section covers Keycloak section
@@ -314,7 +403,8 @@ spec:
         - name: keycloak_admin_username
           type: text
           title: Keycloak admin username
-          default: "kcadmin"
+          required: true
+          default: kcadmin
           help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
         - name: keycloak_admin_password
           type: text
@@ -333,6 +423,31 @@ spec:
           title: Keycloak proxy
           hidden: true
           default: "edge"
+        - name: set_keycloak_resources
+          type: bool
+          title: Configure Keycloak resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Keycloak deployment
+        - name: set_keycloak_limits_cpu
+          type: text
+          title: Keycloak CPU limit
+          help_text: Configure Keycloak resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_limits_memory
+          type: text
+          title: Keycloak Memory limit
+          help_text: Configure Keycloak resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_cpu
+          type: text
+          title: Keycloak CPU requests
+          help_text: Configure Keycloak resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_memory
+          type: text
+          title: Keycloak Memory requests
+          help_text: Configure Keycloak resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
     - name: Object Storage
       description: >
         This section covers object storage for MTS/MRS
@@ -515,18 +630,7 @@ spec:
           type: bool
           title: Configure Backend resources
           default: "0"
-        - name: set_webclient_resources
-          type: bool
-          title: Configure Web client resources
-          default: "0"
-        - name: set_eventingestion_resources
-          type: bool
-          title: Configure Event ingestion resources
-          default: "0"
-        - name: set_keycloak_resources
-          type: bool
-          title: Configure Keycloak resources
-          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Backend deployment
         - name: set_backend_limits_cpu
           type: text
           title: Backend CPU limit
@@ -547,6 +651,11 @@ spec:
           title: Backend Memory requests
           help_text: Configure Backend resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
+        - name: set_webclient_resources
+          type: bool
+          title: Configure Web client resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Web client deployment
         - name: set_webclient_limits_cpu
           type: text
           title: Web client CPU limit
@@ -567,6 +676,11 @@ spec:
           title: Web client Memory requests
           help_text: Configure Web client resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_eventingestion_resources
+          type: bool
+          title: Configure Event ingestion resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Event ingestion deployment
         - name: set_eventingestion_limits_cpu
           type: text
           title: Event ingestion CPU limit
@@ -587,23 +701,3 @@ spec:
           title: Event ingestion Memory requests
           help_text: Configure Event ingestion resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-        - name: set_keycloak_limits_cpu
-          type: text
-          title: Keycloak CPU limit
-          help_text: Configure Keycloak resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_limits_memory
-          type: text
-          title: Keycloak Memory limit
-          help_text: Configure Keycloak resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_requests_cpu
-          type: text
-          title: Keycloak CPU requests
-          help_text: Configure Keycloak resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_requests_memory
-          type: text
-          title: Keycloak Memory requests
-          help_text: Configure Keycloak resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'

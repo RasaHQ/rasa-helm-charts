@@ -1,4 +1,4 @@
-name: Replicated Testing
+name: Replicated release to infrasec
 
 on:
   push:
@@ -22,7 +22,7 @@ env:
   STUDIO_HELM_VERSION: 1.0.0
 
 jobs:
-  release-to-replicated:
+  release-to-infrasec:
     runs-on: ubuntu-22.04
 
     steps:

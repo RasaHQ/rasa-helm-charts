@@ -1,9 +1,14 @@
-name: Replicated Testing
+name: Replicated release to infrasec
 
 on:
   push:
     branches:
-      - replicated
+      - repl/**
+    paths:
+      - '!charts/studio/**'
+      - '!charts/rasa/**'
+      - 'replicated/**'
+
   workflow_dispatch:
 
 env:
@@ -11,12 +16,13 @@ env:
   HELM_REPOSITORY: rasa-releases
   HELM_CHART: helm-charts
   GCP_BUCKET_CREDENTIALS: ${{ secrets.GCP_BUCKET_CREDENTIALS }}
-  KAFKA_HELM_VERSION: 26.11.1
-  POSTGRESQL_HELM_VERSION: 13.4.0
-  NGINX_HELM_VERSION: 4.9.1
+  KAFKA_HELM_VERSION: 28.0.1
+  POSTGRESQL_HELM_VERSION: 15.0.0
+  NGINX_HELM_VERSION: 4.10.0
+  STUDIO_HELM_VERSION: 1.0.0
 
 jobs:
-  release-to-replicated:
+  release-to-infrasec:
     runs-on: ubuntu-22.04
 
     steps:
@@ -54,7 +60,7 @@ jobs:
       - name: Pull Helm Charts
         id: get_chart
         run: |
-          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.chart-info.outputs.name }} --version ${{ steps.chart-info.outputs.version }} -d ./replicated
+          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.chart-info.outputs.name }} --version ${{ env.STUDIO_HELM_VERSION }} -d ./replicated
           helm pull ingress-nginx/ingress-nginx --version ${{ env.NGINX_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/postgresql --version ${{ env.POSTGRESQL_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/kafka --version ${{ env.KAFKA_HELM_VERSION }} -d ./replicated
@@ -62,7 +68,7 @@ jobs:
       - name: Update Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.chartVersion = "${{ steps.chart-info.outputs.version }}"' replicated/studio-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ env.STUDIO_HELM_VERSION }}"' replicated/studio-chart.yaml
 
       - name: Update Kafka Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
@@ -87,7 +93,7 @@ jobs:
           replicated-api-origin: https://api.replicated.com/vendor
           yaml-dir: ./replicated
           promote-channel: "infrasec"
-          version: ${{ steps.chart-info.outputs.version }}
+          version: ${{ env.STUDIO_HELM_VERSION }}
 
 #   compatibility-matrix:
 #     needs: release-to-replicated

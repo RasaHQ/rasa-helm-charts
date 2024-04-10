@@ -584,7 +584,7 @@ spec:
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Ingress
       description: >
-        This section covers Ingress configuration
+        This section covers Ingress configuration. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
       title: Ingress
       items:
         - name: install_nginx

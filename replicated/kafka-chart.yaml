@@ -13,7 +13,9 @@ spec:
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
-    replicaCount: 2
+    controller:
+      replicaCount: 3
+      resourcesPreset: "small"
     listeners:
       client:
         protocol: PLAINTEXT

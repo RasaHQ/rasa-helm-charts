@@ -164,13 +164,13 @@ spec:
         brokerAddress: '{{repl ConfigOption "kafka_broker" }}'
         securityProtocol: '{{repl ConfigOption "kafka_security_protocol" }}'
         saslMechanism: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
-        saslUsername: ""
+        saslUsername: '{{repl ConfigOption "kafka_username" }}'
         # -- kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled.
         saslPassword:
           secretName: "studio-secrets"
           secretKey: "KAFKA_SASL_PASSWORD"
         # -- kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
-        sslCaLocation: ""
+        sslCaLocation: '{{repl ConfigOption "kafka_ca_file" }}'
 
       storage:
         # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3

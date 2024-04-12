@@ -4,9 +4,9 @@ metadata:
   name: studio-config
 spec:
   groups:
-    - name: APIs and Credentials
+    - name: API keys and images
       description: >
-        This section configures your API Keys and Credentials
+        This section configures your API Keys and image versions
       title: APIs and Credentials
       items:
         - name: studio_image_tag
@@ -212,6 +212,12 @@ spec:
           default: "5432"
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
           help_text: The database port
+        - name: studio_database
+          type: text
+          title: Studio database name
+          default: studio
+          help_text: The database name for Studio
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: model_service_database
           type: text
           title: MTS DB database

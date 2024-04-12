@@ -32,7 +32,7 @@ spec:
           help_text: OpenAI API key to be used
     - name: Model Services
       description: >
-        This section can  be used to configure number of replicas for Model Services
+        This section can  be used to configure number of replicas for Model Services and resource management
       title: Model Service Replicas
       items:
         - name: training_consumer_replicas

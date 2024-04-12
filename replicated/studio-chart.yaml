@@ -56,7 +56,7 @@ spec:
     backend:
       environmentVariables:
         DATABASE_URL:
-          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/studio?schema=public'
+          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "studio_database" }}?schema=public'
         KEYCLOAK_REALM:
           value: '{{repl ConfigOption "keycloak_realm" }}'
         KEYCLOAK_API_CLIENT_ID:
@@ -98,7 +98,7 @@ spec:
     eventIngestion:
       environmentVariables:
         DATABASE_URL:
-          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/studio?schema=public'
+          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "studio_database" }}?schema=public'
         KAFKA_SASL_MECHANISM:
           value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
         KAFKA_SASL_USERNAME:
@@ -164,13 +164,13 @@ spec:
         brokerAddress: '{{repl ConfigOption "kafka_broker" }}'
         securityProtocol: '{{repl ConfigOption "kafka_security_protocol" }}'
         saslMechanism: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
-        saslUsername: ""
+        saslUsername: '{{repl ConfigOption "kafka_username" }}'
         # -- kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled.
         saslPassword:
           secretName: "studio-secrets"
           secretKey: "KAFKA_SASL_PASSWORD"
         # -- kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
-        sslCaLocation: ""
+        sslCaLocation: '{{repl ConfigOption "kafka_ca_file" }}'
 
       storage:
         # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3

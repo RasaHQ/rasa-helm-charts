@@ -79,10 +79,12 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
           
       - name: Get previous release tag
+        continue-on-error: true
         id: previous-release
         uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42
 
       - name: Create Studio Release Tag
+        continue-on-error: true
         uses: rickstaa/action-create-tag@55450aa830ede05bcbb37fbdad678e36c73e9d15
         with:
           tag: "${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}"

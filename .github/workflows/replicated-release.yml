@@ -1,15 +1,16 @@
-name: Replicated release to infrasec
+name: Release to Replicated
 
 on:
-  push:
-    branches:
-      - repl/**
-    paths:
-      - '!charts/studio/**'
-      - '!charts/rasa/**'
-      - 'replicated/**'
-
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        description: Version of replicated installation. Semver format.
+        required: true
+      channel:
+        type: string
+        description: Name of a Replicated channel to release to.
+        required: true
 
 env:
   ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
@@ -19,7 +20,6 @@ env:
   KAFKA_HELM_VERSION: 28.0.1
   POSTGRESQL_HELM_VERSION: 15.0.0
   NGINX_HELM_VERSION: 4.10.0
-  STUDIO_HELM_VERSION: 1.0.1
 
 jobs:
   release-to-infrasec:
@@ -47,11 +47,17 @@ jobs:
         run: |-
           echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
 
-      - name: Read Helm Chart
-        id: chart-info
+      - name: Read Studio Helm Chart
+        id: studio-info
         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
         with:
           path: charts/studio/
+
+      - name: Read Rasa Pro Helm Chart
+        id: rasa-pro-info
+        uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+        with:
+          path: charts/rasa/
 
       - name: Add Helm Chart repositories
         run: |
@@ -60,15 +66,21 @@ jobs:
       - name: Pull Helm Charts
         id: get_chart
         run: |
-          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.chart-info.outputs.name }} --version ${{ env.STUDIO_HELM_VERSION }} -d ./replicated
+          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.studio-info.outputs.name }} --version ${{ steps.studio-info.outputs.version }} -d ./replicated
+          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.rasa-pro-info.outputs.name }} --version ${{ steps.rasa-pro-info.outputs.version }} -d ./replicated
           helm pull ingress-nginx/ingress-nginx --version ${{ env.NGINX_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/postgresql --version ${{ env.POSTGRESQL_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/kafka --version ${{ env.KAFKA_HELM_VERSION }} -d ./replicated
 
-      - name: Update Helm chart version for Replicated release
+      - name: Update Studio helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:
-          cmd: yq -i '.spec.chart.chartVersion = "${{ env.STUDIO_HELM_VERSION }}"' replicated/studio-chart.yaml
+          cmd: yq -i '.spec.chart.chartVersion = "${{ steps.studio-info.outputs.version }}"' replicated/studio-chart.yaml
+
+      - name: Update Rasa Pro helm chart version for Replicated release
+        uses: mikefarah/yq@v4.40.5
+        with:
+          cmd: yq -i '.spec.chart.chartVersion = "${{ steps.rasa-pro-info.outputs.version }}"' replicated/rasa-pro-chart.yaml
 
       - name: Update Kafka Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
@@ -92,8 +104,8 @@ jobs:
           replicated-api-token: ${{ secrets.REPLICATED_TOKEN }}
           replicated-api-origin: https://api.replicated.com/vendor
           yaml-dir: ./replicated
-          promote-channel: "infrasec"
-          version: ${{ env.STUDIO_HELM_VERSION }}
+          promote-channel: "${{ inputs.channel }}"
+          version: ${{ inputs.version }}
 
 #   compatibility-matrix:
 #     needs: release-to-replicated

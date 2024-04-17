@@ -1,0 +1,15 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: ingress-nginx
+spec:
+  exclude: 'repl{{ ConfigOptionNotEquals `install_nginx` `on_kubernetes` }}'
+  chart:
+    name: ingress-nginx
+    chartVersion: 4.9.1
+  
+  releaseName: ingress-nginx
+  namespace: ingress
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  # values:

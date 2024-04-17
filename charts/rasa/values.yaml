@@ -15,7 +15,7 @@ rasaProLicense:
   secretName: "rasa-secrets"
   secretKey: "rasaProLicense"
 
-# Rasa Plus
+# Rasa Pro Image
 rasa:
   # -- rasa.enabled enables Rasa Plus deployment
   # Disable this if you want to deploy ONLY Rasa Pro Services
@@ -29,11 +29,11 @@ rasa:
   # rasa.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-plus/rasa-plus"
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.7.0-latest"
+    tag: "3.8.0-latest"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -385,12 +385,12 @@ rasaProServices:
   # rasaProServices.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # image.tag specifies image tag
-    tag: "3.1.1-latest"
+    tag: "3.2.3-latest"
 
   # -- rasaProServices.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -1122,3 +1122,6 @@ actionServer:
   # -- actionServer.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+replicated:
+  enabled: false

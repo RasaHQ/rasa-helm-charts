@@ -2,12 +2,12 @@ name: Assign label
 
 on:
   pull_request:
-    types: [opened]
+    types: [opened, edited]
 
 jobs:
   assign-label:
     runs-on: ubuntu-22.04
 
     steps:
-    - name: Assign label to Chart
+    - name: Assign label to PR
       uses: actions/labeler@ac9175f8a1f3625fd0d4fb234536d26811351594

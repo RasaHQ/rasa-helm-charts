@@ -1,0 +1,55 @@
+{{- define "troubleshoot.supportBundle" -}}
+apiVersion: troubleshoot.sh/v1beta2
+kind: SupportBundle
+metadata:
+  name: {{ include "studio.fullname" . }}-support-bundle
+spec:
+  collectors: {{- include "troubleshoot.collectors.shared" .  | nindent 4 }}
+    - logs:
+        name: app/replicated/logs
+        selector: 
+          - app.kubernetes.io/name=replicated
+          - app.kubernetes.io/={{ .Release.Name }}
+        limits:
+          maxAge: 720h
+    - logs:
+        name: app/{{ include "studio.fullname" . }}/logs
+        selector: 
+          - app.kubernetes.io/name={{ include "studio.name" . }}
+          - app.kubernetes.io/instance={{ .Release.Name }}
+        limits:
+          maxAge: 720h
+    - logs:
+        name: app/model-training-service/logs
+        selector: 
+          - app.kubernetes.io/name=model-training-service
+          - app.kubernetes.io/instance={{ .Release.Name }}
+        limits:
+          maxAge: 720h
+    - logs:
+        name: app/model-running-service/logs
+        selector: 
+          - app.kubernetes.io/name=model-running-service
+          - app.kubernetes.io/instance={{ .Release.Name }}
+        limits:
+          maxAge: 720h
+  analyzers: {{- include "troubleshoot.analyzers.shared" .  | nindent 4 }}
+    - deploymentStatus:
+        name: replicated
+        namespace: {{ .Release.Namespace }}
+        outcomes:
+          - fail:
+              when: "absent" # note that the "absent" failure state must be listed first if used.
+              message: The replicated deployment is not present.
+          - fail:
+              when: "< 1"
+              message: The replicated deployment does not have any ready replicas.
+          - warn:
+              when: "< 1"
+              message: The replicated deployment has less than the required number of replicas.
+          - warn:
+              when: "= 1"
+              message: The replicated deployment has only a single ready replica.
+          - pass:
+              message: There are multiple replicas of the replicated deployment ready.
+{{- end -}}

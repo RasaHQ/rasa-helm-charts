@@ -29,6 +29,8 @@ Environment Variables shared between MTS and MRS
     secretKeyRef:
       name: {{ .rasaProLicense.secretName}}
       key: {{ .rasaProLicense.secretKey}}
+- name: TRAINING_STORAGE_BUCKET
+  value: {{ .storage.bucketName | quote }}
 - name: STORAGE_TYPE
   value: {{ .storage.type | quote }}
 {{- if eq .storage.type "aws_s3" }}
@@ -55,11 +57,6 @@ Environment Variables shared between MTS and MRS
   value: {{ .storage.googleCloudProject | quote }}
 - name: CLOUDSDK_COMPUTE_ZONE
   value: {{ .storage.cloudskdComputeZone | quote }}
-- name: TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
-  valueFrom:
-    secretKeyRef:
-      name: {{ .storage.trainingStorageServiceAccount.secretName | quote }}
-      key: {{ .storage.trainingStorageServiceAccount.secretKey | quote }}
 {{- end }}
 {{- end }}
 {{- end -}}
@@ -68,8 +65,6 @@ Environment Variables shared between MTS and MRS
 Environment Variables for Model Service Training Orchestrator
 */}}
 {{- define "modelServiceTraining.orchestrator.env" -}}
-- name: TRAINING_STORAGE_BUCKET
-  value: {{ .Values.modelService.storage.bucketName | quote }}
 # -- Studio supports only postgres as a database backend
 - name: PERSISTOR_BACKEND
   value: "postgres"
@@ -86,6 +81,13 @@ Environment Variables for Model Service Training Orchestrator
     secretKeyRef:
       name: {{ .Values.config.database.password.secretName | quote }}
       key: {{ .Values.config.database.password.secretKey | quote }}
+{{- if eq .Values.modelService.storage.type "gcs" }}
+- name: TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.modelService.storage.storageServiceAccount.secretName | quote }}
+      key: {{ .Values.modelService.storage.storageServiceAccount.secretKey | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -105,6 +107,13 @@ Environment Variables for Model Service Training Consumer
   value: {{ .openAiKey.secretKey | quote }}
 - name: BUCKET_NAME
   value: {{ .storage.bucketName | quote }}
+{{- if eq .storage.type "gcs" }}
+- name: TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
+  valueFrom:
+    secretKeyRef:
+      name: {{ .storage.storageServiceAccount.secretName | quote }}
+      key: {{ .storage.storageServiceAccount.secretKey | quote }}
+{{- end }}
 {{- end }}
 {{- end -}}
 
@@ -130,6 +139,13 @@ Environment Variables for Model Service Running Orchestrator
     secretKeyRef:
       name: {{ .Values.config.database.password.secretName | quote }}
       key: {{ .Values.config.database.password.secretKey | quote }}
+{{- if eq .Values.modelService.storage.type "gcs" }}
+- name: DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.modelService.storage.storageServiceAccount.secretName | quote }}
+      key: {{ .Values.modelService.storage.storageServiceAccount.secretKey | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -149,6 +165,13 @@ Environment Variables for Model Service Running Consumer
   value: {{ .openAiKey.secretKey | quote }}
 - name: BUCKET_NAME
   value: {{ .storage.bucketName | quote }}
+{{- if eq .storage.type "gcs" }}
+- name: DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
+  valueFrom:
+    secretKeyRef:
+      name: {{ .storage.storageServiceAccount.secretName | quote }}
+      key: {{ .storage.storageServiceAccount.secretKey | quote }}
+{{- end }}
 {{- end }}
 {{- with .Values.modelService.running.consumer }}
 - name: RASA_READINESS_CHECK_INITIAL_DELAY_SECONDS

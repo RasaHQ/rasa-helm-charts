@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.0.1](https://img.shields.io/badge/Version-1.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.2
 ```
 
 ## General Configuration
@@ -85,9 +85,9 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":""},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public |
-| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":""}` | The complete registry URL of the Rasa Plus docker image to be used for training |
+| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"}` | The complete registry URL of the Rasa Plus docker image to be used for training |
 | backend.environmentVariables.KEYCLOAK_API_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
@@ -122,13 +122,13 @@ modelService:
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost |
-| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"false","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
+| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
 | config.database.host | string | `""` | The database host name |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
 | config.database.modelServiceDatabaseName | string | `"modelservice"` | The database name for model training and running service |
 | config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password |
 | config.database.port | string | `"5432"` | The database port |
-| config.database.preferSSL | string | `"false"` | Set to true if you want to use SSL for db connection |
+| config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
 | config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
@@ -212,7 +212,7 @@ modelService:
 | modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage. |
 | modelService.gcpCredentials.secretKey | string | `nil` | gcpCredentials.secretName defines the Key in the secret ("studio-secrets") under which GCP service account JSON is stored |
 | modelService.gcpCredentials.secretName | string | `nil` | gcpCredentials.secretName defines the name of the secret ("studio-secrets") that contains the GCP service account JSON |
-| modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL of the Kafka broker to which to connect to. |
+| modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL:portNumber of the Kafka broker to which to connect to. For example "mykafka-88233-us1-kafka.upstash.io:9092" |
 | modelService.kafka.saslMechanism | string | `""` | kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512. You can leave this empty if you are not using SASL. |
 | modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled. |
 | modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |
@@ -236,9 +236,10 @@ modelService:
 | modelService.running.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.running.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.consumer.environmentVariables | object | `{"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.consumer.environmentVariables | object | `{"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.running.consumer.environmentVariables.DEPLOYMENT_JOB_KAFKA_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.running.consumer.environmentVariables.KAFKA_DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.running.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model running |
 | modelService.running.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
 | modelService.running.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.running.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
@@ -268,12 +269,13 @@ modelService:
 | modelService.running.orchestrator.environmentVariables.DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.running.orchestrator.image.name | string | `"model-running-orchestrator"` | Specifies image name |
 | modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":"chart-example.local"}],"labels":{}}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":null}],"labels":{},"tls":[]}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | modelService.running.orchestrator.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | modelService.running.orchestrator.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | modelService.running.orchestrator.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local"}]` | Specifies the hosts for this ingress. Make sure you provide a valid host name. We recommend setting the same host for all ingress objects |
+| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":null}]` | Specifies additional hosts for this ingress. Additional hosts are NOT required since a default host is added automatically. |
 | modelService.running.orchestrator.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
+| modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
 | modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | modelService.running.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
@@ -308,8 +310,6 @@ modelService:
 | modelService.running.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
 | modelService.running.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | modelService.runsInCluster | bool | `true` | modelService.runsInCluster describes if service is run inside cluster or not. # It is used during the initialization procedure or API clients which communicate with K8S API. |
-| modelService.storage.awsAccessKeyId | object | `{"secretKey":"AWS_ACCESS_KEY_ID","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3 |
-| modelService.storage.awsSecretAccessKey | object | `{"secretKey":"AWS_SECRET_ACCESS_KEY","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to aws_s3 |
 | modelService.storage.bucketName | string | `""` | Name of the storage bucket. Make sure to pre-create this bucket. |
 | modelService.storage.cloudskdComputeZone | string | `""` | Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located. |
 | modelService.storage.googleCloudProject | string | `""` | Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project. |
@@ -320,9 +320,10 @@ modelService:
 | modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.consumer.environmentVariables | object | `{"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.training.consumer.environmentVariables | object | `{"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.training.consumer.environmentVariables.KAFKA_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.training.consumer.environmentVariables.KAFKA_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
+| modelService.training.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model training |
 | modelService.training.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
 | modelService.training.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.training.consumer.environmentVariables.RASA_REQUESTS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
@@ -382,7 +383,7 @@ modelService:
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |
-| tag | string | `"1.1.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.2.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

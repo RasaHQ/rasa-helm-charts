@@ -12,12 +12,12 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio version
-          default: "1.1.2"
+          default: "1.2.0"
           help_text: Specifies image tag for Studio
         - name: docker_image_tag
           type: text
           title: Rasa Pro version
-          default: "3.7.9"
+          default: "3.8.0"
           help_text: Rasa Plus docker image to be used for training
         - name: model_service_image_tag
           type: text
@@ -45,6 +45,16 @@ spec:
           title: Number of running consumer replicas
           default: "2"
           help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+        - name: rasa_training_debug_logs
+          type: text
+          title: Enable Rasa training debug logs
+          default: "false"
+          help_text: Set this to true if you want to include rasa debug logs during model training
+        - name: rasa_running_debug_logs
+          type: text
+          title: Enable Rasa running debug logs
+          default: "false"
+          help_text: Set this to true if you want to include rasa debug logs during model running
         - name: configure_rasa_resources
           type: bool
           title: Configure Rasa Bot resources

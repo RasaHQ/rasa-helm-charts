@@ -1026,10 +1026,10 @@ modelService:
           value: "1Gi"
         # -- Value of CPU limit to allocate to the container for model training
         RASA_LIMITS_CPU:
-          value: "1000m"
+          value: "2500m"
         # -- Value of Memory limit to allocate to the container for model training
         RASA_LIMITS_MEMORY:
-          value: "1Gi"
+          value: "2.5Gi"
         # -- Set this to true if you want to include rasa debug logs during model training
         RASA_DEBUG_LOGS:
           value: "false"
@@ -1331,10 +1331,10 @@ modelService:
           value: "1Gi"
         # -- Value of CPU limit to allocate to the container for model training
         RASA_LIMITS_CPU:
-          value: "1000m"
+          value: "2500m"
         # -- Value of Memory limit to allocate to the container for model training
         RASA_LIMITS_MEMORY:
-          value: "1Gi"
+          value: "2.5Gi"
         # -- Set this to true if you want to include rasa debug logs during model running
         RASA_DEBUG_LOGS:
           value: "false"

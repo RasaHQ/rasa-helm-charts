@@ -75,13 +75,13 @@ spec:
         - name: rasa_limits_cpu
           type: text
           title: Rasa limits CPU
-          default: "1000m"
+          default: "2500m"
           help_text: Value of Memory limits to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
         - name: rasa_limits_memory
           type: text
           title: Rasa limits memory
-          default: "1Gi"
+          default: "2.5Gi"
           help_text: Value of Memory limits to allocate to the container for Rasa bots
           when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
         - name: set_model_training_resources
@@ -596,7 +596,7 @@ spec:
           type: text
           title: NFS Server Address
           default: ""
-          help_text:  DNS name or IP address of the NFS server. This value is used only when type is set to nfs
+          help_text: DNS name or IP address of the NFS server. This value is used only when type is set to nfs
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Ingress
       description: >

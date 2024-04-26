@@ -14,7 +14,7 @@ spec:
   values:
     imagePullSecrets:
       - name: '{{repl ImagePullSecretName }}'
-    repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "proxy.replicated.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ) }}'
+    repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ) }}'
     tag: '{{repl ConfigOption "studio_image_tag" }}'
 
     replicated:
@@ -150,7 +150,7 @@ spec:
 
     modelService:
       # -- repository specifies image repository for Studio
-      repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "proxy.replicated.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ) }}'
+      repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ) }}'
       # -- tag specifies image tag for Studio
       tag: '{{repl ConfigOption "model_service_image_tag" }}'
       rasaProLicense:

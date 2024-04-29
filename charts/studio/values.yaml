@@ -99,6 +99,9 @@ backend:
     # -- The complete registry URL of the Rasa Plus docker image to be used for training
     DOCKER_IMAGE_TAG:
       value: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"
+    # -- base64 encoded value of the Rasa Pro config.yml file. This is needed if you want to override the default config.yml file set by Studio.
+    RASA_CONFIG_FILE:
+      value: ""
 
   # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:

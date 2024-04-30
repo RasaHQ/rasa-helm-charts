@@ -19,6 +19,11 @@ spec:
           title: Rasa Pro version
           default: "3.8.0"
           help_text: Rasa Plus docker image to be used for training
+        - name: rasa_config_file
+          type: text
+          title: Rasa Pro config file
+          default: ""
+          help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
         - name: model_service_image_tag
           type: text
           title: Model services version

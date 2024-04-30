@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.0.2](https://img.shields.io/badge/Version-1.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.3](https://img.shields.io/badge/Version-1.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.3
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.3
 ```
 
 ## General Configuration
@@ -85,11 +85,12 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"},"RASA_CONFIG_FILE":{"value":""}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public |
 | backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"}` | The complete registry URL of the Rasa Plus docker image to be used for training |
 | backend.environmentVariables.KEYCLOAK_API_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
+| backend.environmentVariables.RASA_CONFIG_FILE | object | `{"value":""}` | base64 encoded value of the Rasa Pro config.yml file. This is needed if you want to override the default config.yml file set by Studio. |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
 | backend.image.name | string | `"studio-backend"` | image.name specifies image repository |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
@@ -236,12 +237,12 @@ modelService:
 | modelService.running.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.running.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.consumer.environmentVariables | object | `{"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.running.consumer.environmentVariables | object | `{"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"2500m"},"RASA_LIMITS_MEMORY":{"value":"2.5Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.running.consumer.environmentVariables.DEPLOYMENT_JOB_KAFKA_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.running.consumer.environmentVariables.KAFKA_DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.running.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model running |
-| modelService.running.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
-| modelService.running.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.running.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"2500m"}` | Value of CPU limit to allocate to the container for model training |
+| modelService.running.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"2.5Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.running.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.running.consumer.image.name | string | `"model-running-job-consumer"` | Specifies image name |
 | modelService.running.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
@@ -320,12 +321,12 @@ modelService:
 | modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.consumer.environmentVariables | object | `{"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"1000m"},"RASA_LIMITS_MEMORY":{"value":"1Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| modelService.training.consumer.environmentVariables | object | `{"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"2500m"},"RASA_LIMITS_MEMORY":{"value":"2.5Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | modelService.training.consumer.environmentVariables.KAFKA_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.training.consumer.environmentVariables.KAFKA_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
 | modelService.training.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model training |
-| modelService.training.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
-| modelService.training.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"2500m"}` | Value of CPU limit to allocate to the container for model training |
+| modelService.training.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"2.5Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.training.consumer.environmentVariables.RASA_REQUESTS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
 | modelService.training.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
 | modelService.training.consumer.image.name | string | `"model-training-job-consumer"` |  |

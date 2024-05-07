@@ -1,0 +1,181 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: rasa-pro
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
+  # chart identifies a matching chart from a .tgz
+  chart:
+    name: rasa
+    chartVersion: 1.0.4
+  
+  releaseName: rasa-pro
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    imagePullSecrets:
+      - name: '{{repl ImagePullSecretName }}'
+    rasaProLicense:
+      secretName: "rasa-secrets"
+      secretKey: "RASA_PRO_LICENCE"
+    
+    rasa:
+      image:
+        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" ) }}'
+        tag: '{{repl ConfigOption "rasa_pro_image_tag" }}'
+      settings:
+        enableApi: repl{{ eq (ConfigOption "rasa_enable_api") "1"}}
+        authToken:
+          secretName: "rasa-secrets"
+          secretKey: "authToken"
+        jwtSecret:
+          secretName: "rasa-secrets"
+          secretKey: "jwtSecret"
+        credentials:
+          enabled: repl{{ eq (ConfigOption "rasa_credentials") "1"}}
+          additionalChannelCredentials:
+            rest: {}
+            socketio:
+              bot_message_evt: '{{repl ConfigOption "rasa_bot_message_event" }}'
+              metadata_key: '{{repl ConfigOption "rasa_metadata_key" }}'
+              session_persistence: repl{{ eq (ConfigOption "rasa_session_persistence") "1"}}
+              user_message_evt: '{{repl ConfigOption "rasa_user_message_event" }}'
+        endpoints:
+          actionEndpoint:
+            url: '{{repl ConfigOption "rasa_action_endpoint_url" }}'
+          eventBroker:
+            enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
+            type: '{{repl ConfigOption "rasa_event_broker_type" }}'
+            security_protocol: '{{repl ConfigOption "rasa_event_broker_security_protocol" }}'
+            sasl_mechanism: '{{repl ConfigOption "rasa_event_broker_sasl_mechanism" }}'
+            topic: '{{repl ConfigOption "rasa_event_broker_topic" }}'
+            url: '{{repl ConfigOption "rasa_event_broker_url" }}'
+            sasl_username: '{{repl ConfigOption "kafka_username" }}'
+            sasl_password: '{{repl ConfigOption "kafka_password" }}'
+            ssl_check_hostname: repl{{ eq (ConfigOption "rasa_event_broker_ssl_check_hostname") "1"}}
+          lockStore:
+            enabled: repl{{ eq (ConfigOption "rasa_lock_store") "1"}}
+            useConcurrent: repl{{ eq (ConfigOption "rasa_lock_store_use_concurrent") "1"}}
+            db: '{{repl ConfigOption "rasa_lock_store_db" }}'
+            port: '{{repl ConfigOption "rasa_lock_store_port" }}'
+            url: '{{repl ConfigOption "rasa_lock_store_url" }}'
+            password: '{{repl ConfigOption "redis_password" }}'
+            use_ssl: repl{{ eq (ConfigOption "rasa_lock_store_use_ssl") "1"}}
+          models:
+            enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}
+          tracing:
+            enabled: repl{{ eq (ConfigOption "rasa_tracing") "1"}}
+            host: '{{repl ConfigOption "rasa_tracing_host" }}'
+            port: '{{repl ConfigOption "rasa_tracing_port" }}'
+            service_name: '{{repl ConfigOption "rasa_tracing_service_name" }}'
+            sync_export: '{{repl ConfigOption "rasa_tracing_sync_export" }}'
+            type: '{{repl ConfigOption "rasa_tracing_type" }}'
+          trackerStore:
+            enabled: repl{{ eq (ConfigOption "rasa_tracker_store") "1"}}
+            dialect: '{{repl ConfigOption "rasa_tracker_store_dialect" }}'
+            db: '{{repl ConfigOption "rasa_tracker_store_database" }}'
+            password: '{{repl ConfigOption "rasa_tracker_store_password" }}'
+            port: '{{repl ConfigOption "rasa_tracker_store_port" }}'
+            type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
+            url: '{{repl ConfigOption "rasa_tracker_store_url" }}'
+            username: '{{repl ConfigOption "rasa_tracker_store_username" }}'
+          additionalEndpoints:
+            vector_store:
+              type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
+              collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
+              content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
+              host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
+              metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
+              port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
+        # -- settings.environment: development or production
+        environment: '{{repl ConfigOption "settings_environment" }}'
+      additionalArgs:
+        - --model
+        - '{{repl ConfigOption "model_file_name" }}'
+        - --remote-storage
+        - '{{repl ConfigOption "model_storage_provider" }}'
+      additionalEnv:
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "OPENAI_API_KEY"
+        - name: BUCKET_NAME
+          value: '{{repl ConfigOption "rasa_pro_bucket_name" }}'
+        - name: MODEL_FILE
+          value: '{{repl ConfigOption "model_file" }}'
+        - name: DB_HOST
+          value: '{{repl ConfigOption "database_host" }}'
+        - name: DB_DATABASE
+          value: '{{repl ConfigOption "rasa_pro_database" }}'
+        - name: DB_USER
+          value: '{{repl ConfigOption "database_username" }}'
+        - name: DB_PASSWORD
+          value: '{{repl ConfigOption "database_password" }}'
+        - name: KAFKA_PASSWORD
+          value: '{{repl ConfigOption "kafka_password" }}'
+        - name: KAFKA_USER
+          value: '{{repl ConfigOption "kafka_username" }}'
+        - name: REDIS_PASSWORD
+          value: '{{repl ConfigOption "redis_password" }}'
+      serviceAccount:
+        create: repl{{ eq (ConfigOption "service_account") "1"}}
+        # k8s service account assumes role of IAM service account
+        name: '{{repl ConfigOption "service_account_name" }}'
+      ingress:
+          enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
+          className: '{{repl ConfigOption "ingress_class_name" }}'
+          annotations:
+            kubernetes.io/tls-acme: '{{repl ConfigOption "rasa_annotations_tls-acme" }}'
+            kots.io/placeholder: |-
+              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+            hosts:
+              host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+              paths:
+                path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
+                pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+      
+    actionServer:
+      enabled: repl{{ eq (ConfigOption "action_server") "1"}}
+      image:
+        # user need to specify image for action server
+        repository: '{{repl ConfigOption "action_server_repository" }}'
+        tag: '{{repl ConfigOption "action_server_image_tag" }}'
+      replicaCount: '{{repl ConfigOption "action_server_replica_count" }}'
+      service:
+        port: '{{repl ConfigOption "action_service_port" }}'
+        targetPort: '{{repl ConfigOption "action_service_target_port" }}'
+        type: '{{repl ConfigOption "action_server_service_type" }}'
+      settings:
+        port: '{{repl ConfigOption "action_server_settings_port" }}'
+        scheme: '{{repl ConfigOption "action_server_settings_schema" }}'
+    
+    rasaProServices:
+      # (OPTIONAL) user need to specify if using external vector DB
+      enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}
+      image:
+        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services/" ) }}'
+        tag: '{{repl ConfigOption "rasa_pro_services_image_tag" }}'
+      environmentVariables:
+        KAFKA_BROKER_ADDRESS:
+          value: '{{repl ConfigOption "kafka_broker" }}'
+        KAFKA_SASL_MECHANISM:
+          value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
+        KAFKA_SASL_PASSWORD:
+          value: '{{repl ConfigOption "kafka_password" }}'
+        KAFKA_SASL_USERNAME:
+          value: '{{repl ConfigOption "kafka_username" }}'
+        KAFKA_SECURITY_PROTOCOL:
+          value: '{{repl ConfigOption "kafka_security_protocol" }}'
+        KAFKA_SSL_CA_LOCATION:
+          value: '{{repl ConfigOption "kafka_ca_file" }}'
+        KAFKA_TOPIC:
+          value: '{{repl ConfigOption "kafka_topic" }}'
+        KAFKA_LOGGING_LEVEL:
+          value: '{{repl ConfigOption "kafka_logging_level" }}'
+        RASA_ANALYTICS_DB_URL:
+          value: '{{repl ConfigOption "rasa_analytics_db_url" }}'
+    
+    replicated:
+      enabled: true
+

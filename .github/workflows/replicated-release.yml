@@ -17,9 +17,10 @@ env:
   HELM_REPOSITORY: rasa-releases
   HELM_CHART: helm-charts
   GCP_BUCKET_CREDENTIALS: ${{ secrets.GCP_BUCKET_CREDENTIALS }}
-  KAFKA_HELM_VERSION: 28.0.1
+  KAFKA_HELM_VERSION: 26.11.1
   POSTGRESQL_HELM_VERSION: 15.0.0
   NGINX_HELM_VERSION: 4.10.0
+  REDIS_HELM_VERSION: 19.1.1
 
 jobs:
   release-to-infrasec:
@@ -71,6 +72,7 @@ jobs:
           helm pull ingress-nginx/ingress-nginx --version ${{ env.NGINX_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/postgresql --version ${{ env.POSTGRESQL_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/kafka --version ${{ env.KAFKA_HELM_VERSION }} -d ./replicated
+          helm pull oci://registry-1.docker.io/bitnamicharts/redis --version ${{ env.REDIS_HELM_VERSION }} -d ./replicated
 
       - name: Update Studio helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
@@ -87,6 +89,11 @@ jobs:
         with:
           cmd: yq -i '.spec.chart.chartVersion = "${{ env.KAFKA_HELM_VERSION }}"' replicated/kafka-chart.yaml
 
+      - name: Update Redis Helm chart version for Replicated release
+        uses: mikefarah/yq@v4.40.5
+        with:
+          cmd: yq -i '.spec.chart.chartVersion = "${{ env.REDIS_HELM_VERSION }}"' replicated/redis-chart.yaml
+            
       - name: Update PostgresSQL Helm chart version for Replicated release
         uses: mikefarah/yq@v4.40.5
         with:

@@ -130,10 +130,10 @@ spec:
             kots.io/placeholder: |-
               repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
             hosts:
-              host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
-              paths:
-                path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
-                pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+              - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+                paths:
+                  - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
+                    pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
       
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}

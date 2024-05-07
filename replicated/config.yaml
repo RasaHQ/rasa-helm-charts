@@ -362,7 +362,7 @@ spec:
           default: deployment-job
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: rasa_assistant
+        - name: rasa_assistant_topic
           type: text
           title: Rasa Assistant
           default: rasa-assistant
@@ -889,7 +889,7 @@ spec:
         - name: rasa_tracing_host
           type: text
           title: Tracing host
-          default: "demo-tracing-agent.observability.svc"
+          default: ""
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         - name: rasa_tracing_port
           type: text
@@ -1016,7 +1016,7 @@ spec:
         - name: rasa_pro_bucket_name
           type: text
           title: Rasa Pro Bucket name
-          default: ""
+          default: "rasa-pro-dummy-model"
         - name: model_file
           type: text
           title: Model file
@@ -1048,17 +1048,6 @@ spec:
         default: "3.2.3-latest"
         help_text: Specifies image tag for Rasa Pro Analytics
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
-    - name: Duckling
-      description: >
-        This section configures Duckling deployment
-      title: Duckling
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        - name: duckling_image_tag
-          type: text
-          title: Duckling version
-          default: "0.2.0.2-r0"
-          help_text: Specifies image tag for Duckling
     - name: Action Server
       description: >
         This section configures Action Server deployment

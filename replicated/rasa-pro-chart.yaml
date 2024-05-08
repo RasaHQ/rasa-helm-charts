@@ -123,17 +123,19 @@ spec:
         # k8s service account assumes role of IAM service account
         name: '{{repl ConfigOption "service_account_name" }}'
       ingress:
-          enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
-          className: '{{repl ConfigOption "ingress_class_name" }}'
-          annotations:
-            kubernetes.io/tls-acme: '{{repl ConfigOption "annotations" }}'
-            kots.io/placeholder: |-
-              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
-            hosts:
-              - host: '{{repl ConfigOption "annotations" }}'
-                paths:
-                  - path: '{{repl ConfigOption "annotations" }}'
-                    pathType: '{{repl ConfigOption "annotations" }}'
+        enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
+        className: '{{repl ConfigOption "ingress_class_name" }}'
+        annotations:
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+        hosts:
+          - host: '{{repl ConfigOption "ingress_hostname" }}'
+            paths:
+              - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
+                pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+        tls:
+          - hosts:
+            - '{{repl ConfigOption "ingress_hostname" }}'
       
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}

@@ -634,7 +634,6 @@ spec:
       description: >
         This section covers Ingress configuration. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
       title: Ingress
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: install_nginx
           type: select_one

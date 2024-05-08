@@ -126,14 +126,14 @@ spec:
           enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
           className: '{{repl ConfigOption "ingress_class_name" }}'
           annotations:
-            kubernetes.io/tls-acme: '{{repl ConfigOption "rasa_annotations_tls-acme" }}'
+            kubernetes.io/tls-acme: '{{repl ConfigOption "annotations" }}'
             kots.io/placeholder: |-
               repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
             hosts:
-              - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+              - host: '{{repl ConfigOption "annotations" }}'
                 paths:
-                  - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
-                    pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+                  - path: '{{repl ConfigOption "annotations" }}'
+                    pathType: '{{repl ConfigOption "annotations" }}'
       
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}

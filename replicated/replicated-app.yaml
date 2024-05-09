@@ -12,6 +12,7 @@ spec:
     - "ingress"
     - "postgresql"
     - "kafka"
+    - "redis"
   statusInformers:
     - deployment/studio-backend
     - deployment/studio-keycloak

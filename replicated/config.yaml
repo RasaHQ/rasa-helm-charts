@@ -656,12 +656,12 @@ spec:
           title: Ingress DNS Hostname
           default: ""
           help_text: Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
-        - name: rasa_ingress_annotations_path
+        - name: rasa_ingress_hosts_path
           type: text
           title: Path
           default: "/"
           when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-        - name: rasa_ingress_annotations_path_type
+        - name: rasa_ingress_hosts_path_type
           type: text
           title: Path type
           default: "ImplementationSpecific"

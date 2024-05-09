@@ -3,6 +3,7 @@ kind: HelmChart
 metadata:
   name: studio
 spec:
+  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio

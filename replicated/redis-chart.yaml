@@ -1,0 +1,18 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: redis
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'
+  chart:
+    name: redis
+    chartVersion: 19.1.1
+
+  releaseName: redis
+  namespace: redis
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    global:
+      redis:
+        password: '{{repl ConfigOption "redis_password" }}'

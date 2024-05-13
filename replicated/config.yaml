@@ -776,6 +776,12 @@ spec:
           title: Rasa Pro version
           default: "3.8.0-latest"
           help_text: Specifies image tag for Rasa Pro
+        - name: rasa_openai_api_key
+          type: text
+          title: Rasa OpenAI API key
+          default: ""
+          required: true
+          help_text: OpenAI API key to be used
         - name: settings
           type: heading
           title: Settings

@@ -149,7 +149,6 @@ spec:
               paths:
                 - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
                   pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
-      {{- if eq (ConfigOptionEquals "model_storage_provider" "aws") "true" }}
       volumeMounts:
         - mountPath: /etc/gcp
           name: service-account-credentials-volume
@@ -161,7 +160,6 @@ spec:
             items:
               - key: GCS_JSON
                 path: credentials.json
-      {{- end }}
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}
       image:

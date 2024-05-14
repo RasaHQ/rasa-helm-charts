@@ -945,12 +945,17 @@ spec:
         - name: rasa_tracker_store_database
           type: text
           title: Tracker Store database
-          default: ""
+          default: "rasa"
+          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+        - name: rasa_tracker_store_username
+          type: text
+          title: Tracker Store user name
+          default: "postgres"
           when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
         - name: rasa_tracker_store_password
           type: password
           title: Tracker Store password
-          default: ""
+          default: "postgres"
           when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
         - name: rasa_tracker_store_port
           type: text
@@ -965,12 +970,7 @@ spec:
         - name: rasa_tracker_store_url
           type: text
           title: Tracker Store URL
-          default: ""
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
-        - name: rasa_tracker_store_username
-          type: text
-          title: Tracker Store user name
-          default: "1"
+          default: "postgresql.postgresql.svc.cluster.local"
           when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
         # Additional Endpoints
         - name: additional_endpoints

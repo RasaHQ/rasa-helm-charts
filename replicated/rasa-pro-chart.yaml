@@ -10,6 +10,10 @@ spec:
     chartVersion: 1.0.4
   
   releaseName: rasa-pro
+
+  resources:
+    - create-rasa-database-job.yaml
+
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
@@ -18,7 +22,6 @@ spec:
     rasaProLicense:
       secretName: "rasa-secrets"
       secretKey: "RASA_PRO_LICENCE"
-    
     rasa:
       image:
         repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" ) }}'
@@ -74,11 +77,11 @@ spec:
             enabled: repl{{ eq (ConfigOption "rasa_tracker_store") "1"}}
             dialect: '{{repl ConfigOption "rasa_tracker_store_dialect" }}'
             db: '{{repl ConfigOption "rasa_tracker_store_database" }}'
+            username: '{{repl ConfigOption "rasa_tracker_store_username" }}'
             password: '{{repl ConfigOption "rasa_tracker_store_password" }}'
             port: '{{repl ConfigOption "rasa_tracker_store_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
             url: '{{repl ConfigOption "rasa_tracker_store_url" }}'
-            username: '{{repl ConfigOption "rasa_tracker_store_username" }}'
           additionalEndpoints:
             vector_store:
               type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
@@ -91,10 +94,14 @@ spec:
         environment: '{{repl ConfigOption "settings_environment" }}'
       additionalArgs:
         - --model
-        - '{{repl ConfigOption "model_file_name" }}'
+        - '{{repl ConfigOption "model_file" }}'
         - --remote-storage
         - '{{repl ConfigOption "model_storage_provider" }}'
       additionalEnv:
+        - name: BUCKET_NAME
+          value: '{{repl ConfigOption "rasa_pro_bucket_name" }}'
+        - name: MODEL_FILE
+          value: '{{repl ConfigOption "model_file" }}'
         - name: AWS_ACCESS_KEY_ID
           valueFrom:
             secretKeyRef:
@@ -114,10 +121,6 @@ spec:
             secretKeyRef:
               name: "rasa-secrets"
               key: "OPENAI_API_KEY"
-        - name: BUCKET_NAME
-          value: '{{repl ConfigOption "rasa_pro_bucket_name" }}'
-        - name: MODEL_FILE
-          value: '{{repl ConfigOption "model_file" }}'
         - name: DB_HOST
           value: '{{repl ConfigOption "database_host" }}'
         - name: DB_DATABASE
@@ -132,24 +135,18 @@ spec:
           value: '{{repl ConfigOption "kafka_username" }}'
         - name: REDIS_PASSWORD
           value: '{{repl ConfigOption "redis_password" }}'
-      serviceAccount:
-        create: repl{{ eq (ConfigOption "service_account") "1"}}
-        # k8s service account assumes role of IAM service account
-        name: '{{repl ConfigOption "service_account_name" }}'
       ingress:
-        enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
-        className: '{{repl ConfigOption "ingress_class_name" }}'
-        annotations:
-          kots.io/placeholder: |-
-            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
-        hosts:
-          - host: '{{repl ConfigOption "ingress_hostname" }}'
-            paths:
-              - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
-                pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
-        tls:
-          - hosts:
-            - '{{repl ConfigOption "ingress_hostname" }}'
+          enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
+          className: '{{repl ConfigOption "ingress_class_name" }}'
+          annotations:
+            kubernetes.io/tls-acme: '{{repl ConfigOption "rasa_annotations_tls-acme" }}'
+            kots.io/placeholder: |-
+              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+            hosts:
+              - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+                paths:
+                  - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
+                    pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
       volumeMounts:
         - mountPath: /etc/gcp
           name: service-account-credentials-volume
@@ -205,4 +202,3 @@ spec:
     
     replicated:
       enabled: true
-

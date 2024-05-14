@@ -95,6 +95,20 @@ spec:
         - --remote-storage
         - '{{repl ConfigOption "model_storage_provider" }}'
       additionalEnv:
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "AWS_ACCESS_KEY_ID"
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "AWS_SECRET_ACCESS_KEY"
+        - name: AWS_DEFAULT_REGION
+          value: '{{repl ConfigOption "aws_default_region" }}'
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: '/etc/gcp/credentials.json'
         - name: OPENAI_API_KEY
           valueFrom:
             secretKeyRef:
@@ -136,6 +150,17 @@ spec:
         tls:
           - hosts:
             - '{{repl ConfigOption "ingress_hostname" }}'
+      volumeMounts:
+        - mountPath: /etc/gcp
+          name: service-account-credentials-volume
+          readOnly: true
+      volumes:
+        - name: service-account-credentials-volume
+          secret:
+            secretName: rasa-secrets
+            items:
+              - key: gcs_json
+                path: credentials.json
       
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}

@@ -254,7 +254,7 @@ spec:
         - name: rasa_pro_database
           type: text
           title: Rasa Pro database name
-          default: rasa_pro
+          default: rasa
           help_text: The database name for Rasa Pro
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: model_service_database
@@ -1010,10 +1010,7 @@ spec:
         - name: additional_arguments
           type: heading
           title: Additional Arguments
-        - name: model_file_name
-          type: text
-          title: Model file
-          default: "model.tar.gz"
+          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
         - name: model_storage_provider
           type: select_one
           title: Model storage provider
@@ -1025,33 +1022,41 @@ spec:
               title: Google Cloud Storage
         - name: model_storage_type
           type: text
-          title: Storage Type
+          title: Model storage Type
           default: '{{repl (ConfigOptionEquals "model_storage_provider" "aws") | ternary "aws" "gcs"}}'
           hidden: true
-        # Additional Environment
-        - name: additional_environment
-          type: heading
-          title: Additional Environment
-          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
         - name: rasa_pro_bucket_name
           type: text
           title: Rasa Pro Bucket name
-          default: "rasa-pro-dummy-model"
+          help_text: "S3 or GCS bucket name, eg: rasa-pro-model-bucket"
         - name: model_file
           type: text
           title: Model file
           default: "model.tar.gz"
-        # Service account
-        - name: service_account
-          type: bool
-          title: Create Service Account
-          default: "1"
-        - name: service_account_name
+        # AWS credentials
+        - name: aws_access_key_id
           type: text
-          title: Service account name
-          default: "rasa-model-storage"
-          help_text: "K8s service account assumes role of IAM service account"
-          when: '{{repl ConfigOptionEquals "service_account" "1"}}'
+          title: AWS ACCESS KEY ID
+          help_text: "Environment variable containing your AWS S3 access key ID"
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        - name: aws_secret_access_key
+          type: text
+          title: AWS SECRET ACCESS KEY
+          help_text: "Environment variable containing your AWS S3 secret access key"
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        - name: aws_default_region
+          type: text
+          title: AWS DEFAULT REGION
+          help_text: "Environment variable specifying the region of your AWS S3 bucket"
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        # GCS credentials
+        - name: gcs_json
+          type: textarea
+          props:
+            rows: 20
+          title: Google application credentials
+          help_text: "GCP SA Base64Encoded"
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
     - name: Rasa Pro Services
       description: >
         This section configures Rasa Pro Services deployment

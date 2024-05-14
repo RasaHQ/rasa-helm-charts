@@ -1031,29 +1031,24 @@ spec:
           help_text: "S3 or GCS bucket name, eg: rasa-pro-model-bucket"
         - name: model_file
           type: text
-          title: Model file
+          title: Model file name
           default: "model.tar.gz"
         # AWS credentials
         - name: aws_access_key_id
           type: text
           title: AWS ACCESS KEY ID
-          help_text: "Environment variable containing your AWS S3 access key ID"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
         - name: aws_secret_access_key
           type: text
           title: AWS SECRET ACCESS KEY
-          help_text: "Environment variable containing your AWS S3 secret access key"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
         - name: aws_default_region
           type: text
           title: AWS DEFAULT REGION
-          help_text: "Environment variable specifying the region of your AWS S3 bucket"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
         # GCS credentials
         - name: gcs_json
-          type: textarea
-          props:
-            rows: 20
+          type: text
           title: Google application credentials
           help_text: "GCP SA Base64Encoded"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'

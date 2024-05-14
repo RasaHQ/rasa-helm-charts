@@ -30,10 +30,10 @@ spec:
         enableApi: repl{{ eq (ConfigOption "rasa_enable_api") "1"}}
         authToken:
           secretName: "rasa-secrets"
-          secretKey: "authToken"
+          secretKey: "AUTHTOKEN"
         jwtSecret:
           secretName: "rasa-secrets"
-          secretKey: "jwtSecret"
+          secretKey: "JWTSECRET"
         credentials:
           enabled: repl{{ eq (ConfigOption "rasa_credentials") "1"}}
           additionalChannelCredentials:
@@ -134,12 +134,14 @@ spec:
         - name: KAFKA_USER
           value: '{{repl ConfigOption "kafka_username" }}'
         - name: REDIS_PASSWORD
-          value: '{{repl ConfigOption "redis_password" }}'
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "REDIS_PASSWORD"
       ingress:
           enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
           className: '{{repl ConfigOption "ingress_class_name" }}'
           annotations:
-            kubernetes.io/tls-acme: '{{repl ConfigOption "rasa_annotations_tls-acme" }}'
             kots.io/placeholder: |-
               repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
             hosts:
@@ -147,6 +149,7 @@ spec:
                 paths:
                   - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
                     pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+      {{- if eq (ConfigOptionEquals "model_storage_provider" "aws") "true" }}
       volumeMounts:
         - mountPath: /etc/gcp
           name: service-account-credentials-volume
@@ -156,9 +159,9 @@ spec:
           secret:
             secretName: rasa-secrets
             items:
-              - key: gcs_json
+              - key: GCS_JSON
                 path: credentials.json
-      
+      {{- end }}
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}
       image:

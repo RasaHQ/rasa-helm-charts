@@ -150,11 +150,13 @@ spec:
                 - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
                   pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
       volumeMounts:
-        - mountPath: /etc/gcp
+        - when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
+          mountPath: /etc/gcp
           name: service-account-credentials-volume
           readOnly: true
       volumes:
-        - name: service-account-credentials-volume
+        - when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
+          name: service-account-credentials-volume
           secret:
             secretName: rasa-secrets
             items:

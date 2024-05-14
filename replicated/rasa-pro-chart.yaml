@@ -139,16 +139,16 @@ spec:
               name: "rasa-secrets"
               key: "REDIS_PASSWORD"
       ingress:
-          enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
-          className: '{{repl ConfigOption "ingress_class_name" }}'
-          annotations:
-            kots.io/placeholder: |-
-              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
-            hosts:
-              - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
-                paths:
-                  - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
-                    pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+        enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
+        className: '{{repl ConfigOption "ingress_class_name" }}'
+        annotations:
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+          hosts:
+            - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+              paths:
+                - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
+                  pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
       {{- if eq (ConfigOptionEquals "model_storage_provider" "aws") "true" }}
       volumeMounts:
         - mountPath: /etc/gcp

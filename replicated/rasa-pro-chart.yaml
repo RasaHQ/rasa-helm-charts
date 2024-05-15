@@ -12,7 +12,8 @@ spec:
   releaseName: rasa-pro
 
   resources:
-    - create-rasa-database-job.yaml
+    - when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+      job: create-rasa-database-job.yaml
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template

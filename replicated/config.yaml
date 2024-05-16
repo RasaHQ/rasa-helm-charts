@@ -254,7 +254,7 @@ spec:
         - name: rasa_pro_database
           type: text
           title: Rasa Pro database name
-          default: rasa_pro
+          default: rasa
           help_text: The database name for Rasa Pro
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: model_service_database
@@ -776,6 +776,12 @@ spec:
           title: Rasa Pro version
           default: "3.8.0-latest"
           help_text: Specifies image tag for Rasa Pro
+        - name: rasa_openai_api_key
+          type: text
+          title: Rasa OpenAI API key
+          default: ""
+          required: true
+          help_text: OpenAI API key to be used
         - name: settings
           type: heading
           title: Settings
@@ -931,41 +937,42 @@ spec:
           title: Tracker Store
           default: "1"
           help_text: "TrackerStore assistant's conversations are stored within a tracker store. More: https://rasa.com/docs/rasa/tracker-stores"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: rasa_tracker_store_dialect
           type: text
           title: Tracker Store dialect
           default: "postgresql"
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_database
           type: text
           title: Tracker Store database
-          default: ""
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          default: "rasa"
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
+        - name: rasa_tracker_store_username
+          type: text
+          title: Tracker Store user name
+          default: "postgres"
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_password
           type: password
           title: Tracker Store password
-          default: ""
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          default: "postgres"
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_port
           type: text
           title: Tracker Store port
           default: "5432"
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_type
           type: text
           title: Tracker Store type
           default: "sql"
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_url
           type: text
           title: Tracker Store URL
-          default: ""
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
-        - name: rasa_tracker_store_username
-          type: text
-          title: Tracker Store user name
-          default: "1"
-          when: '{{repl ConfigOptionEquals "rasa_tracker_store" "1"}}'
+          default: "postgresql.postgresql.svc.cluster.local"
+          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         # Additional Endpoints
         - name: additional_endpoints
           type: heading
@@ -1004,10 +1011,7 @@ spec:
         - name: additional_arguments
           type: heading
           title: Additional Arguments
-        - name: model_file_name
-          type: text
-          title: Model file
-          default: "model.tar.gz"
+          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
         - name: model_storage_provider
           type: select_one
           title: Model storage provider
@@ -1019,33 +1023,36 @@ spec:
               title: Google Cloud Storage
         - name: model_storage_type
           type: text
-          title: Storage Type
+          title: Model storage Type
           default: '{{repl (ConfigOptionEquals "model_storage_provider" "aws") | ternary "aws" "gcs"}}'
           hidden: true
-        # Additional Environment
-        - name: additional_environment
-          type: heading
-          title: Additional Environment
-          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
         - name: rasa_pro_bucket_name
           type: text
           title: Rasa Pro Bucket name
-          default: "rasa-pro-dummy-model"
+          help_text: "S3 or GCS bucket name, eg: rasa-pro-model-bucket"
         - name: model_file
           type: text
-          title: Model file
+          title: Model file name
           default: "model.tar.gz"
-        # Service account
-        - name: service_account
-          type: bool
-          title: Create Service Account
-          default: "1"
-        - name: service_account_name
+        # AWS credentials
+        - name: aws_access_key_id
           type: text
-          title: Service account name
-          default: "rasa-model-storage"
-          help_text: "K8s service account assumes role of IAM service account"
-          when: '{{repl ConfigOptionEquals "service_account" "1"}}'
+          title: AWS ACCESS KEY ID
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        - name: aws_secret_access_key
+          type: text
+          title: AWS SECRET ACCESS KEY
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        - name: aws_default_region
+          type: text
+          title: AWS DEFAULT REGION
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
+        # GCS credentials
+        - name: gcs_json
+          type: text
+          title: Google application credentials
+          help_text: "GCP SA Base64Encoded"
+          when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
     - name: Rasa Pro Services
       description: >
         This section configures Rasa Pro Services deployment

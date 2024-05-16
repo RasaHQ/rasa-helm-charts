@@ -1,0 +1,35 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-rasa-database-job
+spec:
+  ttlSecondsAfterFinished: 200
+  template:
+    spec:
+      initContainers:
+      - name: wait-for-postgres
+        image: postgres:16.3
+        env:
+          - name: PGHOST
+            value: '{{repl ConfigOption "database_host" }}'
+          - name: PGUSER
+            value: '{{repl ConfigOption "database_username" }}'
+          - name: PGPASSWORD
+            value: '{{repl ConfigOption "database_password" }}'
+          - name: PGDATABASE
+            value: "postgres"
+        command: ['sh', '-c', 'until pg_isready; do echo "Waiting for PostgreSQL to be ready..."; sleep 10; done;']
+      containers:
+      - name: create-database-container
+        image: postgres:16.3
+        env:
+          - name: PGHOST
+            value: '{{repl ConfigOption "database_host" }}'
+          - name: PGUSER
+            value: '{{repl ConfigOption "database_username" }}'
+          - name: PGPASSWORD
+            value: '{{repl ConfigOption "database_password" }}'
+          - name: PGDATABASE
+            value: "postgres"
+        command: ["bash", "-c", 'if psql -lqt | cut -d \| -f 1 | grep -qw "rasa"; then echo "Database already exists"; else psql -c "CREATE DATABASE rasa;" || true; fi']
+      restartPolicy: Never

@@ -141,15 +141,15 @@ spec:
               key: "REDIS_PASSWORD"
       ingress:
         enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
-        className: '{{repl ConfigOption "ingress_class_name" }}'
+        className: '{{repl ConfigOption "ingress_class" }}'
         annotations:
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
           hosts:
-            - host: '{{repl ConfigOption "rasa_ingress_annotations_host" }}'
+            - host: '{{repl ConfigOption "ingress_hostname" }}'
               paths:
-                - path: '{{repl ConfigOption "rasa_ingress_annotations_path" }}'
-                  pathType: '{{repl ConfigOption "rasa_ingress_annotations_path_type" }}'
+                - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
+                  pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
       volumeMounts:
         - when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
           mountPath: /etc/gcp

@@ -10,6 +10,7 @@ spec:
     chartVersion: 1.0.3
 
   releaseName: studio
+
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
@@ -159,7 +160,7 @@ spec:
       rasaProLicense:
         secretKey: "RASA_PRO_LICENCE"
       gcpCredentials:
-        secretName: "gcp-secrets"
+        secretName: "studio-secrets"
         secretKey: "GCP_CREDENTIALS"
       openAiKey:
         secretKey: "OPENAI_API_KEY_SECRET_KEY"

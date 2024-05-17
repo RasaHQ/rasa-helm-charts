@@ -1,5 +1,10 @@
 {{- if .Values.actionServer.ingress.enabled -}}
 {{- $svcPort := .Values.actionServer.service.port -}}
+{{- if and .Values.actionServer.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+  {{- if not (hasKey .Values.actionServer.ingress.annotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.actionServer.ingress.annotations "kubernetes.io/ingress.class" .Values.actionServer.ingress.className}}
+  {{- end }}
+{{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
 {{- else if semverCompare ">=1.14-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -20,6 +25,9 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- if and .Values.actionServer.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  ingressClassName: {{ .Values.actionServer.ingress.className }}
+  {{- end }}
   {{- if .Values.actionServer.ingress.tls }}
   tls:
     {{- range .Values.actionServer.ingress.tls }}

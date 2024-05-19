@@ -3,7 +3,8 @@ kind: Job
 metadata:
   name: create-rasa-database-job
   annotations:
-    "kots.io/hook-delete-policy": "hook-succeeded, hook-failed"
+    kots.io/exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
+    kots.io/hook-delete-policy: "hook-succeeded, hook-failed"
 spec:
   template:
     spec:

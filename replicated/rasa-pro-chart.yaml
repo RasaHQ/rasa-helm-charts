@@ -11,10 +11,6 @@ spec:
   
   releaseName: rasa-pro
 
-  resources:
-    - when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
-      job: create-rasa-database-job.yaml
-
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
@@ -151,18 +147,16 @@ spec:
                 - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
                   pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
       volumeMounts:
-        - when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
-          mountPath: /etc/gcp
-          name: service-account-credentials-volume
-          readOnly: true
+      - mountPath: /etc/gcp
+        name: service-account-credentials-volume
+        readOnly: true
       volumes:
-        - when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
-          name: service-account-credentials-volume
-          secret:
-            secretName: rasa-secrets
-            items:
-              - key: GCS_JSON
-                path: credentials.json
+      - name: service-account-credentials-volume
+        secret:
+          secretName: rasa-secrets
+          items:
+            - key: GCS_JSON
+              path: credentials.json
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}
       image:

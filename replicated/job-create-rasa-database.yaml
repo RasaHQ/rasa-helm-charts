@@ -2,8 +2,9 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: create-rasa-database-job
+  annotations:
+    "kots.io/hook-delete-policy": "hook-succeeded, hook-failed"
 spec:
-  ttlSecondsAfterFinished: 200
   template:
     spec:
       initContainers:
@@ -31,5 +32,5 @@ spec:
             value: '{{repl ConfigOption "database_password" }}'
           - name: PGDATABASE
             value: "postgres"
-        command: ["bash", "-c", 'if psql -lqt | cut -d \| -f 1 | grep -qw "rasa"; then echo "Database already exists"; else psql -c "CREATE DATABASE rasa;" || true; fi']
+        command: ["bash", "-c", 'if psql -lqt | cut -d \| -f 1 | grep -qw "rasa"; then echo "Database already exists"; else createdb rasa || true; fi']
       restartPolicy: Never

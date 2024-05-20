@@ -4,8 +4,8 @@ metadata:
   name: create-rasa-database-job
   annotations:
     kots.io/exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
+    kots.io/hook-delete-policy: "hook-succeeded"
 spec:
-  ttlSecondsAfterFinished: 200
   template:
     spec:
       initContainers:

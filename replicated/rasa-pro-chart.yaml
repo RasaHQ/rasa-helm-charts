@@ -206,3 +206,27 @@ spec:
     
     replicated:
       enabled: true
+
+  optionalValues:
+    - when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_rasa_pro_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_rasa_pro_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_rasa_pro_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_rasa_pro_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        rasaProServices:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_analytics_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_analytics_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_analytics_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_analytics_requests_memory" }}'

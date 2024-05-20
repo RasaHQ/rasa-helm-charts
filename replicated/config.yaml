@@ -1100,6 +1100,31 @@ spec:
           title: Google application credentials
           help_text: "GCP SA Base64Encoded"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
+        - name: set_rasa_pro_resources
+          type: bool
+          title: Configure Rasa Pro resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Rasa Pro deployment
+        - name: set_rasa_pro_limits_cpu
+          type: text
+          title: Rasa Pro CPU limit
+          help_text: Configure Rasa Pro resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_limits_memory
+          type: text
+          title: Rasa Pro Memory limit
+          help_text: Configure Rasa Pro resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_requests_cpu
+          type: text
+          title: Rasa Pro CPU requests
+          help_text: Configure Rasa Pro resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_requests_memory
+          type: text
+          title: Rasa Pro Memory requests
+          help_text: Configure Rasa Pro resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
     - name: Rasa Pro Services
       description: >
         This section configures Rasa Pro Services deployment
@@ -1116,6 +1141,31 @@ spec:
         default: "3.2.3-latest"
         help_text: Specifies image tag for Rasa Pro Analytics
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
+      - name: set_analytics_resources
+        type: bool
+        title: Configure Rasa Pro Analytics resources
+        default: "0"
+        help_text: Check this option if you want to configure resource requests/limits for Rasa Pro Analytics deployment
+      - name: set_analytics_limits_cpu
+        type: text
+        title: Rasa Pro Analytics CPU limit
+        help_text: Configure Rasa Pro Analytics resource limit for CPU
+        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
+      - name: set_analytics_limits_memory
+        type: text
+        title: Rasa Pro Analytics Memory limit
+        help_text: Configure Rasa Pro Analytics resource limit for Memory
+        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
+      - name: set_analytics_requests_cpu
+        type: text
+        title: Rasa Pro Analytics CPU requests
+        help_text: Configure Rasa Pro Analytics resource requests for CPU
+        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
+      - name: set_analytics_requests_memory
+        type: text
+        title: Rasa Pro Analytics Memory requests
+        help_text: Configure Rasa Pro Analytics resource requests for Memory
+        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
     - name: Action Server
       description: >
         This section configures Action Server deployment

@@ -24,28 +24,31 @@ spec:
       description: >
         This section configures your API Keys and image versions
       title: APIs and Credentials
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: studio_image_tag
           type: text
           title: Studio version
           default: "1.2.0"
           help_text: Specifies image tag for Studio
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: docker_image_tag
           type: text
           title: Rasa Pro version
           default: "3.8.0"
           help_text: Rasa Plus docker image to be used for training
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: rasa_config_file
           type: text
           title: Rasa Pro config file
           default: ""
           help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: model_service_image_tag
           type: text
           title: Model services version
           default: "3.2.2"
           help_text: Specifies image tag for Model Service
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: openai_api_key
           type: text
           title: OpenAI API key
@@ -777,12 +780,6 @@ spec:
           title: Rasa Pro version
           default: "3.8.0-latest"
           help_text: Specifies image tag for Rasa Pro
-        - name: rasa_openai_api_key
-          type: text
-          title: Rasa OpenAI API key
-          default: ""
-          required: true
-          help_text: OpenAI API key to be used
         - name: rasa_auth_token
           type: text
           title: Rasa Auth Token

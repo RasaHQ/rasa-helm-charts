@@ -140,11 +140,11 @@ spec:
         annotations:
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
-          hosts:
-            - host: '{{repl ConfigOption "ingress_hostname" }}'
-              paths:
-                - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
-                  pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
+        hosts:
+          - host: '{{repl ConfigOption "ingress_hostname" }}'
+            paths:
+              - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
+                pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
       volumeMounts:
       - mountPath: /etc/gcp
         name: service-account-credentials-volume

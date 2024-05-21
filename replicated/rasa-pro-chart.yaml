@@ -79,14 +79,16 @@ spec:
             port: '{{repl ConfigOption "rasa_tracker_store_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
             url: '{{repl ConfigOption "rasa_tracker_store_url" }}'
-          additionalEndpoints:
-            vector_store:
-              type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
-              collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
-              content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
-              host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
-              metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
-              port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
+          optionalValues:
+            - when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
+              additionalEndpoints:
+                vector_store:
+                  type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
+                  collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
+                  content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
+                  host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
+                  metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
+                  port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
           # -- settings.environment: development or production
         environment: '{{repl ConfigOption "settings_environment" }}'
       additionalArgs:

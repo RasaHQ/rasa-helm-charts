@@ -1005,36 +1005,47 @@ spec:
         - name: heading_additional_endpoints
           type: heading
           title: Additional Endpoints
-          help_text: "(OPTIONAL) Additional endpoints to add more settings to endpoints.yml"
+        - name: enable_vector_store
+          type: bool
+          title: Enable Vector Store
+          default: "0"
+          help_text: "Specify if using external vector DB"
         - name: rasa_additional_endpoints_vector_store_type
           type: text
           title: Vector Store type
           default: "qdrant"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_collection
           type: text
           title: Vector Store collection
           default: "rasa"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_content_payload_key
           type: text
           title: Vector Store payload key
           default: "page_content"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_host
           type: text
           title: Vector Store host
           default: "qdrant-0.qdrant-headless.rasa.svc.cluster.local"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_metadata_payload_key
           type: text
           title: Vector Store metadata payload key
           default: "metadata"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_port
           type: text
           title: Vector Store port
           default: "6333"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: settings_environment
           type: text
           title: Environment
           default: "production"
           help_text: "Environment: development or production"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         # Additional Arguments
         - name: heading_additional_arguments
           type: heading

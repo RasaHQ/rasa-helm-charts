@@ -782,7 +782,7 @@ spec:
           default: ""
           required: true
           help_text: OpenAI API key to be used
-        - name: settings
+        - name: heading_settings
           type: heading
           title: Settings
         - name: rasa_enable_api
@@ -822,15 +822,21 @@ spec:
           type: heading
           title: Endpoints
         # Action Server
+        - name: heading_action_server
+          type: heading
+          title: Action Server
         - name: rasa_action_endpoint_url
           type: text
           title: Action Server URL
           default: "http://action-server.rasa.svc.cluster.local:5055/webhook"
           help_text: Action Server is deployed in cluster
         # Event Broker configuration
+        - name: heading_event_broker
+          type: heading
+          title: Event Broker
         - name: rasa_event_broker
           type: bool
-          title: Event Broker
+          title: Enable Event Broker
           default: "1"
           help_text: "Allows you to connect your running assistant to other services that process the data. More info: https://rasa.com/docs/rasa/event-brokers"
         - name: rasa_event_broker_type
@@ -864,9 +870,12 @@ spec:
           default: "1"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         # Lock Store configuration
+        - name: heading_lock_store
+          type: heading
+          title: Lock Store
         - name: rasa_lock_store
           type: bool
-          title: Lock Store
+          title: Enable Lock Store
           default: "1"
           help_text: "lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order. More: https://rasa.com/docs/rasa/lock-stores"
         - name: rasa_lock_store_use_concurrent
@@ -895,15 +904,21 @@ spec:
           default: "1"
           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         # Models
+        - name: heading_rasa_models
+          type: heading
+          title: Rasa Models
         - name: rasa_models
           type: bool
-          title: Rasa Models
+          title: Enable Rasa Models
           default: "0"
-          help_text: Models provides loading models from the storage
+          help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
         # Tracing
+        - name: heading_rasa_tracing
+          type: heading
+          title: Tracing
         - name: rasa_tracing
           type: bool
-          title: Tracing
+          title: Enable Tracing
           default: "1"
           help_text: "Tracing tracks requests as they flow through a distributed system. More: https://rasa.com/docs/rasa/monitoring/tracing/"
         - name: rasa_tracing_host
@@ -932,9 +947,13 @@ spec:
           default: "jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         # Tracker Store
+        - name: heading_tracker_store
+          type: heading
+          title: Tracker Store
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: rasa_tracker_store
           type: bool
-          title: Tracker Store
+          title: Enable Tracker Store
           default: "1"
           help_text: "TrackerStore assistant's conversations are stored within a tracker store. More: https://rasa.com/docs/rasa/tracker-stores"
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
@@ -974,7 +993,7 @@ spec:
           default: "postgresql.postgresql.svc.cluster.local"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         # Additional Endpoints
-        - name: additional_endpoints
+        - name: heading_additional_endpoints
           type: heading
           title: Additional Endpoints
           help_text: "(OPTIONAL) Additional endpoints to add more settings to endpoints.yml"
@@ -1008,7 +1027,7 @@ spec:
           default: "production"
           help_text: "Environment: development or production"
         # Additional Arguments
-        - name: additional_arguments
+        - name: heading_additional_arguments
           type: heading
           title: Additional Arguments
           help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"

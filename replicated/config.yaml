@@ -671,6 +671,7 @@ spec:
           title: Connection type
           default: http
           help_text: Define if you will be using https or http with the ingressHost
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: ingress_class
           type: text
           title: Ingress Class Name
@@ -782,6 +783,14 @@ spec:
           default: ""
           required: true
           help_text: OpenAI API key to be used
+        - name: rasa_auth_token
+          type: text
+          title: Rasa Auth Token
+          default: ""
+        - name: rasa_jwt_secret
+          type: text
+          title: Rasa JWT secret
+          default: ""
         - name: heading_settings
           type: heading
           title: Settings

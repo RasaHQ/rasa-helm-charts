@@ -1179,6 +1179,7 @@ spec:
             - name: external_redis
               title: External Redis
         - name: redis_password
-          type: text
+          type: password
           title: Redis password
           default: redis
+          when: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'

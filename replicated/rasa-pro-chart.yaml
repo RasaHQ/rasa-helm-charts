@@ -87,7 +87,7 @@ spec:
               host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
               metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
               port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
-        # -- settings.environment: development or production
+          # -- settings.environment: development or production
         environment: '{{repl ConfigOption "settings_environment" }}'
       additionalArgs:
         - --model
@@ -136,6 +136,7 @@ spec:
               name: "rasa-secrets"
               key: "REDIS_PASSWORD"
       ingress:
+        enabled: true
         className: '{{repl ConfigOption "ingress_class" }}'
         annotations:
           kots.io/placeholder: |-

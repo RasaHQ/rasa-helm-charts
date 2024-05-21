@@ -136,7 +136,6 @@ spec:
               name: "rasa-secrets"
               key: "REDIS_PASSWORD"
       ingress:
-        enabled: true
         className: '{{repl ConfigOption "ingress_class" }}'
         annotations:
           kots.io/placeholder: |-

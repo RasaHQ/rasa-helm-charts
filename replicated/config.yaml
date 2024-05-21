@@ -680,7 +680,7 @@ spec:
           title: Ingress Class Name
           default: nginx
           help_text: Ingress class name
-          when: '{{repl ConfigOptionEquals "install_nginx" "no_ingress"}}'
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
         - name: annotations
           type: textarea
           title: Annotations

@@ -658,7 +658,7 @@ spec:
           type: text
           title: Ingress DNS Hostname
           default: ""
-          help_text: Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
+          help_text: Defines the host name for all resources. Make sure you provide a valid host name.
         - name: rasa_ingress_hosts_path
           type: text
           title: Path

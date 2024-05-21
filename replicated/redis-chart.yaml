@@ -3,7 +3,7 @@ kind: HelmChart
 metadata:
   name: redis
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'
+  exclude: 'repl{{ and (ConfigOptionEquals `rasa_platform_deploy` `studio`) (ConfigOptionEquals `redis_type` `external_redis`) }}'
   chart:
     name: redis
     chartVersion: 19.1.1

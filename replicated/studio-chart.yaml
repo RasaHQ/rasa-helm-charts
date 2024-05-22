@@ -406,3 +406,25 @@ spec:
                 requests:
                   cpu: '{{repl ConfigOption "set_model_running_consumer_requests_cpu" }}'
                   memory: '{{repl ConfigOption "set_model_running_consumer_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
+      recursiveMerge: true
+      values:
+        modelService:
+          training:
+            orchestrator:
+              environmentVariables:
+                AWS_ENDPOINT_URL:
+                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
+            consumer:
+              environmentVariables:
+                AWS_ENDPOINT_URL:
+                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
+          running:
+            orchestrator:
+              environmentVariables:
+                AWS_ENDPOINT_URL:
+                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
+            consumer:
+              environmentVariables:
+                AWS_ENDPOINT_URL:
+                  value: '{{repl ConfigOption "aws_endpoint_url" }}'

@@ -3,7 +3,7 @@ kind: Config
 metadata:
   name: vm-config
 spec:
-  version: 1.0.0+k8s-1.29
+  version: 1.2.0+k8s-1.29
   unsupportedOverrides:
     k0s: |
       config:

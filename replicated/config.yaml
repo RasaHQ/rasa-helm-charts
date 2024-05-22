@@ -24,28 +24,31 @@ spec:
       description: >
         This section configures your API Keys and image versions
       title: APIs and Credentials
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: studio_image_tag
           type: text
           title: Studio version
           default: "1.2.0"
           help_text: Specifies image tag for Studio
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: docker_image_tag
           type: text
           title: Rasa Pro version
           default: "3.8.0"
           help_text: Rasa Plus docker image to be used for training
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: rasa_config_file
           type: text
           title: Rasa Pro config file
           default: ""
           help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: model_service_image_tag
           type: text
           title: Model services version
           default: "3.2.2"
           help_text: Specifies image tag for Model Service
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: openai_api_key
           type: text
           title: OpenAI API key
@@ -655,7 +658,7 @@ spec:
           type: text
           title: Ingress DNS Hostname
           default: ""
-          help_text: Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
+          help_text: Defines the host name for all resources. Make sure you provide a valid host name.
         - name: rasa_ingress_hosts_path
           type: text
           title: Path
@@ -671,12 +674,13 @@ spec:
           title: Connection type
           default: http
           help_text: Define if you will be using https or http with the ingressHost
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: ingress_class
           type: text
           title: Ingress Class Name
           default: nginx
           help_text: Ingress class name
-          when: '{{repl ConfigOptionEquals "install_nginx" "no_ingress"}}'
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
         - name: annotations
           type: textarea
           title: Annotations
@@ -776,12 +780,14 @@ spec:
           title: Rasa Pro version
           default: "3.8.0-latest"
           help_text: Specifies image tag for Rasa Pro
-        - name: rasa_openai_api_key
+        - name: rasa_auth_token
           type: text
-          title: Rasa OpenAI API key
+          title: Rasa Auth Token
           default: ""
-          required: true
-          help_text: OpenAI API key to be used
+        - name: rasa_jwt_secret
+          type: text
+          title: Rasa JWT secret
+          default: ""
         - name: heading_settings
           type: heading
           title: Settings
@@ -862,7 +868,7 @@ spec:
         - name: rasa_event_broker_url
           type: text
           title: Event Broker URL
-          default: "kafka-0.kafka-headless.rasa.svc.cluster.local:9093"
+          default: "kafka.kafka.svc.cluster.local:9092"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
@@ -893,7 +899,7 @@ spec:
           type: text
           title: Lock Store port
           default: "6379"
-           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_url
           type: text
           title: Lock Store URL
@@ -926,12 +932,12 @@ spec:
         - name: rasa_tracing
           type: bool
           title: Enable Tracing
-          default: "1"
+          default: "0"
           help_text: "Tracing tracks requests as they flow through a distributed system. More: https://rasa.com/docs/rasa/monitoring/tracing/"
         - name: rasa_tracing_host
           type: text
           title: Tracing host
-          default: ""
+          default: "jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         - name: rasa_tracing_port
           type: text
@@ -941,7 +947,7 @@ spec:
         - name: rasa_tracing_service_name
           type: text
           title: Tracing Service name
-          default: "demo-rasa"
+          default: "rasa-jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         - name: rasa_tracing_sync_export
           type: text
@@ -978,36 +984,40 @@ spec:
         - name: heading_additional_endpoints
           type: heading
           title: Additional Endpoints
-          help_text: "(OPTIONAL) Additional endpoints to add more settings to endpoints.yml"
+        - name: enable_vector_store
+          type: bool
+          title: Enable Vector Store
+          default: "0"
+          help_text: "Specify if using external vector DB"
         - name: rasa_additional_endpoints_vector_store_type
           type: text
           title: Vector Store type
-          default: "qdrant"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_collection
           type: text
           title: Vector Store collection
-          default: "rasa"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_content_payload_key
           type: text
           title: Vector Store payload key
-          default: "page_content"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_host
           type: text
           title: Vector Store host
-          default: "qdrant-0.qdrant-headless.rasa.svc.cluster.local"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_metadata_payload_key
           type: text
           title: Vector Store metadata payload key
-          default: "metadata"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: rasa_additional_endpoints_vector_store_port
           type: text
           title: Vector Store port
-          default: "6333"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         - name: settings_environment
           type: text
           title: Environment
-          default: "production"
           help_text: "Environment: development or production"
+          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         # Additional Arguments
         - name: heading_additional_arguments
           type: heading

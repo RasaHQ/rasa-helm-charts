@@ -63,7 +63,7 @@ spec:
             db: '{{repl ConfigOption "rasa_lock_store_db" }}'
             port: '{{repl ConfigOption "rasa_lock_store_port" }}'
             url: '{{repl ConfigOption "rasa_lock_store_url" }}'
-            password: '{{repl ConfigOption "rasa_lock_store_password" }}'
+            password: '{{repl ConfigOption "redis_password" }}'
             use_ssl: repl{{ eq (ConfigOption "rasa_lock_store_use_ssl") "1"}}
           models:
             enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}

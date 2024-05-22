@@ -934,16 +934,23 @@ spec:
           type: text
           title: Lock Store database
           default: "0"
+          help_text: "Number of database within redis, e.g. 0"
           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_port
           type: text
           title: Lock Store port
           default: "6379"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_url
           type: text
           title: Lock Store URL
-          default: "gusc1-composed-shark-30348.upstash.io"
+          default: "redis-master.redis.svc.cluster.local"
+          help_text: "URL of the redis instance"
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+        - name: redis_password
+          type: password
+          title: Lock Store Password
+          default: 'redis'
           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_use_ssl
           type: bool
@@ -1009,35 +1016,10 @@ spec:
           title: Tracker Store dialect
           default: "postgresql"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_database
-          type: text
-          title: Tracker Store database
-          default: "rasa"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_username
-          type: text
-          title: Tracker Store user name
-          default: "postgres"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_password
-          type: password
-          title: Tracker Store password
-          default: "postgres"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_port
-          type: text
-          title: Tracker Store port
-          default: "5432"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_type
           type: text
           title: Tracker Store type
           default: "sql"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_url
-          type: text
-          title: Tracker Store URL
-          default: "postgresql.postgresql.svc.cluster.local"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         # Additional Endpoints
         - name: heading_additional_endpoints
@@ -1216,6 +1198,7 @@ spec:
             - name: external_redis
               title: External Redis
         - name: redis_password
-          type: text
+          type: password
           title: Redis password
           default: redis
+          when: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'

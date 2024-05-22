@@ -73,12 +73,12 @@ spec:
           trackerStore:
             enabled: repl{{ eq (ConfigOption "rasa_tracker_store") "1"}}
             dialect: '{{repl ConfigOption "rasa_tracker_store_dialect" }}'
-            db: '{{repl ConfigOption "rasa_tracker_store_database" }}'
-            username: '{{repl ConfigOption "rasa_tracker_store_username" }}'
-            password: '{{repl ConfigOption "rasa_tracker_store_password" }}'
-            port: '{{repl ConfigOption "rasa_tracker_store_port" }}'
+            db: '{{repl ConfigOption "rasa_pro_database" }}'
+            username: '{{repl ConfigOption "database_username" }}'
+            password: '{{repl ConfigOption "database_password" }}'
+            port: '{{repl ConfigOption "database_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
-            url: '{{repl ConfigOption "rasa_tracker_store_url" }}'
+            url: '{{repl ConfigOption "database_host" }}'
           additionalEndpoints:
             vector_store:
               type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'

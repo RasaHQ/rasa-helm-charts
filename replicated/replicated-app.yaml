@@ -23,4 +23,4 @@ spec:
     - deployment/model-training-service-orchestrator
     - deployment/model-training-service-consumer
     - deployment/nginx-reverse-proxy
-    - deployment/rasa-pro
+    

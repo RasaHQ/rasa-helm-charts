@@ -950,35 +950,10 @@ spec:
           title: Tracker Store dialect
           default: "postgresql"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_database
-          type: text
-          title: Tracker Store database
-          default: "rasa"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_username
-          type: text
-          title: Tracker Store user name
-          default: "postgres"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_password
-          type: password
-          title: Tracker Store password
-          default: "postgres"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_port
-          type: text
-          title: Tracker Store port
-          default: "5432"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         - name: rasa_tracker_store_type
           type: text
           title: Tracker Store type
           default: "sql"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_url
-          type: text
-          title: Tracker Store URL
-          default: "postgresql.postgresql.svc.cluster.local"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
         # Additional Endpoints
         - name: additional_endpoints

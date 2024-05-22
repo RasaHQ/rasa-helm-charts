@@ -535,6 +535,18 @@ spec:
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: The region where the bucket is located.
+        - name: custom_s3_endpoint
+          type: bool
+          title: Use custom S3 Endpoint
+          default: "0"
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+          help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
+        - name: aws_endpoint_url
+          type: text
+          title: Endpoint URL
+          default: ""
+          help_text: A custom URL endpoint for an S3-compatible storage service.
+          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
     - name: NFS
       description: >
         This section covers NFS server configuration

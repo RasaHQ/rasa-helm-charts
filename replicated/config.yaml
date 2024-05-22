@@ -868,7 +868,7 @@ spec:
         - name: rasa_event_broker_url
           type: text
           title: Event Broker URL
-          default: "kafka-0.kafka-headless.rasa.svc.cluster.local:9093"
+          default: "kafka.kafka.svc.cluster.local:9092"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
@@ -899,7 +899,7 @@ spec:
           type: text
           title: Lock Store port
           default: "6379"
-           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_url
           type: text
           title: Lock Store URL

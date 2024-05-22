@@ -937,7 +937,7 @@ spec:
         - name: rasa_tracing_host
           type: text
           title: Tracing host
-          default: ""
+          default: "jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         - name: rasa_tracing_port
           type: text
@@ -947,7 +947,7 @@ spec:
         - name: rasa_tracing_service_name
           type: text
           title: Tracing Service name
-          default: "demo-rasa"
+          default: "rasa-jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
         - name: rasa_tracing_sync_export
           type: text

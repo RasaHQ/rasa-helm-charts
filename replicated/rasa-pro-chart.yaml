@@ -64,7 +64,7 @@ spec:
           models:
             enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}
           tracing:
-            enabled: repl{{ eq (ConfigOption "rasa_tracing") "1"}}
+            enabled: repl{{ eq (ConfigOption "rasa_tracing") "0"}}
             host: '{{repl ConfigOption "rasa_tracing_host" }}'
             port: '{{repl ConfigOption "rasa_tracing_port" }}'
             service_name: '{{repl ConfigOption "rasa_tracing_service_name" }}'
@@ -79,15 +79,7 @@ spec:
             port: '{{repl ConfigOption "database_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
             url: '{{repl ConfigOption "database_host" }}'
-          additionalEndpoints:
-            vector_store:
-              type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
-              collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
-              content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
-              host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
-              metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
-              port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
-        # -- settings.environment: development or production
+          # -- settings.environment: development or production
         environment: '{{repl ConfigOption "settings_environment" }}'
       additionalArgs:
         - --model
@@ -136,16 +128,16 @@ spec:
               name: "rasa-secrets"
               key: "REDIS_PASSWORD"
       ingress:
-        enabled: repl{{ eq (ConfigOption "ingress_enabled") "1"}}
+        enabled: true
         className: '{{repl ConfigOption "ingress_class" }}'
         annotations:
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
-          hosts:
-            - host: '{{repl ConfigOption "ingress_hostname" }}'
-              paths:
-                - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
-                  pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
+        hosts:
+          - host: '{{repl ConfigOption "ingress_hostname" }}'
+            paths:
+              - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
+                pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
       volumeMounts:
       - mountPath: /etc/gcp
         name: service-account-credentials-volume
@@ -224,3 +216,12 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_analytics_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_analytics_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
+      additionalEndpoints:
+        vector_store:
+          type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
+          collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
+          content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
+          host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
+          metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
+          port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'

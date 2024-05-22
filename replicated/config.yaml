@@ -873,34 +873,34 @@ spec:
           type: bool
           title: Lock Store use concurrent
           default: "1"
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_db
           type: text
           title: Lock Store database
           default: "0"
           help_text: "Number of database within redis, e.g. 0"
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_port
           type: text
           title: Lock Store port
           default: "6379"
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
+           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_url
           type: text
           title: Lock Store URL
           default: "redis-master.redis.svc.cluster.local"
           help_text: "URL of the redis instance"
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
-        - name: rasa_lock_store_password
-          type: text
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+        - name: redis_password
+          type: password
           title: Lock Store Password
           default: 'redis'
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         - name: rasa_lock_store_use_ssl
           type: bool
           title: Lock Store use SSL
           default: "1"
-          when: '{{repl and (ConfigOptionEquals "redis_type" "embedded_redis") (ConfigOptionEquals "rasa_lock_store" "1") }}'
+          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         # Models
         - name: rasa_models
           type: bool
@@ -1107,6 +1107,7 @@ spec:
             - name: external_redis
               title: External Redis
         - name: redis_password
-          type: text
+          type: password
           title: Redis password
           default: redis
+          when: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'

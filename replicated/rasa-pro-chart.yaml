@@ -79,7 +79,11 @@ spec:
             dialect: '{{repl ConfigOption "rasa_tracker_store_dialect" }}'
             db: '{{repl ConfigOption "rasa_tracker_store_database" }}'
             username: '{{repl ConfigOption "rasa_tracker_store_username" }}'
-            password: '{{repl ConfigOption "rasa_tracker_store_password" }}'
+            password:
+              valueFrom:
+                secretKeyRef:
+                  name: "rasa-secrets"
+                  key: "REDIS_PASSWORD"
             port: '{{repl ConfigOption "rasa_tracker_store_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
             url: '{{repl ConfigOption "rasa_tracker_store_url" }}'

@@ -932,7 +932,7 @@ spec:
         - name: rasa_tracing
           type: bool
           title: Enable Tracing
-          default: "1"
+          default: "0"
           help_text: "Tracing tracks requests as they flow through a distributed system. More: https://rasa.com/docs/rasa/monitoring/tracing/"
         - name: rasa_tracing_host
           type: text

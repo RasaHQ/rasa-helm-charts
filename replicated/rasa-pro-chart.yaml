@@ -64,7 +64,7 @@ spec:
           models:
             enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}
           tracing:
-            enabled: repl{{ eq (ConfigOption "rasa_tracing") "1"}}
+            enabled: repl{{ eq (ConfigOption "rasa_tracing") "0"}}
             host: '{{repl ConfigOption "rasa_tracing_host" }}'
             port: '{{repl ConfigOption "rasa_tracing_port" }}'
             service_name: '{{repl ConfigOption "rasa_tracing_service_name" }}'

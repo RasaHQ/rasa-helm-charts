@@ -12,9 +12,7 @@ spec:
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
-    imagePullSecrets:
-      - name: "{{repl ImagePullSecretName }}"
-    repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ) }}'
+    repository: '{{repl ConfigOption "studio_repository" }}'
     tag: '{{repl ConfigOption "studio_image_tag" }}'
 
     replicated:
@@ -70,7 +68,7 @@ spec:
         KEYCLOAK_CLIENT_ID:
           value: '{{repl ConfigOption "keycloak_client_id" }}'
         DOCKER_IMAGE_TAG:
-          value: 'europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:{{repl ConfigOption "docker_image_tag" }}'
+          value: '{{repl ConfigOption "rasa_config_image" }}:{{repl ConfigOption "docker_image_tag" }}'
         RASA_CONFIG_FILE:
           value: '{{repl ConfigOption "rasa_config_file" }}'
       migration:
@@ -152,7 +150,7 @@ spec:
 
     modelService:
       # -- repository specifies image repository for Studio
-      repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ) }}'
+      repository: '{{repl ConfigOption "model_services_repository" }}'
       # -- tag specifies image tag for Studio
       tag: '{{repl ConfigOption "model_service_image_tag" }}'
       rasaProLicense:
@@ -320,6 +318,38 @@ spec:
         localNodeName: '{{repl ConfigOption "local_node_name" }}'
 
   optionalValues:
+    - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ImagePullSecretName }}'
+        modelService:
+          training:
+            consumer:
+              environmentVariables:
+                KUBERNETES_IMAGE_PULL_SECRET_NAME:
+                  value: '{{repl ImagePullSecretName }}'
+          running:
+            consumer:
+              environmentVariables:
+                KUBERNETES_IMAGE_PULL_SECRET_NAME:
+                  value: '{{repl ImagePullSecretName }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ConfigOption "image_pull_secrets" }}'
+        modelService:
+          training:
+            consumer:
+              environmentVariables:
+                KUBERNETES_IMAGE_PULL_SECRET_NAME:
+                  value: '{{repl ConfigOption "image_pull_secrets" }}'
+          running:
+            consumer:
+              environmentVariables:
+                KUBERNETES_IMAGE_PULL_SECRET_NAME:
+                  value: '{{repl ConfigOption "image_pull_secrets" }}'
     - when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
       recursiveMerge: true
       values:

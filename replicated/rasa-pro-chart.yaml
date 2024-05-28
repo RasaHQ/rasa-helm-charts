@@ -10,6 +10,7 @@ spec:
     chartVersion: 1.0.4
   
   releaseName: rasa-pro
+  namespace: rasa-pro
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template

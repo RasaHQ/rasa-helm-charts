@@ -347,7 +347,7 @@ spec:
         - name: kafka_username
           type: text
           title: Kafka SASL username
-          default: ""
+          default: "kafka"
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka SASL username
         - name: kafka_password
@@ -880,7 +880,7 @@ spec:
         - name: rasa_action_endpoint_url
           type: text
           title: Action Server URL
-          default: "http://action-server.rasa.svc.cluster.local:5055/webhook"
+          default: "http://action-server.kotsadm.svc.cluster.local:5055/webhook"
           help_text: Action Server is deployed in cluster
         # Event Broker configuration
         - name: heading_event_broker
@@ -899,12 +899,7 @@ spec:
         - name: rasa_event_broker_security_protocol
           type: text
           title: Event Broker security protocol
-          default: "SASL_SSL"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_sasl_mechanism
-          type: text
-          title: Event Broker SASL mechanism
-          default: "SCRAM-SHA-256"
+          default: "PLAINTEXT"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         - name: rasa_event_broker_topic
           type: text
@@ -919,7 +914,7 @@ spec:
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
           title: Event Broker SSL check hostname
-          default: "1"
+          default: "0"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         # Lock Store configuration
         - name: heading_lock_store
@@ -960,7 +955,7 @@ spec:
         - name: rasa_lock_store_use_ssl
           type: bool
           title: Lock Store use SSL
-          default: "1"
+          default: "0"
           when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
         # Models
         - name: heading_rasa_models
@@ -978,7 +973,7 @@ spec:
         - name: rasa_tracing
           type: bool
           title: Enable Tracing
-          default: "0"
+          default: "1"
           help_text: "Tracing tracks requests as they flow through a distributed system. More: https://rasa.com/docs/rasa/monitoring/tracing/"
         - name: rasa_tracing_host
           type: text
@@ -1090,7 +1085,7 @@ spec:
         - name: model_file
           type: text
           title: Model file name
-          default: "model.tar.gz"
+          default: "20240523-154518-ancient-xylophone.tar.gz"
         # AWS credentials
         - name: aws_access_key_id
           type: text
@@ -1185,12 +1180,29 @@ spec:
         - name: action_server_image_tag
           type: text
           title: Action Server version
-          default: "3.6.2"
+          default: "calm"
           help_text: Specifies image tag for Action Server
         - name: action_server
           type: bool
           title: Enable Action Server
           default: "0"
+        - name: action_server_replica_count
+          type: text
+          title: Action Server replica count
+          default: "1"
+        - name: action_service_port
+          type: text
+          title: Action Server port
+          default: "5055"
+          help_text: Specifies image tag for Action Server
+        - name: action_server_service_type
+          type: text
+          title: Action Server service type
+          default: "ClusterIP"
+        - name: action_server_settings_schema
+          type: text
+          title: Action Server schema
+          default: "http"
     - name: Redis
       description: >
           This section covers Redis configuration

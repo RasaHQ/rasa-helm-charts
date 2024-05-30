@@ -47,7 +47,6 @@ spec:
             enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
             security_protocol: '{{repl ConfigOption "rasa_event_broker_security_protocol" }}'
-            sasl_mechanism: '{{repl ConfigOption "rasa_event_broker_sasl_mechanism" }}'
             topic: '{{repl ConfigOption "rasa_event_broker_topic" }}'
             url: '{{repl ConfigOption "rasa_event_broker_url" }}'
             sasl_username: '{{repl ConfigOption "kafka_username" }}'
@@ -64,7 +63,7 @@ spec:
           models:
             enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}
           tracing:
-            enabled: repl{{ eq (ConfigOption "rasa_tracing") "0"}}
+            enabled: repl{{ eq (ConfigOption "rasa_tracing") "1"}}
             host: '{{repl ConfigOption "rasa_tracing_host" }}'
             port: '{{repl ConfigOption "rasa_tracing_port" }}'
             service_name: '{{repl ConfigOption "rasa_tracing_service_name" }}'
@@ -152,17 +151,24 @@ spec:
     actionServer:
       enabled: repl{{ eq (ConfigOption "action_server") "1"}}
       image:
-        # user need to specify image for action server
-        repository: '{{repl ConfigOption "action_server_repository" }}'
+        repository: 'registry.replicated.com/studio-dragon/rasa-action-server'
         tag: '{{repl ConfigOption "action_server_image_tag" }}'
       replicaCount: '{{repl ConfigOption "action_server_replica_count" }}'
       service:
         port: '{{repl ConfigOption "action_service_port" }}'
-        targetPort: '{{repl ConfigOption "action_service_target_port" }}'
+        targetPort: '{{repl ConfigOption "action_service_port" }}'
         type: '{{repl ConfigOption "action_server_service_type" }}'
       settings:
-        port: '{{repl ConfigOption "action_server_settings_port" }}'
+        port: '{{repl ConfigOption "action_service_port" }}'
         scheme: '{{repl ConfigOption "action_server_settings_schema" }}'
+      volumeMounts:
+        - name: rasa-config-volume
+          mountPath: /app/endpoints.yml
+          subPath: endpoints
+      volumes:
+        - name: rasa-config-volume
+          configMap:
+            name: rasa-configmap
     
     rasaProServices:
       # (OPTIONAL) user need to specify if using external vector DB

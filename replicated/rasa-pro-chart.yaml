@@ -46,9 +46,9 @@ spec:
           eventBroker:
             enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
-            security_protocol: '{{repl ConfigOption "rasa_event_broker_security_protocol" }}'
-            topic: '{{repl ConfigOption "rasa_event_broker_topic" }}'
-            url: '{{repl ConfigOption "rasa_event_broker_url" }}'
+            security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
+            topic: '{{repl ConfigOption "rasa_assistant_topic" }}'
+            url: '{{repl ConfigOption "kafka_broker" }}'
             sasl_username: '{{repl ConfigOption "kafka_username" }}'
             sasl_password: '{{repl ConfigOption "kafka_password" }}'
             ssl_check_hostname: repl{{ eq (ConfigOption "rasa_event_broker_ssl_check_hostname") "1"}}
@@ -174,7 +174,7 @@ spec:
       # (OPTIONAL) user need to specify if using external vector DB
       enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}
       image:
-        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services/" ) }}'
+        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services" ) }}'
         tag: '{{repl ConfigOption "rasa_pro_services_image_tag" }}'
       environmentVariables:
         KAFKA_BROKER_ADDRESS:
@@ -194,7 +194,7 @@ spec:
         KAFKA_LOGGING_LEVEL:
           value: '{{repl ConfigOption "kafka_logging_level" }}'
         RASA_ANALYTICS_DB_URL:
-          value: '{{repl ConfigOption "rasa_analytics_db_url" }}'
+          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "rasa_pro_database" }}'
     
     replicated:
       enabled: true

@@ -331,7 +331,7 @@ spec:
         - name: kafka_topic
           type: text
           title: Kafka topic
-          default: rasa-events
+          default: rasa_core_events
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
         - name: kafka_dlq_topic
@@ -421,6 +421,11 @@ spec:
           type: text
           title: Node TLS reject unauthorized
           default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_logging_level
+          type: text
+          title: Kafka logging level
+          default: "INFO"
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
     - name: Keycloak
       description: >

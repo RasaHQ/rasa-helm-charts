@@ -47,7 +47,7 @@ spec:
             enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
             security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
-            topic: '{{repl ConfigOption "rasa_assistant_topic" }}'
+            topic: '{{repl ConfigOption "kafka_topic" }}'
             url: '{{repl ConfigOption "kafka_broker" }}'
             sasl_username: '{{repl ConfigOption "kafka_username" }}'
             sasl_password: '{{repl ConfigOption "kafka_password" }}'
@@ -191,7 +191,7 @@ spec:
           value: '{{repl ConfigOption "kafka_ca_file" }}'
         KAFKA_TOPIC:
           value: '{{repl ConfigOption "kafka_topic" }}'
-        KAFKA_LOGGING_LEVEL:
+        LOGGING_LEVEL:
           value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
         RASA_ANALYTICS_DB_URL:
           value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "rasa_pro_database" }}'

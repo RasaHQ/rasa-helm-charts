@@ -190,7 +190,7 @@ spec:
         KAFKA_SSL_CA_LOCATION:
           value: '{{repl ConfigOption "kafka_ca_file" }}'
         KAFKA_TOPIC:
-          value: '{{repl ConfigOption "rasa_assistant_topic" }}'
+          value: '{{repl ConfigOption "rasa_core_events_topic" }}'
         LOGGING_LEVEL:
           value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
         RASA_ANALYTICS_DB_URL:

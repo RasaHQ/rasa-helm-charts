@@ -72,6 +72,12 @@ spec:
           config:
             max.message.bytes: 64000
             flush.messages: 1
+        - name: '{{repl ConfigOption "rasa_core_events_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+          config:
+            max.message.bytes: 64000
+            flush.messages: 1
     kraft:
       enabled: true
     zookeeper:

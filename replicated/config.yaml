@@ -370,11 +370,6 @@ spec:
           default: deployment-job
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: rasa_assistant_topic
-          type: text
-          title: Rasa Assistant
-          default: rasa-assistant
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_security_protocol
           type: text
           title: Kafka Security Protocol

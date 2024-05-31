@@ -1088,7 +1088,7 @@ spec:
       - name: rasa_pro_services_logging_level
         type: text
         title: Rasa Pro Services logging level
-        default: "DEBUG"
+        default: "INFO"
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
       - name: set_analytics_resources
         type: bool

@@ -307,7 +307,7 @@ spec:
         - name: kafka_sasl_mechanism
           type: text
           title: Kafka SASL mechanism
-          default: "PLAIN"
+          default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
         - name: kafka_username
@@ -370,6 +370,11 @@ spec:
           default: deployment-job
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: rasa_assistant_topic
+          type: text
+          title: Rasa Assistant
+          default: rasa-assistant
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_security_protocol
           type: text
           title: Kafka Security Protocol
@@ -849,21 +854,6 @@ spec:
           type: text
           title: Event Broker type
           default: "kafka"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_security_protocol
-          type: text
-          title: Event Broker security protocol
-          default: "PLAINTEXT"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_topic
-          type: text
-          title: Event Broker topic
-          default: "rasa-assistant"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_url
-          type: text
-          title: Event Broker URL
-          default: "kafka.kafka.svc.cluster.local:9092"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool

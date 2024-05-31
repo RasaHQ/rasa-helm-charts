@@ -375,6 +375,11 @@ spec:
           title: Rasa Assistant
           default: rasa-assistant
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: rasa_core_events_topic
+          type: text
+          title: Rasa Assistant
+          default: rasa_core_events
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_security_protocol
           type: text
           title: Kafka Security Protocol
@@ -850,21 +855,6 @@ spec:
           title: Event Broker type
           default: "kafka"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_security_protocol
-          type: text
-          title: Event Broker security protocol
-          default: "PLAINTEXT"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_topic
-          type: text
-          title: Event Broker topic
-          default: "rasa-assistant"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        - name: rasa_event_broker_url
-          type: text
-          title: Event Broker URL
-          default: "kafka.kafka.svc.cluster.local:9092"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
           title: Event Broker SSL check hostname
@@ -1099,6 +1089,11 @@ spec:
         title: Rasa Pro Analytics version
         default: "3.2.3-latest"
         help_text: Specifies image tag for Rasa Pro Analytics
+        when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
+      - name: rasa_pro_services_logging_level
+        type: text
+        title: Rasa Pro Services logging level
+        default: "INFO"
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
       - name: set_analytics_resources
         type: bool

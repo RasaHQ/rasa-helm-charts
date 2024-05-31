@@ -373,7 +373,7 @@ spec:
         - name: rasa_assistant_topic
           type: text
           title: Rasa Assistant
-          default: rasa-assistant
+          default: rasa_core_events
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_security_protocol
           type: text

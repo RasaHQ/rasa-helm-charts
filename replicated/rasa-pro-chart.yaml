@@ -192,7 +192,7 @@ spec:
         KAFKA_TOPIC:
           value: '{{repl ConfigOption "kafka_topic" }}'
         KAFKA_LOGGING_LEVEL:
-          value: '{{repl ConfigOption "kafka_logging_level" }}'
+          value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
         RASA_ANALYTICS_DB_URL:
           value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "rasa_pro_database" }}'
     

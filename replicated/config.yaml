@@ -422,11 +422,6 @@ spec:
           title: Node TLS reject unauthorized
           default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: kafka_logging_level
-          type: text
-          title: Kafka logging level
-          default: "INFO"
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
     - name: Keycloak
       description: >
         This section covers Keycloak section
@@ -1089,6 +1084,11 @@ spec:
         title: Rasa Pro Analytics version
         default: "3.2.3-latest"
         help_text: Specifies image tag for Rasa Pro Analytics
+        when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
+      - name: rasa_pro_services_logging_level
+        type: text
+        title: Rasa Pro Services logging level
+        default: "DEBUG"
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
       - name: set_analytics_resources
         type: bool

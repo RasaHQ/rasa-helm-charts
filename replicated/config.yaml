@@ -331,7 +331,7 @@ spec:
         - name: kafka_topic
           type: text
           title: Kafka topic
-          default: rasa_events
+          default: rasa-events
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
         - name: kafka_dlq_topic

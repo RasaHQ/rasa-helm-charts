@@ -22,7 +22,7 @@ spec:
       secretKey: "RASA_PRO_LICENCE"
     rasa:
       image:
-        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" ) }}'
+        repository: '{{repl ConfigOption "rasa_pro_repository" }}'
         tag: '{{repl ConfigOption "rasa_pro_image_tag" }}'
       settings:
         enableApi: repl{{ eq (ConfigOption "rasa_enable_api") "1"}}
@@ -201,6 +201,16 @@ spec:
       enabled: true
 
   optionalValues:
+    - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ImagePullSecretName }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ConfigOption "image_pull_secrets" }}'
     - when: '{{repl ConfigOptionEquals "rasa_platform_deploy" "rasa_platform"}}'
       recursiveMerge: true
       values:

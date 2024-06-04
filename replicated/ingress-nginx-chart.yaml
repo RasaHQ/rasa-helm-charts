@@ -9,7 +9,7 @@ spec:
     chartVersion: 4.9.1
   
   releaseName: ingress-nginx
-  namespace: ingress
+  namespace: ingress-nginx
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   # values:

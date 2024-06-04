@@ -10,6 +10,7 @@ spec:
     chartVersion: 1.0.4
   
   releaseName: rasa-pro
+  namespace: rasa-pro
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
@@ -200,6 +201,14 @@ spec:
       enabled: true
 
   optionalValues:
+    - when: '{{repl ConfigOptionEquals "rasa_platform_deploy" "rasa_platform"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/use-regex: "true"
+              nginx.ingress.kubernetes.io/rewrite-target: /$2
     - when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
       recursiveMerge: true
       values:

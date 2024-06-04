@@ -9,10 +9,12 @@ spec:
   allowRollback: true
   minKotsVersion: 1.79.0
   additionalNamespaces:
-    - "ingress"
+    - "ingress-nginx"
     - "postgresql"
     - "kafka"
     - "redis"
+    - "studio"
+    - "rasa-pro"
   statusInformers:
     - deployment/studio-backend
     - deployment/studio-keycloak

@@ -713,13 +713,13 @@ spec:
         - name: rasa_ingress_hosts_path
           type: text
           title: Path
-          default: "/"
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
+          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "/" "/rasapro(/|$)(.*)"}}'
+          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: rasa_ingress_hosts_path_type
           type: text
           title: Path type
-          default: "ImplementationSpecific"
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
+          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "ImplementationSpecific" "Prefix"}}'
+          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: connection_type
           type: text
           title: Connection type
@@ -731,7 +731,7 @@ spec:
           title: Ingress Class Name
           default: nginx
           help_text: Ingress class name
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
+          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
         - name: annotations
           type: textarea
           title: Annotations

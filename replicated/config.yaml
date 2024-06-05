@@ -235,233 +235,6 @@ spec:
           title: MRS consumer Memory requests
           help_text: Configure MRS consumer resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-    - name: Database
-      description: >
-        This section can be used to configure the database required by Rasa Studio.
-      title: Database
-      items:
-        - name: postgres_type
-          type: select_one
-          title: PostgreSQL
-          default: embedded_postgres
-          items:
-            - name: embedded_postgres
-              title: Embedded Postgres
-            - name: external_postgres
-              title: External Postgres
-        - name: wait_for_it
-          type: bool
-          title: Wait for PostgreSQL to be ready
-          default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
-          when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
-          help_text: Enable this if you are using Embedded PostgreSQL
-        - name: database_host
-          type: text
-          title: Database Host
-          required: true
-          default: postgresql.postgresql.svc.cluster.local
-          help_text: The database host name
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: database_username
-          type: text
-          title: Database Username
-          required: true
-          default: postgres
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: The database username
-        - name: database_password
-          type: text
-          title: Database Password
-          default: postgres
-          required: true
-          help_text: The database password
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: database_port
-          type: text
-          title: Database port
-          required: true
-          default: "5432"
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: The database port
-        - name: studio_database
-          type: text
-          title: Studio database name
-          default: studio
-          help_text: The database name for Studio
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: rasa_pro_database
-          type: text
-          title: Rasa Pro database name
-          default: rasa
-          help_text: The database name for Rasa Pro
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: model_service_database
-          type: text
-          title: MTS DB database
-          default: modelservice
-          help_text: The database name for model training and running service
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: keycloak_database
-          type: text
-          title: Keycloak DB database
-          default: keycloak
-          help_text: The database name for keycloak user management service
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: prefer_ssl
-          type: text
-          title: Prefer SSL
-          default: "false"
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: Set to true if you want to use SSL for db connection
-        - name: reject_unauthorized
-          type: "text"
-          title: Reject Unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: If true the server will reject db connection which is not present list of supplied CAs.
-    - name: Kafka
-      description: >
-        This section covers Kafka configuration
-      title: Kafka
-      items:
-        - name: kafka_type
-          type: select_one
-          title: Kafka
-          default: embedded_kafka
-          items:
-            - name: embedded_kafka
-              title: Embedded Kafka
-            - name: external_kafka
-              title: External Kafka
-        - name: kafka_broker
-          type: text
-          title: Kafka broker address
-          default: "kafka.kafka.svc.cluster.local:9092"
-          help_text: Kafka broker address
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: kafka_sasl_mechanism
-          type: text
-          title: Kafka SASL mechanism
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
-        - name: kafka_username
-          type: text
-          title: Kafka SASL username
-          default: "kafka"
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka SASL username
-        - name: kafka_password
-          type: text
-          title: Kafka SASL password
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          default: kafka
-          help_text: Kafka SASL password
-        - name: kafka_group_id
-          type: text
-          title: Kafka group ID
-          default: "studio"
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic.
-        - name: kafka_topic
-          type: text
-          title: Kafka topic
-          default: rasa-events
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
-        - name: kafka_dlq_topic
-          type: text
-          title: Kafka DLQ topic
-          default: rasa-events-dlq
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
-        - name: training_result_topic
-          type: text
-          title: Training result topic
-          default: training-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: training_job_topic
-          type: text
-          title: Training job topic
-          default: training-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: kafka_training_status_update_topic
-          type: text
-          title: Training status update topic
-          default: training-status-update
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_result_topic
-          type: text
-          title: Deployment result topic
-          default: deployment-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_job_topic
-          type: text
-          title: Deployment job topic
-          default: deployment-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: rasa_assistant_topic
-          type: text
-          title: Rasa Assistant
-          default: rasa-assistant
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: rasa_core_events_topic
-          type: text
-          title: Rasa Assistant
-          default: rasa_core_events
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: kafka_security_protocol
-          type: text
-          title: Kafka Security Protocol
-          default: PLAINTEXT
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka security protocol
-        - name: kafka_ssl
-          type: text
-          title: Kafka Enable SSL
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Set to true if you want to use SSL
-        - name: kafka_custom_ssl
-          type: text
-          title: Kafka custom SSL
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Set to true if you want to use SSL with custom certs
-        - name: kafka_ca_file
-          type: text
-          title: Kafka CA file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the CA file
-        - name: kafka_key_file
-          type: text
-          title: Kafka key file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the client key file
-        - name: kafka_cert_file
-          type: text
-          title: Kafka certificate file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the client certificate file
-        - name: kafka_reject_unauthorized
-          type: text
-          title: Kafka reject unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Defaults to true, the server certificate is verified against the list of supplied CA
-        - name: node_tls_reject_unauthorized
-          type: text
-          title: Node TLS reject unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
     - name: Keycloak
       description: >
         This section covers Keycloak section
@@ -690,56 +463,6 @@ spec:
           default: ""
           help_text: DNS name or IP address of the NFS server. This value is used only when type is set to nfs
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-    - name: Ingress
-      description: >
-        This section covers Ingress configuration. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
-      title: Ingress
-      items:
-        - name: install_nginx
-          type: select_one
-          title: Deploy on
-          default: on_vm
-          items:
-            - name: on_vm
-              title: Virtual Machine
-            - name: on_kubernetes
-              title: Kubernetes
-            - name: no_ingress
-              title: Do not install
-        - name: ingress_hostname
-          type: text
-          title: Ingress DNS Hostname
-          default: ""
-          help_text: Defines the host name for all resources. Make sure you provide a valid host name.
-        - name: rasa_ingress_hosts_path
-          type: text
-          title: Path
-          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "/" "/rasapro(/|$)(.*)"}}'
-          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
-        - name: rasa_ingress_hosts_path_type
-          type: text
-          title: Path type
-          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "ImplementationSpecific" "Prefix"}}'
-          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
-        - name: connection_type
-          type: text
-          title: Connection type
-          default: http
-          help_text: Define if you will be using https or http with the ingressHost
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
-        - name: ingress_class
-          type: text
-          title: Ingress Class Name
-          default: nginx
-          help_text: Ingress class name
-          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
-        - name: annotations
-          type: textarea
-          title: Annotations
-          help_text: |
-            Use this textarea to provide annotations specific to your ingress controller.
-            For example, `kubernetes.io/tls-acme: true`.
-          default: ""
     - name: Resource Management
       description: >
         Set resource limits and requests for pods
@@ -1194,6 +917,90 @@ spec:
           type: text
           title: Action Server schema
           default: "http"
+    - name: Database
+      description: >
+        This section can be used to configure the database required by Rasa Studio.
+      title: Database
+      items:
+        - name: postgres_type
+          type: select_one
+          title: PostgreSQL
+          default: embedded_postgres
+          items:
+            - name: embedded_postgres
+              title: Embedded Postgres
+            - name: external_postgres
+              title: External Postgres
+        - name: wait_for_it
+          type: bool
+          title: Wait for PostgreSQL to be ready
+          default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
+          when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+          help_text: Enable this if you are using Embedded PostgreSQL
+        - name: database_host
+          type: text
+          title: Database Host
+          required: true
+          default: postgresql.postgresql.svc.cluster.local
+          help_text: The database host name
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: database_username
+          type: text
+          title: Database Username
+          required: true
+          default: postgres
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: The database username
+        - name: database_password
+          type: text
+          title: Database Password
+          default: postgres
+          required: true
+          help_text: The database password
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: database_port
+          type: text
+          title: Database port
+          required: true
+          default: "5432"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: The database port
+        - name: studio_database
+          type: text
+          title: Studio database name
+          default: studio
+          help_text: The database name for Studio
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: rasa_pro_database
+          type: text
+          title: Rasa Pro database name
+          default: rasa
+          help_text: The database name for Rasa Pro
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: model_service_database
+          type: text
+          title: MTS DB database
+          default: modelservice
+          help_text: The database name for model training and running service
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: keycloak_database
+          type: text
+          title: Keycloak DB database
+          default: keycloak
+          help_text: The database name for keycloak user management service
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: prefer_ssl
+          type: text
+          title: Prefer SSL
+          default: "false"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: Set to true if you want to use SSL for db connection
+        - name: reject_unauthorized
+          type: "text"
+          title: Reject Unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: If true the server will reject db connection which is not present list of supplied CAs.
     - name: Redis
       description: >
           This section covers Redis configuration
@@ -1214,3 +1021,196 @@ spec:
           title: Redis password
           default: redis
           when: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'
+    - name: Kafka
+      description: >
+        This section covers Kafka configuration
+      title: Kafka
+      items:
+        - name: kafka_type
+          type: select_one
+          title: Kafka
+          default: embedded_kafka
+          items:
+            - name: embedded_kafka
+              title: Embedded Kafka
+            - name: external_kafka
+              title: External Kafka
+        - name: kafka_broker
+          type: text
+          title: Kafka broker address
+          default: "kafka.kafka.svc.cluster.local:9092"
+          help_text: Kafka broker address
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_sasl_mechanism
+          type: text
+          title: Kafka SASL mechanism
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
+        - name: kafka_username
+          type: text
+          title: Kafka SASL username
+          default: "kafka"
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka SASL username
+        - name: kafka_password
+          type: text
+          title: Kafka SASL password
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          default: kafka
+          help_text: Kafka SASL password
+        - name: kafka_group_id
+          type: text
+          title: Kafka group ID
+          default: "studio"
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic.
+        - name: kafka_topic
+          type: text
+          title: Kafka topic
+          default: rasa-events
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
+        - name: kafka_dlq_topic
+          type: text
+          title: Kafka DLQ topic
+          default: rasa-events-dlq
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
+        - name: training_result_topic
+          type: text
+          title: Training result topic
+          default: training-result
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: training_job_topic
+          type: text
+          title: Training job topic
+          default: training-job
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: kafka_training_status_update_topic
+          type: text
+          title: Training status update topic
+          default: training-status-update
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: deployment_result_topic
+          type: text
+          title: Deployment result topic
+          default: deployment-result
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: deployment_job_topic
+          type: text
+          title: Deployment job topic
+          default: deployment-job
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: rasa_assistant_topic
+          type: text
+          title: Rasa Assistant
+          default: rasa-assistant
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: rasa_core_events_topic
+          type: text
+          title: Rasa Assistant
+          default: rasa_core_events
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_security_protocol
+          type: text
+          title: Kafka Security Protocol
+          default: PLAINTEXT
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka security protocol
+        - name: kafka_ssl
+          type: text
+          title: Kafka Enable SSL
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Set to true if you want to use SSL
+        - name: kafka_custom_ssl
+          type: text
+          title: Kafka custom SSL
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Set to true if you want to use SSL with custom certs
+        - name: kafka_ca_file
+          type: text
+          title: Kafka CA file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the CA file
+        - name: kafka_key_file
+          type: text
+          title: Kafka key file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the client key file
+        - name: kafka_cert_file
+          type: text
+          title: Kafka certificate file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the client certificate file
+        - name: kafka_reject_unauthorized
+          type: text
+          title: Kafka reject unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Defaults to true, the server certificate is verified against the list of supplied CA
+        - name: node_tls_reject_unauthorized
+          type: text
+          title: Node TLS reject unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+    - name: Ingress
+      description: >
+        This section covers Ingress configuration. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
+      title: Ingress
+      items:
+        - name: install_nginx
+          type: select_one
+          title: Deploy on
+          default: on_vm
+          items:
+            - name: on_vm
+              title: Virtual Machine
+            - name: on_kubernetes
+              title: Kubernetes
+            - name: no_ingress
+              title: Do not install
+        - name: ingress_hostname
+          type: text
+          title: Ingress DNS Hostname
+          default: ""
+          help_text: Defines the host name for all resources. Make sure you provide a valid host name.
+        - name: rasa_ingress_hosts_path
+          type: text
+          title: Path
+          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "/" "/rasapro(/|$)(.*)"}}'
+          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
+        - name: rasa_ingress_hosts_path_type
+          type: text
+          title: Path type
+          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "ImplementationSpecific" "Prefix"}}'
+          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
+        - name: connection_type
+          type: text
+          title: Connection type
+          default: http
+          help_text: Define if you will be using https or http with the ingressHost
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
+        - name: ingress_class
+          type: text
+          title: Ingress Class Name
+          default: nginx
+          help_text: Ingress class name
+          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
+        - name: annotations
+          type: textarea
+          title: Annotations
+          help_text: |
+            Use this textarea to provide annotations specific to your ingress controller.
+            For example, `kubernetes.io/tls-acme: true`.
+          default: ""

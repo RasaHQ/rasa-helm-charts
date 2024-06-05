@@ -44,13 +44,14 @@ spec:
           title: Studio repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/studio/" ""}}'
           help_text: URL of your repository for Studio, without an image name
-          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+          when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: studio_image_tag
           type: text
           title: Studio version
           default: "1.2.0"
           help_text: Specifies image tag for Studio
-        - name: rasa_config_image
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
+        - name: rasa_pro_repository
           type: text
           title: Rasa Pro repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" ""}}'
@@ -60,23 +61,23 @@ spec:
             regex:
               pattern: '[^\/]$'
               message: You have `/` at the end of your image URL. Please remove the `/` from the end in in format `repository/image_name`.
-        - name: docker_image_tag
+        - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro version
           default: "3.8.0"
-          help_text: Rasa Plus docker image to be used for training
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
+          help_text: Specifies image tag for Rasa Pro. This image is used for deployment or for training
         - name: rasa_config_file
           type: text
           title: Rasa Pro config file
           default: ""
           help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
+          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: model_services_repository
           type: text
           title: Model services repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ""}}'
           help_text: URL of your repository for Model services, without an image name
-          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+          when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: model_service_image_tag
           type: text
           title: Model services version
@@ -826,11 +827,6 @@ spec:
       title: Rasa Pro
       when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
       items:
-        - name: rasa_pro_image_tag
-          type: text
-          title: Rasa Pro version
-          default: "3.8.0-latest"
-          help_text: Specifies image tag for Rasa Pro
         - name: rasa_auth_token
           type: text
           title: Rasa Auth Token

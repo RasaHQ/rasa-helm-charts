@@ -88,7 +88,7 @@ spec:
         - '{{repl ConfigOption "model_storage_provider" }}'
       additionalEnv:
         - name: BUCKET_NAME
-          value: '{{repl ConfigOption "rasa_pro_bucket_name" }}'
+          value: '{{repl ConfigOption "bucket_name" }}'
         - name: MODEL_FILE
           value: '{{repl ConfigOption "model_file" }}'
         - name: AWS_ACCESS_KEY_ID
@@ -102,7 +102,7 @@ spec:
               name: "rasa-secrets"
               key: "AWS_SECRET_ACCESS_KEY"
         - name: AWS_DEFAULT_REGION
-          value: '{{repl ConfigOption "aws_default_region" }}'
+          value: '{{repl ConfigOption "aws_region_name" }}'
         - name: GOOGLE_APPLICATION_CREDENTIALS
           value: '/etc/gcp/credentials.json'
         - name: OPENAI_API_KEY

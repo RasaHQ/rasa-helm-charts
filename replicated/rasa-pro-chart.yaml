@@ -79,7 +79,6 @@ spec:
             port: '{{repl ConfigOption "database_port" }}'
             type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
             url: '{{repl ConfigOption "database_host" }}'
-          # -- settings.environment: development or production
         environment: '{{repl ConfigOption "settings_environment" }}'
       additionalArgs:
         - --model

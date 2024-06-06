@@ -150,11 +150,10 @@ spec:
             - key: GCS_JSON
               path: credentials.json
     actionServer:
-      enabled: repl{{ eq (ConfigOption "action_server") "1"}}
+      enabled: true
       image:
-        repository: 'registry.replicated.com/studio-dragon/rasa-action-server'
+        repository: '{{repl ConfigOption "action_server_repository" }}'
         tag: '{{repl ConfigOption "action_server_image_tag" }}'
-      replicaCount: '{{repl ConfigOption "action_server_replica_count" }}'
       service:
         port: '{{repl ConfigOption "action_service_port" }}'
         targetPort: '{{repl ConfigOption "action_service_port" }}'

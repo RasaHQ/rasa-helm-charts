@@ -544,10 +544,10 @@ spec:
           title: Event ingestion Memory requests
           help_text: Configure Event ingestion resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-    - name: Rasa Pro
+    - name: Rasa Pro Settings
       description: >
-        This section configures Rasa Pro deployment
-      title: Rasa Pro
+        This section configures Rasa Pro Settings
+      title: Rasa Pro Settings
       when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
       items:
         - name: rasa_auth_token
@@ -558,21 +558,23 @@ spec:
           type: text
           title: Rasa JWT secret
           default: ""
-        - name: heading_settings
-          type: heading
-          title: Settings
         - name: rasa_enable_api
           type: bool
           title: Rasa Pro enable API
           default: "1"
+        - name: rasa_models
+          type: bool
+          title: Enable Rasa Models
+          default: "0"
+          help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
         - name: rasa_credentials
           type: bool
           title: Rasa Pro enable credentials
           default: "1"
-        - name: additional_channel_credentials
+        - name: channel_credentials
           type: heading
-          title: Additional Channel Credentials
-          help_text: additionalChannelCredentials defines credentials which should be used by Rasa to connect to various channels
+          title: Channel Credentials
+          help_text: defines credentials which should be used by Rasa to connect to various channels
           when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
         - name: rasa_bot_message_event
           type: text
@@ -594,19 +596,38 @@ spec:
           title: Rasa Bot user message event
           default: "user_uttered"
           when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
-        - name: endpoints
-          type: heading
-          title: Endpoints
-        # Action Server
-        - name: heading_action_server
-          type: heading
-          title: Action Server
-        - name: rasa_action_endpoint_url
+        - name: set_rasa_pro_resources
+          type: bool
+          title: Configure Rasa Pro resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Rasa Pro deployment
+        - name: set_rasa_pro_limits_cpu
           type: text
-          title: Action Server URL
-          default: "http://action-server.kotsadm.svc.cluster.local:5055/webhook"
-          help_text: Action Server is deployed in cluster
-        # Event Broker configuration
+          title: Rasa Pro CPU limit
+          help_text: Configure Rasa Pro resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_limits_memory
+          type: text
+          title: Rasa Pro Memory limit
+          help_text: Configure Rasa Pro resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_requests_cpu
+          type: text
+          title: Rasa Pro CPU requests
+          help_text: Configure Rasa Pro resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+        - name: set_rasa_pro_requests_memory
+          type: text
+          title: Rasa Pro Memory requests
+          help_text: Configure Rasa Pro resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+    - name: Rasa Pro Endpoints
+      description: >
+        This section configures Rasa Pro Endpoints
+      title: Rasa Pro Endpoints
+      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
+      items:
+        # Event Broker endpoint config
         - name: heading_event_broker
           type: heading
           title: Event Broker
@@ -625,7 +646,7 @@ spec:
           title: Event Broker SSL check hostname
           default: "0"
           when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
-        # Lock Store configuration
+        # Lock Store endpoint config
         - name: heading_lock_store
           type: heading
           title: Lock Store
@@ -638,44 +659,35 @@ spec:
           type: bool
           title: Lock Store use concurrent
           default: "1"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "embedded_redis") }}'
         - name: rasa_lock_store_db
           type: text
           title: Lock Store database
           default: "0"
           help_text: "Number of database within redis, e.g. 0"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
         - name: rasa_lock_store_port
           type: text
           title: Lock Store port
           default: "6379"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
         - name: rasa_lock_store_url
           type: text
           title: Lock Store URL
           default: "redis-master.redis.svc.cluster.local"
           help_text: "URL of the redis instance"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
         - name: redis_password
           type: password
           title: Lock Store Password
           default: 'redis'
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
         - name: rasa_lock_store_use_ssl
           type: bool
           title: Lock Store use SSL
           default: "0"
-          when: '{{repl ConfigOptionEquals "rasa_lock_store" "1"}}'
-        # Models
-        - name: heading_rasa_models
-          type: heading
-          title: Rasa Models
-        - name: rasa_models
-          type: bool
-          title: Enable Rasa Models
-          default: "0"
-          help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
-        # Tracing
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
+        # Tracing endpoint config
         - name: heading_rasa_tracing
           type: heading
           title: Tracing
@@ -709,7 +721,7 @@ spec:
           title: Tracing type
           default: "jaeger"
           when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
-        # Tracker Store
+        # Tracker Store endpoint config
         - name: heading_tracker_store
           type: heading
           title: Tracker Store
@@ -730,10 +742,10 @@ spec:
           title: Tracker Store type
           default: "sql"
           when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        # Additional Endpoints
-        - name: heading_additional_endpoints
+        # Vector Store endpoint config
+        - name: heading_vector_store
           type: heading
-          title: Additional Endpoints
+          title: Vector Store
         - name: enable_vector_store
           type: bool
           title: Enable Vector Store
@@ -768,6 +780,17 @@ spec:
           title: Environment
           help_text: "Environment: development or production"
           when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
+        # Action Server endpoint config
+        - name: heading_action_server
+          type: heading
+          title: Action Server configuration
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
+        - name: rasa_action_endpoint_url
+          type: text
+          title: Action Server URL
+          default: "http://action-server.kotsadm.svc.cluster.local:5055/webhook"
+          help_text: Action Server is deployed in cluster
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
         # Additional Arguments
         - name: heading_additional_arguments
           type: heading
@@ -814,31 +837,53 @@ spec:
           title: Google application credentials
           help_text: "GCP SA Base64Encoded"
           when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
-        - name: set_rasa_pro_resources
-          type: bool
-          title: Configure Rasa Pro resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Rasa Pro deployment
-        - name: set_rasa_pro_limits_cpu
+    - name: Action Server
+      description: >
+        This section configures Action Server deployment
+      title: Action Server
+      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
+      items:
+        - name: action_server_type
+          type: select_one
+          title: Action Server
+          default: embedded_action_server
+          items:
+            - name: embedded_action_server
+              title: Embedded Action Server
+            - name: external_action_server
+              title: External Action Server
+        - name: action_server_image_tag
           type: text
-          title: Rasa Pro CPU limit
-          help_text: Configure Rasa Pro resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_limits_memory
+          title: Action Server version
+          default: "calm"
+          help_text: Specifies image tag for Action Server
+        - name: action_server_repository
           type: text
-          title: Rasa Pro Memory limit
-          help_text: Configure Rasa Pro resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_requests_cpu
+          title: Action Server repository URL
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.replicated.com/studio-dragon/rasa-action-server" ""}}'
+          help_text: URL of your repository for Action Server, without an image name
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
+        - name: action_server_replica_count
           type: text
-          title: Rasa Pro CPU requests
-          help_text: Configure Rasa Pro resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_requests_memory
+          title: Action Server replica count
+          default: "1"
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
+        - name: action_service_port
           type: text
-          title: Rasa Pro Memory requests
-          help_text: Configure Rasa Pro resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+          title: Action Server port
+          default: "5055"
+          help_text: Specifies image tag for Action Server
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
+        - name: action_server_service_type
+          type: text
+          title: Action Server service type
+          default: "ClusterIP"
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
+        - name: action_server_settings_schema
+          type: text
+          title: Action Server schema
+          default: "http"
+          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
     - name: Rasa Pro Services
       description: >
         This section configures Rasa Pro Services deployment
@@ -885,38 +930,6 @@ spec:
         title: Rasa Pro Analytics Memory requests
         help_text: Configure Rasa Pro Analytics resource requests for Memory
         when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
-    - name: Action Server
-      description: >
-        This section configures Action Server deployment
-      title: Action Server
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        - name: action_server_image_tag
-          type: text
-          title: Action Server version
-          default: "calm"
-          help_text: Specifies image tag for Action Server
-        - name: action_server
-          type: bool
-          title: Enable Action Server
-          default: "0"
-        - name: action_server_replica_count
-          type: text
-          title: Action Server replica count
-          default: "1"
-        - name: action_service_port
-          type: text
-          title: Action Server port
-          default: "5055"
-          help_text: Specifies image tag for Action Server
-        - name: action_server_service_type
-          type: text
-          title: Action Server service type
-          default: "ClusterIP"
-        - name: action_server_settings_schema
-          type: text
-          title: Action Server schema
-          default: "http"
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.

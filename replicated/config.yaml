@@ -788,7 +788,7 @@ spec:
         - name: rasa_action_endpoint_url
           type: text
           title: Action Server URL
-          default: "http://action-server.kotsadm.svc.cluster.local:5055/webhook"
+          default: "http://action-server.rasa-pro.svc.cluster.local:5055/webhook"
           help_text: Action Server is deployed in cluster
           when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
         # Additional Arguments

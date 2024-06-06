@@ -48,7 +48,7 @@ spec:
             enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
             security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
-            topic: '{{repl ConfigOption "rasa_assistant_topic" }}'
+            topic: '{{repl ConfigOption "rasa_core_events_topic" }}'
             url: '{{repl ConfigOption "kafka_broker" }}'
             sasl_username: '{{repl ConfigOption "kafka_username" }}'
             sasl_password: '{{repl ConfigOption "kafka_password" }}'

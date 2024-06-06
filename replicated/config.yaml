@@ -344,7 +344,7 @@ spec:
           type: text
           title: Model file name
           default: "20240523-154518-ancient-xylophone.tar.gz"
-          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
+          help_text: "Model file name to load. More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
           when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
         - name: gcp_credentials
           type: text
@@ -637,25 +637,25 @@ spec:
       title: Rasa Pro Endpoints
       when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
       items:
-        # Event Broker endpoint config
-        - name: heading_event_broker
+        # Kafka Event Broker endpoint config
+        - name: heading_kafka_event_broker
           type: heading
           title: Event Broker
-        - name: rasa_event_broker
+        - name: rasa_kafka_event_broker
           type: bool
-          title: Enable Event Broker
+          title: Enable Kafka Event Broker
           default: "1"
           help_text: "Allows you to connect your running assistant to other services that process the data. More info: https://rasa.com/docs/rasa/event-brokers"
         - name: rasa_event_broker_type
           type: text
           title: Event Broker type
           default: "kafka"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
           title: Event Broker SSL check hostname
           default: "0"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
         # Lock Store endpoint config
         - name: heading_lock_store
           type: heading

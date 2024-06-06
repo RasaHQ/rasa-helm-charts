@@ -577,6 +577,11 @@ spec:
           title: Enable Rasa Models
           default: "0"
           help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
+        - name: settings_environment
+          type: text
+          title: Environment
+          default: "production"
+          help_text: "Environment: development or production"
         - name: rasa_credentials
           type: bool
           title: Rasa Pro enable credentials
@@ -784,11 +789,6 @@ spec:
         - name: rasa_additional_endpoints_vector_store_port
           type: text
           title: Vector Store port
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: settings_environment
-          type: text
-          title: Environment
-          help_text: "Environment: development or production"
           when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         # Action Server endpoint config
         - name: heading_action_server

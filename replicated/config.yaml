@@ -319,7 +319,6 @@ spec:
       description: >
         This section covers object storage for MTS/MRS
       title: Object Storage
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: bucket_provider
           type: select_one
@@ -341,6 +340,12 @@ spec:
           title: Bucket Name
           default: ""
           help_text: Name of the storage bucket. Make sure to pre-create this bucket.
+        - name: model_file
+          type: text
+          title: Model file name
+          default: "20240523-154518-ancient-xylophone.tar.gz"
+          help_text: "Model file name to load. More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
         - name: gcp_credentials
           type: text
           title: GCP SA Base64Encoded
@@ -352,18 +357,21 @@ spec:
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The project ID of the GCP project.
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
         - name: cloudsdk_compute_zone
           type: text
           title: CloudSDK Compute Zone
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The zone where the bucket is located.
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
         - name: url_service_account
           type: text
           title: Storage Signed Url Service Account Email
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The service account email address.
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
         - name: aws_access_key_id
           type: text
           title: AWS Access Key ID
@@ -388,12 +396,14 @@ spec:
           default: "0"
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
         - name: aws_endpoint_url
           type: text
           title: Endpoint URL
           default: ""
           help_text: A custom URL endpoint for an S3-compatible storage service.
           when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
     - name: NFS
       description: >
         This section covers NFS server configuration
@@ -567,6 +577,11 @@ spec:
           title: Enable Rasa Models
           default: "0"
           help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
+        - name: settings_environment
+          type: text
+          title: Environment
+          default: "production"
+          help_text: "Environment: development or production"
         - name: rasa_credentials
           type: bool
           title: Rasa Pro enable credentials
@@ -627,25 +642,25 @@ spec:
       title: Rasa Pro Endpoints
       when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
       items:
-        # Event Broker endpoint config
-        - name: heading_event_broker
+        # Kafka Event Broker endpoint config
+        - name: heading_kafka_event_broker
           type: heading
           title: Event Broker
-        - name: rasa_event_broker
+        - name: rasa_kafka_event_broker
           type: bool
-          title: Enable Event Broker
+          title: Enable Kafka Event Broker
           default: "1"
           help_text: "Allows you to connect your running assistant to other services that process the data. More info: https://rasa.com/docs/rasa/event-brokers"
         - name: rasa_event_broker_type
           type: text
           title: Event Broker type
           default: "kafka"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
         - name: rasa_event_broker_ssl_check_hostname
           type: bool
           title: Event Broker SSL check hostname
           default: "0"
-          when: '{{repl ConfigOptionEquals "rasa_event_broker" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
         # Lock Store endpoint config
         - name: heading_lock_store
           type: heading
@@ -775,11 +790,6 @@ spec:
           type: text
           title: Vector Store port
           when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: settings_environment
-          type: text
-          title: Environment
-          help_text: "Environment: development or production"
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
         # Action Server endpoint config
         - name: heading_action_server
           type: heading
@@ -788,55 +798,9 @@ spec:
         - name: rasa_action_endpoint_url
           type: text
           title: Action Server URL
-          default: "http://action-server.kotsadm.svc.cluster.local:5055/webhook"
+          default: "http://action-server.rasa-pro.svc.cluster.local:5055/webhook"
           help_text: Action Server is deployed in cluster
           when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        # Additional Arguments
-        - name: heading_additional_arguments
-          type: heading
-          title: Additional Arguments
-          help_text: "More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
-        - name: model_storage_provider
-          type: select_one
-          title: Model storage provider
-          default: aws
-          items:
-            - name: aws
-              title: AWS S3 Bucket
-            - name: gcs
-              title: Google Cloud Storage
-        - name: model_storage_type
-          type: text
-          title: Model storage Type
-          default: '{{repl (ConfigOptionEquals "model_storage_provider" "aws") | ternary "aws" "gcs"}}'
-          hidden: true
-        - name: rasa_pro_bucket_name
-          type: text
-          title: Rasa Pro Bucket name
-          help_text: "S3 or GCS bucket name, eg: rasa-pro-model-bucket"
-        - name: model_file
-          type: text
-          title: Model file name
-          default: "20240523-154518-ancient-xylophone.tar.gz"
-        # AWS credentials
-        - name: aws_access_key_id
-          type: text
-          title: AWS ACCESS KEY ID
-          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
-        - name: aws_secret_access_key
-          type: text
-          title: AWS SECRET ACCESS KEY
-          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
-        - name: aws_default_region
-          type: text
-          title: AWS DEFAULT REGION
-          when: '{{repl ConfigOptionEquals "model_storage_provider" "aws"}}'
-        # GCS credentials
-        - name: gcs_json
-          type: text
-          title: Google application credentials
-          help_text: "GCP SA Base64Encoded"
-          when: '{{repl ConfigOptionEquals "model_storage_provider" "gcs"}}'
     - name: Action Server
       description: >
         This section configures Action Server deployment

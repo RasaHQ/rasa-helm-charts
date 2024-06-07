@@ -15,8 +15,6 @@ spec:
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
-    imagePullSecrets:
-      - name: '{{repl ImagePullSecretName }}'
     rasaProLicense:
       secretName: "rasa-secrets"
       secretKey: "RASA_PRO_LICENCE"
@@ -48,7 +46,7 @@ spec:
             enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
             security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
-            topic: '{{repl ConfigOption "kafka_topic" }}'
+            topic: '{{repl ConfigOption "rasa_core_events_topic" }}'
             url: '{{repl ConfigOption "kafka_broker" }}'
             sasl_username: '{{repl ConfigOption "kafka_username" }}'
             sasl_password: '{{repl ConfigOption "kafka_password" }}'
@@ -189,7 +187,7 @@ spec:
         KAFKA_SSL_CA_LOCATION:
           value: '{{repl ConfigOption "kafka_ca_file" }}'
         KAFKA_TOPIC:
-          value: '{{repl ConfigOption "kafka_topic" }}'
+          value: '{{repl ConfigOption "rasa_core_events_topic" }}'
         LOGGING_LEVEL:
           value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
         RASA_ANALYTICS_DB_URL:
@@ -240,11 +238,16 @@ spec:
               cpu: '{{repl ConfigOption "set_analytics_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_analytics_requests_memory" }}'
     - when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-      additionalEndpoints:
-        vector_store:
-          type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
-          collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
-          content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
-          host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
-          metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
-          port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
+      values:
+        rasa:
+          settings:
+            endpoints:
+              additionalEndpoints:
+                vector_store:
+                  type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
+                  collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
+                  content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
+                  host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
+                  metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
+                  port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
+

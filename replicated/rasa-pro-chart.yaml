@@ -43,7 +43,7 @@ spec:
           actionEndpoint:
             url: '{{repl ConfigOption "rasa_action_endpoint_url" }}'
           eventBroker:
-            enabled: repl{{ eq (ConfigOption "rasa_event_broker") "1"}}
+            enabled: repl{{ eq (ConfigOption "rasa_kafka_event_broker") "1"}}
             type: '{{repl ConfigOption "rasa_event_broker_type" }}'
             security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
             topic: '{{repl ConfigOption "rasa_core_events_topic" }}'
@@ -82,7 +82,7 @@ spec:
         - --model
         - '{{repl ConfigOption "model_file" }}'
         - --remote-storage
-        - '{{repl ConfigOption "model_storage_provider" }}'
+        - '{{repl ConfigOption "model_storage_type" }}'
       additionalEnv:
         - name: BUCKET_NAME
           value: '{{repl ConfigOption "bucket_name" }}'

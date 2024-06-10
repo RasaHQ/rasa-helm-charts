@@ -82,7 +82,7 @@ spec:
         - --model
         - '{{repl ConfigOption "model_file" }}'
         - --remote-storage
-        - '{{repl ConfigOption "model_storage_provider" }}'
+        - '{{repl ConfigOption "model_storage_type" }}'
       additionalEnv:
         - name: BUCKET_NAME
           value: '{{repl ConfigOption "bucket_name" }}'

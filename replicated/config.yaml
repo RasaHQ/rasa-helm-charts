@@ -334,7 +334,14 @@ spec:
           title: Storage Type
           default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa-pro" }}'
           hidden: true
+        - name: model_storage_type
+          type: text
+          title: Storage Type
+          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
+          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
+          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
         - name: bucket_name
           type: text
           title: Bucket Name

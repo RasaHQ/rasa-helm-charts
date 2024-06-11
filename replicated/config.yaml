@@ -351,7 +351,7 @@ spec:
           type: text
           title: Model file name
           default: "20240523-154518-ancient-xylophone.tar.gz"
-          help_text: "Model file name to load. More info: https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud"
+          help_text: "Model file name to load. More information [here](https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud)."
           when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
         - name: gcp_credentials
           type: text
@@ -583,7 +583,7 @@ spec:
           type: bool
           title: Enable Rasa Models
           default: "0"
-          help_text: "Models provides loading models from the storage. More: https://rasa.com/docs/rasa/model-storage"
+          help_text: "Models provides loading models from the storage. More information [here](https://rasa.com/docs/rasa/model-storage)."
         - name: settings_environment
           type: text
           title: Environment
@@ -597,7 +597,7 @@ spec:
           type: select_one
           title: Channel Credentials
           default: default_credentials
-          help_text: defines credentials which should be used by Rasa to connect to various channels
+          help_text: Defines credentials which should be used by Rasa to connect to various channels
           when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
           items:
             - name: default_credentials
@@ -664,7 +664,7 @@ spec:
           type: bool
           title: Enable Kafka Event Broker
           default: "1"
-          help_text: "Allows you to connect your running assistant to other services that process the data. More info: https://rasa.com/docs/rasa/event-brokers"
+          help_text: "Allows you to connect your running assistant to other services that process the data. More information [here](https://rasa.com/docs/rasa/event-brokers)."
         - name: rasa_event_broker_type
           type: text
           title: Event Broker type
@@ -683,7 +683,7 @@ spec:
           type: bool
           title: Enable Lock Store
           default: "1"
-          help_text: "lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order. More: https://rasa.com/docs/rasa/lock-stores"
+          help_text: "lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order. More information [here](https://rasa.com/docs/rasa/lock-stores)."
         - name: rasa_lock_store_use_concurrent
           type: bool
           title: Lock Store use concurrent
@@ -724,7 +724,7 @@ spec:
           type: bool
           title: Enable Tracing
           default: "1"
-          help_text: "Tracing tracks requests as they flow through a distributed system. More: https://rasa.com/docs/rasa/monitoring/tracing/"
+          help_text: "Tracing tracks requests as they flow through a distributed system. More information [here](https://rasa.com/docs/rasa/monitoring/tracing/)."
         - name: rasa_tracing_host
           type: text
           title: Tracing host
@@ -759,7 +759,7 @@ spec:
           type: bool
           title: Enable Tracker Store
           default: "1"
-          help_text: "TrackerStore assistant's conversations are stored within a tracker store. More: https://rasa.com/docs/rasa/tracker-stores"
+          help_text: "TrackerStore assistant's conversations are stored within a tracker store. More information [here](https://rasa.com/docs/rasa/tracker-stores)."
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: rasa_tracker_store_dialect
           type: text

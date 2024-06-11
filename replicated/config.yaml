@@ -689,7 +689,7 @@ spec:
           type: bool
           title: Lock Store use concurrent
           default: "1"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
+          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "embedded_redis") }}'
         - name: rasa_lock_store_db
           type: text
           title: Lock Store database
@@ -730,6 +730,7 @@ spec:
           type: select_one
           title: Tracing Configuration
           default: default_configuration
+          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
           items:
             - name: default_configuration
               title: Default jaeger configuration

@@ -317,7 +317,7 @@ spec:
           when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
     - name: Object Storage
       description: >
-        This section covers object storage for MTS/MRS
+        This section covers object storage
       title: Object Storage
       items:
         - name: bucket_provider
@@ -342,6 +342,7 @@ spec:
           default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
           when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
+          hidden: true
         - name: bucket_name
           type: text
           title: Bucket Name

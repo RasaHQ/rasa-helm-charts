@@ -594,30 +594,37 @@ spec:
           title: Rasa Pro enable credentials
           default: "1"
         - name: channel_credentials
-          type: heading
+          type: select_one
           title: Channel Credentials
+          default: default_credentials
           help_text: defines credentials which should be used by Rasa to connect to various channels
           when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
+          items:
+            - name: default_credentials
+              title: Default credentials
+            - name: custom_credentials
+              title: Custom credentials
         - name: rasa_bot_message_event
           type: text
           title: Rasa Bot message event
           default: "bot_uttered"
           when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
         - name: rasa_metadata_key
           type: text
           title: Rasa Bot metadata key
           default: "customData"
-          when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
         - name: rasa_session_persistence
           type: bool
           title: Rasa Bot session persistence
           default: "0"
-          when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
         - name: rasa_user_message_event
           type: text
           title: Rasa Bot user message event
           default: "user_uttered"
-          when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
         - name: set_rasa_pro_resources
           type: bool
           title: Configure Rasa Pro resources

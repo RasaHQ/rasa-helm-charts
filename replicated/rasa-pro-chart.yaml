@@ -146,6 +146,7 @@ spec:
           items:
             - key: GCS_JSON
               path: credentials.json
+    
     actionServer:
       enabled: true
       image:

@@ -83,7 +83,11 @@ spec:
           title: Model services version
           default: "3.3.2"
           help_text: Specifies image tag for Model Service
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
+        - name: mrs_nginx_proxy
+          type: text
+          title: Model running service nginx proxy image URL
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" )) "nginx-unprivileged:1.25-alpine") ""}}'
+          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: openai_api_key
           type: text
           title: OpenAI API key

@@ -21,8 +21,8 @@ spec:
           password: '{{repl ConfigOption "database_password" }}'
           database: studio
     image:
-      registry: docker.io
-      repository: bitnami/postgresql
+      registry: '{{repl HasLocalRegistry | tenary LocalRegistryHost "registry.rasa.com"}'
+      repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/bitnami" ) }}/postgresql'
       tag: 16.2.0-debian-12-r8
       digest: ""
       pullPolicy: IfNotPresent

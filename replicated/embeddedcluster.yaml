@@ -28,3 +28,10 @@ spec:
               nodePorts:
                 http: "80"
                 https: "443"
+            image:
+              digest: ""
+              digestChroot: ""
+            admissionWebhooks:
+              patch:
+                image:
+                  digest: ""

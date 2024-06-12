@@ -42,7 +42,7 @@ spec:
         - name: studio_repository
           type: text
           title: Studio repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/studio/" ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/studio/" )) ""}}'
           help_text: URL of your repository for Studio, without an image name
           when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: studio_image_tag
@@ -54,7 +54,7 @@ spec:
         - name: rasa_pro_repository
           type: text
           title: Rasa Pro repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" ))/rasa-pro ""}}'
           help_text: Rasa Pro docker image repository to be used for training. Please specify full repository and image name in format `repository/image_name`.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
           validation:
@@ -75,7 +75,7 @@ spec:
         - name: model_services_repository
           type: text
           title: Model services repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.rasa.com/proxy/studio-dragon/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" )) ""}}'
           help_text: URL of your repository for Model services, without an image name
           when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: model_service_image_tag

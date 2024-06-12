@@ -169,7 +169,6 @@ spec:
             name: rasa-configmap
     
     rasaProServices:
-      # (OPTIONAL) user need to specify if using external vector DB
       enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}
       image:
         repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services" ) }}'

@@ -365,14 +365,14 @@ spec:
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The project ID of the GCP project.
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
+          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: cloudsdk_compute_zone
           type: text
           title: CloudSDK Compute Zone
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The zone where the bucket is located.
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
+          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: url_service_account
           type: text
           title: Storage Signed Url Service Account Email

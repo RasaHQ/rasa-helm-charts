@@ -78,6 +78,8 @@ spec:
           value: '{{repl ConfigOption "rasa_config_file" }}'
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
+        waitFotItContainer:
+          image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/library" ) }}/postgres:16.1'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
         annotations:

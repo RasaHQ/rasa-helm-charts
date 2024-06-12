@@ -103,7 +103,7 @@ modelService:
 | backend.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"waitForIt":false}` | Define Studio Database Migration job settings |
+| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"waitForIt":false,"waitFotItContainer":{"image":"postgres:16.1"}}` | Define Studio Database Migration job settings |
 | backend.migration.enable | bool | `true` | migration.enable specifies whether a database migration job should be created |
 | backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | migration.image specifies which image database migration job should use |
 | backend.migration.image.name | string | `"studio-database-migration"` | image.name specifies the repository of the image |

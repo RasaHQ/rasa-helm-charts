@@ -14,7 +14,7 @@ spec:
   # these values will be supplied to helm template
   values:
     image:
-      registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}'
+      registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
       repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/bitnami" ) }}/kafka'
       tag: 3.6.1-debian-12-r11
       digest: ""

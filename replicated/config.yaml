@@ -379,7 +379,7 @@ spec:
           default: ""
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The service account email address.
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
+          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: aws_access_key_id
           type: text
           title: AWS Access Key ID

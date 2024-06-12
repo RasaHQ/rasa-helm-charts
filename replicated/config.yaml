@@ -726,31 +726,41 @@ spec:
           title: Enable Tracing
           default: "1"
           help_text: "Tracing tracks requests as they flow through a distributed system. More information [here](https://rasa.com/docs/rasa/monitoring/tracing/)."
+        - name: tracing_configuration
+          type: select_one
+          title: Tracing Configuration
+          default: default_configuration
+          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          items:
+            - name: default_configuration
+              title: Default jaeger configuration
+            - name: custom_configuration
+              title: Custom configuration
         - name: rasa_tracing_host
           type: text
           title: Tracing host
           default: "jaeger"
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
         - name: rasa_tracing_port
           type: text
           title: Tracing port
           default: "6831"
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
         - name: rasa_tracing_service_name
           type: text
           title: Tracing Service name
           default: "rasa-jaeger"
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
         - name: rasa_tracing_sync_export
           type: text
           title: Tracing Sync export
           default: "null"
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
         - name: rasa_tracing_type
           type: text
           title: Tracing type
           default: "jaeger"
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
+          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
         # Tracker Store endpoint config
         - name: heading_tracker_store
           type: heading

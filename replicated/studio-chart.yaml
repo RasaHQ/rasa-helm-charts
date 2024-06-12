@@ -17,6 +17,8 @@ spec:
 
     replicated:
       enabled: true
+      images:
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated:v1.0.0-beta.17'
 
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
@@ -263,6 +265,8 @@ spec:
               nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
               kots.io/placeholder: |-
                 repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 14 }}repl{{ end }}
+        proxy:
+          image: '{{repl ConfigOption "mrs_nginx_proxy" }}'
         consumer:
           replicaCount: repl{{ ConfigOption "running_consumer_replicas" }}
           environmentVariables:

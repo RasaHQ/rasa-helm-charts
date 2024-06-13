@@ -363,21 +363,18 @@ spec:
           type: text
           title: Google Cloud project
           default: ""
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The project ID of the GCP project.
           when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: cloudsdk_compute_zone
           type: text
           title: CloudSDK Compute Zone
           default: ""
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The zone where the bucket is located.
           when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: url_service_account
           type: text
           title: Storage Signed Url Service Account Email
           default: ""
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: The service account email address.
           when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
         - name: aws_access_key_id
@@ -410,8 +407,7 @@ spec:
           title: Endpoint URL
           default: ""
           help_text: A custom URL endpoint for an S3-compatible storage service.
-          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
+          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionEquals "custom_s3_endpoint" "1") }}'
     - name: NFS
       description: >
         This section covers NFS server configuration
@@ -609,7 +605,6 @@ spec:
           type: text
           title: Rasa Bot message event
           default: "bot_uttered"
-          when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
           when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
         - name: rasa_metadata_key
           type: text

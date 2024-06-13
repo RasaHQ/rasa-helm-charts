@@ -23,7 +23,7 @@ spec:
       images:
         replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated:v1.0.0-beta.21'
       imagePullSecrets:
-        - '{{repl ImagePullSecretName }}'
+        - name: '{{repl ImagePullSecretName }}'
 
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
@@ -469,3 +469,6 @@ spec:
               environmentVariables:
                 AWS_ENDPOINT_URL:
                   value: '{{repl ConfigOption "aws_endpoint_url" }}'
+  builder:
+    replicated:
+      enabled: true

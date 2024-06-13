@@ -21,7 +21,7 @@ spec:
     replicated:
       enabled: true
       images:
-        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated:v1.0.0-beta.17'
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated:v1.0.0-beta.21'
 
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.

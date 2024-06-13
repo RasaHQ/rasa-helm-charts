@@ -19,6 +19,8 @@ spec:
       tag: 3.6.1-debian-12-r11
       digest: ""
       pullPolicy: IfNotPresent
+      pullSecrets:
+        - '{{repl ImagePullSecretName }}'
     controller:
       replicaCount: 3
       resourcesPreset: "small"

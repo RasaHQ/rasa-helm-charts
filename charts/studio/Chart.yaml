@@ -17,4 +17,4 @@ dependencies:
   - name: replicated
     condition: replicated.enabled
     repository: oci://registry.replicated.com/library
-    version: 1.0.0-beta.17
+    version: 1.0.0-beta.21

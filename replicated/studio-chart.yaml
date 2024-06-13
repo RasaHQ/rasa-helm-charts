@@ -21,6 +21,7 @@ spec:
         replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated:v1.0.0-beta.21'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
+      isAirgap: repl{{ HasLocalRegistry }}
 
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.

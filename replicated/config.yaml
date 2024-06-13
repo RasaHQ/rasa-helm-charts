@@ -399,9 +399,8 @@ spec:
           type: bool
           title: Use custom S3 Endpoint
           default: "0"
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro" }}'
+          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionEquals "bucket_provider" "aws_bucket") }}'
         - name: aws_endpoint_url
           type: text
           title: Endpoint URL

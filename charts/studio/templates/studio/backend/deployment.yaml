@@ -90,14 +90,10 @@ spec:
             - name: DELETE_CONVERSATIONS_OLDER_THAN_HOURS
               {{- if .Values.backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS }}
               value: {{ .Values.backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS.value | quote }}
-              {{- else }}
-              value: ""
               {{- end }}
-            - name: DELETE_CONVERSATIONS_CRON_INPUT
-              {{- if .Values.backend.environmentVariables.DELETE_CONVERSATIONS_CRON_INPUT }}
-              value: {{ .Values.backend.environmentVariables.DELETE_CONVERSATIONS_CRON_INPUT.value | quote }}
-              {{- else }}
-              value: "0 1 * * *"
+            - name: DELETE_CONVERSATIONS_CRON_TEMPLATE
+              {{- if .Values.backend.environmentVariables.DELETE_CONVERSATIONS_CRON_TEMPLATE }}
+              value: {{ .Values.backend.environmentVariables.DELETE_CONVERSATIONS_CRON_TEMPLATE.value | quote }}
               {{- end }}
             - name: MTS_API_URL
               {{- if .Values.backend.environmentVariables.MTS_API_URL }}

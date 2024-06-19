@@ -96,8 +96,23 @@ backend:
       secret:
         name: "studio-secrets"
         key: "KEYCLOAK_API_PASSWORD"
+    # -- DELETE_CONVERSATIONS_OLDER_THAN_HOURS defines how often you want to run the cron job to delete
+    # -- older conversation data from Studio database. The value should be in hours. The cron job won't
+    # -- run if the "DELETE_CONVERSATIONS_OLDER_THAN_HOURS" value is left undefined.
     DELETE_CONVERSATIONS_OLDER_THAN_HOURS:
       value: ""
+    # -- DELETE_CONVERSATIONS_CRON_TEMPLATE defines the cron schedule for the cron job to delete older
+    # -- conversation data from Studio database. The value should be in the cron format
+    # -- https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
+    #  ┌───────────── minute (0 - 59)
+    # | ┌───────────── hour (0 - 23)
+    # │ │ ┌───────────── day of the month (1 - 31)
+    # │ │ │ ┌───────────── month (1 - 12)
+    # │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
+    # │ │ │ │ │
+    # │ │ │ │ │
+    # │ │ │ │ │
+    # * * * * *
     DELETE_CONVERSATIONS_CRON_TEMPLATE:
       value: "0 1 * * *"
     # -- The complete registry URL of the Rasa Plus docker image to be used for training

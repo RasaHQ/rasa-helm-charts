@@ -25,4 +25,5 @@ spec:
     - deployment/model-training-service-orchestrator
     - deployment/model-training-service-consumer
     - deployment/nginx-reverse-proxy
-    
+  additionalImages:
+    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.10

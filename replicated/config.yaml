@@ -81,7 +81,7 @@ spec:
         - name: model_service_image_tag
           type: text
           title: Model services version
-          default: "3.2.2"
+          default: "3.3.2"
           help_text: Specifies image tag for Model Service
           when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: openai_api_key

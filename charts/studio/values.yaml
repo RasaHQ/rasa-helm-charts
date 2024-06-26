@@ -102,7 +102,7 @@ backend:
     DELETE_CONVERSATIONS_OLDER_THAN_HOURS:
       value: ""
     # -- DELETE_CONVERSATIONS_CRON_EXPRESSION defines the cron schedule for the cron job to delete older
-    # -- conversation data from Studio database. The value should be in the cron format
+    # -- conversation data from Studio database. The value should be in the cron format. Default value is hourly
     # -- https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
     #  ┌───────────── minute (0 - 59)
     # | ┌───────────── hour (0 - 23)
@@ -114,7 +114,7 @@ backend:
     # │ │ │ │ │
     # * * * * *
     DELETE_CONVERSATIONS_CRON_EXPRESSION:
-      value: "0 1 * * *"
+      value: "0 * * * *"
     # -- The complete registry URL of the Rasa Plus docker image to be used for training
     DOCKER_IMAGE_TAG:
       value: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"

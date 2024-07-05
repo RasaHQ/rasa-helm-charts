@@ -1,5 +1,5 @@
 {{- if and .Values.duckling.enabled .Values.duckling.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: duckling
@@ -17,12 +17,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.duckling.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.duckling.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.duckling.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.duckling.autoscaling.targetMemoryUtilizationPercentage }}
+          target:
+          type: Utilization
+          averageUtilization: {{ .Values.duckling.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

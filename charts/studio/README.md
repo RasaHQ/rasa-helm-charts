@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.0.8](https://img.shields.io/badge/Version-1.0.8--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.0.9](https://img.shields.io/badge/Version-1.0.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.8
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.9
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.8
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.9
 ```
 
 ## General Configuration
@@ -85,8 +85,10 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"},"RASA_CONFIG_FILE":{"value":""}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"},"RASA_CONFIG_FILE":{"value":""}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public |
+| backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | `{"value":"0 * * * *"}` | https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax  ┌───────────── minute (0 - 59) | ┌───────────── hour (0 - 23) │ │ ┌───────────── day of the month (1 - 31) │ │ │ ┌───────────── month (1 - 12) │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday) │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ * * * * * |
+| backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | `{"value":""}` | run if the "DELETE_CONVERSATIONS_OLDER_THAN_HOURS" value is left undefined. |
 | backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.0"}` | The complete registry URL of the Rasa Plus docker image to be used for training |
 | backend.environmentVariables.KEYCLOAK_API_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |

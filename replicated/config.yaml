@@ -42,7 +42,7 @@ spec:
         - name: studio_repository
           type: text
           title: Studio repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/studio/" ))) ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ))) ""}}'
           help_text: URL of your repository for Studio, without an image name
           when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: studio_image_tag
@@ -54,7 +54,7 @@ spec:
         - name: rasa_pro_repository
           type: text
           title: Rasa Pro repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" )) "/rasa-pro") ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" )) "/rasa-pro") ""}}'
           help_text: Rasa Pro docker image repository to be used for training. Please specify full repository and image name in format `repository/image_name`.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
           validation:
@@ -75,7 +75,7 @@ spec:
         - name: model_services_repository
           type: text
           title: Model services repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
           help_text: URL of your repository for Model services, without an image name
           when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
         - name: model_service_image_tag
@@ -86,7 +86,7 @@ spec:
         - name: mrs_nginx_proxy
           type: text
           title: Model running service nginx proxy image URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services" )) "/nginx-unprivileged:1.25-alpine") ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services" )) "/nginx-unprivileged:1.25-alpine") ""}}'
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: openai_api_key
           type: text
@@ -1044,7 +1044,7 @@ spec:
         - name: kafka_sasl_mechanism
           type: text
           title: Kafka SASL mechanism
-          default: ""
+          default: PLAIN
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
         - name: kafka_username
@@ -1120,7 +1120,7 @@ spec:
         - name: kafka_security_protocol
           type: text
           title: Kafka Security Protocol
-          default: PLAINTEXT
+          default: SASL_PLAINTEXT
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka security protocol
         - name: kafka_ssl

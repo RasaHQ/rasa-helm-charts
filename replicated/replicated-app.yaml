@@ -28,3 +28,5 @@ spec:
   additionalImages:
     - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.10
     - registry.replicated.com/studio-dragon/rasa-action-server:calm
+    - index.docker.io/bitnami/kafka:3.7.1-debian-12-r0
+    - index.docker.io/bitnami/postgresql:16.2.0-debian-12-r8

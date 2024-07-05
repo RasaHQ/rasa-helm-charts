@@ -18,6 +18,15 @@ spec:
     rasaProLicense:
       secretName: "rasa-secrets"
       secretKey: "RASA_PRO_LICENCE"
+    
+    replicated:
+      enabled: true
+      images:
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated-sdk:v1.0.0-beta.21'
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
+      isAirgap: repl{{ HasLocalRegistry }}
+    
     rasa:
       image:
         repository: '{{repl ConfigOption "rasa_pro_repository" }}'
@@ -192,9 +201,6 @@ spec:
           value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
         RASA_ANALYTICS_DB_URL:
           value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "rasa_pro_database" }}'
-    
-    replicated:
-      enabled: true
 
   optionalValues:
     - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
@@ -251,3 +257,6 @@ spec:
                   metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
                   port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
 
+  builder:
+    replicated:
+      enabled: true

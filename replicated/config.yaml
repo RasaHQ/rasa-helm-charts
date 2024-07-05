@@ -847,7 +847,7 @@ spec:
         - name: action_server_repository
           type: text
           title: Action Server repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary "registry.replicated.com/studio-dragon/rasa-action-server" ""}}'
+          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "registry.replicated.com/studio-dragon/rasa-action-server" ))) ""}}'
           help_text: URL of your repository for Action Server, without an image name
           when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
         - name: action_server_replica_count

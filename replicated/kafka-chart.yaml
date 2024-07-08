@@ -15,7 +15,7 @@ spec:
   values:
     image:
       registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
-      repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/bitnami" ) }}/kafka'
+      repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kafka'
       tag: 3.7.1-debian-12-r0
       digest: ""
       pullPolicy: IfNotPresent

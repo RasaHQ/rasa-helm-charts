@@ -22,7 +22,7 @@ spec:
     replicated:
       enabled: true
       images:
-        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/index.docker.io/replicated" ) }}/replicated-sdk:v1.0.0-beta.21'
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.21'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
       isAirgap: repl{{ HasLocalRegistry }}
@@ -180,7 +180,7 @@ spec:
     rasaProServices:
       enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}
       image:
-        repository: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services" ) }}'
+        repository: '{{repl ConfigOption "rasa_pro_services_repository" }}'
         tag: '{{repl ConfigOption "rasa_pro_services_image_tag" }}'
       environmentVariables:
         KAFKA_BROKER_ADDRESS:
@@ -244,6 +244,7 @@ spec:
               cpu: '{{repl ConfigOption "set_analytics_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_analytics_requests_memory" }}'
     - when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
+      recursiveMerge: true
       values:
         rasa:
           settings:

@@ -17,12 +17,14 @@ spec:
       - '{{repl ImagePullSecretName }}'
     controller:
       image:
-        registry: registry.k8s.io
-        image: ingress-nginx/controller
+        registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+        # image: ingress-nginx/controller
+        image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/nginx-controller'
         tag: "v1.10.1"
       admissionWebhooks:
         patch:
           image:
-            registry: registry.k8s.io
-            image: ingress-nginx/kube-webhook-certgen
+            registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+            # image: ingress-nginx/kube-webhook-certgen
+            image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kube-webhook-certgen'
             tag: v1.4.1

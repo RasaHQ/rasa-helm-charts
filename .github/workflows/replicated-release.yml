@@ -11,16 +11,26 @@ on:
         type: string
         description: Name of a Replicated channel to release to.
         required: true
+      studio-chart-version:
+        type: string
+        description: Studio Helm chart version
+        required: false
+        default: "1.0.9"
+      rasa-pro-chart-version:
+        type: string
+        description: Rasa Pro Helm chart version
+        required: false
+        default: "1.0.8"
 
 env:
   ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
   HELM_REPOSITORY: rasa-releases
   HELM_CHART: helm-charts
   GCP_BUCKET_CREDENTIALS: ${{ secrets.GCP_BUCKET_CREDENTIALS }}
-  KAFKA_HELM_VERSION: 26.11.1
+  KAFKA_HELM_VERSION: 29.3.5
   POSTGRESQL_HELM_VERSION: 15.0.0
   NGINX_HELM_VERSION: 4.10.0
-  REDIS_HELM_VERSION: 19.1.1
+  REDIS_HELM_VERSION: 19.6.1
 
 jobs:
   release-to-infrasec:
@@ -67,8 +77,8 @@ jobs:
       - name: Pull Helm Charts
         id: get_chart
         run: |
-          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.studio-info.outputs.name }} --version ${{ steps.studio-info.outputs.version }} -d ./replicated
-          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.rasa-pro-info.outputs.name }} --version ${{ steps.rasa-pro-info.outputs.version }} -d ./replicated
+          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.studio-info.outputs.name }} --version ${{ inputs.studio-chart-version }} -d ./replicated
+          helm pull oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}/${{ steps.rasa-pro-info.outputs.name }} --version ${{ inputs.rasa-pro-chart-version }} -d ./replicated
           helm pull ingress-nginx/ingress-nginx --version ${{ env.NGINX_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/postgresql --version ${{ env.POSTGRESQL_HELM_VERSION }} -d ./replicated
           helm pull oci://registry-1.docker.io/bitnamicharts/kafka --version ${{ env.KAFKA_HELM_VERSION }} -d ./replicated

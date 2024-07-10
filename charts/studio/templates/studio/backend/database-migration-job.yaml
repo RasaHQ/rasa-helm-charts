@@ -29,7 +29,7 @@ spec:
       {{- if .Values.backend.migration.waitForIt }}
       initContainers:
         - name: wait-for-postgresql
-          image: postgres:16.1
+          image: {{ .Values.backend.migration.waitFotItContainer.image }}
           command: ['sh', '-c', 'until pg_isready -h {{ .Values.config.database.host }} -p {{ .Values.config.database.port }} -U {{ .Values.config.database.username }}; do echo waiting for postgresql; sleep 2; done;']
       {{- end }}
       containers:

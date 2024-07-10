@@ -6,10 +6,25 @@ spec:
   exclude: 'repl{{ ConfigOptionNotEquals `install_nginx` `on_kubernetes` }}'
   chart:
     name: ingress-nginx
-    chartVersion: 4.9.1
+    chartVersion: 4.10.1
   
   releaseName: ingress-nginx
   namespace: ingress-nginx
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
-  # values:
+  values:
+    imagePullSecrets:
+      - '{{repl ImagePullSecretName }}'
+    controller:
+      image:
+        registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+        # image: ingress-nginx/controller
+        image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/nginx-controller'
+        tag: "v1.10.1"
+      admissionWebhooks:
+        patch:
+          image:
+            registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+            # image: ingress-nginx/kube-webhook-certgen
+            image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kube-webhook-certgen'
+            tag: v1.4.1

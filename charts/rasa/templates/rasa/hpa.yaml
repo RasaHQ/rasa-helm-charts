@@ -1,5 +1,5 @@
 {{- if and .Values.rasa.enabled .Values.rasa.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: {{ include "rasa.fullname" . }}
@@ -17,12 +17,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.rasa.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.rasa.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.rasa.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.rasa.autoscaling.targetMemoryUtilizationPercentage }}
+          target:
+          type: Utilization
+          averageUtilization: {{ .Values.rasa.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

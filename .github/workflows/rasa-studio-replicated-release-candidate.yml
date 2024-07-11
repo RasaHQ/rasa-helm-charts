@@ -60,3 +60,4 @@ jobs:
       replicated-version: ${{ needs.check-chart-versions.outputs.studio-version }}
       pro-version: ${{ needs.check-chart-versions.outputs.pro-version }}
       studio-version: ${{ needs.check-chart-versions.outputs.studio-version }}
+    secrets: inherit

@@ -4,7 +4,7 @@ run-name: Promote Replicated release to rasa-pro-release-candidate channel
 on:
   push:
     branches:
-      - releases/*
+      - release/*
     paths:
       - charts/rasa/**
       - replicated/**

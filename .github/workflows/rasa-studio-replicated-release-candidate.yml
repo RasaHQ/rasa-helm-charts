@@ -1,6 +1,6 @@
 
 name: Rasa Studio Replicated Candidate Release
-run-name: Promote Replicated release to rasa-studio-release-candidate channel
+run-name: Promote Replicated release to studio-release-candidate channel
 
 on:
   push:

@@ -30,7 +30,6 @@ The command removes all the Kubernetes components associated with the chart and 
 ## Pull the Chart
 
 To pull chart contents for your own convenience:
-
 ```console
 helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.9-rc1
 ```

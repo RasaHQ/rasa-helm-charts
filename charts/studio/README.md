@@ -12,7 +12,6 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 ## Installing the Chart
 
 To install the chart with the release name `my-release`:
-
 ```console
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.10-rc1
 ```

@@ -17,6 +17,7 @@ jobs:
     outputs:
       studio-version: ${{ steps.studio-chart-info.outputs.version }}
       pro-version: ${{ steps.pro-chart-info.outputs.version }}
+      release-candidate: ${{ steps.check-rc.outputs.rc }}
     steps:
     - name: Checkout repo
       uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
@@ -26,15 +27,17 @@ jobs:
       with:
         path: charts/studio/
     - name: Check Rasa Studio chart version
+      id: check-rc
+      if: github.event_name != 'pull_request' && !startsWith(github.base_ref, 'release/')
       env:
         VERSION: ${{ steps.studio-chart-info.outputs.name }}-${{ steps.studio-chart-info.outputs.version }}
       run: |
         if [[ $VERSION == *-rc* ]]; then
-          echo "The Helm chart version is valid for a release candidate."
+          echo "The Helm chart version is a release candidate."
+          echo "rc=true" >> $GITHUB_OUTPUT
         else
-          echo "The Helm chart version is not valid for a release candidate. Please add `-rc*` after the version in Chart.yaml."
-          exit 1
-        fi
+          echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
+        echo "rc=false" >> $GITHUB_OUTPUT
     - name: Read Rasa Pro chart
       id: pro-chart-info
       uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
@@ -43,6 +46,7 @@ jobs:
   register-helm-chart:
     name: Register Rasa Studio chart
     needs: [check-chart-versions]
+    if: needs.check-chart-versions.outputs.release-candidate == 'true'
     uses: RasaHQ/infrasec-workflows/.github/workflows/register-private-helm-chart.yml@main
     with:
         github-repo: ${{ github.repository }}
@@ -56,6 +60,7 @@ jobs:
   promote-replicated-release:
     name: Promote Replicated release
     needs: [register-helm-chart, check-chart-versions]
+    if: needs.check-chart-versions.outputs.release-candidate == 'true'
     uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@feat/add-replicated-release-workflow
     with:
       replicated-channel: studio-release-candidate

@@ -58,7 +58,7 @@ jobs:
     needs: [register-helm-chart, check-chart-versions]
     uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@feat/add-replicated-release-workflow
     with:
-      replicated-channel: rasa-studio-release-candidate
+      replicated-channel: studio-release-candidate
       replicated-version: ${{ needs.check-chart-versions.outputs.studio-version }}
       pro-version: ${{ needs.check-chart-versions.outputs.pro-version }}
       studio-version: ${{ needs.check-chart-versions.outputs.studio-version }}

@@ -7,6 +7,7 @@ on:
       - release/*
     paths:
       - charts/rasa/**
+      - '!charts/studio/**'
       - replicated/**
 
 jobs:

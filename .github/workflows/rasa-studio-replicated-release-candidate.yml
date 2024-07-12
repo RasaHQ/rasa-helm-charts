@@ -1,4 +1,5 @@
 
+name: Rasa Studio Replicated Candidate Release
 run-name: Promote Replicated release to rasa-studio-release-candidate channel
 
 on:
@@ -11,6 +12,7 @@ on:
 
 jobs:
   check-chart-versions:
+    name: Check chart versions
     runs-on: ubuntu-22.04 
     outputs:
       studio-version: ${{ steps.studio-chart-info.outputs.version }}

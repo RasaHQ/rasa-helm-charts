@@ -1,4 +1,5 @@
 
+name: Rasa Pro Replicated Candidate Release
 run-name: Promote Replicated release to rasa-pro-release-candidate channel
 
 on:

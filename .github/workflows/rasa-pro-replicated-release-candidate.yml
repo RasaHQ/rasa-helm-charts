@@ -38,6 +38,7 @@ jobs:
         else
           echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
           echo "rc=false" >> $GITHUB_OUTPUT
+        fi
     - name: Read Rasa Studio chart
       id: studio-chart-info
       uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
@@ -61,7 +62,7 @@ jobs:
     name: Promote Replicated release
     needs: [register-helm-chart, check-chart-versions]
     if: needs.check-chart-versions.outputs.release-candidate == 'true'
-    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@feat/add-replicated-release-workflow
+    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
     with:
       replicated-channel: rasa-pro-release-candidate
       replicated-version: ${{ needs.check-chart-versions.outputs.pro-version }}

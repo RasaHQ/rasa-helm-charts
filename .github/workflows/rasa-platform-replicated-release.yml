@@ -25,7 +25,7 @@ on:
 jobs:
   promote-replicated-release:
     name: Promote Replicated release
-    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@feat/add-replicated-release-workflow
+    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
     with:
       replicated-channel: ${{ inputs.replicated-channel }}
       replicated-version: ${{ inputs.replicated-version }}

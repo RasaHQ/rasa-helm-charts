@@ -3,12 +3,15 @@ kind: HelmChart
 metadata:
   name: studio
 spec:
+  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
     chartVersion: 1.0.3
 
   releaseName: studio
+  namespace: studio
+
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
@@ -17,6 +20,11 @@ spec:
 
     replicated:
       enabled: true
+      images:
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.21'
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
+      isAirgap: repl{{ HasLocalRegistry }}
 
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
@@ -68,11 +76,13 @@ spec:
         KEYCLOAK_CLIENT_ID:
           value: '{{repl ConfigOption "keycloak_client_id" }}'
         DOCKER_IMAGE_TAG:
-          value: '{{repl ConfigOption "rasa_config_image" }}:{{repl ConfigOption "docker_image_tag" }}'
+          value: '{{repl ConfigOption "rasa_pro_repository" }}:{{repl ConfigOption "rasa_pro_image_tag" }}'
         RASA_CONFIG_FILE:
           value: '{{repl ConfigOption "rasa_config_file" }}'
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
+        waitFotItContainer:
+          image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
       ingress:
         className: '{{repl ConfigOption "ingress_class" }}'
         annotations:
@@ -156,7 +166,7 @@ spec:
       rasaProLicense:
         secretKey: "RASA_PRO_LICENCE"
       gcpCredentials:
-        secretName: "gcp-secrets"
+        secretName: "studio-secrets"
         secretKey: "GCP_CREDENTIALS"
       openAiKey:
         secretKey: "OPENAI_API_KEY_SECRET_KEY"
@@ -263,6 +273,8 @@ spec:
               nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
               kots.io/placeholder: |-
                 repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 14 }}repl{{ end }}
+        proxy:
+          image: '{{repl ConfigOption "mrs_nginx_proxy" }}'
         consumer:
           replicaCount: repl{{ ConfigOption "running_consumer_replicas" }}
           environmentVariables:
@@ -458,3 +470,6 @@ spec:
               environmentVariables:
                 AWS_ENDPOINT_URL:
                   value: '{{repl ConfigOption "aws_endpoint_url" }}'
+  builder:
+    replicated:
+      enabled: true

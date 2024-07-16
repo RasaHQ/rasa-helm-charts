@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.0.9](https://img.shields.io/badge/Version-1.0.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.9
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.0.9
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.0
 ```
 
 ## General Configuration
@@ -103,7 +103,7 @@ modelService:
 | backend.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"waitForIt":false}` | Define Studio Database Migration job settings |
+| backend.migration | object | `{"enable":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"waitForIt":false,"waitFotItContainer":{"image":"postgres:16.1"}}` | Define Studio Database Migration job settings |
 | backend.migration.enable | bool | `true` | migration.enable specifies whether a database migration job should be created |
 | backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | migration.image specifies which image database migration job should use |
 | backend.migration.image.name | string | `"studio-database-migration"` | image.name specifies the repository of the image |
@@ -295,7 +295,7 @@ modelService:
 | modelService.running.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
 | modelService.running.orchestrator.volumes | list | `[]` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
-| modelService.running.proxy.image | string | `"nginxinc/nginx-unprivileged:1.25-alpine"` | proxy.image defines image settings |
+| modelService.running.proxy.image | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/nginx-unprivileged:1.27-alpine"` | proxy.image defines image settings |
 | modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | modelService.running.proxy.podAnnotations | object | `{}` | proxy.podAnnotations defines annotations to add to the pod |
 | modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | proxy.podSecurityContext defines pod security context |
@@ -319,7 +319,7 @@ modelService:
 | modelService.storage.regionName | string | `""` | Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located. |
 | modelService.storage.storageServiceAccount | object | `{"secretKey":"STORAGE_SIGNED_URL_SERVICE_ACCOUNT","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to gcs. The service account email address. |
 | modelService.storage.type | string | `""` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
-| modelService.tag | string | `"3.2.2"` | tag specifies image tag for Studio |
+| modelService.tag | string | `"3.3.2"` | tag specifies image tag for Studio |
 | modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -386,7 +386,7 @@ modelService:
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |
-| tag | string | `"1.2.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.3.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

@@ -1,0 +1,263 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: rasa-pro
+spec:
+  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
+  # chart identifies a matching chart from a .tgz
+  chart:
+    name: rasa
+    chartVersion: 1.0.4
+  
+  releaseName: rasa-pro
+  namespace: rasa-pro
+
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    rasaProLicense:
+      secretName: "rasa-secrets"
+      secretKey: "RASA_PRO_LICENCE"
+    
+    replicated:
+      enabled: true
+      images:
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.21'
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
+      isAirgap: repl{{ HasLocalRegistry }}
+    
+    rasa:
+      image:
+        repository: '{{repl ConfigOption "rasa_pro_repository" }}'
+        tag: '{{repl ConfigOption "rasa_pro_image_tag" }}'
+      settings:
+        enableApi: repl{{ eq (ConfigOption "rasa_enable_api") "1"}}
+        authToken:
+          secretName: "rasa-secrets"
+          secretKey: "AUTHTOKEN"
+        jwtSecret:
+          secretName: "rasa-secrets"
+          secretKey: "JWTSECRET"
+        credentials:
+          enabled: repl{{ eq (ConfigOption "rasa_credentials") "1"}}
+          additionalChannelCredentials:
+            rest: {}
+            socketio:
+              bot_message_evt: '{{repl ConfigOption "rasa_bot_message_event" }}'
+              metadata_key: '{{repl ConfigOption "rasa_metadata_key" }}'
+              session_persistence: repl{{ eq (ConfigOption "rasa_session_persistence") "1"}}
+              user_message_evt: '{{repl ConfigOption "rasa_user_message_event" }}'
+        endpoints:
+          actionEndpoint:
+            url: '{{repl ConfigOption "rasa_action_endpoint_url" }}'
+          eventBroker:
+            enabled: repl{{ eq (ConfigOption "rasa_kafka_event_broker") "1"}}
+            type: '{{repl ConfigOption "rasa_event_broker_type" }}'
+            security_protocol: '{{repl ConfigOption "kafka_security_protocol" }}'
+            topic: '{{repl ConfigOption "kafka_topic" }}'
+            url: '{{repl ConfigOption "kafka_broker" }}'
+            sasl_username: '{{repl ConfigOption "kafka_username" }}'
+            sasl_password: '{{repl ConfigOption "kafka_password" }}'
+            ssl_check_hostname: repl{{ eq (ConfigOption "rasa_event_broker_ssl_check_hostname") "1"}}
+          lockStore:
+            enabled: repl{{ eq (ConfigOption "rasa_lock_store") "1"}}
+            useConcurrent: repl{{ eq (ConfigOption "rasa_lock_store_use_concurrent") "1"}}
+            db: '{{repl ConfigOption "rasa_lock_store_db" }}'
+            port: '{{repl ConfigOption "rasa_lock_store_port" }}'
+            url: '{{repl ConfigOption "rasa_lock_store_url" }}'
+            password: '{{repl ConfigOption "redis_password" }}'
+            use_ssl: repl{{ eq (ConfigOption "rasa_lock_store_use_ssl") "1"}}
+          models:
+            enabled: repl{{ eq (ConfigOption "rasa_models") "1"}}
+          tracing:
+            enabled: repl{{ eq (ConfigOption "rasa_tracing") "1"}}
+            host: '{{repl ConfigOption "rasa_tracing_host" }}'
+            port: '{{repl ConfigOption "rasa_tracing_port" }}'
+            service_name: '{{repl ConfigOption "rasa_tracing_service_name" }}'
+            sync_export: '{{repl ConfigOption "rasa_tracing_sync_export" }}'
+            type: '{{repl ConfigOption "rasa_tracing_type" }}'
+          trackerStore:
+            enabled: repl{{ eq (ConfigOption "rasa_tracker_store") "1"}}
+            dialect: '{{repl ConfigOption "rasa_tracker_store_dialect" }}'
+            db: '{{repl ConfigOption "rasa_pro_database" }}'
+            username: '{{repl ConfigOption "database_username" }}'
+            password: '{{repl ConfigOption "database_password" }}'
+            port: '{{repl ConfigOption "database_port" }}'
+            type: '{{repl ConfigOption "rasa_tracker_store_type" }}'
+            url: '{{repl ConfigOption "database_host" }}'
+        environment: '{{repl ConfigOption "settings_environment" }}'
+      additionalArgs:
+        - --model
+        - '{{repl ConfigOption "model_file" }}'
+        - --remote-storage
+        - '{{repl ConfigOption "model_storage_type" }}'
+      additionalEnv:
+        - name: BUCKET_NAME
+          value: '{{repl ConfigOption "bucket_name" }}'
+        - name: MODEL_FILE
+          value: '{{repl ConfigOption "model_file" }}'
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "AWS_ACCESS_KEY_ID"
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "AWS_SECRET_ACCESS_KEY"
+        - name: AWS_DEFAULT_REGION
+          value: '{{repl ConfigOption "aws_region_name" }}'
+        - name: GOOGLE_APPLICATION_CREDENTIALS
+          value: '/etc/gcp/credentials.json'
+        - name: OPENAI_API_KEY
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "OPENAI_API_KEY"
+        - name: DB_HOST
+          value: '{{repl ConfigOption "database_host" }}'
+        - name: DB_DATABASE
+          value: '{{repl ConfigOption "rasa_pro_database" }}'
+        - name: DB_USER
+          value: '{{repl ConfigOption "database_username" }}'
+        - name: DB_PASSWORD
+          value: '{{repl ConfigOption "database_password" }}'
+        - name: KAFKA_PASSWORD
+          value: '{{repl ConfigOption "kafka_password" }}'
+        - name: KAFKA_USER
+          value: '{{repl ConfigOption "kafka_username" }}'
+        - name: REDIS_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: "rasa-secrets"
+              key: "REDIS_PASSWORD"
+      ingress:
+        enabled: true
+        className: '{{repl ConfigOption "ingress_class" }}'
+        annotations:
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+        hosts:
+          - host: '{{repl ConfigOption "ingress_hostname" }}'
+            paths:
+              - path: '{{repl ConfigOption "rasa_ingress_hosts_path" }}'
+                pathType: '{{repl ConfigOption "rasa_ingress_hosts_path_type" }}'
+      volumeMounts:
+      - mountPath: /etc/gcp
+        name: service-account-credentials-volume
+        readOnly: true
+      volumes:
+      - name: service-account-credentials-volume
+        secret:
+          secretName: rasa-secrets
+          items:
+            - key: GCS_JSON
+              path: credentials.json
+    
+    actionServer:
+      enabled: true
+      image:
+        repository: '{{repl ConfigOption "action_server_repository" }}'
+        tag: '{{repl ConfigOption "action_server_image_tag" }}'
+      service:
+        port: '{{repl ConfigOption "action_service_port" }}'
+        targetPort: '{{repl ConfigOption "action_service_port" }}'
+        type: '{{repl ConfigOption "action_server_service_type" }}'
+      settings:
+        port: '{{repl ConfigOption "action_service_port" }}'
+        scheme: '{{repl ConfigOption "action_server_settings_schema" }}'
+      volumeMounts:
+        - name: rasa-config-volume
+          mountPath: /app/endpoints.yml
+          subPath: endpoints
+      volumes:
+        - name: rasa-config-volume
+          configMap:
+            name: rasa-configmap
+    
+    rasaProServices:
+      enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}
+      image:
+        repository: '{{repl ConfigOption "rasa_pro_services_repository" }}'
+        tag: '{{repl ConfigOption "rasa_pro_services_image_tag" }}'
+      environmentVariables:
+        KAFKA_BROKER_ADDRESS:
+          value: '{{repl ConfigOption "kafka_broker" }}'
+        KAFKA_SASL_MECHANISM:
+          value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
+        KAFKA_SASL_PASSWORD:
+          value: '{{repl ConfigOption "kafka_password" }}'
+        KAFKA_SASL_USERNAME:
+          value: '{{repl ConfigOption "kafka_username" }}'
+        KAFKA_SECURITY_PROTOCOL:
+          value: '{{repl ConfigOption "kafka_security_protocol" }}'
+        KAFKA_SSL_CA_LOCATION:
+          value: '{{repl ConfigOption "kafka_ca_file" }}'
+        KAFKA_TOPIC:
+          value: '{{repl ConfigOption "kafka_topic" }}'
+        LOGGING_LEVEL:
+          value: '{{repl ConfigOption "rasa_pro_services_logging_level" }}'
+        RASA_ANALYTICS_DB_URL:
+          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "rasa_pro_database" }}'
+
+  optionalValues:
+    - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ImagePullSecretName }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+      recursiveMerge: true
+      values:
+        imagePullSecrets:
+          - name: '{{repl ConfigOption "image_pull_secrets" }}'
+    - when: '{{repl ConfigOptionEquals "rasa_platform_deploy" "rasa_platform"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          ingress:
+            annotations:
+              nginx.ingress.kubernetes.io/use-regex: "true"
+              nginx.ingress.kubernetes.io/rewrite-target: /$2
+    - when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_rasa_pro_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_rasa_pro_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_rasa_pro_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_rasa_pro_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
+      recursiveMerge: true
+      values:
+        rasaProServices:
+          resources:
+            limits:
+              cpu: '{{repl ConfigOption "set_analytics_limits_cpu" }}'
+              memory: '{{repl ConfigOption "set_analytics_limits_memory" }}'
+            requests:
+              cpu: '{{repl ConfigOption "set_analytics_requests_cpu" }}'
+              memory: '{{repl ConfigOption "set_analytics_requests_memory" }}'
+    - when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          settings:
+            endpoints:
+              additionalEndpoints:
+                vector_store:
+                  type: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_type" }}'
+                  collection: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_collection" }}'
+                  content_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_content_payload_key" }}'
+                  host: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_host" }}'
+                  metadata_payload_key: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_metadata_payload_key" }}'
+                  port: '{{repl ConfigOption "rasa_additional_endpoints_vector_store_port" }}'
+
+  builder:
+    replicated:
+      enabled: true

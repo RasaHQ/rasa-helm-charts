@@ -6,66 +6,97 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
   chart:
     name: kafka
-    chartVersion: 26.11.1
+    chartVersion: 29.3.5
   
   releaseName: kafka
   namespace: kafka
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
-    controller:
-      replicaCount: 3
-      resourcesPreset: "small"
+    image:
+      registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+      repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kafka'
+      tag: 3.7.1-debian-12-r0
+      digest: ""
+      pullPolicy: IfNotPresent
+      pullSecrets:
+        - '{{repl ImagePullSecretName }}'
+    extraConfigYaml:
+      offsets.topic.replication.factor: 1
+      transaction.state.log.replication.factor: 1
     listeners:
       client:
-        protocol: PLAINTEXT
+        protocol: SASL_PLAINTEXT
       interbroker:
         protocol: PLAINTEXT
+      external:
+        protocol: SASL_PLAINTEXT
+    sasl:
+      client:
+        users:
+          - '{{repl ConfigOption "kafka_username" }}'
+        passwords:
+          - '{{repl ConfigOption "kafka_password" }}'
+    controller:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+        limits:
+          cpu: "750m"
+          memory: "2Gi"
+      persistence:
+        enabled: false
+      automountServiceAccountToken: true
+      extraConfigYaml:
+        offsets.topic.replication.factor: 1
+        transaction.state.log.replication.factor: 1
+    broker:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: "500m"
+          memory: "512Mi"
+        limits:
+          cpu: "750m"
+          memory: "2Gi"
+      persistence:
+        enabled: false
+      automountServiceAccountToken: true
+      extraConfigYaml:
+        offsets.topic.replication.factor: 1
+        transaction.state.log.replication.factor: 1
     provisioning:
       enabled: true
       topics:
         - name: '{{repl ConfigOption "training_job_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "training_result_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "kafka_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "kafka_dlq_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "deployment_result_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
         - name: '{{repl ConfigOption "deployment_job_topic" }}'
           partitions: 1
           replicationFactor: 1
-          config:
-            max.message.bytes: 64000
-            flush.messages: 1
+        - name: '{{repl ConfigOption "rasa_assistant_topic" }}'
+          partitions: 1
+          replicationFactor: 1
+        - name: '{{repl ConfigOption "rasa_core_events_topic" }}'
+          partitions: 1
+          replicationFactor: 1
     kraft:
       enabled: true
     zookeeper:

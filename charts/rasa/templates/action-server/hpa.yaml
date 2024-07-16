@@ -1,5 +1,5 @@
 {{- if and .Values.actionServer.enabled .Values.actionServer.autoscaling.enabled }}
-apiVersion: autoscaling/v2beta1
+apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
   name: action-server
@@ -17,12 +17,16 @@ spec:
     - type: Resource
       resource:
         name: cpu
-        targetAverageUtilization: {{ .Values.actionServer.autoscaling.targetCPUUtilizationPercentage }}
+        target:
+          type: Utilization
+          averageUtilization: {{ .Values.actionServer.autoscaling.targetCPUUtilizationPercentage }}
     {{- end }}
     {{- if .Values.actionServer.autoscaling.targetMemoryUtilizationPercentage }}
     - type: Resource
       resource:
         name: memory
-        targetAverageUtilization: {{ .Values.actionServer.autoscaling.targetMemoryUtilizationPercentage }}
+          target:
+          type: Utilization
+          averageUtilization: {{ .Values.actionServer.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}
 {{- end }}

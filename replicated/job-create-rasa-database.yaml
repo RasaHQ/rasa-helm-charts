@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-rasa-database-job
+  annotations:
+    kots.io/exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
+    kots.io/hook-delete-policy: "hook-succeeded"
+spec:
+  template:
+    spec:
+      imagePullSecrets:
+        - name: '{{repl ImagePullSecretName }}'
+      initContainers:
+      - name: wait-for-postgres
+        image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
+        env:
+          - name: PGHOST
+            value: '{{repl ConfigOption "database_host" }}'
+          - name: PGUSER
+            value: '{{repl ConfigOption "database_username" }}'
+          - name: PGPASSWORD
+            value: '{{repl ConfigOption "database_password" }}'
+          - name: PGDATABASE
+            value: "postgres"
+        command: ['sh', '-c', 'until pg_isready; do echo "Waiting for PostgreSQL to be ready..."; sleep 10; done;']
+      containers:
+      - name: create-database-container
+        image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
+        env:
+          - name: PGHOST
+            value: '{{repl ConfigOption "database_host" }}'
+          - name: PGUSER
+            value: '{{repl ConfigOption "database_username" }}'
+          - name: PGPASSWORD
+            value: '{{repl ConfigOption "database_password" }}'
+          - name: PGDATABASE
+            value: "postgres"
+        command: ["bash", "-c", 'if psql -lqt | cut -d \| -f 1 | grep -qw "rasa"; then echo "Database already exists"; else createdb rasa || true; fi']
+      restartPolicy: Never

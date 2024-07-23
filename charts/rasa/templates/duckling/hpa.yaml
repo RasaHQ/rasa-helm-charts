@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: duckling
+  name: {{ include "rasa.fullname" . }}-duckling
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: duckling
+    name: {{ include "rasa.fullname" . }}-duckling
   minReplicas: {{ .Values.duckling.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.duckling.autoscaling.maxReplicas }}
   metrics:

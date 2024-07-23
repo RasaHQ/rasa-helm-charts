@@ -674,8 +674,7 @@ duckling:
     # - "-p"
     # - --access-log=/dev/stdout
     # - --error-log=/dev/stderr
-  # -- duckling.additionalArgs adds additional arguments to the default args
-  additionalArgs: []
+
   # -- duckling.command overrides the default command for the container
   command: []
   # - duckling-example-exe
@@ -915,8 +914,7 @@ actionServer:
     # - "-p"
     # - --access-log=/dev/stdout
     # - --error-log=/dev/stderr
-  # -- actionServer.additionalArgs adds additional arguments to the default args
-  additionalArgs: []
+
   # -- actionServer.command overrides the default command for the container
   command: []
 
@@ -1094,7 +1092,7 @@ actionServer:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
-    # requests:
+    # requests:g
     #   cpu: 100m
     #   memory: 128Mi
 

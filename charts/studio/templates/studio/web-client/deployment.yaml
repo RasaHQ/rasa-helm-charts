@@ -79,6 +79,8 @@ spec:
             mountPath: "/usr/share/nginx/html/config.js"
             subPath: "config.js"
             readOnly: true
+          - name: nginx
+            mountPath: "/tmp"
       {{- if .Values.webClient.additionalContainers }}
         {{- toYaml .Values.webClient.additionalContainers | nindent 8 }}
       {{- end }}
@@ -89,6 +91,8 @@ spec:
           items:
           - key: "windowVariables"
             path: "config.js"
+      - emptyDir: {}
+        name: nginx
       {{- with .Values.webClient.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

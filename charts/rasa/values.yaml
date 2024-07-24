@@ -1092,7 +1092,7 @@ actionServer:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
-    # requests:g
+    # requests:
     #   cpu: 100m
     #   memory: 128Mi
 

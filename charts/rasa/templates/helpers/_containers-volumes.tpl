@@ -3,7 +3,7 @@
   emptyDir: {}
 - name: "rasa-configuration"
   configMap:
-    name: rasa-configmap
+    name: {{ include "rasa.fullname" . }}-configmap
     items:
       - key: "endpoints"
         path: "endpoints.yml"

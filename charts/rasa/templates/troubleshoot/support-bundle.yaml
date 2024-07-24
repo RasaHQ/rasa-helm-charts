@@ -15,21 +15,21 @@ spec:
     - logs:
         name: app/{{ include "rasa.fullname" . }}/logs
         selector: 
-          - app.kubernetes.io/name={{ include "rasa.name" . }}
+          - app.kubernetes.io/name={{ include "rasa.fullname" . }}
           - app.kubernetes.io/instance={{ .Release.Name }}
         limits:
           maxAge: 720h
     - logs:
-        name: app/rasa-pro-services/logs
+        name: app/{{ include "rasa.fullname" . }}-rasa-pro-services/logs
         selector: 
-          - app.kubernetes.io/name=rasa-pro-services
+          - app.kubernetes.io/name={{ include "rasa.fullname" . }}-rasa-pro-services
           - app.kubernetes.io/instance={{ .Release.Name }}
         limits:
           maxAge: 720h
     - logs:
-        name: app/action-server/logs
+        name: app/{{ include "rasa.fullname" . }}-action-server/logs
         selector: 
-          - app.kubernetes.io/name=action-server
+          - app.kubernetes.io/name={{ include "rasa.fullname" . }}-action-server
           - app.kubernetes.io/instance={{ .Release.Name }}
         limits:
           maxAge: 720h

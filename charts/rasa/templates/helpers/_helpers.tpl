@@ -49,7 +49,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 Selector labels for Rasa OSS/Plus
 */}}
 {{- define "rasa.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.name" . }}
+app.kubernetes.io/name: {{ include "rasa.fullname" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -57,7 +57,7 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Selector labels for Rasa Pro Services
 */}}
 {{- define "rasa.rasaProServices.selectorLabels" -}}
-app.kubernetes.io/name: rasa-pro-services
+app.kubernetes.io/name: {{ include "rasa.fullname" . }}-rasa-pro-services
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -93,7 +93,7 @@ Create the name of the service account to use
 */}}
 {{- define "rasa.rasaProServices.serviceAccountName" -}}
 {{- if .Values.rasaProServices.serviceAccount.create }}
-{{- default "rasa-pro-services" .Values.rasaProServices.serviceAccount.name }}
+{{- default (include "rasa.fullname" . | printf "%s-rasa-pro-services") .Values.rasaProServices.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasaProServices.serviceAccount.name }}
 {{- end }}

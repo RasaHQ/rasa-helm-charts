@@ -2,14 +2,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: action-server
+  name: {{ include "rasa.fullname" . }}-action-server
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: action-server
+    name: {{ include "rasa.fullname" . }}-action-server
   minReplicas: {{ .Values.actionServer.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.actionServer.autoscaling.maxReplicas }}
   metrics:

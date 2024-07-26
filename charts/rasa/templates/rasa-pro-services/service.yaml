@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: rasa-pro-services
+  name: {{ include "rasa.fullname" . }}-rasa-pro-services
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
   {{- with .Values.rasaProServices.service.annotations }}

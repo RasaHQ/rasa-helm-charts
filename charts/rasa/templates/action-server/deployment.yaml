@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: action-server
+  name: {{ include "rasa.fullname" . }}-action-server
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.deploymentLabels }}

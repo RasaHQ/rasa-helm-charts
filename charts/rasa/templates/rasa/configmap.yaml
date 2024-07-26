@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: rasa-configmap
+  name: {{ include "rasa.fullname" . }}-configmap
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 data:

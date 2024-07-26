@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.0.9](https://img.shields.io/badge/Version-1.0.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.9
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.0.9
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.0
 ```
 
 ## General Configuration
@@ -87,7 +87,6 @@ rasaProServices:
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
-| actionServer.additionalArgs | list | `[]` | actionServer.additionalArgs adds additional arguments to the default args |
 | actionServer.additionalContainers | list | `[]` | actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment |
 | actionServer.additionalEnv | list | `[]` | actionServer.additionalEnv adds additional environment variables |
 | actionServer.affinity | object | `{}` | actionServer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
@@ -152,7 +151,6 @@ rasaProServices:
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Rasa deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling.additionalArgs | list | `[]` | duckling.additionalArgs adds additional arguments to the default args |
 | duckling.additionalContainers | list | `[]` | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment |
 | duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables |
 | duckling.affinity | object | `{}` | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |

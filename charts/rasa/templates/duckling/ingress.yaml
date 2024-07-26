@@ -1,4 +1,5 @@
 {{- if .Values.duckling.ingress.enabled -}}
+{{- $fullName := include "rasa.fullname" . -}}
 {{- $svcPort := .Values.duckling.service.port -}}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
 apiVersion: networking.k8s.io/v1
@@ -9,7 +10,7 @@ apiVersion: extensions/v1beta1
 {{- end }}
 kind: Ingress
 metadata:
-  name: duckling
+  name: {{ $fullName }}-duckling
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
     {{- if .Values.duckling.ingress.labels }}
@@ -43,11 +44,11 @@ spec:
             backend:
               {{- if semverCompare ">=1.19-0" $.Capabilities.KubeVersion.GitVersion }}
               service:
-                name: duckling
+                name: {{ $fullName }}-duckling
                 port:
                   number: {{ $svcPort }}
               {{- else }}
-              serviceName: duckling
+              serviceName: {{ $fullName }}-duckling
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}

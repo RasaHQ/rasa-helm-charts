@@ -14,7 +14,7 @@ spec:
   # these values will be supplied to helm template
   values:
     imagePullSecrets:
-      - '{{repl ImagePullSecretName }}'
+      - name: '{{repl ImagePullSecretName }}'
     controller:
       image:
         registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'

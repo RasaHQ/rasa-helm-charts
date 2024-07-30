@@ -175,7 +175,7 @@ spec:
       volumes:
         - name: rasa-config-volume
           configMap:
-            name: rasa-configmap
+            name: rasa-pro-configmap
     
     rasaProServices:
       enabled: repl{{ eq (ConfigOption "deploy_analytics") "1"}}

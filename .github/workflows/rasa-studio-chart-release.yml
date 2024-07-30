@@ -7,7 +7,7 @@ on:
     paths:
       - 'charts/studio/**'
       - '!charts/rasa/**'
-      - 'replicated/**'
+      - '!replicated/**'
 
 env:
   ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev

@@ -56,9 +56,9 @@ spec:
       {{- end }}
       containers:
         - name: duckling
-          {{- if .Values.duckling.securityContext.enabled }}
+          {{- if .Values.duckling.containerSecurityContext.enabled }}
           securityContext:
-            {{- omit .Values.duckling.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.duckling.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ .Values.duckling.image.repository }}:{{ .Values.duckling.image.tag }}"
           imagePullPolicy: {{ .Values.duckling.image.pullPolicy }}

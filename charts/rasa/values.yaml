@@ -230,19 +230,13 @@ rasa:
     enabled: true
     # fsGroup: 2000
 
-  # -- rasa.securityContext defines security context that allows you to overwrite the pod-level security context
-  securityContext:
+  # -- rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context
+  containerSecurityContext:
     enabled: true
-    # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
     #   drop:
     #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-    # seccompProfile:
-    #   type: RuntimeDefault
 
   # -- rasa.service define service for Rasa OSS/Plus
   service:
@@ -486,19 +480,14 @@ rasaProServices:
     enabled: true
     # fsGroup: 2000
 
-  # -- rasaProServices.securityContext defines security context that allows you to overwrite the pod-level security context
-  securityContext:
+  # -- rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context
+  containerSecurityContext:
     enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
     #   drop:
     #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-    # seccompProfile:
-    #   type: RuntimeDefault
 
   # -- rasaProServices.service define service for Rasa OSS/Plus
   service:
@@ -740,19 +729,14 @@ duckling:
     enabled: true
     # fsGroup: 2000
 
-  # -- duckling.securityContext defines security context that allows you to overwrite the pod-level security context
-  securityContext:
+  # -- duckling.containerSecurityContext defines security context that allows you to overwrite the container-level security context
+  containerSecurityContext:
     enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false
     # capabilities:
     #   drop:
     #   - ALL
-    # readOnlyRootFilesystem: true
-    # runAsNonRoot: true
-    # runAsUser: 1000
-    # seccompProfile:
-    #   type: RuntimeDefault
 
   # -- duckling.service define service for Duckling
   service:
@@ -980,8 +964,8 @@ actionServer:
     enabled: true
     # fsGroup: 2000
 
-  # -- actionServer.securityContext defines security context that allows you to overwrite the pod-level security context
-  securityContext:
+  # -- actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context
+  containerSecurityContext:
     enabled: true
     # privileged: false
     # allowPrivilegeEscalation: false

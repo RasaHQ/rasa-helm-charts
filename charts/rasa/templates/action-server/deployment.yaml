@@ -56,9 +56,9 @@ spec:
       {{- end }}
       containers:
         - name: action-server
-          {{- if .Values.actionServer.securityContext.enabled }}
+          {{- if .Values.actionServer.containerSecurityContext.enabled }}
           securityContext:
-            {{- omit .Values.actionServer.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.actionServer.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ .Values.actionServer.image.repository }}:{{ .Values.actionServer.image.tag }}"
           imagePullPolicy: {{ .Values.actionServer.image.pullPolicy }}

@@ -61,9 +61,9 @@ spec:
       {{- end }}
       containers:
         - name: rasa
-          {{- if .Values.rasa.securityContext.enabled }}
+          {{- if .Values.rasa.containerSecurityContext.enabled }}
           securityContext:
-            {{- omit .Values.rasa.securityContext "enabled" | toYaml | nindent 12 }}
+            {{- omit .Values.rasa.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}"
           imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}

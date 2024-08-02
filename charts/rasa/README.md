@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.1.0](https://img.shields.io/badge/Version-1.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.2](https://img.shields.io/badge/Version-1.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.0
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.2
 ```
 
 ## General Configuration
@@ -96,6 +96,7 @@ rasaProServices:
 | actionServer.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | actionServer.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | actionServer.command | list | `[]` | actionServer.command overrides the default command for the container |
+| actionServer.containerSecurityContext | object | `{"enabled":true}` | actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | actionServer.enabled | bool | `false` | actionServer.enabled enables Action Server deployment |
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
@@ -128,7 +129,6 @@ rasaProServices:
 | actionServer.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | actionServer.replicaCount | int | `1` | actionServer.replicaCount specifies number of replicas |
 | actionServer.resources | object | `{}` | actionServer.resources specifies the resources limits and requests |
-| actionServer.containerSecurityContext | object | `{"enabled":true}` | actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | actionServer.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5055,"targetPort":5055,"type":"ClusterIP"}` | actionServer.service define service for Action Server |
 | actionServer.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
 | actionServer.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
@@ -160,6 +160,7 @@ rasaProServices:
 | duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | duckling.command | list | `[]` | duckling.command overrides the default command for the container |
+| duckling.containerSecurityContext | object | `{"enabled":true}` | duckling.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | duckling.enabled | bool | `false` | duckling.enabled enables Duckling deployment |
 | duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
 | duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
@@ -192,7 +193,6 @@ rasaProServices:
 | duckling.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | duckling.replicaCount | int | `1` | duckling.replicaCount specifies number of replicas |
 | duckling.resources | object | `{}` | duckling.resources specifies the resources limits and requests |
-| duckling.containerSecurityContext | object | `{"enabled":true}` | duckling.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | duckling.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":8000,"targetPort":8000,"type":"ClusterIP"}` | duckling.service define service for Duckling |
 | duckling.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
 | duckling.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
@@ -231,12 +231,13 @@ rasaProServices:
 | rasa.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | rasa.command overrides the default command for the container |
+| rasa.containerSecurityContext | object | `{"enabled":true}` | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | rasa.deployOSS | bool | `false` | rasa.deployOSS enables Rasa Open Source deployment |
 | rasa.enabled | bool | `true` | rasa.enabled enables Rasa Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.8.0-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.8.10-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -264,7 +265,6 @@ rasaProServices:
 | rasa.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasa.replicaCount | int | `1` | rasa.replicaCount specifies number of replicas |
 | rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
-| rasa.containerSecurityContext | object | `{"enabled":true}` | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | rasa.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":5005,"type":"ClusterIP"}` | rasa.service define service for Rasa OSS/Plus |
 | rasa.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
 | rasa.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
@@ -310,6 +310,7 @@ rasaProServices:
 | rasaProServices.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
 | rasaProServices.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
+| rasaProServices.containerSecurityContext | object | `{"enabled":true}` | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | rasaProServices.enabled | bool | `true` | rasaProServices.enabled enables Rasa Pro Services deployment |
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasaProServices.environmentVariables.KAFKA_BROKER_ADDRESS.value | string | `""` |  |
@@ -346,7 +347,6 @@ rasaProServices:
 | rasaProServices.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasaProServices.replicaCount | int | `1` | rasaProServices.replicaCount specifies number of replicas |
 | rasaProServices.resources | object | `{}` | rasaProServices.resources specifies the resources limits and requests |
-| rasaProServices.containerSecurityContext | object | `{"enabled":true}` | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
 | rasaProServices.service | object | `{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"}` | rasaProServices.service define service for Rasa OSS/Plus |
 | rasaProServices.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
 | rasaProServices.service.port | int | `8732` | service.port is used to specify service port |

@@ -1471,6 +1471,8 @@ modelService:
       pullPolicy: IfNotPresent
       # proxy.botTalkSubPath defines the path to talk to your bot
       botTalkSubPath: "/talk"
+      # Nginx server resolver. For OpenShift, use `dns-default.openshift-dns.svc.cluster.local` or your custom configuration
+      resolver: "kube-dns.kube-system.svc.cluster.local"
 
       # -- Define service
       service:

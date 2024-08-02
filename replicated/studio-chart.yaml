@@ -21,7 +21,7 @@ spec:
     replicated:
       enabled: true
       images:
-        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.21'
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.26'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
       isAirgap: repl{{ HasLocalRegistry }}

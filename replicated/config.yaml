@@ -64,7 +64,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro version
-          default: "3.8.10"
+          default: "3.8.10-latest"
           help_text: Rasa Pro docker image to be used for training.
         - name: rasa_config_file
           type: text

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.5](https://img.shields.io/badge/Version-1.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.5
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.5
 ```
 
 ## General Configuration
@@ -59,7 +59,7 @@ modelService:
 
 ### MTS/MRS only
 
-To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`. Configure image and image pull settings.
+To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
 
 ```yaml
 studioEnabled: false
@@ -302,6 +302,7 @@ modelService:
 | modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | proxy.pullPolicy specifies image pull policy |
 | modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
+| modelService.running.proxy.resolver | string | `"kube-dns.kube-system.svc.cluster.local"` |  |
 | modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
 | modelService.running.proxy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
 | modelService.running.proxy.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |

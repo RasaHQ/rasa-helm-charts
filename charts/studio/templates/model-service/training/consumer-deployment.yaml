@@ -1,6 +1,6 @@
 {{- if .Values.modelService.training.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: model-training-service-consumer
   labels:

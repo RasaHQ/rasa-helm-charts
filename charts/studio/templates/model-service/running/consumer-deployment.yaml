@@ -1,6 +1,6 @@
 {{- if .Values.modelService.running.enabled }}
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: model-running-service-consumer
   labels:

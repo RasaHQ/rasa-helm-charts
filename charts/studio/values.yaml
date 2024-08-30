@@ -52,6 +52,8 @@ config:
     # -- The database name for keycloak user management service
     keycloakDatabaseName: "keycloak"
   keycloak:
+    # -- config.keycloak.url allows to override the default service endpoint; format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS
+    url: ""
     # -- The admin username for Keycloak. This username is used to login to Keycloak admin console.
     adminUsername: "kcadmin"
     # -- The admin password for Keycloak. This password is used to login to Keycloak admin console.

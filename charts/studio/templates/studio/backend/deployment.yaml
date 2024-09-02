@@ -73,10 +73,9 @@ spec:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
             {{- include "studio.shared.env" . | nindent 12 }}
+            {{- include "studio.keycloak.url" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
-            - name: KEYCLOAK_URL
-              value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
             - name: MODEL_TRAINING_MOCK_ENABLED
               value: "false"
             - name: MODEL_RUNNING_MOCK_ENABLED

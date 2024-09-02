@@ -48,7 +48,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio version
-          default: "1.5.0"
+          default: "1.6.0"
           help_text: Specifies image tag for Studio
           when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: rasa_pro_repository
@@ -64,7 +64,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro version
-          default: "3.8.10-latest"
+          default: "3.9.9-latest"
           help_text: Rasa Pro docker image to be used for training.
         - name: rasa_config_file
           type: text

@@ -3,11 +3,11 @@ kind: HelmChart
 metadata:
   name: studio
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
+  exclude: "repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}"
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 1.0.3
+    chartVersion: 1.1.7
 
   releaseName: studio
   namespace: studio
@@ -23,7 +23,7 @@ spec:
       images:
         replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.26'
       imagePullSecrets:
-        - name: '{{repl ImagePullSecretName }}'
+        - name: "{{repl ImagePullSecretName }}"
       isAirgap: repl{{ HasLocalRegistry }}
 
     config:
@@ -332,18 +332,18 @@ spec:
       recursiveMerge: true
       values:
         imagePullSecrets:
-          - name: '{{repl ImagePullSecretName }}'
+          - name: "{{repl ImagePullSecretName }}"
         modelService:
           training:
             consumer:
               environmentVariables:
                 KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ImagePullSecretName }}'
+                  value: "{{repl ImagePullSecretName }}"
           running:
             consumer:
               environmentVariables:
                 KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ImagePullSecretName }}'
+                  value: "{{repl ImagePullSecretName }}"
     - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
       recursiveMerge: true
       values:

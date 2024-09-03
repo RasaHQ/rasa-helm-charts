@@ -135,6 +135,7 @@ modelService:
 | config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |
+| config.keycloak.url | string | `""` | config.keycloak.url allows to override the default service endpoint; format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS |
 | deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio deployments |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Studio deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |

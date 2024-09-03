@@ -10,8 +10,6 @@ data:
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }};
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
     window.SYSTEM_FLOWS_ENABLED = {{ .Values.webClient.environmentVariables.SYSTEM_FLOWS_ENABLED | quote | default "false" }};
-    window.ASSISTANT_SETTINGS_ENABLED = {{ .Values.webClient.environmentVariables.ASSISTANT_SETTINGS_ENABLED | quote | default "false" }};
-    window.SCALABLE_COMMAND_GENERATOR_CONFIG_ENABLED = {{ .Values.webClient.environmentVariables.SCALABLE_COMMAND_GENERATOR_CONFIG_ENABLED | quote | default "false" }};
     window.VERSION_CONTROL_ENABLED = {{ .Values.webClient.environmentVariables.VERSION_CONTROL_ENABLED | quote | default "false" }};
     {{- with .Values.webClient.environmentVariables.CURRENT_VERSION_NUMBER }}
     window.CURRENT_VERSION_NUMBER = {{ . | quote | trim }};

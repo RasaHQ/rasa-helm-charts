@@ -12,6 +12,7 @@ data:
     window.SYSTEM_FLOWS_ENABLED = {{ .Values.webClient.environmentVariables.SYSTEM_FLOWS_ENABLED | quote | default "false" }};
     window.VERSION_CONTROL_ENABLED = {{ .Values.webClient.environmentVariables.VERSION_CONTROL_ENABLED | quote | default "false" }};
     {{- with .Values.webClient.environmentVariables.CURRENT_VERSION_NUMBER }}
+    window.BUTTON_PAYLOADS_ENABLED = {{ .Values.webClient.environmentVariables.BUTTON_PAYLOADS_ENABLED | quote | default "false" }};
     window.CURRENT_VERSION_NUMBER = {{ . | quote | trim }};
     {{- else }}
     window.CURRENT_VERSION_NUMBER = {{ .Values.tag | quote | trim }};

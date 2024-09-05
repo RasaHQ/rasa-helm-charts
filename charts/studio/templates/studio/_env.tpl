@@ -31,3 +31,16 @@ Environment Variables for Keycloak Containers
   # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
   value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
 {{- end -}}
+
+{{/*
+Keycloak URL
+*/}}
+{{- define "studio.keycloak.url" -}}
+{{- if not (empty .Values.config.keycloak.url ) -}}
+- name: KEYCLOAK_URL
+  value: {{ .Values.config.keycloak.url }}
+{{- else -}}
+- name: KEYCLOAK_URL
+  value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
+{{- end -}}
+{{- end -}}

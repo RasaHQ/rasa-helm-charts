@@ -7,7 +7,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 1.0.3
+    chartVersion: 1.1.8
 
   releaseName: studio
   namespace: studio
@@ -77,8 +77,6 @@ spec:
           value: '{{repl ConfigOption "keycloak_client_id" }}'
         DOCKER_IMAGE_TAG:
           value: '{{repl ConfigOption "rasa_pro_repository" }}:{{repl ConfigOption "rasa_pro_image_tag" }}'
-        RASA_CONFIG_FILE:
-          value: '{{repl ConfigOption "rasa_config_file" }}'
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:

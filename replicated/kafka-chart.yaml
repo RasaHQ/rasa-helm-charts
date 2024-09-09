@@ -67,6 +67,26 @@ spec:
       extraConfigYaml:
         offsets.topic.replication.factor: 1
         transaction.state.log.replication.factor: 1
+    serviceAccount:
+      create: true
+    rbac:
+      create: true
+    externalAccess:
+      enabled: true
+      autoDiscovery:
+        enabled: true
+      controller:
+        service:
+          type: NodePort
+          nodePorts:
+            - 30001
+          domain: '{{repl ConfigOption "ingress_hostname" }}'
+      broker:
+        service:
+          type: NodePort
+          nodePorts:
+            - 30002
+          domain: '{{repl ConfigOption "ingress_hostname" }}'
     provisioning:
       enabled: true
       topics:

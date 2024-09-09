@@ -21,6 +21,8 @@ spec:
         # image: ingress-nginx/controller
         image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/controller'
         tag: "v1.10.1"
+        digest: ""
+        digestChroot: ""
       admissionWebhooks:
         patch:
           image:
@@ -28,3 +30,4 @@ spec:
             # image: ingress-nginx/kube-webhook-certgen
             image: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kube-webhook-certgen'
             tag: v1.4.1
+            digest: ""

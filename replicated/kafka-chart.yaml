@@ -75,6 +75,12 @@ spec:
       enabled: true
       autoDiscovery:
         enabled: true
+        image:
+          registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
+          repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kubectl'
+          tag: 1.30.2-debian-12-r1
+          pullSecrets:
+            - '{{repl ImagePullSecretName }}'
       controller:
         service:
           type: NodePort

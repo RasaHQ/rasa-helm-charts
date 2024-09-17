@@ -16,7 +16,6 @@ jobs:
     runs-on: ubuntu-22.04 
     outputs:
       studio-version: ${{ steps.studio-chart-info.outputs.version }}
-      pro-version: ${{ steps.pro-chart-info.outputs.version }}
       release-candidate: ${{ steps.check-rc.outputs.rc }}
     steps:
     - name: Checkout repo
@@ -39,11 +38,6 @@ jobs:
           echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
           echo "rc=false" >> $GITHUB_OUTPUT
         fi
-    - name: Read Rasa Pro chart
-      id: pro-chart-info
-      uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
-      with:
-        path: charts/rasa/
   register-helm-chart:
     name: Register Rasa Studio chart
     needs: [check-chart-versions]
@@ -66,6 +60,5 @@ jobs:
     with:
       replicated-channel: studio-release-candidate
       replicated-version: ${{ needs.check-chart-versions.outputs.studio-version }}
-      pro-version: ${{ needs.check-chart-versions.outputs.pro-version }}
       studio-version: ${{ needs.check-chart-versions.outputs.studio-version }}
     secrets: inherit

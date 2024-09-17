@@ -4,22 +4,6 @@ metadata:
   name: studio-config
 spec:
   groups:
-    - name: Rasa Platform Deployment
-      description: >
-        Deploy Rasa Platform or specific components
-      title: Rasa Platform Deployment
-      items:
-        - name: rasa_platform_deploy
-          type: select_one
-          title: Rasa Platform deploy
-          default: rasa_platform
-          items:
-            - name: rasa_platform
-              title: Rasa Platform
-            - name: studio
-              title: Studio
-            - name: rasa_pro
-              title: Rasa Pro
     - name: API keys and images
       description: >
         This section configures your API Keys and image versions
@@ -44,13 +28,12 @@ spec:
           title: Studio repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ))) ""}}'
           help_text: URL of your repository for Studio, without an image name
-          when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
+          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_image_tag
           type: text
           title: Studio version
           default: "1.6.0"
           help_text: Specifies image tag for Studio
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: rasa_pro_repository
           type: text
           title: Rasa Pro repository URL
@@ -66,19 +49,12 @@ spec:
           title: Rasa Pro version
           default: "3.9.9-latest"
           help_text: Rasa Pro docker image to be used for training.
-        - name: rasa_config_file
-          type: text
-          title: Rasa Pro config file
-          default: ""
-          help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
-          hidden: true
         - name: model_services_repository
           type: text
           title: Model services repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
           help_text: URL of your repository for Model services, without an image name
-          when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") }}'
+          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: model_service_image_tag
           type: text
           title: Model services version
@@ -95,11 +71,20 @@ spec:
           default: ""
           required: true
           help_text: OpenAI API key to be used
+        - name: postgresql_image_tag
+          type: text
+          hidden: true
+          default: 16.4.0-debian-12-r8
+          help_text: Postgesql version used in embedded database
+        - name: replicated_sdk_image_tag
+          type: text
+          hidden: true
+          default: v1.0.0-beta.27
+          help_text: Replicated SDK version
     - name: Model Services
       description: >
         This section can  be used to configure number of replicas for Model Services and resource management
       title: Model Service Replicas
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: training_consumer_replicas
           type: text
@@ -244,7 +229,6 @@ spec:
       description: >
         This section covers Keycloak section
       title: Keycloak
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: keycloak_realm
           type: text
@@ -339,29 +323,23 @@ spec:
           title: Storage Type
           default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "rasa-pro" }}'
           hidden: true
         - name: model_storage_type
           type: text
           title: Storage Type
           default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
           help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
           hidden: true
         - name: bucket_name
           type: text
           title: Bucket Name
           default: ""
+          required: true
           help_text: Name of the storage bucket. Make sure to pre-create this bucket.
-        - name: model_file
-          type: text
-          title: Model file name
-          default: "20240523-154518-ancient-xylophone.tar.gz"
-          help_text: "Model file name to load. More information [here](https://rasa.com/docs/rasa/model-storage/#load-model-from-cloud)."
-          when: 'repl{{ ConfigOptionNotEquals "rasa_platform_deploy" "studio" }}'
         - name: gcp_credentials
           type: text
           title: GCP SA Base64Encoded
+          required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
           help_text: GCP credentials for the service account. This is the base64 encoded service account JSON. This is only required if you are using GCS for object storage.
         - name: google_cloud_project
@@ -369,35 +347,41 @@ spec:
           title: Google Cloud project
           default: ""
           help_text: The project ID of the GCP project.
-          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: cloudsdk_compute_zone
           type: text
           title: CloudSDK Compute Zone
           default: ""
           help_text: The zone where the bucket is located.
-          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: url_service_account
           type: text
           title: Storage Signed Url Service Account Email
           default: ""
           help_text: The service account email address.
-          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionNotEquals "bucket_provider" "aws_bucket") }}'
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: aws_access_key_id
           type: text
           title: AWS Access Key ID
           default: ""
+          required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: AWS access key ID used for S3
         - name: aws_secret_access_key
           type: text
           title: AWS Secret Access Key
           default: ""
+          required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: AWS secret access key ID used for S3
         - name: aws_region_name
           type: text
           title: AWS Region Name
           default: ""
+          required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
           help_text: The region where the bucket is located.
         - name: custom_s3_endpoint
@@ -405,18 +389,17 @@ spec:
           title: Use custom S3 Endpoint
           default: "0"
           help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
-          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionEquals "bucket_provider" "aws_bucket") }}'
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
         - name: aws_endpoint_url
           type: text
           title: Endpoint URL
           default: ""
           help_text: A custom URL endpoint for an S3-compatible storage service.
-          when: '{{repl and (ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro") (ConfigOptionEquals "custom_s3_endpoint" "1") }}'
+          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
     - name: NFS
       description: >
         This section covers NFS server configuration
       title: NFS Server
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: nfs_type
           type: select_one
@@ -450,18 +433,21 @@ spec:
           title: Host Path
           default: /
           help_text: Directory from the host machine that will be mounted to the container for training data.
+          required: true
           when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
         - name: local_node_name
           type: text
           title: Local Node Name
           default: ""
           help_text: Node on which the PV will be created
+          required: true
           when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
         - name: storage_class_name
           type: text
           title: Storage Class name
           default: "openebs-hostpath"
           help_text: Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's `standard-rwo` if you are using NFS server.
+          required: true
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
         - name: storage_capacity
           type: text
@@ -485,7 +471,6 @@ spec:
       description: >
         Set resource limits and requests for pods
       title: Resource Management
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
       items:
         - name: set_backend_resources
           type: bool
@@ -562,371 +547,6 @@ spec:
           title: Event ingestion Memory requests
           help_text: Configure Event ingestion resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-    - name: Rasa Pro Settings
-      description: >
-        This section configures Rasa Pro Settings
-      title: Rasa Pro Settings
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        - name: rasa_auth_token
-          type: text
-          title: Rasa Auth Token
-          default: ""
-        - name: rasa_jwt_secret
-          type: text
-          title: Rasa JWT secret
-          default: ""
-        - name: rasa_enable_api
-          type: bool
-          title: Rasa Pro enable API
-          default: "1"
-        - name: rasa_models
-          type: bool
-          title: Enable Rasa Models
-          default: "1"
-          hidden: true
-          help_text: "Models provides loading models from the storage. More information [here](https://rasa.com/docs/rasa/model-storage)."
-        - name: settings_environment
-          type: text
-          title: Environment
-          default: "production"
-          help_text: "Environment: development or production"
-        - name: rasa_credentials
-          type: bool
-          title: Rasa Pro enable credentials
-          default: "1"
-        - name: channel_credentials
-          type: select_one
-          title: Channel Credentials
-          default: default_credentials
-          help_text: Defines credentials which should be used by Rasa to connect to various channels
-          when: '{{repl ConfigOptionEquals "rasa_credentials" "1"}}'
-          items:
-            - name: default_credentials
-              title: Default credentials
-            - name: custom_credentials
-              title: Custom credentials
-        - name: rasa_bot_message_event
-          type: text
-          title: Rasa Bot message event
-          default: "bot_uttered"
-          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
-        - name: rasa_metadata_key
-          type: text
-          title: Rasa Bot metadata key
-          default: "customData"
-          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
-        - name: rasa_session_persistence
-          type: bool
-          title: Rasa Bot session persistence
-          default: "0"
-          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
-        - name: rasa_user_message_event
-          type: text
-          title: Rasa Bot user message event
-          default: "user_uttered"
-          when: '{{repl and (ConfigOptionEquals "rasa_credentials" "1") (ConfigOptionEquals "channel_credentials" "custom_credentials") }}'
-        - name: set_rasa_pro_resources
-          type: bool
-          title: Configure Rasa Pro resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Rasa Pro deployment
-        - name: set_rasa_pro_limits_cpu
-          type: text
-          title: Rasa Pro CPU limit
-          help_text: Configure Rasa Pro resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_limits_memory
-          type: text
-          title: Rasa Pro Memory limit
-          help_text: Configure Rasa Pro resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_requests_cpu
-          type: text
-          title: Rasa Pro CPU requests
-          help_text: Configure Rasa Pro resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-        - name: set_rasa_pro_requests_memory
-          type: text
-          title: Rasa Pro Memory requests
-          help_text: Configure Rasa Pro resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_rasa_pro_resources" "1"}}'
-    - name: Rasa Pro Endpoints
-      description: >
-        This section configures Rasa Pro Endpoints
-      title: Rasa Pro Endpoints
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        # Kafka Event Broker endpoint config
-        - name: heading_kafka_event_broker
-          type: heading
-          title: Event Broker
-        - name: rasa_kafka_event_broker
-          type: bool
-          title: Enable Kafka Event Broker
-          default: "1"
-          help_text: "Allows you to connect your running assistant to other services that process the data. More information [here](https://rasa.com/docs/rasa/event-brokers)."
-        - name: rasa_event_broker_type
-          type: text
-          title: Event Broker type
-          default: "kafka"
-          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
-        - name: rasa_event_broker_ssl_check_hostname
-          type: bool
-          title: Event Broker SSL check hostname
-          default: "0"
-          when: '{{repl and (ConfigOptionEquals "rasa_event_broker" "1") (ConfigOptionEquals "kafka_type" "external_kafka") }}'
-        # Lock Store endpoint config
-        - name: heading_lock_store
-          type: heading
-          title: Lock Store
-        - name: rasa_lock_store
-          type: bool
-          title: Enable Lock Store
-          default: "1"
-          help_text: "lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order. More information [here](https://rasa.com/docs/rasa/lock-stores)."
-        - name: rasa_lock_store_use_concurrent
-          type: bool
-          title: Lock Store use concurrent
-          default: "1"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "embedded_redis") }}'
-        - name: rasa_lock_store_db
-          type: text
-          title: Lock Store database
-          default: "0"
-          help_text: "Number of database within redis, e.g. 0"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
-        - name: rasa_lock_store_port
-          type: text
-          title: Lock Store port
-          default: "6379"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
-        - name: rasa_lock_store_url
-          type: text
-          title: Lock Store URL
-          default: "redis-master.redis.svc.cluster.local"
-          help_text: "URL of the redis instance"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
-        - name: redis_password
-          type: password
-          title: Lock Store Password
-          default: 'redis'
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
-        - name: rasa_lock_store_use_ssl
-          type: bool
-          title: Lock Store use SSL
-          default: "0"
-          when: '{{repl and (ConfigOptionEquals "rasa_lock_store" "1") (ConfigOptionEquals "redis_type" "external_redis") }}'
-        # Tracing endpoint config
-        - name: heading_rasa_tracing
-          type: heading
-          title: Tracing
-        - name: rasa_tracing
-          type: bool
-          title: Enable Tracing
-          default: "1"
-          help_text: "Tracing tracks requests as they flow through a distributed system. More information [here](https://rasa.com/docs/rasa/monitoring/tracing/)."
-        - name: tracing_configuration
-          type: select_one
-          title: Tracing Configuration
-          default: default_configuration
-          when: '{{repl ConfigOptionEquals "rasa_tracing" "1"}}'
-          items:
-            - name: default_configuration
-              title: Default jaeger configuration
-            - name: custom_configuration
-              title: Custom configuration
-        - name: rasa_tracing_host
-          type: text
-          title: Tracing host
-          default: "jaeger"
-          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
-        - name: rasa_tracing_port
-          type: text
-          title: Tracing port
-          default: "6831"
-          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
-        - name: rasa_tracing_service_name
-          type: text
-          title: Tracing Service name
-          default: "rasa-jaeger"
-          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
-        - name: rasa_tracing_sync_export
-          type: text
-          title: Tracing Sync export
-          default: "null"
-          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
-        - name: rasa_tracing_type
-          type: text
-          title: Tracing type
-          default: "jaeger"
-          when: '{{repl and (ConfigOptionEquals "rasa_tracing" "1") (ConfigOptionEquals "tracing_configuration" "custom_configuration") }}'
-        # Tracker Store endpoint config
-        - name: heading_tracker_store
-          type: heading
-          title: Tracker Store
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: rasa_tracker_store
-          type: bool
-          title: Enable Tracker Store
-          default: "1"
-          help_text: "TrackerStore assistant's conversations are stored within a tracker store. More information [here](https://rasa.com/docs/rasa/tracker-stores)."
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: rasa_tracker_store_dialect
-          type: text
-          title: Tracker Store dialect
-          default: "postgresql"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        - name: rasa_tracker_store_type
-          type: text
-          title: Tracker Store type
-          default: "sql"
-          when: '{{repl and (ConfigOptionEquals "postgres_type" "external_postgres") (ConfigOptionEquals "rasa_tracker_store" "1") }}'
-        # Vector Store endpoint config
-        - name: heading_vector_store
-          type: heading
-          title: Vector Store
-        - name: enable_vector_store
-          type: bool
-          title: Enable Vector Store
-          default: "0"
-          help_text: "Specify if using external vector DB"
-        - name: rasa_additional_endpoints_vector_store_type
-          type: text
-          title: Vector Store type
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: rasa_additional_endpoints_vector_store_collection
-          type: text
-          title: Vector Store collection
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: rasa_additional_endpoints_vector_store_content_payload_key
-          type: text
-          title: Vector Store payload key
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: rasa_additional_endpoints_vector_store_host
-          type: text
-          title: Vector Store host
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: rasa_additional_endpoints_vector_store_metadata_payload_key
-          type: text
-          title: Vector Store metadata payload key
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        - name: rasa_additional_endpoints_vector_store_port
-          type: text
-          title: Vector Store port
-          when: '{{repl ConfigOptionEquals "enable_vector_store" "1"}}'
-        # Action Server endpoint config
-        - name: heading_action_server
-          type: heading
-          title: Action Server configuration
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        - name: rasa_action_endpoint_url
-          type: text
-          title: Action Server URL
-          default: "http://action-server.rasa-pro.svc.cluster.local:5055/webhook"
-          help_text: Action Server is deployed in cluster
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-    - name: Action Server
-      description: >
-        This section configures Action Server deployment
-      title: Action Server
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        - name: action_server_type
-          type: select_one
-          title: Action Server
-          default: embedded_action_server
-          items:
-            - name: embedded_action_server
-              title: Embedded Action Server
-            - name: external_action_server
-              title: External Action Server
-        - name: action_server_image_tag
-          type: text
-          title: Action Server version
-          default: "calm"
-          help_text: Specifies image tag for Action Server
-        - name: action_server_repository
-          type: text
-          title: Action Server repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" )) "/rasa-action-server") ""}}'
-          #default: "registry.replicated.com/studio-dragon/rasa-action-server"
-          help_text: URL of your repository for Action Server, without an image name
-          when: '{{repl or (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionEquals "action_server_type" "external_action_server") }}'
-          # when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        - name: action_server_replica_count
-          type: text
-          title: Action Server replica count
-          default: "1"
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        - name: action_service_port
-          type: text
-          title: Action Server port
-          default: "5055"
-          help_text: Specifies image tag for Action Server
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        - name: action_server_service_type
-          type: text
-          title: Action Server service type
-          default: "ClusterIP"
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-        - name: action_server_settings_schema
-          type: text
-          title: Action Server schema
-          default: "http"
-          when: 'repl{{ ConfigOptionEquals `action_server_type` `external_action_server` }}'
-    - name: Rasa Pro Services
-      description: >
-        This section configures Rasa Pro Services deployment
-      title: Rasa Pro Services
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-      - name: deploy_analytics
-        type: bool
-        title: Deploy Analytics
-        default: "0"
-      - name: rasa_pro_services_repository
-        type: text
-        title: Rasa Pro Services repository URL
-        default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" )) "/rasa-pro-services") ""}}'
-        help_text: URL of your repository for Studio, without an image name
-        when: '{{repl and (ConfigOptionEquals "image_registry" "external_registry") (ConfigOptionNotEquals "rasa_platform_deploy" "studio") }}'
-      - name: rasa_pro_services_image_tag
-        type: text
-        title: Rasa Pro Analytics version
-        default: "3.3.2-latest"
-        help_text: Specifies image tag for Rasa Pro Analytics
-        when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
-      - name: rasa_pro_services_logging_level
-        type: text
-        title: Rasa Pro Services logging level
-        default: "INFO"
-        when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
-      - name: set_analytics_resources
-        type: bool
-        title: Configure Rasa Pro Analytics resources
-        default: "0"
-        help_text: Check this option if you want to configure resource requests/limits for Rasa Pro Analytics deployment
-      - name: set_analytics_limits_cpu
-        type: text
-        title: Rasa Pro Analytics CPU limit
-        help_text: Configure Rasa Pro Analytics resource limit for CPU
-        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
-      - name: set_analytics_limits_memory
-        type: text
-        title: Rasa Pro Analytics Memory limit
-        help_text: Configure Rasa Pro Analytics resource limit for Memory
-        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
-      - name: set_analytics_requests_cpu
-        type: text
-        title: Rasa Pro Analytics CPU requests
-        help_text: Configure Rasa Pro Analytics resource requests for CPU
-        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
-      - name: set_analytics_requests_memory
-        type: text
-        title: Rasa Pro Analytics Memory requests
-        help_text: Configure Rasa Pro Analytics resource requests for Memory
-        when: '{{repl ConfigOptionEquals "set_analytics_resources" "1"}}'
     - name: Database
       description: >
         This section can be used to configure the database required by Rasa Studio.
@@ -981,12 +601,6 @@ spec:
           default: studio
           help_text: The database name for Studio
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: rasa_pro_database
-          type: text
-          title: Rasa Pro database name
-          default: rasa
-          help_text: The database name for Rasa Pro
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: model_service_database
           type: text
           title: MTS DB database
@@ -1011,31 +625,6 @@ spec:
           default: ""
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
           help_text: If true the server will reject db connection which is not present list of supplied CAs.
-        - name: postgresql_image_tag
-          type: text
-          hidden: true
-          default: 16.4.0-debian-12-r8
-          help_text: Postgesql version used in embedded database
-    - name: Redis
-      description: >
-          This section covers Redis configuration
-      title: Redis
-      when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `studio` }}'
-      items:
-        - name: redis_type
-          type: select_one
-          title: Redis
-          default: embedded_redis
-          items:
-            - name: embedded_redis
-              title: Embedded Redis
-            - name: external_redis
-              title: External Redis
-        - name: redis_password
-          type: password
-          title: Redis password
-          default: redis
-          when: 'repl{{ ConfigOptionEquals `redis_type` `external_redis` }}'
     - name: Kafka
       description: >
         This section covers Kafka configuration
@@ -1205,23 +794,13 @@ spec:
           type: text
           title: Ingress DNS Hostname
           default: ""
+          required: true
           help_text: Defines the host name for all resources. Make sure you provide a valid host name.
-        - name: rasa_ingress_hosts_path
-          type: text
-          title: Path
-          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "/" "/rasapro(/|$)(.*)"}}'
-          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
-        - name: rasa_ingress_hosts_path_type
-          type: text
-          title: Path type
-          default: '{{repl (ConfigOptionEquals "rasa_platform_deploy" "rasa_pro") | ternary "ImplementationSpecific" "Prefix"}}'
-          when: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: connection_type
           type: text
           title: Connection type
           default: http
           help_text: Define if you will be using https or http with the ingressHost
-          when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
         - name: ingress_class
           type: text
           title: Ingress Class Name

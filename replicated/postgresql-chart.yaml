@@ -19,7 +19,7 @@ spec:
           postgresPassword: "postgres"
           username: '{{repl ConfigOption "database_username" }}'
           password: '{{repl ConfigOption "database_password" }}'
-          database: rasa
+          database: studio
     image:
       registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
       repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql'

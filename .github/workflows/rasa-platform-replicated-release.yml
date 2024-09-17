@@ -17,10 +17,6 @@ on:
         description: The version of the Rasa Studio chart to pull from the private registry
         required: true
         type: string
-      pro-version:
-        description: The version of the Rasa Pro chart to pull from the private registry
-        required: true
-        type: string
 
 jobs:
   promote-replicated-release:
@@ -30,5 +26,4 @@ jobs:
       replicated-channel: ${{ inputs.replicated-channel }}
       replicated-version: ${{ inputs.replicated-version }}
       studio-version: ${{ inputs.studio-version }}
-      pro-version: ${{ inputs.pro-version }}
     secrets: inherit

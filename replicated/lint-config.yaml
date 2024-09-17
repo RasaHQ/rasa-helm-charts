@@ -1,0 +1,12 @@
+apiVersion: kots.io/v1beta1
+kind: LintConfig
+metadata:
+  name: lint-config
+spec:
+  rules:
+  - name: nonexistent-status-informer-object
+    level: "info"
+  - name: config-option-password-type
+    level: "info"
+  - name: invalid-type
+    level: "info"

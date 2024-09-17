@@ -3,7 +3,7 @@ kind: Application
 metadata:
   name: studio
 spec:
-  title: Studio
+  title: Rasa Studio
   icon: https://info.rasa.com/hubfs/Rasa_January2020/Images/rasa-logo-square-ef3444fc36faec97ae8bd7bfb568996d.svg
   requireMinimalRBACPrivileges: false
   allowRollback: true
@@ -12,20 +12,16 @@ spec:
     - "ingress-nginx"
     - "postgresql"
     - "kafka"
-    - "redis"
     - "studio"
-    - "rasa-pro"
   statusInformers:
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/studio-backend{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/studio-keycloak{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/studio-event-ingestion{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/studio-web-client{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/model-running-service-orchestrator{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/model-running-service-consumer{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/model-training-service-orchestrator{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/model-training-service-consumer{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "rasa_pro"}}studio/deployment/nginx-reverse-proxy{{repl else}}{{repl end}}'
-    - '{{repl if ConfigOptionNotEquals "rasa_platform_deploy" "studio"}}rasa-pro/deployment/rasa-pro{{repl else}}{{repl end}}'
+    - studio/deployment/studio-backend
+    - studio/deployment/studio-keycloak
+    - studio/deployment/studio-event-ingestion
+    - studio/deployment/studio-web-client
+    - studio/deployment/model-running-service-orchestrator
+    - studio/deployment/model-running-service-consumer
+    - studio/deployment/model-training-service-orchestrator
+    - studio/deployment/model-training-service-consumer
+    - studio/deployment/nginx-reverse-proxy
   additionalImages:
-    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.8.10-latest
-    - europe-west3-docker.pkg.dev/rasa-releases/dependencies/rasa-action-server:calm
+    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.9-latest

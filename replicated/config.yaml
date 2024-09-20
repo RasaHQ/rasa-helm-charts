@@ -4,41 +4,44 @@ metadata:
   name: studio-config
 spec:
   groups:
-    - name: API keys and images
+    - name: Container Images & API Keys
       description: >
-        This section configures your API Keys and image versions
+        Here you will configure where container images are pulled from and what versions you use for components of Rasa Studio. You'll also set up your OpenAI API key for building bots.
       title: API keys and images
       items:
         - name: image_registry
-          type: select_one
+          type: radio
           title: Image Registry
+          help_text: You can choose whether to pull container images from Rasa's registry or use an internal private registry.
           default: internal_registry
           items:
             - name: internal_registry
               title: Use Default Registry
+              help_text: Select this option to pull container images from Rasa's registry.
             - name: external_registry
               title: Use Private Registry
+              help_text: Select this option if you have your own private registry configured and you've pushed all the required images to it.
         - name: image_pull_secrets
           type: text
-          title: Image pull secret name
-          help_text: Name of a secret thats used for connecting to the private registry. More information on how to create a secret [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line).
+          title: Image Pull Secret Name
+          help_text: To pull images from a private registry, you need to create a Kubernetes secret in this cluster to use for pulling images. Provide the name of this secret here.. More information on how to create this secret [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated).
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_repository
           type: text
-          title: Studio repository URL
+          title: Studio Image Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ))) ""}}'
-          help_text: URL of your repository for Studio, without an image name
+          help_text: URL of your private image repository for all of the Studio component images, without an image name.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_image_tag
           type: text
-          title: Studio version
+          title: Studio Version
           default: "1.6.0"
-          help_text: Specifies image tag for Studio
+          help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
-          title: Rasa Pro repository URL
+          title: Rasa Pro Image Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" )) "/rasa-pro") ""}}'
-          help_text: Rasa Pro docker image repository to be used for training. Please specify full repository and image name in format `repository/image_name`.
+          help_text: URL of your private image repository for Rasa Pro, used by Studio for training and running bots. Please specify full repository and image name in format `repository/image_name`.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
           validation:
             regex:
@@ -48,29 +51,30 @@ spec:
           type: text
           title: Rasa Pro version
           default: "3.9.9-latest"
-          help_text: Rasa Pro docker image to be used for training.
+          help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: model_services_repository
           type: text
-          title: Model services repository URL
+          title: Model Services Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
-          help_text: URL of your repository for Model services, without an image name
+          help_text: URL of your private image repository for Model services, without an image name.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: model_service_image_tag
           type: text
-          title: Model services version
+          title: Model Services Version
           default: "3.3.2-latest"
-          help_text: Specifies image tag for Model Service
+          help_text: The version of the Model Services you wish to use, which is used as a tag for the container image. 
         - name: mrs_nginx_proxy
           type: text
-          title: Model running service nginx proxy image URL
+          title: Model Services Nginx Proxy Image URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services" )) "/nginx-unprivileged:1.27-alpine") ""}}'
+          help_text: The full path of the Model Services Nginx Proxy Image you wish to use, including the repository name, image name and tag. 
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: openai_api_key
           type: text
           title: OpenAI API key
           default: ""
           required: true
-          help_text: OpenAI API key to be used
+          help_text: OpenAI API key to be used for training and running bots within Rasa Studio.
         - name: postgresql_image_tag
           type: text
           hidden: true
@@ -83,19 +87,19 @@ spec:
           help_text: Replicated SDK version
     - name: Model Services
       description: >
-        This section can  be used to configure number of replicas for Model Services and resource management
+        Here you will configure the Model Services which are used by Rasa Studio to train and run bots.
       title: Model Service Replicas
       items:
         - name: training_consumer_replicas
           type: text
-          title: Number of training consumer replicas
+          title: Number of Model Training Service Replicas
           default: "2"
-          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+          help_text: This is the number of replicas you'd like to run of the Training Service. This should be `n+1` the number of bots you expect to build with Rasa Studio. More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
         - name: running_consumer_replicas
           type: text
-          title: Number of running consumer replicas
+          title: Number of Model Running Service Replicas
           default: "2"
-          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+          help_text: This is the number of replicas you'd like to run of the Running Service. This should be `n+1` the number of bots you expect to build with Rasa Studio.More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
         - name: rasa_training_debug_logs
           type: text
           title: Enable Rasa training debug logs
@@ -227,7 +231,7 @@ spec:
           when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
     - name: Keycloak
       description: >
-        This section covers Keycloak section
+        Here you will configure Keycloak, the authentication solution used by Rasa Studio.
       title: Keycloak
       items:
         - name: keycloak_realm
@@ -258,7 +262,7 @@ spec:
           help_text: Keycloak API client ID
         - name: keycloak_admin_username
           type: text
-          title: Keycloak admin username
+          title: Keycloak Admin Username
           required: true
           default: kcadmin
           help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
@@ -306,7 +310,7 @@ spec:
           when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
     - name: Object Storage
       description: >
-        This section covers object storage
+        Here you will configure your object storage, used by Rasa Studio when training and running bots.
       title: Object Storage
       items:
         - name: bucket_provider
@@ -317,7 +321,8 @@ spec:
             - name: gcp_bucket
               title: Google Cloud Storage
             - name: aws_bucket
-              title: AWS S3 Bucket
+              title: AWS S3 Bucket or MinIO
+              help_text: Select this option if you're going to use AWS S3 or you want to deploy your own storage solution using MinIO. For more information about using MinIO see [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated#object-storage)
         - name: storage_type
           type: text
           title: Storage Type
@@ -335,55 +340,55 @@ spec:
           title: Bucket Name
           default: ""
           required: true
-          help_text: Name of the storage bucket. Make sure to pre-create this bucket.
+          help_text: Name of the storage bucket. Make sure to pre-create this bucket in your cloud environment.
         - name: gcp_credentials
           type: text
-          title: GCP SA Base64Encoded
+          title: GCP Service Account (Base-64 Encoded)
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-          help_text: GCP credentials for the service account. This is the base64 encoded service account JSON. This is only required if you are using GCS for object storage.
+          help_text: Base-64 encode your GCP service account JSON file and paste it here. The service account should have permission to read and write to your bucket. This is only required if you are using GCS for object storage.
         - name: google_cloud_project
           type: text
-          title: Google Cloud project
+          title: Google Cloud Project
           default: ""
-          help_text: The project ID of the GCP project.
+          help_text: The project ID of the GCP project containing the bucket.
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: cloudsdk_compute_zone
           type: text
-          title: CloudSDK Compute Zone
+          title: Bucket Region
           default: ""
-          help_text: The zone where the bucket is located.
+          help_text: The name of the region where the bucket is located such as `US-WEST1`.
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: url_service_account
           type: text
-          title: Storage Signed Url Service Account Email
+          title: Service Account Email
           default: ""
-          help_text: The service account email address.
+          help_text: The email address for the GCP service account you are using.
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: aws_access_key_id
           type: text
-          title: AWS Access Key ID
+          title: Access Key ID
           default: ""
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: AWS access key ID used for S3
+          help_text: Access Key ID for the AWS IAM or MinIO user that has permission to read and write to the bucket.
         - name: aws_secret_access_key
           type: text
-          title: AWS Secret Access Key
+          title: Secret Access Key
           default: ""
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: AWS secret access key ID used for S3
+          help_text: Secret Access Key for the AWS IAM or MinIO user that has permission to read and write to the bucket.
         - name: aws_region_name
           type: text
           title: AWS Region Name
           default: ""
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: The region where the bucket is located.
+          help_text: The region where the bucket is located such as `eu-west-1`.
         - name: custom_s3_endpoint
           type: bool
           title: Use custom S3 Endpoint
@@ -392,7 +397,7 @@ spec:
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
         - name: aws_endpoint_url
           type: text
-          title: Endpoint URL
+          title: Custom Endpoint URL
           default: ""
           help_text: A custom URL endpoint for an S3-compatible storage service.
           when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'

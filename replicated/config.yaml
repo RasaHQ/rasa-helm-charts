@@ -12,7 +12,7 @@ spec:
         - name: image_registry
           type: radio
           title: Image Registry
-          help_text: You can choose whether to pull container images from Rasa's registry or use an internal private registry.
+          help_text: You can choose whether to pull container images from Rasa's registry or use your own internal private registry.
           default: internal_registry
           items:
             - name: internal_registry
@@ -24,7 +24,7 @@ spec:
         - name: image_pull_secrets
           type: text
           title: Image Pull Secret Name
-          help_text: To pull images from a private registry, you need to create a Kubernetes secret in this cluster to use for pulling images. Provide the name of this secret here.. More information on how to create this secret [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated).
+          help_text: To pull images from a private registry, you need to create a Kubernetes secret in this cluster to use for pulling images. Provide the name of this secret here. More information on how to create this secret can be found [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated).
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_repository
           type: text
@@ -49,7 +49,7 @@ spec:
               message: You have `/` at the end of your image URL. Please remove the `/` from the end in in format `repository/image_name`.
         - name: rasa_pro_image_tag
           type: text
-          title: Rasa Pro version
+          title: Rasa Pro Version
           default: "3.10.3-latest"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: model_services_repository
@@ -104,12 +104,12 @@ spec:
           type: text
           title: Enable Rasa training debug logs
           default: "false"
-          help_text: Set this to true if you want to include rasa debug logs during model training
+          help_text: Set this to `true` if you want to include rasa debug logs during model training
         - name: rasa_running_debug_logs
           type: text
           title: Enable Rasa running debug logs
           default: "false"
-          help_text: Set this to true if you want to include rasa debug logs during model running
+          help_text: Set this to `true` if you want to include rasa debug logs during model running
     - name: Keycloak
       description: >
         Here you will configure Keycloak, the authentication solution used by Rasa Studio.
@@ -203,7 +203,7 @@ spec:
           title: GCP Service Account (Base-64 Encoded)
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-          help_text: Base-64 encode your GCP service account JSON file and paste it here. The service account should have permission to read and write to your bucket. This is only required if you are using GCS for object storage.
+          help_text: Base-64 encode your GCP service account JSON file and paste it here. The service account should have permission to read and write to your bucket, and create buckets. This is only required if you are using GCS for object storage.
         - name: google_cloud_project
           type: text
           title: Google Cloud Project
@@ -215,7 +215,7 @@ spec:
           type: text
           title: Bucket Region
           default: ""
-          help_text: The name of the region where the bucket is located such as `US-WEST1`.
+          help_text: The name of the region where the bucket is located such as `us-west1`.
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
         - name: url_service_account
@@ -231,14 +231,14 @@ spec:
           default: ""
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: Access Key ID for the AWS IAM or MinIO user that has permission to read and write to the bucket.
+          help_text: Access Key ID for the AWS IAM or MinIO user that has permission to read and write to the bucket, and create new buckets.
         - name: aws_secret_access_key
           type: text
           title: Secret Access Key
           default: ""
           required: true
           when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: Secret Access Key for the AWS IAM or MinIO user that has permission to read and write to the bucket.
+          help_text: Secret Access Key for the AWS IAM or MinIO user that has permission to read and write to the bucket, and create new buckets.
         - name: aws_region_name
           type: text
           title: AWS Region Name
@@ -260,7 +260,7 @@ spec:
           when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
     - name: NFS
       description: >
-        Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots.
+        Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots. Select Embedded NFS to automatically deploy an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server. Select External NFS to connect to an existing, external NFS service such as AWS EFS.
       title: NFS Server
       items:
         - name: nfs_type
@@ -270,10 +270,8 @@ spec:
           items:
             - name: embedded_nfs
               title: Embedded NFS
-              help_text: Select this to use an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server.
             - name: external_nfs
               title: External NFS
-              help_text: Select this to connect to an existing, external NFS service such as AWS EFS.
         - name: persistence_type
           type: text
           title: Persistence Type
@@ -296,7 +294,7 @@ spec:
           type: text
           title: Host Path
           default: /
-          help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`
+          help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`.
           required: true
           when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
         - name: local_node_name
@@ -333,7 +331,7 @@ spec:
           when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Database
       description: >
-        Here you will configure how Rasa Studio connects to a database.
+        Here you will configure how Rasa Studio connects to a database. Select Embedded Postgres to use an embedded Postgres database, meaning that you do not have to deploy and manage a Postgres database. We do not recommend this for production workloads. Select External Postgres to use an existing, external Postgres database.
       title: Database
       items:
         - name: postgres_type
@@ -343,10 +341,8 @@ spec:
           items:
             - name: embedded_postgres
               title: Embedded Postgres
-              help_text: Select this to use an embedded Postgres database, meaning that you do not have to deploy and manage a Postgres database. We do not recommend this for production workloads.
             - name: external_postgres
               title: External Postgres
-              help_text: Select this to use an existing, external Postgres database.
         - name: wait_for_it
           type: bool
           title: Wait for PostgreSQL to be ready
@@ -413,7 +409,7 @@ spec:
           help_text: If `true` the server will reject db connection which is not present list of supplied CAs.
     - name: Kafka
       description: >
-        Here you will configure how Rasa Studio uses Kafka.
+        Here you will configure how Rasa Studio uses Kafka. Select Embedded Kafka to use an embedded Kafka install, meaning that you do not have to deploy and manage your own Kafka instance. We do not recommend this for production workloads. Select External Kafka to use an existing, external Kafka deployment.
       title: Kafka
       items:
         - name: kafka_type
@@ -423,10 +419,8 @@ spec:
           items:
             - name: embedded_kafka
               title: Embedded Kafka
-              help_text: Select this to use an embedded Kafka install, meaning that you do not have to deploy and manage your own Kafka instance. We do not recommend this for production workloads.
             - name: external_kafka
               title: External Kafka
-              help_text: Select this to use an existing, external Kafka deployment.
         - name: expose_kafka
           type: bool
           title: Expose Kafka outside the cluster.

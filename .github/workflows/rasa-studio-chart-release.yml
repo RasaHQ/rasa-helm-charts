@@ -115,7 +115,7 @@ jobs:
     needs: [release]
     uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
     with:
-      replicated-channel: studio-release-candidate
+      replicated-channel: Stable
       replicated-version: ${{ needs.release.outputs.studio-version }}
       studio-version: ${{ needs.release.outputs.studio-version }}
     secrets: inherit

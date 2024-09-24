@@ -4,41 +4,44 @@ metadata:
   name: studio-config
 spec:
   groups:
-    - name: API keys and images
+    - name: Container Images & API Keys
       description: >
-        This section configures your API Keys and image versions
-      title: API keys and images
+        Here you will configure where container images are pulled from and what versions you use for components of Rasa Studio. You'll also set up your OpenAI API key for building bots.
+      title: Container Images & API Keys
       items:
         - name: image_registry
-          type: select_one
+          type: radio
           title: Image Registry
+          help_text: You can choose whether to pull container images from Rasa's registry or use an internal private registry.
           default: internal_registry
           items:
             - name: internal_registry
               title: Use Default Registry
+              help_text: Select this option to pull container images from Rasa's registry.
             - name: external_registry
               title: Use Private Registry
+              help_text: Select this option if you have your own private registry configured and you've pushed all the required images to it.
         - name: image_pull_secrets
           type: text
-          title: Image pull secret name
-          help_text: Name of a secret thats used for connecting to the private registry. More information on how to create a secret [here](https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/#create-a-secret-by-providing-credentials-on-the-command-line).
+          title: Image Pull Secret Name
+          help_text: To pull images from a private registry, you need to create a Kubernetes secret in this cluster to use for pulling images. Provide the name of this secret here.. More information on how to create this secret [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated).
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_repository
           type: text
-          title: Studio repository URL
+          title: Studio Image Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/studio/" ))) ""}}'
-          help_text: URL of your repository for Studio, without an image name
+          help_text: URL of your private image repository for all of the Studio component images, without an image name.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: studio_image_tag
           type: text
-          title: Studio version
-          default: "1.6.0"
-          help_text: Specifies image tag for Studio
+          title: Studio Version
+          default: "1.7.0"
+          help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
-          title: Rasa Pro repository URL
+          title: Rasa Pro Image Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/rasa-pro" )) "/rasa-pro") ""}}'
-          help_text: Rasa Pro docker image repository to be used for training. Please specify full repository and image name in format `repository/image_name`.
+          help_text: URL of your private image repository for Rasa Pro, used by Studio for training and running bots. Please specify full repository and image name in format `repository/image_name`.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
           validation:
             regex:
@@ -47,30 +50,31 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro version
-          default: "3.9.9-latest"
-          help_text: Rasa Pro docker image to be used for training.
+          default: "3.10.3-latest"
+          help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: model_services_repository
           type: text
-          title: Model services repository URL
+          title: Model Services Repository URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
-          help_text: URL of your repository for Model services, without an image name
+          help_text: URL of your private image repository for Model services, without an image name.
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: model_service_image_tag
           type: text
-          title: Model services version
+          title: Model Services Version
           default: "3.3.2-latest"
-          help_text: Specifies image tag for Model Service
+          help_text: The version of the Model Services you wish to use, which is used as a tag for the container image. 
         - name: mrs_nginx_proxy
           type: text
-          title: Model running service nginx proxy image URL
+          title: Model Services Nginx Proxy Image URL
           default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services" )) "/nginx-unprivileged:1.27-alpine") ""}}'
+          help_text: The full path of the Model Services Nginx Proxy Image you wish to use, including the repository name, image name and tag. 
           when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: openai_api_key
           type: text
           title: OpenAI API key
           default: ""
           required: true
-          help_text: OpenAI API key to be used
+          help_text: OpenAI API key to be used for training and running bots within Rasa Studio.
         - name: postgresql_image_tag
           type: text
           hidden: true
@@ -83,19 +87,19 @@ spec:
           help_text: Replicated SDK version
     - name: Model Services
       description: >
-        This section can  be used to configure number of replicas for Model Services and resource management
+        Here you will configure the Model Services which are used by Rasa Studio to train and run bots.
       title: Model Service Replicas
       items:
         - name: training_consumer_replicas
           type: text
-          title: Number of training consumer replicas
+          title: Number of Model Training Service Replicas
           default: "2"
-          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+          help_text: This is the number of replicas you'd like to run of the Training Service. This should be `n+1` the number of bots you expect to build with Rasa Studio. More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
         - name: running_consumer_replicas
           type: text
-          title: Number of running consumer replicas
+          title: Number of Model Running Service Replicas
           default: "2"
-          help_text: More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
+          help_text: This is the number of replicas you'd like to run of the Running Service. This should be `n+1` the number of bots you expect to build with Rasa Studio.More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
         - name: rasa_training_debug_logs
           type: text
           title: Enable Rasa training debug logs
@@ -106,6 +110,603 @@ spec:
           title: Enable Rasa running debug logs
           default: "false"
           help_text: Set this to true if you want to include rasa debug logs during model running
+    - name: Keycloak
+      description: >
+        Here you will configure Keycloak, the authentication solution used by Rasa Studio.
+      title: Keycloak
+      items:
+        - name: keycloak_realm
+          type: text
+          title: Keycloak realm
+          default: rasa-studio
+          hidden: true
+          help_text: Keycloak realm name
+        - name: keycloak_api_username
+          type: text
+          title: Keycloak API username
+          required: true
+          default: realmadmin
+          hidden: true
+          help_text: These credentials are used by Studio Backend Server to communicate with Keycloak's user management module
+        - name: keycloak_api_password
+          type: text
+          title: Keycloak API password
+          required: true
+          default: realmadmin
+          hidden: true
+          help_text: These credentials are used by Studio Backend Server to communicate with Keycloak's user management module
+        - name: keycloak_api_client_id
+          type: text
+          title: Keycloak API client ID
+          default: admin-cli
+          hidden: true
+          help_text: Keycloak API client ID
+        - name: keycloak_admin_username
+          type: text
+          title: Keycloak Admin Username
+          required: true
+          default: kcadmin
+          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
+        - name: keycloak_admin_password
+          type: text
+          title: Keycloak Admin Password
+          required: true
+          default: studio
+          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
+        - name: keycloak_client_id
+          type: text
+          title: Keycloak Client ID
+          default: rasa-studio-backend
+          hidden: true
+          help_text: Keycloak client id
+        - name: keycloak_proxy
+          type: text
+          title: Keycloak proxy
+          hidden: true
+          default: "edge"
+
+    - name: Object Storage
+      description: >
+        Here you will configure your object storage, used by Rasa Studio when training and running bots.
+      title: Object Storage
+      items:
+        - name: bucket_provider
+          type: radio
+          title: Bucket Provider
+          default: gcp_bucket
+          items:
+            - name: gcp_bucket
+              title: Google Cloud Storage
+            - name: aws_bucket
+              title: AWS S3 Bucket or MinIO
+              help_text: Select this option if you're going to use AWS S3 or you want to deploy your own storage solution using MinIO. For more information about using MinIO see [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated#object-storage)
+        - name: storage_type
+          type: text
+          title: Storage Type
+          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
+          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
+          hidden: true
+        - name: model_storage_type
+          type: text
+          title: Storage Type
+          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
+          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
+          hidden: true
+        - name: bucket_name
+          type: text
+          title: Bucket Name
+          default: ""
+          required: true
+          help_text: Name of the storage bucket. Make sure to pre-create this bucket in your cloud environment.
+        - name: gcp_credentials
+          type: text
+          title: GCP Service Account (Base-64 Encoded)
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+          help_text: Base-64 encode your GCP service account JSON file and paste it here. The service account should have permission to read and write to your bucket. This is only required if you are using GCS for object storage.
+        - name: google_cloud_project
+          type: text
+          title: Google Cloud Project
+          default: ""
+          help_text: The project ID of the GCP project containing the bucket.
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: cloudsdk_compute_zone
+          type: text
+          title: Bucket Region
+          default: ""
+          help_text: The name of the region where the bucket is located such as `US-WEST1`.
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: url_service_account
+          type: text
+          title: Service Account Email
+          default: ""
+          help_text: The email address for the GCP service account you are using.
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
+        - name: aws_access_key_id
+          type: text
+          title: Access Key ID
+          default: ""
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+          help_text: Access Key ID for the AWS IAM or MinIO user that has permission to read and write to the bucket.
+        - name: aws_secret_access_key
+          type: text
+          title: Secret Access Key
+          default: ""
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+          help_text: Secret Access Key for the AWS IAM or MinIO user that has permission to read and write to the bucket.
+        - name: aws_region_name
+          type: text
+          title: AWS Region Name
+          default: ""
+          required: true
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+          help_text: The region where the bucket is located such as `eu-west-1`.
+        - name: custom_s3_endpoint
+          type: bool
+          title: Use custom S3 Endpoint
+          default: "0"
+          help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
+          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
+        - name: aws_endpoint_url
+          type: text
+          title: Custom Endpoint URL
+          default: ""
+          help_text: A custom URL endpoint for an S3-compatible storage service.
+          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
+    - name: NFS
+      description: >
+        Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots.
+      title: NFS Server
+      items:
+        - name: nfs_type
+          type: radio
+          title: NFS Server
+          default: embedded_nfs
+          items:
+            - name: embedded_nfs
+              title: Embedded NFS
+              help_text: Select this to use an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server.
+            - name: external_nfs
+              title: External NFS
+              help_text: Select this to connect to an existing, external NFS service such as AWS EFS.
+        - name: persistence_type
+          type: text
+          title: Persistence Type
+          default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
+          help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+        - name: nfs_aws_type
+          type: bool
+          title: Using AWS NFS
+          default: "0"
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+          help_text: Please check this if you are using AWS NFS
+        - name: efs_id
+          type: text
+          title: AWS EFS volume ID
+          default: ""
+          help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
+          when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
+        - name: host_path
+          type: text
+          title: Host Path
+          default: /
+          help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`
+          required: true
+          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+        - name: local_node_name
+          type: text
+          title: Local Node Name
+          default: ""
+          help_text: The hostname of the VM you are installing on to correctly provision the embedded NFS server. You can run `hostname` in the VM's shell to find this.
+          required: true
+          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+        - name: storage_class_name
+          type: text
+          title: Storage Class name
+          default: "openebs-hostpath"
+          help_text: Storage Class name for Persistent Volume. If you are using AWS EFS then this should be `efs-sc`. If you are using a standard NFS server this should be `standard-rwo`.
+          required: true
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+        - name: storage_capacity
+          type: text
+          title: Storage Capacity
+          default: 1Gi
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+          help_text: Storage Capacity for PV
+        - name: storage_requests
+          type: text
+          title: Storage Requests
+          default: 1Gi
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+          help_text: Storage requests for PVC
+        - name: nfs_server
+          type: text
+          title: NFS Server Address
+          default: ""
+          help_text: DNS name or IP address of your external NFS server.
+          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    - name: Database
+      description: >
+        Here you will configure how Rasa Studio connects to a database.
+      title: Database
+      items:
+        - name: postgres_type
+          type: radio
+          title: PostgreSQL
+          default: embedded_postgres
+          items:
+            - name: embedded_postgres
+              title: Embedded Postgres
+              help_text: Select this to use an embedded Postgres database, meaning that you do not have to deploy and manage a Postgres database. We do not recommend this for production workloads.
+            - name: external_postgres
+              title: External Postgres
+              help_text: Select this to use an existing, external Postgres database.
+        - name: wait_for_it
+          type: bool
+          title: Wait for PostgreSQL to be ready
+          default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
+          when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+          help_text: Enable this if you are using Embedded PostgreSQL
+        - name: database_host
+          type: text
+          title: Database Host
+          required: true
+          default: postgresql.postgresql.svc.cluster.local
+          help_text: The database host name
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: database_username
+          type: text
+          title: Database Username
+          required: true
+          default: postgres
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: The username to connect to your existing database.
+        - name: database_password
+          type: text
+          title: Database Password
+          default: postgres
+          required: true
+          help_text: The password to connect to your existing database.
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: database_port
+          type: text
+          title: Database port
+          required: true
+          default: "5432"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: The port used to connect to your existing database.
+        - name: studio_database
+          type: text
+          title: Studio Database Name
+          default: studio
+          help_text: The name of the database used by Rasa Studio.
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: model_service_database
+          type: text
+          title: Model Services Database Name
+          default: modelservice
+          help_text: The name of the database used by the Model Services.
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: keycloak_database
+          type: text
+          title: Keycloak Database Name
+          default: keycloak
+          help_text: The name of the database used by Keycloak, our authentication solution.
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+        - name: prefer_ssl
+          type: text
+          title: Prefer SSL
+          default: "false"
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: Set to `true`` if you want to use SSL for connecting to your existing database.
+        - name: reject_unauthorized
+          type: text
+          title: Reject Unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
+          help_text: If `true` the server will reject db connection which is not present list of supplied CAs.
+    - name: Kafka
+      description: >
+        Here you will configure how Rasa Studio uses Kafka.
+      title: Kafka
+      items:
+        - name: kafka_type
+          type: radio
+          title: Kafka
+          default: embedded_kafka
+          items:
+            - name: embedded_kafka
+              title: Embedded Kafka
+              help_text: Select this to use an embedded Kafka install, meaning that you do not have to deploy and manage your own Kafka instance. We do not recommend this for production workloads.
+            - name: external_kafka
+              title: External Kafka
+              help_text: Select this to use an existing, external Kafka deployment.
+        - name: expose_kafka
+          type: bool
+          title: Expose Kafka outside the cluster.
+          default: "0"
+          when: '{{repl ConfigOptionEquals "kafka_type" "embedded_kafka"}}'
+          help_text: Enable this if you want to expose Kafka externally through DNS. Use `<ingress dns hostname>:30002` to connect to it.
+        - name: kafka_broker
+          type: text
+          title: Kafka Broker Address
+          default: "kafka.kafka.svc.cluster.local:9092"
+          help_text: The URL and port for your external Kafka deployment.
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_sasl_mechanism
+          type: text
+          title: Kafka SASL Mechanism
+          default: PLAIN
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Supported values are `plain`, `SCRAM-SHA-256` or `SCRAM-SHA-512`. You can leave it empty if you are not using SASL.
+        - name: kafka_username
+          type: text
+          title: Kafka SASL Username
+          default: "kafka"
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka SASL username
+        - name: kafka_password
+          type: text
+          title: Kafka SASL password
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          default: kafka
+          help_text: Kafka SASL password
+        - name: kafka_group_id
+          type: text
+          title: Kafka Group ID
+          default: "studio"
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: This is the Kafka group ID that Studio can use to receive a copy of all the Rasa Pro events streamed to the topic. It should be unique for Studio.
+        - name: kafka_topic
+          type: text
+          title: Kafka Topic
+          default: rasa-events
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
+        - name: kafka_dlq_topic
+          type: text
+          title: Kafka DLQ topic
+          default: rasa-events-dlq
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
+        - name: training_result_topic
+          type: text
+          title: Training Result Topic
+          default: training-result
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: training_job_topic
+          type: text
+          title: Training Job Topic
+          default: training-job
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: kafka_training_status_update_topic
+          type: text
+          title: Training Status Update Topic
+          default: training-status-update
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: deployment_result_topic
+          type: text
+          title: Deployment Result Topic
+          default: deployment-result
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: deployment_job_topic
+          type: text
+          title: Deployment Job Topic
+          default: deployment-job
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
+        - name: rasa_assistant_topic
+          type: text
+          title: Rasa Assistant Topic
+          default: rasa-assistant
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: rasa_core_events_topic
+          type: text
+          title: Rasa Assistant Core Events Topic
+          default: rasa_core_events
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+        - name: kafka_security_protocol
+          type: text
+          title: Kafka Security Protocol
+          default: SASL_PLAINTEXT
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: The security protocol used by your existing Kafka deployment.
+        - name: kafka_ssl
+          type: text
+          title: Kafka Enable SSL
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Set to `true` if you want to use SSL with your existing Kafka deployment.
+        - name: kafka_custom_ssl
+          type: text
+          title: Kafka Custom SSL
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+          help_text: Set to `true` if you want to use SSL with custom certificates.
+        - name: kafka_ca_file
+          type: text
+          title: Kafka CA file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the CA file
+        - name: kafka_key_file
+          type: text
+          title: Kafka key file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the client key file
+        - name: kafka_cert_file
+          type: text
+          title: Kafka certificate file
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Path to the client certificate file
+        - name: kafka_reject_unauthorized
+          type: text
+          title: Kafka reject unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
+          help_text: Defaults to true, the server certificate is verified against the list of supplied CA
+        - name: node_tls_reject_unauthorized
+          type: text
+          title: Node TLS reject unauthorized
+          default: ""
+          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
+    - name: Accessing Rasa Studio
+      description: >
+        Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
+      title: Accessing Rasa Studio
+      items:
+        - name: install_nginx
+          type: radio
+          title: Deploy on
+          default: on_vm
+          items:
+            - name: on_vm
+              title: Virtual Machine
+            - name: on_kubernetes
+              title: Kubernetes
+            - name: no_ingress
+              title: Do not install
+        - name: ingress_hostname
+          type: text
+          title: Ingress DNS Hostname
+          default: ""
+          required: true
+          help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
+        - name: connection_type
+          type: text
+          title: Connection Type
+          default: http
+          help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
+        - name: ingress_class
+          type: text
+          title: Ingress Class Name
+          default: nginx
+          help_text: Ingress class name
+          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
+        - name: annotations
+          type: textarea
+          title: Annotations
+          help_text: |
+            Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
+            For example, `kubernetes.io/tls-acme: true`.
+          default: ""
+    - name: Advanced Settings
+      description: >
+        Here you will optionally configure Kubernetes resource limits and requests for the components of Rasa Studio. If you're not sure what this is, you can safely ignore it.
+      title: Resource Management
+      items:
+        - name: set_backend_resources
+          type: bool
+          title: Configure Backend resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Backend deployment
+        - name: set_backend_limits_cpu
+          type: text
+          title: Backend CPU limit
+          help_text: Configure Backend resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
+        - name: set_backend_limits_memory
+          type: text
+          title: Backend Memory limit
+          help_text: Configure Backend resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
+        - name: set_backend_requests_cpu
+          type: text
+          title: Backend CPU requests
+          help_text: Configure Backend resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
+        - name: set_backend_requests_memory
+          type: text
+          title: Backend Memory requests
+          help_text: Configure Backend resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
+        - name: set_webclient_resources
+          type: bool
+          title: Configure Web client resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Web client deployment
+        - name: set_webclient_limits_cpu
+          type: text
+          title: Web client CPU limit
+          help_text: Configure Web client resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_limits_memory
+          type: text
+          title: Web client Memory limit
+          help_text: Configure Web client resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_requests_cpu
+          type: text
+          title: Web client CPU requests
+          help_text: Configure Web client resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_webclient_requests_memory
+          type: text
+          title: Web client Memory requests
+          help_text: Configure Web client resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
+        - name: set_eventingestion_resources
+          type: bool
+          title: Configure Event ingestion resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Event ingestion deployment
+        - name: set_eventingestion_limits_cpu
+          type: text
+          title: Event ingestion CPU limit
+          help_text: Configure Event ingestion resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_limits_memory
+          type: text
+          title: Event ingestion Memory limit
+          help_text: Configure Event ingestion resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_requests_cpu
+          type: text
+          title: Event ingestion CPU requests
+          help_text: Configure Event ingestion resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_eventingestion_requests_memory
+          type: text
+          title: Event ingestion Memory requests
+          help_text: Configure Event ingestion resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
+        - name: set_keycloak_resources
+          type: bool
+          title: Configure Keycloak resources
+          default: "0"
+          help_text: Check this option if you want to configure resource requests/limits for Keycloak deployment
+        - name: set_keycloak_limits_cpu
+          type: text
+          title: Keycloak CPU limit
+          help_text: Configure Keycloak resource limit for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_limits_memory
+          type: text
+          title: Keycloak Memory limit
+          help_text: Configure Keycloak resource limit for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_cpu
+          type: text
+          title: Keycloak CPU requests
+          help_text: Configure Keycloak resource requests for CPU
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
+        - name: set_keycloak_requests_memory
+          type: text
+          title: Keycloak Memory requests
+          help_text: Configure Keycloak resource requests for Memory
+          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
         - name: configure_rasa_resources
           type: bool
           title: Configure Rasa Bot resources
@@ -225,592 +826,3 @@ spec:
           title: MRS consumer Memory requests
           help_text: Configure MRS consumer resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-    - name: Keycloak
-      description: >
-        This section covers Keycloak section
-      title: Keycloak
-      items:
-        - name: keycloak_realm
-          type: text
-          title: Keycloak realm
-          default: rasa-studio
-          hidden: true
-          help_text: Keycloak realm name
-        - name: keycloak_api_username
-          type: text
-          title: Keycloak API username
-          required: true
-          default: realmadmin
-          hidden: true
-          help_text: These credentials are used by Studio Backend Server to communicate with Keycloak's user management module
-        - name: keycloak_api_password
-          type: text
-          title: Keycloak API password
-          required: true
-          default: realmadmin
-          hidden: true
-          help_text: These credentials are used by Studio Backend Server to communicate with Keycloak's user management module
-        - name: keycloak_api_client_id
-          type: text
-          title: Keycloak API client ID
-          default: admin-cli
-          hidden: true
-          help_text: Keycloak API client ID
-        - name: keycloak_admin_username
-          type: text
-          title: Keycloak admin username
-          required: true
-          default: kcadmin
-          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
-        - name: keycloak_admin_password
-          type: text
-          title: Keycloak Admin Password
-          required: true
-          default: studio
-          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
-        - name: keycloak_client_id
-          type: text
-          title: Keycloak Client ID
-          default: rasa-studio-backend
-          hidden: true
-          help_text: Keycloak client id
-        - name: keycloak_proxy
-          type: text
-          title: Keycloak proxy
-          hidden: true
-          default: "edge"
-        - name: set_keycloak_resources
-          type: bool
-          title: Configure Keycloak resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Keycloak deployment
-        - name: set_keycloak_limits_cpu
-          type: text
-          title: Keycloak CPU limit
-          help_text: Configure Keycloak resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_limits_memory
-          type: text
-          title: Keycloak Memory limit
-          help_text: Configure Keycloak resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_requests_cpu
-          type: text
-          title: Keycloak CPU requests
-          help_text: Configure Keycloak resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: set_keycloak_requests_memory
-          type: text
-          title: Keycloak Memory requests
-          help_text: Configure Keycloak resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-    - name: Object Storage
-      description: >
-        This section covers object storage
-      title: Object Storage
-      items:
-        - name: bucket_provider
-          type: select_one
-          title: Bucket Provider
-          default: gcp_bucket
-          items:
-            - name: gcp_bucket
-              title: Google Cloud Storage
-            - name: aws_bucket
-              title: AWS S3 Bucket
-        - name: storage_type
-          type: text
-          title: Storage Type
-          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
-          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          hidden: true
-        - name: model_storage_type
-          type: text
-          title: Storage Type
-          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
-          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          hidden: true
-        - name: bucket_name
-          type: text
-          title: Bucket Name
-          default: ""
-          required: true
-          help_text: Name of the storage bucket. Make sure to pre-create this bucket.
-        - name: gcp_credentials
-          type: text
-          title: GCP SA Base64Encoded
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-          help_text: GCP credentials for the service account. This is the base64 encoded service account JSON. This is only required if you are using GCS for object storage.
-        - name: google_cloud_project
-          type: text
-          title: Google Cloud project
-          default: ""
-          help_text: The project ID of the GCP project.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: cloudsdk_compute_zone
-          type: text
-          title: CloudSDK Compute Zone
-          default: ""
-          help_text: The zone where the bucket is located.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: url_service_account
-          type: text
-          title: Storage Signed Url Service Account Email
-          default: ""
-          help_text: The service account email address.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: aws_access_key_id
-          type: text
-          title: AWS Access Key ID
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: AWS access key ID used for S3
-        - name: aws_secret_access_key
-          type: text
-          title: AWS Secret Access Key
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: AWS secret access key ID used for S3
-        - name: aws_region_name
-          type: text
-          title: AWS Region Name
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: The region where the bucket is located.
-        - name: custom_s3_endpoint
-          type: bool
-          title: Use custom S3 Endpoint
-          default: "0"
-          help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-        - name: aws_endpoint_url
-          type: text
-          title: Endpoint URL
-          default: ""
-          help_text: A custom URL endpoint for an S3-compatible storage service.
-          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-    - name: NFS
-      description: >
-        This section covers NFS server configuration
-      title: NFS Server
-      items:
-        - name: nfs_type
-          type: select_one
-          title: NFS Server
-          default: embedded_nfs
-          items:
-            - name: embedded_nfs
-              title: Embedded NFS
-            - name: external_nfs
-              title: External NFS
-        - name: persistence_type
-          type: text
-          title: Persistence Type
-          default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
-          help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: nfs_aws_type
-          type: bool
-          title: Using AWS NFS
-          default: "0"
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Please check this if you are using AWS NFS
-        - name: efs_id
-          type: text
-          title: AWS EFS volume ID
-          default: ""
-          help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
-          when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
-        - name: host_path
-          type: text
-          title: Host Path
-          default: /
-          help_text: Directory from the host machine that will be mounted to the container for training data.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: local_node_name
-          type: text
-          title: Local Node Name
-          default: ""
-          help_text: Node on which the PV will be created
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: storage_class_name
-          type: text
-          title: Storage Class name
-          default: "openebs-hostpath"
-          help_text: Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's `standard-rwo` if you are using NFS server.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: storage_capacity
-          type: text
-          title: Storage Capacity
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage Capacity for PV
-        - name: storage_requests
-          type: text
-          title: Storage Requests
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage requests for PVC
-        - name: nfs_server
-          type: text
-          title: NFS Server Address
-          default: ""
-          help_text: DNS name or IP address of the NFS server. This value is used only when type is set to nfs
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-    - name: Resource Management
-      description: >
-        Set resource limits and requests for pods
-      title: Resource Management
-      items:
-        - name: set_backend_resources
-          type: bool
-          title: Configure Backend resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Backend deployment
-        - name: set_backend_limits_cpu
-          type: text
-          title: Backend CPU limit
-          help_text: Configure Backend resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
-        - name: set_backend_limits_memory
-          type: text
-          title: Backend Memory limit
-          help_text: Configure Backend resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
-        - name: set_backend_requests_cpu
-          type: text
-          title: Backend CPU requests
-          help_text: Configure Backend resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
-        - name: set_backend_requests_memory
-          type: text
-          title: Backend Memory requests
-          help_text: Configure Backend resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
-        - name: set_webclient_resources
-          type: bool
-          title: Configure Web client resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Web client deployment
-        - name: set_webclient_limits_cpu
-          type: text
-          title: Web client CPU limit
-          help_text: Configure Web client resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
-        - name: set_webclient_limits_memory
-          type: text
-          title: Web client Memory limit
-          help_text: Configure Web client resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
-        - name: set_webclient_requests_cpu
-          type: text
-          title: Web client CPU requests
-          help_text: Configure Web client resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
-        - name: set_webclient_requests_memory
-          type: text
-          title: Web client Memory requests
-          help_text: Configure Web client resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_webclient_resources" "1"}}'
-        - name: set_eventingestion_resources
-          type: bool
-          title: Configure Event ingestion resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Event ingestion deployment
-        - name: set_eventingestion_limits_cpu
-          type: text
-          title: Event ingestion CPU limit
-          help_text: Configure Event ingestion resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-        - name: set_eventingestion_limits_memory
-          type: text
-          title: Event ingestion Memory limit
-          help_text: Configure Event ingestion resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-        - name: set_eventingestion_requests_cpu
-          type: text
-          title: Event ingestion CPU requests
-          help_text: Configure Event ingestion resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-        - name: set_eventingestion_requests_memory
-          type: text
-          title: Event ingestion Memory requests
-          help_text: Configure Event ingestion resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_eventingestion_resources" "1"}}'
-    - name: Database
-      description: >
-        This section can be used to configure the database required by Rasa Studio.
-      title: Database
-      items:
-        - name: postgres_type
-          type: select_one
-          title: PostgreSQL
-          default: embedded_postgres
-          items:
-            - name: embedded_postgres
-              title: Embedded Postgres
-            - name: external_postgres
-              title: External Postgres
-        - name: wait_for_it
-          type: bool
-          title: Wait for PostgreSQL to be ready
-          default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
-          when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
-          help_text: Enable this if you are using Embedded PostgreSQL
-        - name: database_host
-          type: text
-          title: Database Host
-          required: true
-          default: postgresql.postgresql.svc.cluster.local
-          help_text: The database host name
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: database_username
-          type: text
-          title: Database Username
-          required: true
-          default: postgres
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: The database username
-        - name: database_password
-          type: text
-          title: Database Password
-          default: postgres
-          required: true
-          help_text: The database password
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: database_port
-          type: text
-          title: Database port
-          required: true
-          default: "5432"
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: The database port
-        - name: studio_database
-          type: text
-          title: Studio database name
-          default: studio
-          help_text: The database name for Studio
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: model_service_database
-          type: text
-          title: MTS DB database
-          default: modelservice
-          help_text: The database name for model training and running service
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: keycloak_database
-          type: text
-          title: Keycloak DB database
-          default: keycloak
-          help_text: The database name for keycloak user management service
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: prefer_ssl
-          type: text
-          title: Prefer SSL
-          default: "false"
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: Set to true if you want to use SSL for db connection
-        - name: reject_unauthorized
-          type: text
-          title: Reject Unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-          help_text: If true the server will reject db connection which is not present list of supplied CAs.
-    - name: Kafka
-      description: >
-        This section covers Kafka configuration
-      title: Kafka
-      items:
-        - name: kafka_type
-          type: select_one
-          title: Kafka
-          default: embedded_kafka
-          items:
-            - name: embedded_kafka
-              title: Embedded Kafka
-            - name: external_kafka
-              title: External Kafka
-        - name: expose_kafka
-          type: bool
-          title: Expose Kafka outside the cluster.
-          default: "0"
-          when: '{{repl ConfigOptionEquals "kafka_type" "embedded_kafka"}}'
-          help_text: Enable this if you want to expose Kafka externally through DNS. Use `<ingress dns hostname>:30002` to connect to it.
-        - name: kafka_broker
-          type: text
-          title: Kafka broker address
-          default: "kafka.kafka.svc.cluster.local:9092"
-          help_text: Kafka broker address
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: kafka_sasl_mechanism
-          type: text
-          title: Kafka SASL mechanism
-          default: PLAIN
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
-        - name: kafka_username
-          type: text
-          title: Kafka SASL username
-          default: "kafka"
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka SASL username
-        - name: kafka_password
-          type: text
-          title: Kafka SASL password
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          default: kafka
-          help_text: Kafka SASL password
-        - name: kafka_group_id
-          type: text
-          title: Kafka group ID
-          default: "studio"
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic.
-        - name: kafka_topic
-          type: text
-          title: Kafka topic
-          default: rasa-events
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
-        - name: kafka_dlq_topic
-          type: text
-          title: Kafka DLQ topic
-          default: rasa-events-dlq
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
-        - name: training_result_topic
-          type: text
-          title: Training result topic
-          default: training-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: training_job_topic
-          type: text
-          title: Training job topic
-          default: training-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: kafka_training_status_update_topic
-          type: text
-          title: Training status update topic
-          default: training-status-update
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_result_topic
-          type: text
-          title: Deployment result topic
-          default: deployment-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_job_topic
-          type: text
-          title: Deployment job topic
-          default: deployment-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: rasa_assistant_topic
-          type: text
-          title: Rasa Assistant
-          default: rasa-assistant
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: rasa_core_events_topic
-          type: text
-          title: Rasa Assistant
-          default: rasa_core_events
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-        - name: kafka_security_protocol
-          type: text
-          title: Kafka Security Protocol
-          default: SASL_PLAINTEXT
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka security protocol
-        - name: kafka_ssl
-          type: text
-          title: Kafka Enable SSL
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Set to true if you want to use SSL
-        - name: kafka_custom_ssl
-          type: text
-          title: Kafka custom SSL
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Set to true if you want to use SSL with custom certs
-        - name: kafka_ca_file
-          type: text
-          title: Kafka CA file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the CA file
-        - name: kafka_key_file
-          type: text
-          title: Kafka key file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the client key file
-        - name: kafka_cert_file
-          type: text
-          title: Kafka certificate file
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Path to the client certificate file
-        - name: kafka_reject_unauthorized
-          type: text
-          title: Kafka reject unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_custom_ssl" "true"}}'
-          help_text: Defaults to true, the server certificate is verified against the list of supplied CA
-        - name: node_tls_reject_unauthorized
-          type: text
-          title: Node TLS reject unauthorized
-          default: ""
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-    - name: Ingress
-      description: >
-        This section covers Ingress configuration. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
-      title: Ingress
-      items:
-        - name: install_nginx
-          type: select_one
-          title: Deploy on
-          default: on_vm
-          items:
-            - name: on_vm
-              title: Virtual Machine
-            - name: on_kubernetes
-              title: Kubernetes
-            - name: no_ingress
-              title: Do not install
-        - name: ingress_hostname
-          type: text
-          title: Ingress DNS Hostname
-          default: ""
-          required: true
-          help_text: Defines the host name for all resources. Make sure you provide a valid host name.
-        - name: connection_type
-          type: text
-          title: Connection type
-          default: http
-          help_text: Define if you will be using https or http with the ingressHost
-        - name: ingress_class
-          type: text
-          title: Ingress Class Name
-          default: nginx
-          help_text: Ingress class name
-          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
-        - name: annotations
-          type: textarea
-          title: Annotations
-          help_text: |
-            Use this textarea to provide annotations specific to your ingress controller.
-            For example, `kubernetes.io/tls-acme: true`.
-          default: ""

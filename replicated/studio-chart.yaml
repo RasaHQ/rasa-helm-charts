@@ -3,7 +3,6 @@ kind: HelmChart
 metadata:
   name: studio
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `rasa_pro` }}'
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
@@ -21,7 +20,7 @@ spec:
     replicated:
       enabled: true
       images:
-        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:v1.0.0-beta.26'
+        replicated-sdk: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/replicated-sdk:{{repl ConfigOption "replicated_sdk_image_tag" }}'
       imagePullSecrets:
         - name: '{{repl ImagePullSecretName }}'
       isAirgap: repl{{ HasLocalRegistry }}

@@ -3,7 +3,7 @@
 - clusterResources: {}
 - registryImages:
     images:
-      - replicated/replicated-sdk:v1.0.0-beta.11
+      - replicated/replicated-sdk:v1.0.0-beta.27
 {{- end -}}
 
 {{- define "troubleshoot.analyzers.shared" -}}

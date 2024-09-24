@@ -72,6 +72,7 @@ spec:
           default: ""
           help_text: base64 encoded Rasa Pro config file. This is required if you want to use a custom Rasa Pro config file and override the default one.
           when: 'repl{{ ConfigOptionNotEquals `rasa_platform_deploy` `rasa_pro` }}'
+          hidden: true
         - name: model_services_repository
           type: text
           title: Model services repository URL
@@ -81,7 +82,7 @@ spec:
         - name: model_service_image_tag
           type: text
           title: Model services version
-          default: "3.3.2"
+          default: "3.3.2-latest"
           help_text: Specifies image tag for Model Service
         - name: mrs_nginx_proxy
           type: text
@@ -893,7 +894,7 @@ spec:
       - name: rasa_pro_services_image_tag
         type: text
         title: Rasa Pro Analytics version
-        default: "3.2.3-latest"
+        default: "3.3.2-latest"
         help_text: Specifies image tag for Rasa Pro Analytics
         when: '{{repl ConfigOptionEquals "deploy_analytics" "1"}}'
       - name: rasa_pro_services_logging_level
@@ -1013,7 +1014,7 @@ spec:
         - name: postgresql_image_tag
           type: text
           hidden: true
-          default: 16.2.0-debian-12-r8
+          default: 16.4.0-debian-12-r8
           help_text: Postgesql version used in embedded database
     - name: Redis
       description: >
@@ -1049,6 +1050,12 @@ spec:
               title: Embedded Kafka
             - name: external_kafka
               title: External Kafka
+        - name: expose_kafka
+          type: bool
+          title: Expose Kafka outside the cluster.
+          default: "0"
+          when: '{{repl ConfigOptionEquals "kafka_type" "embedded_kafka"}}'
+          help_text: Enable this if you want to expose Kafka externally through DNS. Use `<ingress dns hostname>:30002` to connect to it.
         - name: kafka_broker
           type: text
           title: Kafka broker address

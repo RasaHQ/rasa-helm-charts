@@ -6,7 +6,7 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `rasa_platform_deploy` `studio` }}'
   chart:
     name: redis
-    chartVersion: 19.1.1
+    chartVersion: 20.0.3
 
   releaseName: redis
   namespace: redis
@@ -19,7 +19,7 @@ spec:
     image:
       registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
       repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/redis'
-      tag: 7.2.5-debian-12-r2
+      tag: 7.4.0-debian-12-r2
       digest: ""
       pullPolicy: IfNotPresent
       pullSecrets:

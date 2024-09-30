@@ -18,6 +18,8 @@ env:
 jobs:
   release:
     runs-on: ubuntu-22.04
+    outputs:
+      studio-version: ${{ steps.chart-info.outputs.version }}
 
     steps:
       - name: Checkout repository
@@ -107,3 +109,13 @@ jobs:
         with:
           tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
           body: ${{ steps.changelog.outputs.changelog }}
+      
+  replicated-release:
+    name: Promote Replicated release
+    needs: [release]
+    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
+    with:
+      replicated-channel: Stable
+      replicated-version: ${{ needs.release.outputs.studio-version }}
+      studio-version: ${{ needs.release.outputs.studio-version }}
+    secrets: inherit

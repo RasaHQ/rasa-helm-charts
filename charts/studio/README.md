@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.1.12](https://img.shields.io/badge/Version-1.1.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.12
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.1.12
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.0
 ```
 
 ## General Configuration
@@ -85,11 +85,11 @@ modelService:
 | backend.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | backend.envFrom | list | `[]` | backend.envFrom is used to add environment variables from ConfigMap or Secret |
-| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.9"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.environmentVariables | object | `{"DATABASE_URL":{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}},"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""},"DOCKER_IMAGE_TAG":{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest"},"KEYCLOAK_API_CLIENT_ID":{"value":"admin-cli"},"KEYCLOAK_API_PASSWORD":{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}},"KEYCLOAK_API_USERNAME":{"value":"realmadmin"},"KEYCLOAK_REALM":{"value":"rasa-studio"}}` | backend.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.environmentVariables.DATABASE_URL | object | `{"secret":{"key":"DATABASE_URL","name":"studio-secrets"}}` | The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public |
 | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | `{"value":"0 * * * *"}` | https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax  ┌───────────── minute (0 - 59) | ┌───────────── hour (0 - 23) │ │ ┌───────────── day of the month (1 - 31) │ │ │ ┌───────────── month (1 - 12) │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday) │ │ │ │ │ │ │ │ │ │ │ │ │ │ │ * * * * * |
 | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | `{"value":""}` | run if the "DELETE_CONVERSATIONS_OLDER_THAN_HOURS" value is left undefined. |
-| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.9.9"}` | The complete registry URL of the Rasa Plus docker image to be used for training |
+| backend.environmentVariables.DOCKER_IMAGE_TAG | object | `{"value":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest"}` | The complete registry URL of the Rasa Plus docker image to be used for training |
 | backend.environmentVariables.KEYCLOAK_API_PASSWORD | object | `{"secret":{"key":"KEYCLOAK_API_PASSWORD","name":"studio-secrets"}}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.environmentVariables.KEYCLOAK_API_USERNAME | object | `{"value":"realmadmin"}` | These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module |
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
@@ -320,7 +320,7 @@ modelService:
 | modelService.storage.regionName | string | `""` | Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located. |
 | modelService.storage.storageServiceAccount | object | `{"secretKey":"STORAGE_SIGNED_URL_SERVICE_ACCOUNT","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to gcs. The service account email address. |
 | modelService.storage.type | string | `""` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
-| modelService.tag | string | `"3.3.2-latest"` | tag specifies image tag for Studio |
+| modelService.tag | string | `"3.3.3-latest"` | tag specifies image tag for Studio |
 | modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -387,7 +387,7 @@ modelService:
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |
-| tag | string | `"1.7.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.7.0-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

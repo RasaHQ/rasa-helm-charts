@@ -24,4 +24,4 @@ spec:
     - studio/deployment/model-training-service-consumer
     - studio/deployment/nginx-reverse-proxy
   additionalImages:
-    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.3-latest
+    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest

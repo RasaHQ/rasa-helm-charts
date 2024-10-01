@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.7.0"
+          default: "1.7.0-latest"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.10.3-latest"
+          default: "3.10.4-latest"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: model_services_repository
           type: text
@@ -61,7 +61,7 @@ spec:
         - name: model_service_image_tag
           type: text
           title: Model Services Version
-          default: "3.3.2-latest"
+          default: "3.3.3-latest"
           help_text: The version of the Model Services you wish to use, which is used as a tag for the container image. 
         - name: mrs_nginx_proxy
           type: text

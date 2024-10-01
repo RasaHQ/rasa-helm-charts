@@ -6,7 +6,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 1.1.13-rc
+    chartVersion: 1.1.13
 
   releaseName: studio
   namespace: studio

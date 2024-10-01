@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.7.0-latest"
+          default: "1.7.0"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text

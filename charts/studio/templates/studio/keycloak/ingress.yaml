@@ -40,7 +40,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: {{ .Values.keycloak.ingress.hostname | default $.Values.config.ingressHost | quote }}
+    - host: {{ .Values.keycloak.ingress.hostName | default $.Values.config.ingressHost | quote }}
       http:
         paths:
           - path: /auth

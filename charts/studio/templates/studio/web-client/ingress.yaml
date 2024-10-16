@@ -40,7 +40,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: {{ $.Values.config.ingressHost | quote }}
+    - host: {{ .Values.webClient.ingress.hostname | default $.Values.config.ingressHost | quote }}
       http:
         paths:
           - path: /

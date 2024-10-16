@@ -8,24 +8,6 @@ spec:
   requireMinimalRBACPrivileges: false
   allowRollback: true
   minKotsVersion: 1.79.0
-  graphs:
-    - title: User Signups
-      query: 'sum(user_signup_events_total)'
-    # Disk Usage, CPU Usage, and Memory Usage below are the default graphs
-    - title: Disk Usage
-      queries:
-        - query: 'sum((node_filesystem_size_bytes{job="node-exporter",fstype!="",instance!=""} - node_filesystem_avail_bytes{job="node-exporter", fstype!=""})) by (instance)'
-          legend: 'Used: {{ instance }}'
-        - query: 'sum((node_filesystem_avail_bytes{job="node-exporter",fstype!="",instance!=""})) by (instance)'
-          legend: 'Available: {{ instance }}'
-      yAxisFormat: bytes
-    - title: CPU Usage
-      query: 'sum(rate(container_cpu_usage_seconds_total{namespace="{{repl Namespace}}",container!="POD",pod!=""}[5m])) by (pod)'
-      legend: '{{ pod }}'
-    - title: Memory Usage
-      query: 'sum(container_memory_usage_bytes{namespace="{{repl Namespace}}",container!="POD",pod!=""}) by (pod)'
-      legend: '{{ pod }}'
-      yAxisFormat: bytes
   additionalNamespaces:
     - "ingress-nginx"
     - "postgresql"

@@ -75,7 +75,11 @@ spec:
             {{- include "studio.shared.env" . | nindent 12 }}
             {{- include "studio.keycloak.url" . | nindent 12 }}
             - name: WEB_CLIENT_URL
-              value: "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost}}"
+              value: {{ if .Values.webClient.ingress.hostname }}
+              "{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostname }}"
+              {{ else }}
+              "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"
+              {{ end }}
             - name: MODEL_TRAINING_MOCK_ENABLED
               value: "false"
             - name: MODEL_RUNNING_MOCK_ENABLED

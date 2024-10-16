@@ -11,11 +11,11 @@
     checkName: Is this cluster running a supported Kubernetes verison
     outcomes:
       - fail:
-          when: "< 1.19.0"
-          message: This Rasa Studio Helm chart is only supported on Kubernetes 1.19 or later
+          when: "< 1.24.0"
+          message: This Rasa Studio Helm chart is only supported on Kubernetes 1.24 or later
           uri: https://www.kubernetes.io
       - warn:
-          when: "< 1.24.0"
+          when: "< 1.26.0"
           message: |
             You can run Rasa Studio Helm on your current cluster version, but your cluster is no longer supported 
             by the Kubernetes community. If you have extended support available from your Kubernetes
@@ -88,7 +88,7 @@
         message: Images are missing from registry
       - warn:
           when: "errors > 0"
-          message: Failed to check if images are present in registry
+          message: Failed to check if images are present in registry. This is expected if you are running in the AirGap mode.
       - pass:
           message: All images are present in registry
 {{- end -}}

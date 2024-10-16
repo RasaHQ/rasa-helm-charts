@@ -41,7 +41,7 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.modelService.running.orchestrator.ingress.hosts }}
-    - host: {{ .Values.modelService.running.orchestrator.ingress.hostname | default $.Values.config.ingressHost | quote }}
+    - host: {{ .host | default $.Values.config.ingressHost | quote }}
       http:
         paths:
           - path: {{ $.Values.modelService.running.proxy.botTalkSubPath }}

@@ -36,8 +36,6 @@ spec:
     - logs:
         name: app/model-training-service/consumer
         selector: 
-          - app.kubernetes.io/name=model-training-service
-          - app.kubernetes.io/instance={{ .Release.Name }}
           - app.kubernetes.io/component=model-training-service-consumer
         limits:
           maxAge: 720h
@@ -52,8 +50,6 @@ spec:
     - logs:
         name: app/model-running-service/consumer
         selector: 
-          - app.kubernetes.io/name=model-running-service
-          - app.kubernetes.io/instance={{ .Release.Name }}
           - app.kubernetes.io/component=model-running-service-consumer
         limits:
           maxAge: 720h

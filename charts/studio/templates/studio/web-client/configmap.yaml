@@ -5,8 +5,8 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api";
-    window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/auth";
+    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ if .Values.backend.ingress.hostName }}{{ .Values.backend.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/api";
+    window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ if .Values.keycloak.ingress.hostName }}{{ .Values.keycloak.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/auth";
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }};
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
     window.VERSION_CONTROL_ENABLED = {{ .Values.webClient.environmentVariables.VERSION_CONTROL_ENABLED | quote | default "false" }};

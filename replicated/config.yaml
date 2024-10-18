@@ -507,7 +507,7 @@ spec:
         - name: rasa_core_events_topic
           type: text
           title: Rasa Assistant Core Events Topic
-          default: rasa_core_events
+          default: rasa-core-events
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_security_protocol
           type: text

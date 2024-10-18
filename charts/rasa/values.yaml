@@ -409,7 +409,7 @@ rasaProServices:
       value: ""
     # Topic Rasa Plus publishes events to and Rasa Pro consumes from
     KAFKA_TOPIC:
-      value: "rasa_core_events"
+      value: "rasa-core-events"
     # Set the log level of the application
     LOGGING_LEVEL:
       value: "INFO"

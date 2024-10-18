@@ -2,12 +2,12 @@
 - clusterInfo: {}
 - clusterResources: {}
 - registryImages:
-    namespace: studio
-    imagePullSecret:
-      type: kubernetes.io/dockerconfigjson
-      name: studio-dragon-registry
     images:
-      - replicated/replicated-sdk:v1.0.0-beta.27
+      - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-backend:{{ .Values.tag }}
+      - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-web-client:{{ .Values.tag }}
+      - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-keycloak:{{ .Values.tag }}
+      - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-event-ingestion:{{ .Values.tag }}
+      - europe-west3-docker.pkg.dev/rasa-releases/dependencies/replicated-sdk:v1.0.0-beta.27
 {{- end -}}
 
 {{- define "troubleshoot.analyzers.shared" -}}

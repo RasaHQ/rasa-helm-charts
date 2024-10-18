@@ -10,6 +10,8 @@ spec:
 
   releaseName: studio
   namespace: studio
+  # this is a hack!!! adding this to prevent MTS/MRS to lose connection when Kafka updates
+  weight: 42
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template

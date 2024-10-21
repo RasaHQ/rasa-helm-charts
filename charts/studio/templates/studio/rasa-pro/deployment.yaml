@@ -54,6 +54,7 @@ spec:
             {{- omit .Values.rasapro.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: {{ include "studio.rasapro.image" . }}
+          command: ["python", "-m", "rasa.model_service"] 
           imagePullPolicy: {{ .Values.rasapro.image.pullPolicy }}
           ports:
             - name: http

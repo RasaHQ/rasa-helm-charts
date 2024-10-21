@@ -1,0 +1,105 @@
+{{- if .Values.studioEnabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "studio.fullname" . }}-rasapro
+  labels:
+    {{- include "studio.labels" . | nindent 4 -}}
+    app.kubernetes.io/component: studio-rasapro
+  {{- if .Values.deploymentLabels }}
+      {{- toYaml .Values.deploymentLabels | nindent 4 }}
+    {{- end }}
+  {{- with .Values.deploymentAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.rasapro.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: studio-rasapro
+  template:
+    metadata:
+      {{- with .Values.rasapro.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: studio-rasapro
+        {{- if .Values.podLabels }}
+          {{ toYaml .Values.podLabels | nindent 8 }}
+        {{- end }}
+    spec:
+      hostNetwork: {{ .Values.hostNetwork }}
+      dnsPolicy: {{ include "studio.dnsPolicy" . }}
+      {{- if .Values.dnsConfig }}
+      dnsConfig:
+        {{ toYaml .Values.dnsConfig | nindent 8 }}
+      {{- end }}
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "studio.rasapro.serviceAccountName" . }}
+      {{- if .Values.rasapro.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.rasapro.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: {{ .Chart.Name }}-rasapro
+          {{- if .Values.rasapro.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.rasapro.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ include "studio.rasapro.image" . }}
+          imagePullPolicy: {{ .Values.rasapro.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.rasapro.service.port }}
+              protocol: TCP
+          {{- if or .Values.rasapro.livenessProbe.enabled }}
+          livenessProbe:
+            {{- omit .Values.rasapro.livenessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- if or .Values.rasapro.readinessProbe.enabled }}
+          readinessProbe:
+            {{- omit .Values.rasapro.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          resources:
+            {{- toYaml .Values.rasapro.resources | nindent 12 }}
+          env:
+            {{- include "studio.shared.env" . | nindent 12 }}
+            {{- include "studio.rasapro.env" . | nindent 12 }}
+            {{- range $key, $value := .Values.rasapro.environmentVariables }}
+            - name: {{ $key | upper }}
+              {{- if $value.value }}
+              value: {{ $value.value | quote }}
+              {{- else if $value.secret }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ $value.secret.name }}
+                  key: {{ $value.secret.key }}
+              {{- end }}
+            {{- end }}
+          {{- if .Values.rasapro.envFrom }}
+          envFrom:
+            {{- toYaml .Values.rasapro.envFrom | nindent 12 }}
+          {{- end }}
+      {{- if .Values.rasapro.additionalContainers }}
+        {{- toYaml .Values.rasapro.additionalContainers | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasapro.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasapro.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasapro.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}

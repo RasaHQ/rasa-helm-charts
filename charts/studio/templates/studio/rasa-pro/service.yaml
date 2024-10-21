@@ -1,0 +1,18 @@
+{{- if .Values.studioEnabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "studio.fullname" . }}-rasapro
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.rasapro.service.type }}
+  ports:
+    - port: {{ .Values.rasapro.service.port }}
+      targetPort: {{ .Values.rasapro.service.targetPort }}
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "studio.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: studio-rasapro
+{{- end }}

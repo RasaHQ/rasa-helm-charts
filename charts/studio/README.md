@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.2.4](https://img.shields.io/badge/Version-1.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0-rc1](https://img.shields.io/badge/Version-2.0.0--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc1
 ```
 
 ## General Configuration
@@ -384,6 +384,40 @@ modelService:
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
+| rasapro.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
+| rasapro.affinity | object | `{}` | keycloak.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
+| rasapro.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
+| rasapro.image.name | string | `"rasa-pro"` | image.name specifies image repository |
+| rasapro.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
+| rasapro.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/"` |  |
+| rasapro.image.tag | string | `"3.10.7.dev1"` |  |
+| rasapro.ingress | object | `{"annotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| rasapro.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
+| rasapro.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
+| rasapro.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
+| rasapro.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
+| rasapro.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
+| rasapro.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
+| rasapro.nodeSelector | object | `{}` | keycloak.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasapro.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
+| rasapro.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
+| rasapro.podAnnotations | object | `{}` | keycloak.podAnnotations defines annotations to add to the pod |
+| rasapro.podSecurityContext | object | `{"enabled":true}` | keycloak.podSecurityContext defines pod security context |
+| rasapro.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | rasaProLicense.secretKey defines the key in the K8s under which Rasa Pro License is stored. |
+| rasapro.rasaProLicense.secretName | string | `"studio-secrets"` | rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored. |
+| rasapro.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
+| rasapro.replicaCount | int | `1` | replicaCount specifies number of replicas |
+| rasapro.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |
+| rasapro.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
+| rasapro.service | object | `{"port":80,"targetPort":8000,"type":"ClusterIP"}` | Define service |
+| rasapro.service.port | int | `80` | service.port specifies service port |
+| rasapro.service.targetPort | int | `8000` | service.targetPort specifies service target port |
+| rasapro.service.type | string | `"ClusterIP"` | service.type specifies service type |
+| rasapro.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | Define service account |
+| rasapro.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
+| rasapro.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
+| rasapro.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
+| rasapro.tolerations | list | `[]` | keycloak.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |

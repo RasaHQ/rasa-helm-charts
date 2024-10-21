@@ -113,6 +113,17 @@ Create the name of the keycloak service account to use for Keycloak
 {{- end }}
 
 {{/*
+Create the name of the rasapro service account to use for rasaspro
+*/}}
+{{- define "studio.rasapro.serviceAccountName" -}}
+{{- if .Values.rasapro.serviceAccount.create }}
+{{- default (include "studio.fullname" .) .Values.rasapro.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.rasapro.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the frontend service account to use for Web Client
 */}}
 {{- define "studio.webClient.serviceAccountName" -}}
@@ -221,6 +232,17 @@ Return image repository with tag and image name for Keycloak
 "{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
 {{- else -}}
 "{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return image repository with tag and image name for Rasapro
+*/}}
+{{- define "studio.rasapro.image" -}}
+{{- if hasSuffix "/" .Values.repository -}}
+"{{ .Values.rasapro.image.repository }}{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
+{{- else -}}
+"{{ .Values.rasapro.image.repository }}/{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
 

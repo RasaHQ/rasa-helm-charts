@@ -33,6 +33,16 @@ Environment Variables for Keycloak Containers
 {{- end -}}
 
 {{/*
+Environment Variables for rasapro Containers
+*/}}
+{{- define "studio.rasapro.env" -}}
+- name: RASA_PRO_LICENSE
+  value: {{ .Values.rasapro.rasaProLicense.secretKey | quote }}
+- name: OPENAI_API_KEY
+  value: {{ .Values.rasapro.openAiKey.secretKey | quote }}
+{{- end -}}
+
+{{/*
 Keycloak URL
 */}}
 {{- define "studio.keycloak.url" -}}

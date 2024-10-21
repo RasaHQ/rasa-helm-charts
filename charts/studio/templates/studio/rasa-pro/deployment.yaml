@@ -2,7 +2,7 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "studio.fullname" . }}-rasapro
+  name: rasapro-service
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
     app.kubernetes.io/component: studio-rasapro

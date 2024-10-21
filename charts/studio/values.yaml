@@ -765,18 +765,16 @@ rasapro:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
-  rasaProLicense:
-    # -- rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored.
-    secretName: "studio-secrets"
-    # -- rasaProLicense.secretKey defines the key in the K8s under which Rasa Pro License is stored.
-    secretKey: "RASA_PRO_LICENSE_SECRET_KEY"
+  environmentVariables:
+    RASA_PRO_LICENSE:
+      secret:
+        name: "studio-secrets"
+        key: "OPENAI_API_KEY_SECRET_KEY"
 
-  openAiKey:
-    # -- openAiKey.secretName defines the name of the secret under which OpenAI API key is stored.
-    secretName: "studio-secrets"
-    # -- openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret.
-    secretKey: "OPENAI_API_KEY_SECRET_KEY"
-
+    OPENAI_API_KEY:
+      secret:
+        name: "studio-secrets"
+        key: "OPENAI_API_KEY_SECRET_KEY"
   # -- keycloak.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:
     []

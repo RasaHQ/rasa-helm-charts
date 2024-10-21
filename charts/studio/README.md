@@ -387,6 +387,10 @@ modelService:
 | rasapro.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | rasapro.affinity | object | `{}` | keycloak.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasapro.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
+| rasapro.environmentVariables.OPENAI_API_KEY.secret.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
+| rasapro.environmentVariables.OPENAI_API_KEY.secret.name | string | `"studio-secrets"` |  |
+| rasapro.environmentVariables.RASA_PRO_LICENSE.secret.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
+| rasapro.environmentVariables.RASA_PRO_LICENSE.secret.name | string | `"studio-secrets"` |  |
 | rasapro.image.name | string | `"rasa-pro"` | image.name specifies image repository |
 | rasapro.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasapro.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/"` |  |
@@ -399,12 +403,8 @@ modelService:
 | rasapro.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | rasapro.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
 | rasapro.nodeSelector | object | `{}` | keycloak.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| rasapro.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
-| rasapro.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
 | rasapro.podAnnotations | object | `{}` | keycloak.podAnnotations defines annotations to add to the pod |
 | rasapro.podSecurityContext | object | `{"enabled":true}` | keycloak.podSecurityContext defines pod security context |
-| rasapro.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | rasaProLicense.secretKey defines the key in the K8s under which Rasa Pro License is stored. |
-| rasapro.rasaProLicense.secretName | string | `"studio-secrets"` | rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored. |
 | rasapro.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
 | rasapro.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | rasapro.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |

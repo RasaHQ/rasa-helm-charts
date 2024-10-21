@@ -239,10 +239,10 @@ Return image repository with tag and image name for Keycloak
 Return image repository with tag and image name for Rasapro
 */}}
 {{- define "studio.rasapro.image" -}}
-{{- if hasSuffix "/" .Values.repository -}}
+{{- if hasSuffix "/" .Values.rasapro.image.repository -}}
 "{{ .Values.rasapro.image.repository }}{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
 {{- else -}}
-"{{ .Values.rasapro.image.repository }}/{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
 

@@ -32,15 +32,6 @@ Environment Variables for Keycloak Containers
   value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
 {{- end -}}
 
-{{/*
-Environment Variables for rasapro Containers
-*/}}
-{{- define "studio.rasapro.env" -}}
-- name: RASA_PRO_LICENSE
-  value: {{ .Values.rasapro.rasaProLicense.secretKey | quote }}
-- name: OPENAI_API_KEY
-  value: {{ .Values.rasapro.openAiKey.secretKey | quote }}
-{{- end -}}
 
 {{/*
 Keycloak URL

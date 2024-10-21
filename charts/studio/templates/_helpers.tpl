@@ -242,7 +242,7 @@ Return image repository with tag and image name for Rasapro
 {{- if hasSuffix "/" .Values.rasapro.image.repository -}}
 "{{ .Values.rasapro.image.repository }}{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
+"{{ .Values.rasapro.image.repository }}/{{ .Values.rasapro.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
 

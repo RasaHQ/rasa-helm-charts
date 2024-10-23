@@ -95,12 +95,6 @@ modelService:
           value: "training-result-consumer-group"
         TRAINING_JOB_TOPIC:
           value: "helm-training-job"
-        GOOGLE_CLOUD_PROJECT:
-          value: "playground-studio"
-        CLOUDSDK_COMPUTE_ZONE:
-          value: "us-central1"
-        THIRD_PARTY_STORAGE_BUCKET:
-          value: "studio_model_training_service"
         STORAGE_TYPE:
           value: "gcs"
         TRAINING_STORAGE_BUCKET:
@@ -109,6 +103,18 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        GOOGLE_CLOUD_PROJECT:
+          value: "playground-studio"
+        CLOUDSDK_COMPUTE_ZONE:
+          value: "us-central1"
+        AWS_S3_SIGNATURE_VERSION:
+          value: "s3v4"
+        AWS_QUERYSTRING_AUTH:
+          value: "False"
+        AWS_S3_HOST:
+          value: "eu-central-1"
+        S3_USE_SIGV4:
+          value: "True"
         PERSISTOR_BACKEND:
           value: "postgres"
         POSTGRES_HOST:
@@ -441,6 +447,14 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+        AWS_S3_SIGNATURE_VERSION:
+          value: "s3v4"
+        AWS_QUERYSTRING_AUTH:
+          value: "False"
+        AWS_S3_HOST:
+          value: "eu-central-1"
+        S3_USE_SIGV4:
+          value: "True"
         PERSISTOR_BACKEND:
           value: "postgres"
         POSTGRES_HOST:
@@ -638,10 +652,6 @@ modelService:
           secret:
             name: "studio-secrets"
             key: "TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
-        OPENAI_API_KEY_SECRET_NAME:
-          value: "studio-secrets"
-        OPENAI_API_KEY_SECRET_KEY:
-          value: "OPENAI_API_KEY_SECRET_KEY"
 
       # -- envFrom is used to add environment variables from ConfigMap or Secret
       envFrom:
@@ -730,32 +740,3 @@ modelService:
       # -- Allow the deployment to schedule using affinity rules
       ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
       affinity: {}
-
-  persistence:
-    # -- Should the PV and PVC be created
-    # It is good practice to create volumes once and then reuse them.
-    # So set this value to true only when you are deploying the service for the first time.
-    # If you are redeploying the service, set this value to false.
-    create: true
-    # -- Type of the volume that will be used to store the training data
-    # Valid values: local, nfs
-    type: nfs
-    # -- If you are deploying to AWS and using EFS for volume, set this value to true.
-    aws: false
-    # -- FileSystemId of the AWS EFS volume
-    efs_id: ""
-    # -- Storage Class name for PV
-    storageClassName: "standard-rwo"
-    # -- Storage Capacity for PV
-    storageCapacity: 1Gi
-    # -- Storage requests for PVC
-    storageRequests: 1Gi
-    # -- DNS name or IP address of the NFS server
-    # This value is used only when type is set to nfs
-    nfsServer: "35.223.231.182"
-    # -- Directory from the host machine that will be mounted to the container for training data
-    # This value is used only when type is set to local
-    hostPath: ""
-    # -- Node on which the PV will be created
-    # This value is used only when type is set to local
-    localNodeName: ""

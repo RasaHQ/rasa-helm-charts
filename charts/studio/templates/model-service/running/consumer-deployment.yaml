@@ -57,7 +57,7 @@ spec:
             {{- toYaml .Values.modelService.running.consumer.resources | nindent 12 }}
           volumeMounts:
             - mountPath: /home
-              name: deployment-data
+              name: data
           {{- include "gcpCredentials.volumeMount" . | nindent 12 -}}
           {{- if .Values.modelService.running.consumer.volumeMounts }}
             {{- toYaml .Values.modelService.running.consumer.volumeMounts | nindent 12 }}
@@ -94,9 +94,9 @@ spec:
         {{- toYaml .Values.modelService.running.consumer.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
-        - name: deployment-data
-          persistentVolumeClaim:
-            claimName: model-running-service-data-pvc-{{ .Release.Namespace }}
+        - name: data
+          emptyDir:
+            sizeLimit: 500Mi
       {{- include "gcpCredentials.volume" . | nindent 8 -}}
       {{- if .Values.modelService.running.consumer.volumes }}
         {{- toYaml .Values.modelService.running.consumer.volumes | nindent 8 }}

@@ -3,7 +3,7 @@ kind: Config
 metadata:
   name: embedded-cluster-config
 spec:
-  version: 1.15.0+k8s-1.29
+  version: 1.16.0+k8s-1.30
   unsupportedOverrides:
     k0s: |
       config:

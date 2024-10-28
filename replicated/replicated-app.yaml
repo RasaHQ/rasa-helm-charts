@@ -22,8 +22,6 @@ spec:
     - studio/statefulset/model-running-service-consumer
     - studio/deployment/model-training-service-orchestrator
     - studio/statefulset/model-training-service-consumer
-    - studio/persistentvolumeclaims/model-running-service-data-pvc-studio
-    - studio/persistentvolumeclaims/model-training-service-data-pvc-studio
     - studio/deployment/nginx-reverse-proxy
   additionalImages:
     - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest

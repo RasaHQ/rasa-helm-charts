@@ -816,6 +816,9 @@ modelService:
     # awsSecretAccessKey:
     #   secretName: "studio-secrets"
     #   secretKey: "AWS_SECRET_ACCESS_KEY"
+    # awsS3signatureVersion: "s3v4"
+    # awsQuerystringAuth: "false"
+    # s3UseSigV4: "True"
     # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
     googleCloudProject: ""
     # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
@@ -1076,12 +1079,6 @@ modelService:
         # - name: <VOLUME_NAME>
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
-
-      # -- consumer.additionalContainers allows to specify additional containers for the deployment
-      additionalContainers: []
-      #  - name: extra
-      #    image: "busybox"
-      #    command: ["bash", "-c"]
 
       # -- consumer.annotations defines annotations to add to the pod
       podAnnotations:
@@ -1382,12 +1379,6 @@ modelService:
         #   mountPath: <CONTAINER_PATH>
         #   readOnly: true
 
-      # -- consumer.additionalContainers allows to specify additional containers for the deployment
-      additionalContainers: []
-      #  - name: extra
-      #    image: "busybox"
-      #    command: ["bash", "-c"]
-
       # -- consumer.annotations defines annotations to add to the pod
       podAnnotations:
         {}
@@ -1545,30 +1536,6 @@ modelService:
         # requests:
         #   cpu: 100m
         #   memory: 128Mi
-
-  persistence:
-    # -- Should the PV and PVC be created
-    create: true
-    # -- Type of the volume that will be used to store the training data
-    # Valid values: local, nfs. Leave this empty if you are using AWS EFS.
-    type: ""
-    # -- If you are deploying to AWS and using EFS for volume, set this value to true.
-    aws: true
-    # -- FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd"
-    efs_id: ""
-    # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server.
-    storageClassName: "standard-rwo"
-    # -- Storage Capacity for PV
-    storageCapacity: 1Gi
-    # -- Storage requests for PVC
-    storageRequests: 1Gi
-    # -- DNS name or IP address of the NFS server. This value is used only when type is set to nfs
-    nfsServer: ""
-    # -- Directory from the host machine that will be mounted to the container for training data. This value is used only when type is set to local
-    hostPath: ""
-    # -- Node on which the PV will be created
-    # This value is used only when type is set to local
-    localNodeName: ""
 
 # Network policy settings
 networkPolicy:

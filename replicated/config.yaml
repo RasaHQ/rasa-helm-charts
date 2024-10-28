@@ -258,77 +258,77 @@ spec:
           default: ""
           help_text: A custom URL endpoint for an S3-compatible storage service.
           when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-    - name: NFS
-      description: >
-        Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots. Select Embedded NFS to automatically deploy an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server. Select External NFS to connect to an existing, external NFS service such as AWS EFS.
-      title: NFS Server
-      items:
-        - name: nfs_type
-          type: radio
-          title: NFS Server
-          default: embedded_nfs
-          items:
-            - name: embedded_nfs
-              title: Embedded NFS
-            - name: external_nfs
-              title: External NFS
-        - name: persistence_type
-          type: text
-          title: Persistence Type
-          default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
-          help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: nfs_aws_type
-          type: bool
-          title: Using AWS NFS
-          default: "0"
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Please check this if you are using AWS NFS
-        - name: efs_id
-          type: text
-          title: AWS EFS volume ID
-          default: ""
-          help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
-          when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
-        - name: host_path
-          type: text
-          title: Host Path
-          default: /
-          help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: local_node_name
-          type: text
-          title: Local Node Name
-          default: ""
-          help_text: The hostname of the VM you are installing on to correctly provision the embedded NFS server. You can run `hostname` in the VM's shell to find this.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: storage_class_name
-          type: text
-          title: Storage Class name
-          default: "openebs-hostpath"
-          help_text: Storage Class name for Persistent Volume. If you are using AWS EFS then this should be `efs-sc`. If you are using a standard NFS server this should be `standard-rwo`.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: storage_capacity
-          type: text
-          title: Storage Capacity
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage Capacity for PV
-        - name: storage_requests
-          type: text
-          title: Storage Requests
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage requests for PVC
-        - name: nfs_server
-          type: text
-          title: NFS Server Address
-          default: ""
-          help_text: DNS name or IP address of your external NFS server.
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    # - name: NFS
+    #   description: >
+    #     Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots. Select Embedded NFS to automatically deploy an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server. Select External NFS to connect to an existing, external NFS service such as AWS EFS.
+    #   title: NFS Server
+    #   items:
+    #     - name: nfs_type
+    #       type: radio
+    #       title: NFS Server
+    #       default: embedded_nfs
+    #       items:
+    #         - name: embedded_nfs
+    #           title: Embedded NFS
+    #         - name: external_nfs
+    #           title: External NFS
+    #     - name: persistence_type
+    #       type: text
+    #       title: Persistence Type
+    #       default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
+    #       help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    #     - name: nfs_aws_type
+    #       type: bool
+    #       title: Using AWS NFS
+    #       default: "0"
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    #       help_text: Please check this if you are using AWS NFS
+    #     - name: efs_id
+    #       type: text
+    #       title: AWS EFS volume ID
+    #       default: ""
+    #       help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
+    #       when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
+    #     - name: host_path
+    #       type: text
+    #       title: Host Path
+    #       default: /
+    #       help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`.
+    #       required: true
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+    #     - name: local_node_name
+    #       type: text
+    #       title: Local Node Name
+    #       default: ""
+    #       help_text: The hostname of the VM you are installing on to correctly provision the embedded NFS server. You can run `hostname` in the VM's shell to find this.
+    #       required: true
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
+    #     - name: storage_class_name
+    #       type: text
+    #       title: Storage Class name
+    #       default: "openebs-hostpath"
+    #       help_text: Storage Class name for Persistent Volume. If you are using AWS EFS then this should be `efs-sc`. If you are using a standard NFS server this should be `standard-rwo`.
+    #       required: true
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    #     - name: storage_capacity
+    #       type: text
+    #       title: Storage Capacity
+    #       default: 1Gi
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    #       help_text: Storage Capacity for PV
+    #     - name: storage_requests
+    #       type: text
+    #       title: Storage Requests
+    #       default: 1Gi
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
+    #       help_text: Storage requests for PVC
+    #     - name: nfs_server
+    #       type: text
+    #       title: NFS Server Address
+    #       default: ""
+    #       help_text: DNS name or IP address of your external NFS server.
+    #       when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Database
       description: >
         Here you will configure how Rasa Studio connects to a database. Select Embedded Postgres to use an embedded Postgres database, meaning that you do not have to deploy and manage a Postgres database. We do not recommend this for production workloads. Select External Postgres to use an existing, external Postgres database.

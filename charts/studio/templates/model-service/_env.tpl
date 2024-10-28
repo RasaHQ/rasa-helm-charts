@@ -49,7 +49,7 @@ Environment Variables shared between MTS and MRS
       name: {{ .storage.awsSecretAccessKey.secretName | quote }}
       key: {{ .storage.awsSecretAccessKey.secretKey | quote }}
 {{- end }}
-- name: REGION_NAME
+- name: AWS_DEFAULT_REGION
   value: {{ .storage.regionName | quote }}
 {{- end }}
 {{- if eq .storage.type "gcs" }}
@@ -88,6 +88,16 @@ Environment Variables for Model Service Training Orchestrator
       name: {{ .Values.modelService.storage.storageServiceAccount.secretName | quote }}
       key: {{ .Values.modelService.storage.storageServiceAccount.secretKey | quote }}
 {{- end }}
+{{- if eq .Values.modelService.storage.type "aws_s3" }}
+- name: AWS_S3_SIGNATURE_VERSION
+  value: {{ .Values.modelService.storage.awsS3signatureVersion | quote }}
+- name: AWS_QUERYSTRING_AUTH
+  value: {{ .Values.modelService.storage.awsQuerystringAuth | quote }}
+- name: AWS_S3_HOST
+  value: {{ .Values.modelService.storage.regionName | quote }}
+- name: S3_USE_SIGV4
+  value: {{ .Values.modelService.storage.s3UseSigV4 | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -95,8 +105,6 @@ Environment Variables for Model Service Training Consumer
 */}}
 {{- define "modelServiceTraining.consumer.env" -}}
 {{- with .Values.modelService }}
-- name: KUBERNETES_DATA_PVC
-  value: "model-training-service-data-pvc-{{ $.Release.Namespace }}"
 - name: RASA_PRO_LICENSE_SECRET_NAME
   value: {{ .rasaProLicense.secretName | quote }}
 - name: RASA_PRO_LICENSE_SECRET_KEY
@@ -107,12 +115,29 @@ Environment Variables for Model Service Training Consumer
   value: {{ .openAiKey.secretKey | quote }}
 - name: BUCKET_NAME
   value: {{ .storage.bucketName | quote }}
-{{- if eq .storage.type "gcs" }}
-- name: TRAINING_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
-  valueFrom:
-    secretKeyRef:
-      name: {{ .storage.storageServiceAccount.secretName | quote }}
-      key: {{ .storage.storageServiceAccount.secretKey | quote }}
+{{ if eq .storage.type "gcs" }}
+{{- if not (empty .gcpCredentials.secretName) -}}
+- name: GOOGLE_APPLICATION_CREDENTIALS_SECRET_NAME
+  value: {{ .gcpCredentials.secretName }}
+{{ end }}
+{{- if not (empty .gcpCredentials.secretKey) -}}
+- name: GOOGLE_APPLICATION_CREDENTIALS_SECRET_KEY
+  value: {{ .gcpCredentials.secretKey }}
+{{- end }}
+{{- end }}
+{{- if eq .storage.type "aws_s3" }}
+{{- if .storage.awsAccessKeyId }}
+- name: AWS_ACCESS_KEY_ID_SECRET_NAME
+  value: {{ .storage.awsAccessKeyId.secretName }}
+- name: AWS_ACCESS_KEY_ID_SECRET_KEY
+  value: {{ .storage.awsAccessKeyId.secretKey }}
+{{- end }}
+{{- if .storage.awsSecretAccessKey }}
+- name: AWS_SECRET_ACCESS_KEY_SECRET_NAME
+  value: {{ .storage.awsSecretAccessKey.secretName }}
+- name: AWS_SECRET_ACCESS_KEY_SECRET_KEY
+  value: {{ .storage.awsSecretAccessKey.secretKey }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end -}}
@@ -146,6 +171,16 @@ Environment Variables for Model Service Running Orchestrator
       name: {{ .Values.modelService.storage.storageServiceAccount.secretName | quote }}
       key: {{ .Values.modelService.storage.storageServiceAccount.secretKey | quote }}
 {{- end }}
+{{- if eq .Values.modelService.storage.type "aws_s3" }}
+- name: AWS_S3_SIGNATURE_VERSION
+  value: {{ .Values.modelService.storage.awsS3signatureVersion | quote }}
+- name: AWS_QUERYSTRING_AUTH
+  value: {{ .Values.modelService.storage.awsQuerystringAuth | quote }}
+- name: AWS_S3_HOST
+  value: {{ .Values.modelService.storage.regionName | quote }}
+- name: S3_USE_SIGV4
+  value: {{ .Values.modelService.storage.s3UseSigV4 | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
@@ -165,12 +200,29 @@ Environment Variables for Model Service Running Consumer
   value: {{ .openAiKey.secretKey | quote }}
 - name: BUCKET_NAME
   value: {{ .storage.bucketName | quote }}
-{{- if eq .storage.type "gcs" }}
-- name: DEPLOYMENT_STORAGE_SIGNED_URL_SERVICE_ACCOUNT
-  valueFrom:
-    secretKeyRef:
-      name: {{ .storage.storageServiceAccount.secretName | quote }}
-      key: {{ .storage.storageServiceAccount.secretKey | quote }}
+{{ if eq .storage.type "gcs" }}
+{{- if not (empty .gcpCredentials.secretName) -}}
+- name: GOOGLE_APPLICATION_CREDENTIALS_SECRET_NAME
+  value: {{ .gcpCredentials.secretName }}
+{{ end }}
+{{- if not (empty .gcpCredentials.secretKey) -}}
+- name: GOOGLE_APPLICATION_CREDENTIALS_SECRET_KEY
+  value: {{ .gcpCredentials.secretKey }}
+{{- end }}
+{{- end }}
+{{- if eq .storage.type "aws_s3" }}
+{{- if .storage.awsAccessKeyId }}
+- name: AWS_ACCESS_KEY_ID_SECRET_NAME
+  value: {{ .storage.awsAccessKeyId.secretName }}
+- name: AWS_ACCESS_KEY_ID_SECRET_KEY
+  value: {{ .storage.awsAccessKeyId.secretKey }}
+{{- end }}
+{{- if .storage.awsSecretAccessKey }}
+- name: AWS_SECRET_ACCESS_KEY_SECRET_NAME
+  value: {{ .storage.awsSecretAccessKey.secretName }}
+- name: AWS_SECRET_ACCESS_KEY_SECRET_KEY
+  value: {{ .storage.awsSecretAccessKey.secretKey }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- with .Values.modelService.running.consumer }}

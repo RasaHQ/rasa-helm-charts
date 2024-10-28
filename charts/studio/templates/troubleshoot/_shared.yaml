@@ -21,7 +21,7 @@
       - warn:
           when: "< 1.26.0"
           message: |
-            You can run Rasa Studio Helm on your current cluster version, but your cluster is no longer supported 
+            You can run Rasa Studio Helm on your current cluster version, but your cluster is no longer supported
             by the Kubernetes community. If you have extended support available from your Kubernetes
             vendor you can ignore this warning.
           uri: https://kubernetes.io
@@ -44,17 +44,17 @@
     outcomes:
       - warn:
           when: "== docker-desktop"
-          message: | 
+          message: |
             You are able to run Rasa Studio Helm in Docker Desktop, but we recommend using a different
             Kubernetes distribution for your production installation.
       - warn:
           when: "== microk8s"
-          message: | 
+          message: |
             You are able to run Rasa Studio in MicroK8s, but we recommend using a different
             Kubernetes distribution for your production installation.
       - warn:
           when: "== minikube"
-          message: | 
+          message: |
             You are able to run Rasa Studio in Minikube, but we recommend using a different
             Kubernetes distribution for your production installation.
       - pass:
@@ -80,7 +80,7 @@
     checkName: Is sufficient memory available in the cluster
     outcomes:
       - fail:
-          when: "min(memoryAllocatable) < 8Gi" 
+          when: "min(memoryAllocatable) < 8Gi"
           message: Your cluster currently has too little memory available to install Rasa Studio
       - pass:
           message: Your cluster has sufficient memory available to install Rasa Studio

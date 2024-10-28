@@ -13,21 +13,21 @@ spec:
         namespace: "postgresql"
     - logs:
         name: app/replicated/logs
-        selector: 
+        selector:
           - app.kubernetes.io/name=replicated
           - app.kubernetes.io/={{ .Release.Name }}
         limits:
           maxAge: 720h
     - logs:
         name: app/{{ include "studio.fullname" . }}/logs
-        selector: 
+        selector:
           - app.kubernetes.io/name={{ include "studio.name" . }}
           - app.kubernetes.io/instance={{ .Release.Name }}
         limits:
           maxAge: 720h
     - logs:
         name: app/model-training-service/orchestrator
-        selector: 
+        selector:
           - app.kubernetes.io/name=model-training-service
           - app.kubernetes.io/instance={{ .Release.Name }}
           - app.kubernetes.io/component=model-training-service-orchestrator
@@ -35,13 +35,13 @@ spec:
           maxAge: 720h
     - logs:
         name: app/model-training-service/consumer
-        selector: 
+        selector:
           - app.kubernetes.io/component=model-training-service-consumer
         limits:
           maxAge: 720h
     - logs:
         name: app/model-running-service/orchestrator
-        selector: 
+        selector:
           - app.kubernetes.io/name=model-running-service
           - app.kubernetes.io/instance={{ .Release.Name }}
           - app.kubernetes.io/component=model-running-service-orchestrator
@@ -49,7 +49,7 @@ spec:
           maxAge: 720h
     - logs:
         name: app/model-running-service/consumer
-        selector: 
+        selector:
           - app.kubernetes.io/component=model-running-service-consumer
         limits:
           maxAge: 720h

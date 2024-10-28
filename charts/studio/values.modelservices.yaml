@@ -730,32 +730,3 @@ modelService:
       # -- Allow the deployment to schedule using affinity rules
       ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
       affinity: {}
-
-  persistence:
-    # -- Should the PV and PVC be created
-    # It is good practice to create volumes once and then reuse them.
-    # So set this value to true only when you are deploying the service for the first time.
-    # If you are redeploying the service, set this value to false.
-    create: true
-    # -- Type of the volume that will be used to store the training data
-    # Valid values: local, nfs
-    type: nfs
-    # -- If you are deploying to AWS and using EFS for volume, set this value to true.
-    aws: false
-    # -- FileSystemId of the AWS EFS volume
-    efs_id: ""
-    # -- Storage Class name for PV
-    storageClassName: "standard-rwo"
-    # -- Storage Capacity for PV
-    storageCapacity: 1Gi
-    # -- Storage requests for PVC
-    storageRequests: 1Gi
-    # -- DNS name or IP address of the NFS server
-    # This value is used only when type is set to nfs
-    nfsServer: "35.223.231.182"
-    # -- Directory from the host machine that will be mounted to the container for training data
-    # This value is used only when type is set to local
-    hostPath: ""
-    # -- Node on which the PV will be created
-    # This value is used only when type is set to local
-    localNodeName: ""

@@ -66,7 +66,10 @@ rasa:
     jwtMethod: HS256
     # -- settings.cors is CORS for the passed origin. Default is * to allow all origins
     cors: '*'
-
+    # -- settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case.
+    useDefaultArgs: true
+    # -- settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment.
+    mountDefaultConfigmap: true
     # settings.credentials enables credentials configuration for channel connectors
     credentials:
       # -- credentials.enabled enables credentials configuration for channel connectors
@@ -164,6 +167,8 @@ rasa:
   additionalArgs: []
   # -- rasa.command overrides the default command for the container
   command: []
+  # -- rasa.overrideEnv overrides all default environment variables
+  overrideEnv: []
   # -- rasa.additionalEnv adds additional environment variables
   additionalEnv: []
     # - name: SOME_CUSTOM_ENV_VAR

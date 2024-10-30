@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 1.2.6](https://img.shields.io/badge/Version-1.2.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0-rc2](https://img.shields.io/badge/Version-2.0.0--rc2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.6
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 1.2.6
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc2
 ```
 
 ## General Configuration
@@ -224,7 +224,7 @@ modelService:
 | modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
 | modelService.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
 | modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
-| modelService.persistence.create | bool | `true` | Should the PV and PVC be created |
+| modelService.persistence.create | bool | `false` | Should the PV and PVC be created |
 | modelService.persistence.efs_id | string | `""` | FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd" |
 | modelService.persistence.hostPath | string | `""` | Directory from the host machine that will be mounted to the container for training data. This value is used only when type is set to local |
 | modelService.persistence.localNodeName | string | `""` | Node on which the PV will be created This value is used only when type is set to local |
@@ -263,7 +263,7 @@ modelService:
 | modelService.running.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.running.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
 | modelService.running.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.running.enabled | bool | `true` |  |
+| modelService.running.enabled | bool | `false` |  |
 | modelService.running.orchestrator.additionalContainers | list | `[]` | orchestrator.additionalContainers allows to specify additional containers for the deployment |
 | modelService.running.orchestrator.affinity | object | `{}` | orchestrator.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.running.orchestrator.envFrom | list | `[]` | orchestrator.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -343,7 +343,7 @@ modelService:
 | modelService.training.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | modelService.training.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
 | modelService.training.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.training.enabled | bool | `true` |  |
+| modelService.training.enabled | bool | `false` |  |
 | modelService.training.orchestrator.additionalContainers | list | `[]` | orchestrator.additionalContainers allows to specify additional containers for the deployment |
 | modelService.training.orchestrator.affinity | object | `{}` | orchestrator.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | modelService.training.orchestrator.envFrom | list | `[]` | orchestrator.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -384,6 +384,49 @@ modelService:
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
+| rasa.enabled | bool | `true` |  |
+| rasa.fullnameOverride | string | `"rasapro"` |  |
+| rasa.rasa.command[0] | string | `"python"` |  |
+| rasa.rasa.command[1] | string | `"-m"` |  |
+| rasa.rasa.command[2] | string | `"rasa.model_service"` |  |
+| rasa.rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |  |
+| rasa.rasa.image.tag | string | `"3.10.7.dev1"` |  |
+| rasa.rasa.ingress.annotations | object | `{}` |  |
+| rasa.rasa.ingress.enabled | bool | `true` |  |
+| rasa.rasa.ingress.hosts[0].host | string | `"chart-example.local"` |  |
+| rasa.rasa.ingress.hosts[0].paths[0].path | string | `"/talk"` |  |
+| rasa.rasa.ingress.hosts[0].paths[0].pathType | string | `"prefix"` |  |
+| rasa.rasa.livenessProbe.enabled | bool | `true` |  |
+| rasa.rasa.livenessProbe.failureThreshold | int | `6` |  |
+| rasa.rasa.livenessProbe.httpGet.path | string | `"/"` |  |
+| rasa.rasa.livenessProbe.httpGet.port | int | `8000` |  |
+| rasa.rasa.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| rasa.rasa.livenessProbe.initialDelaySeconds | int | `30` |  |
+| rasa.rasa.livenessProbe.periodSeconds | int | `15` |  |
+| rasa.rasa.livenessProbe.successThreshold | int | `1` |  |
+| rasa.rasa.livenessProbe.timeoutSeconds | int | `5` |  |
+| rasa.rasa.overrideEnv[0].name | string | `"RASA_PRO_LICENSE"` |  |
+| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.key | string | `"RASA_PRO_LICENSE_SECRET_KEY"` |  |
+| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
+| rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
+| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
+| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
+| rasa.rasa.readinessProbe.enabled | bool | `true` |  |
+| rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
+| rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |
+| rasa.rasa.readinessProbe.httpGet.port | int | `8000` |  |
+| rasa.rasa.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
+| rasa.rasa.readinessProbe.initialDelaySeconds | int | `30` |  |
+| rasa.rasa.readinessProbe.periodSeconds | int | `15` |  |
+| rasa.rasa.readinessProbe.successThreshold | int | `1` |  |
+| rasa.rasa.readinessProbe.timeoutSeconds | int | `5` |  |
+| rasa.rasa.replicaCount | int | `1` |  |
+| rasa.rasa.resources | object | `{}` |  |
+| rasa.rasa.service.port | int | `80` |  |
+| rasa.rasa.service.targetPort | int | `8000` |  |
+| rasa.rasa.settings.mountDefaultConfigmap | bool | `false` |  |
+| rasa.rasa.settings.useDefaultArgs | bool | `false` |  |
+| rasa.rasaProServices.enabled | bool | `false` |  |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |

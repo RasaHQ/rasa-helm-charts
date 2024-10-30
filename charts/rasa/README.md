@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.5-rc](https://img.shields.io/badge/Version-1.1.5--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.4
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.4
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc
 ```
 
 ## General Configuration
@@ -254,6 +254,7 @@ rasaProServices:
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasa.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasa.nodeSelector | object | `{}` | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasa.overrideEnv | list | `[]` | rasa.overrideEnv overrides all default environment variables |
 | rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
 | rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
@@ -295,10 +296,12 @@ rasaProServices:
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
+| rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |
 | rasa.settings.telemetry.enabled | bool | `true` | telemetry.enabled allow Rasa to collect anonymous usage details |
+| rasa.settings.useDefaultArgs | bool | `true` | settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case. |
 | rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |

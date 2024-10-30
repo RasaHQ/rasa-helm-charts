@@ -827,7 +827,7 @@ modelService:
 
   # Model Training Service specific configuration
   training:
-    enabled: true
+    enabled: false
 
     # -- Define service account
     serviceAccount:
@@ -1137,7 +1137,7 @@ modelService:
 
   # Model Running Servic specific configuration
   running:
-    enabled: true
+    enabled: false
 
     # -- Define service account
     serviceAccount:
@@ -1548,7 +1548,7 @@ modelService:
 
   persistence:
     # -- Should the PV and PVC be created
-    create: true
+    create: false
     # -- Type of the volume that will be used to store the training data
     # Valid values: local, nfs. Leave this empty if you are using AWS EFS.
     type: ""
@@ -1614,3 +1614,73 @@ podLabels: {}
 
 replicated:
   enabled: false
+
+rasa:
+  enabled: true
+  fullnameOverride: rasapro
+
+  rasa:
+    replicaCount: 1
+    image:
+      repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
+      tag: 3.10.7.dev1
+
+    settings:
+      useDefaultArgs: false
+      mountDefaultConfigmap: false
+
+    command: ["python", "-m", "rasa.model_service"]
+
+    overrideEnv:
+      - name: "RASA_PRO_LICENSE" 
+        valueFrom:
+          secretKeyRef:
+            name: "studio-secrets"
+            key: "RASA_PRO_LICENSE_SECRET_KEY"
+      - name: OPENAI_API_KEY
+        valueFrom:
+          secretKeyRef:
+            name: "studio-secrets"
+            key: "OPENAI_API_KEY_SECRET_KEY"
+
+    service:
+      port: 80
+      targetPort: 8000
+
+    livenessProbe:
+      enabled: true
+      httpGet:
+        path: /
+        port: 8000
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      successThreshold: 1
+      timeoutSeconds: 5
+      failureThreshold: 6
+
+    readinessProbe:
+      enabled: true
+      httpGet:
+        path: /
+        port: 8000
+        scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 15
+      successThreshold: 1
+      timeoutSeconds: 5
+      failureThreshold: 6
+
+    ingress:
+      enabled: true
+      annotations: {}
+      hosts:
+        - host: chart-example.local
+          paths:
+            - path: /talk
+              pathType: prefix
+
+    resources: {}
+
+  rasaProServices:
+    enabled: false

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.1.5-rc](https://img.shields.io/badge/Version-1.1.5--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.5-rc1](https://img.shields.io/badge/Version-1.1.5--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc1
 ```
 
 ## General Configuration
@@ -241,7 +241,7 @@ rasaProServices:
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
-| rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
+| rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
 | rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
 | rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file |

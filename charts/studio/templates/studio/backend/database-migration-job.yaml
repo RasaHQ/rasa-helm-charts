@@ -56,8 +56,6 @@ spec:
             value: {{ .Values.config.database.host | quote }}
           - name: POSTGRES_PORT
             value: {{ .Values.config.database.port | quote }}
-          - name: POSTGRES_DATABASE
-            value: {{ .Values.config.database.modelServiceDatabaseName | quote }}
           - name: POSTGRES_USERNAME
             value: {{ .Values.config.database.username | quote }}
           - name: POSTGRES_PASSWORD

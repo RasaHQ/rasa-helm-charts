@@ -321,7 +321,7 @@ rasa:
       # kubernetes.io/tls-acme: "true"
     # -- ingress.hosts specifies the hosts for this ingress
     hosts:
-      - host: chart-example.local
+      - host: INGRESS.HOST.NAME
         paths:
           - path: /api
             pathType: Prefix

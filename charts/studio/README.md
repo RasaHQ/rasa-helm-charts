@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.0-rc2](https://img.shields.io/badge/Version-2.0.0--rc2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0-rc3](https://img.shields.io/badge/Version-2.0.0--rc3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc3
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc3
 ```
 
 ## General Configuration
@@ -124,15 +124,14 @@ modelService:
 | backend.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost |
-| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","modelServiceDatabaseName":"modelservice","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
+| config.database | object | `{"host":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. |
 | config.database.host | string | `""` | The database host name |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for keycloak user management service |
-| config.database.modelServiceDatabaseName | string | `"modelservice"` | The database name for model training and running service |
 | config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password |
 | config.database.port | string | `"5432"` | The database port |
 | config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
-| config.ingressHost | string | `"rasa.bot.com"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
+| config.ingressHost | string | `"INGRESS.HOST.NAME"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |
 | config.keycloak.url | string | `""` | config.keycloak.url allows to override the default service endpoint; format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS |
@@ -212,173 +211,6 @@ modelService:
 | keycloak.serviceAccount.create | bool | `false` | serviceAccount.create specifies whether a service account should be created |
 | keycloak.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | keycloak.tolerations | list | `[]` | keycloak.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.gcpCredentials | object | `{"secretKey":null,"secretName":null}` | GCP credentials for the service account. The secretKey is the base64 encoded service account JSON. This is only required if you are using GCS for object storage. |
-| modelService.gcpCredentials.secretKey | string | `nil` | gcpCredentials.secretName defines the Key in the secret ("studio-secrets") under which GCP service account JSON is stored |
-| modelService.gcpCredentials.secretName | string | `nil` | gcpCredentials.secretName defines the name of the secret ("studio-secrets") that contains the GCP service account JSON |
-| modelService.kafka.brokerAddress | string | `""` | kafka.brokerAddress is the URL:portNumber of the Kafka broker to which to connect to. For example "mykafka-88233-us1-kafka.upstash.io:9092" |
-| modelService.kafka.saslMechanism | string | `""` | kafka.saslMechanism defines Kafka SASL mechanism used to connect to Kafka Broker. # Values: PLAIN, SCRAM-SHA-256, SCRAM-SHA-512. You can leave this empty if you are not using SASL. |
-| modelService.kafka.saslPassword | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"studio-secrets"}` | kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled. |
-| modelService.kafka.saslUsername | string | `""` | kafka.saslUsername is a username used to connect to Kafka broker which has SASL authentication method enabled. |
-| modelService.kafka.securityProtocol | string | `""` | kafka.securityProtocol defines security protocol used to connect to Kafka broker. # Values: PLAINTEXT, SASL_PLAINTEXT, SSL, SASL_SSL |
-| modelService.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL). |
-| modelService.openAiKey.secretKey | string | `"OPENAI_API_KEY_SECRET_KEY"` | openAiKey.secretKey defines the Key in the K8s under which OpenAI API key is stored in K8s secret. |
-| modelService.openAiKey.secretName | string | `"studio-secrets"` | openAiKey.secretName defines the name of the secret under which OpenAI API key is stored. |
-| modelService.persistence.aws | bool | `true` | If you are deploying to AWS and using EFS for volume, set this value to true. |
-| modelService.persistence.create | bool | `false` | Should the PV and PVC be created |
-| modelService.persistence.efs_id | string | `""` | FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd" |
-| modelService.persistence.hostPath | string | `""` | Directory from the host machine that will be mounted to the container for training data. This value is used only when type is set to local |
-| modelService.persistence.localNodeName | string | `""` | Node on which the PV will be created This value is used only when type is set to local |
-| modelService.persistence.nfsServer | string | `""` | DNS name or IP address of the NFS server. This value is used only when type is set to nfs |
-| modelService.persistence.storageCapacity | string | `"1Gi"` | Storage Capacity for PV |
-| modelService.persistence.storageClassName | string | `"standard-rwo"` | Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server. |
-| modelService.persistence.storageRequests | string | `"1Gi"` | Storage requests for PVC |
-| modelService.persistence.type | string | `""` | Type of the volume that will be used to store the training data Valid values: local, nfs. Leave this empty if you are using AWS EFS. |
-| modelService.rasaProLicense.secretKey | string | `"RASA_PRO_LICENSE_SECRET_KEY"` | rasaProLicense.secretKey defines the key in the K8s under which Rasa Pro License is stored. |
-| modelService.rasaProLicense.secretName | string | `"studio-secrets"` | rasaProLicense.secretName defines the name of the secret under which Rasa Pro License is stored. |
-| modelService.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/"` | repository specifies image repository for Studio |
-| modelService.running.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
-| modelService.running.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelService.running.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.consumer.environmentVariables | object | `{"DEPLOYMENT_JOB_KAFKA_TOPIC":{"value":"deployment-job"},"KAFKA_DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"},"KUBERNETES_BASE_BOT_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID":{"value":"deployment-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"2500m"},"RASA_LIMITS_MEMORY":{"value":"2.5Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.consumer.environmentVariables.DEPLOYMENT_JOB_KAFKA_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.running.consumer.environmentVariables.KAFKA_DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.running.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model running |
-| modelService.running.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"2500m"}` | Value of CPU limit to allocate to the container for model training |
-| modelService.running.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"2.5Gi"}` | Value of Memory limit to allocate to the container for model training |
-| modelService.running.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
-| modelService.running.consumer.image.name | string | `"model-running-job-consumer"` | Specifies image name |
-| modelService.running.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.consumer.nodeSelector | object | `{}` | consumer.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.running.consumer.podAnnotations | object | `{}` | consumer.annotations defines annotations to add to the pod |
-| modelService.running.consumer.podSecurityContext | object | `{"enabled":true}` | consumer.podSecurityContext defines pod security context |
-| modelService.running.consumer.rasaReadinessProbe.failureThreshold | int | `50` | rasaReadinessProbe.failureThreshold is allowed number of failed readiness checks until Rasa container inside the pod is considered unreachable and unable to serve requests. # Total possible readiness check = initial delay + check interval x failure threshold |
-| modelService.running.consumer.rasaReadinessProbe.initialDelaySeconds | int | `10` | rasaReadinessProbe.initialDelaySeconds is initial delay after which readiness probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa is ready to serve requests. |
-| modelService.running.consumer.rasaReadinessProbe.intervalInSeconds | int | `5` | rasaReadinessProbe.intervalInSeconds interval (in seconds) on which readiness check will be performed. |
-| modelService.running.consumer.rasaStartupProbe.failureThreshold | int | `50` | rasaStartupProbe.failureThreshold is allowed number of failed startup checks until Rasa app inside the container is considered not started. # Total possible startup check = initial delay + check interval x failure threshold |
-| modelService.running.consumer.rasaStartupProbe.initialDelaySeconds | int | `10` | rasaStartupProbe.initialDelaySeconds is initial delay after which startup probe will be run on the container which is running Rasa deployment. # Readiness check assess if Rasa application is ready. |
-| modelService.running.consumer.rasaStartupProbe.intervalInSeconds | int | `5` | rasaStartupProbe.intervalInSeconds is interval (in seconds) on which startup check will be performed. |
-| modelService.running.consumer.replicaCount | int | `2` | consumer.replicaCount specifies number of replicas |
-| modelService.running.consumer.resources | object | `{}` | consumer.resources specifies the resources limits and requests |
-| modelService.running.consumer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.running.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.running.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
-| modelService.running.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.running.enabled | bool | `false` |  |
-| modelService.running.orchestrator.additionalContainers | list | `[]` | orchestrator.additionalContainers allows to specify additional containers for the deployment |
-| modelService.running.orchestrator.affinity | object | `{}` | orchestrator.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelService.running.orchestrator.envFrom | list | `[]` | orchestrator.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.running.orchestrator.environmentVariables | object | `{"DEPLOYMENT_JOB_TOPIC":{"value":"deployment-job"},"DEPLOYMENT_RESULT_CONSUMER_GROUP_ID":{"value":"deployment-result-consumer-group"},"DEPLOYMENT_RESULT_TOPIC":{"value":"deployment-result"}}` | orchestrator.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.running.orchestrator.environmentVariables.DEPLOYMENT_JOB_TOPIC | object | `{"value":"deployment-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.running.orchestrator.environmentVariables.DEPLOYMENT_RESULT_TOPIC | object | `{"value":"deployment-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.running.orchestrator.image.name | string | `"model-running-orchestrator"` | Specifies image name |
-| modelService.running.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.running.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":true,"hosts":[{"extraPaths":[],"host":null}],"labels":{},"tls":[]}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
-| modelService.running.orchestrator.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
-| modelService.running.orchestrator.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| modelService.running.orchestrator.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
-| modelService.running.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":null}]` | Specifies additional hosts for this ingress. Additional hosts are NOT required since a default host is added automatically. |
-| modelService.running.orchestrator.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
-| modelService.running.orchestrator.ingress.tls | list | `[]` | Spefices the TLS configuration for ingress |
-| modelService.running.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.running.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.running.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
-| modelService.running.orchestrator.podSecurityContext | object | `{"enabled":true}` | orchestrator.podSecurityContext defines pod security context |
-| modelService.running.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8001,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.running.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
-| modelService.running.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
-| modelService.running.orchestrator.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.running.orchestrator.service | object | `{"port":8001,"targetPort":8001,"type":"ClusterIP"}` | Define service |
-| modelService.running.orchestrator.service.port | int | `8001` | service.port specifies service port |
-| modelService.running.orchestrator.service.targetPort | int | `8001` | service.targetPort specifies service target port |
-| modelService.running.orchestrator.service.type | string | `"ClusterIP"` | service.type specifies service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
-| modelService.running.orchestrator.tolerations | list | `[]` | orchestrator.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.running.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
-| modelService.running.orchestrator.volumes | list | `[]` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.running.proxy.botTalkSubPath | string | `"/talk"` |  |
-| modelService.running.proxy.image | string | `"europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/nginx-unprivileged:1.27-alpine"` | proxy.image defines image settings |
-| modelService.running.proxy.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.running.proxy.podAnnotations | object | `{}` | proxy.podAnnotations defines annotations to add to the pod |
-| modelService.running.proxy.podSecurityContext | object | `{"enabled":true}` | proxy.podSecurityContext defines pod security context |
-| modelService.running.proxy.pullPolicy | string | `"IfNotPresent"` | proxy.pullPolicy specifies image pull policy |
-| modelService.running.proxy.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/healthz","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.running.proxy.replicaCount | int | `1` | proxy.replicaCount specifies number of replicas |
-| modelService.running.proxy.resolver | string | `"kube-dns.kube-system.svc.cluster.local"` |  |
-| modelService.running.proxy.resources | object | `{}` | proxy.resources specifies the resources limits and requests |
-| modelService.running.proxy.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | proxy.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.running.proxy.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
-| modelService.running.proxy.service.port | int | `80` | service.port specifies service port |
-| modelService.running.proxy.service.targetPort | int | `8080` | service.targetPort specifies service target port |
-| modelService.running.proxy.service.type | string | `"ClusterIP"` | service.type specifies service type |
-| modelService.running.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
-| modelService.running.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| modelService.running.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| modelService.running.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
-| modelService.runsInCluster | bool | `true` | modelService.runsInCluster describes if service is run inside cluster or not. # It is used during the initialization procedure or API clients which communicate with K8S API. |
-| modelService.storage.bucketName | string | `""` | Name of the storage bucket. Make sure to pre-create this bucket. |
-| modelService.storage.cloudskdComputeZone | string | `""` | Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located. |
-| modelService.storage.googleCloudProject | string | `""` | Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project. |
-| modelService.storage.regionName | string | `""` | Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located. |
-| modelService.storage.storageServiceAccount | object | `{"secretKey":"STORAGE_SIGNED_URL_SERVICE_ACCOUNT","secretName":"studio-secrets"}` | Needed if STORAGE_TYPE is set to gcs. The service account email address. |
-| modelService.storage.type | string | `""` | use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3 |
-| modelService.tag | string | `"3.3.3-latest"` | tag specifies image tag for Studio |
-| modelService.training.consumer.additionalContainers | list | `[]` | consumer.additionalContainers allows to specify additional containers for the deployment |
-| modelService.training.consumer.affinity | object | `{}` | consumer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelService.training.consumer.envFrom | list | `[]` | consumer.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.consumer.environmentVariables | object | `{"KAFKA_JOB_TOPIC":{"value":"training-job"},"KAFKA_RESULT_TOPIC":{"value":"training-result"},"KUBERNETES_BASE_TRAINING_DATA_PATH":{"value":"/home"},"KUBERNETES_JOB_BOT_CONFIG_MOUNT":{"value":"/app"},"MODEL_TRAINING_KAFKA_CONSUMER_ID":{"value":"training-result-consumer-group"},"RASA_DEBUG_LOGS":{"value":"false"},"RASA_LIMITS_CPU":{"value":"2500m"},"RASA_LIMITS_MEMORY":{"value":"2.5Gi"},"RASA_REQUESTS_CPU":{"value":"1000m"},"RASA_REQUESTS_MEMORY":{"value":"1Gi"}}` | consumer.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.consumer.environmentVariables.KAFKA_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.training.consumer.environmentVariables.KAFKA_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.training.consumer.environmentVariables.RASA_DEBUG_LOGS | object | `{"value":"false"}` | Set this to true if you want to include rasa debug logs during model training |
-| modelService.training.consumer.environmentVariables.RASA_LIMITS_CPU | object | `{"value":"2500m"}` | Value of CPU limit to allocate to the container for model training |
-| modelService.training.consumer.environmentVariables.RASA_LIMITS_MEMORY | object | `{"value":"2.5Gi"}` | Value of Memory limit to allocate to the container for model training |
-| modelService.training.consumer.environmentVariables.RASA_REQUESTS_CPU | object | `{"value":"1000m"}` | Value of CPU limit to allocate to the container for model training |
-| modelService.training.consumer.environmentVariables.RASA_REQUESTS_MEMORY | object | `{"value":"1Gi"}` | Value of Memory limit to allocate to the container for model training |
-| modelService.training.consumer.image.name | string | `"model-training-job-consumer"` |  |
-| modelService.training.consumer.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.consumer.nodeSelector | object | `{}` | consumer.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.training.consumer.podAnnotations | object | `{}` | consumer.annotations defines annotations to add to the pod |
-| modelService.training.consumer.podSecurityContext | object | `{"enabled":true}` | consumer.podSecurityContext defines pod security context |
-| modelService.training.consumer.replicaCount | int | `1` | consumer.replicaCount specifies number of replicas |
-| modelService.training.consumer.resources | object | `{}` | consumer.resources specifies the resources limits and requests |
-| modelService.training.consumer.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | consumer.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.training.consumer.tolerations | list | `[]` | consumer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.training.consumer.volumeMounts | list | `[]` | consumer.volumeMounts specifies additional volumes to mount |
-| modelService.training.consumer.volumes | list | `[]` | consumer.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.training.enabled | bool | `false` |  |
-| modelService.training.orchestrator.additionalContainers | list | `[]` | orchestrator.additionalContainers allows to specify additional containers for the deployment |
-| modelService.training.orchestrator.affinity | object | `{}` | orchestrator.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| modelService.training.orchestrator.envFrom | list | `[]` | orchestrator.envFrom is used to add environment variables from ConfigMap or Secret |
-| modelService.training.orchestrator.environmentVariables | object | `{"KAFKA_TRAINING_STATUS_UPDATE_TOPIC":{"value":"training-status-update"},"TRAINING_JOB_TOPIC":{"value":"training-job"},"TRAINING_RESULT_CONSUMER_GROUP_ID":{"value":"training-result-consumer-group"},"TRAINING_RESULT_TOPIC":{"value":"training-result"}}` | orchestrator.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| modelService.training.orchestrator.environmentVariables.KAFKA_TRAINING_STATUS_UPDATE_TOPIC | object | `{"value":"training-status-update"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.training.orchestrator.environmentVariables.TRAINING_JOB_TOPIC | object | `{"value":"training-job"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.training.orchestrator.environmentVariables.TRAINING_RESULT_TOPIC | object | `{"value":"training-result"}` | Kafka topic for internal service communication. Please make sure to pre-create this topic. |
-| modelService.training.orchestrator.image.name | string | `"model-training-orchestrator"` | Specifies image name |
-| modelService.training.orchestrator.image.pullPolicy | string | `"IfNotPresent"` | Specifies image pull policy |
-| modelService.training.orchestrator.ingress | object | `{"annotations":{},"className":"","enabled":false,"hosts":[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}],"labels":{},"tls":[]}` | orchestrator.ingress configures the ingress resource. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
-| modelService.training.orchestrator.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
-| modelService.training.orchestrator.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| modelService.training.orchestrator.ingress.enabled | bool | `false` | Specifies whether an ingress service should be created. An ingress for this service is not mandatory. |
-| modelService.training.orchestrator.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
-| modelService.training.orchestrator.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
-| modelService.training.orchestrator.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| modelService.training.orchestrator.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| modelService.training.orchestrator.nodeSelector | object | `{}` | orchestrator.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| modelService.training.orchestrator.podAnnotations | object | `{}` | orchestrator.podAnnotations defines annotations to add to the pod |
-| modelService.training.orchestrator.podSecurityContext | object | `{"enabled":true}` | orchestrator.podSecurityContext defines pod security context |
-| modelService.training.orchestrator.readinessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default readiness probe settings |
-| modelService.training.orchestrator.replicaCount | int | `1` | orchestrator.replicaCount specifies number of replicas |
-| modelService.training.orchestrator.resources | object | `{}` | orchestrator.resources specifies the resources limits and requests |
-| modelService.training.orchestrator.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | orchestrator.securityContext defines security context that allows you to overwrite the pod-level security context |
-| modelService.training.orchestrator.service | object | `{"port":8000,"targetPort":8000,"type":"ClusterIP"}` | Define service |
-| modelService.training.orchestrator.service.port | int | `8000` | service.port specifies service port |
-| modelService.training.orchestrator.service.targetPort | int | `8000` | service.targetPort specifies service target port |
-| modelService.training.orchestrator.service.type | string | `"ClusterIP"` | service.type specifies service type # Use `NodePort` if using GCP ingress controller, in ALL other cases keep `ClusterIP`. |
-| modelService.training.orchestrator.tolerations | list | `[]` | orchestrator.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| modelService.training.orchestrator.volumeMounts | string | `nil` | orchestrator.volumeMounts specifies additional volumes to mount |
-| modelService.training.orchestrator.volumes | string | `nil` | orchestrator.volumes specifies additional volumes # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| modelService.training.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | Define service account |
-| modelService.training.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| modelService.training.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| modelService.training.serviceAccount.name | string | `""` | serviceAccount.name defines the name of the service account to use. # If not set and create is true, a name is generated using the fullname template |
 | nameOverride | string | `""` | Override name of app |
 | networkPolicy.denyAll | bool | `false` | networkPolicy.denyAll defines whether to apply denyAll network policy |
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
@@ -393,7 +225,7 @@ modelService:
 | rasa.rasa.image.tag | string | `"3.10.7.dev1"` |  |
 | rasa.rasa.ingress.annotations | object | `{}` |  |
 | rasa.rasa.ingress.enabled | bool | `true` |  |
-| rasa.rasa.ingress.hosts[0] | object | `{"host":"chart-example.local","paths":[{"path":"/talk","pathType":"prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
+| rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.livenessProbe.enabled | bool | `true` |  |
 | rasa.rasa.livenessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.livenessProbe.httpGet.path | string | `"/"` |  |
@@ -409,7 +241,7 @@ modelService:
 | rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
-| rasa.rasa.overrideEnv[2] | object | `{"name":"RASA_MODEL_SERVER_BASE_URL","value":"https://{ingressHost}/talk"}` | Please update the below URL with the correct host name of the Studio deployment |
+| rasa.rasa.overrideEnv[2] | object | `{"name":"RASA_MODEL_SERVER_BASE_URL","value":"https://{INGRESS.HOST.NAME}/talk"}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |
@@ -420,7 +252,7 @@ modelService:
 | rasa.rasa.readinessProbe.successThreshold | int | `1` |  |
 | rasa.rasa.readinessProbe.timeoutSeconds | int | `5` |  |
 | rasa.rasa.replicaCount | int | `1` |  |
-| rasa.rasa.resources | object | `{}` |  |
+| rasa.rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
 | rasa.rasa.service.port | int | `80` |  |
 | rasa.rasa.service.targetPort | int | `8000` |  |
 | rasa.rasa.settings.mountDefaultConfigmap | bool | `false` |  |

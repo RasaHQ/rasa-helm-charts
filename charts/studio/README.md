@@ -393,9 +393,7 @@ modelService:
 | rasa.rasa.image.tag | string | `"3.10.7.dev1"` |  |
 | rasa.rasa.ingress.annotations | object | `{}` |  |
 | rasa.rasa.ingress.enabled | bool | `true` |  |
-| rasa.rasa.ingress.hosts[0].host | string | `"chart-example.local"` |  |
-| rasa.rasa.ingress.hosts[0].paths[0].path | string | `"/talk"` |  |
-| rasa.rasa.ingress.hosts[0].paths[0].pathType | string | `"prefix"` |  |
+| rasa.rasa.ingress.hosts[0] | object | `{"host":"chart-example.local","paths":[{"path":"/talk","pathType":"prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.livenessProbe.enabled | bool | `true` |  |
 | rasa.rasa.livenessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.livenessProbe.httpGet.path | string | `"/"` |  |
@@ -411,6 +409,7 @@ modelService:
 | rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
+| rasa.rasa.overrideEnv[2] | object | `{"name":"RASA_MODEL_SERVER_BASE_URL","value":"https://{ingressHost}/talk"}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |

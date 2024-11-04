@@ -438,7 +438,8 @@ eventIngestion:
   # -- Define image settings
   image:
     # -- image.name specifies image repository
-    name: "studio-event-ingestion"
+    name:
+      "studio-event-ingestion"
       # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
 
@@ -1632,7 +1633,7 @@ rasa:
     command: ["python", "-m", "rasa.model_service"]
 
     overrideEnv:
-      - name: "RASA_PRO_LICENSE" 
+      - name: "RASA_PRO_LICENSE"
         valueFrom:
           secretKeyRef:
             name: "studio-secrets"
@@ -1642,6 +1643,9 @@ rasa:
           secretKeyRef:
             name: "studio-secrets"
             key: "OPENAI_API_KEY_SECRET_KEY"
+      # -- Please update the below URL with the correct host name of the Studio deployment
+      - name: RASA_MODEL_SERVER_BASE_URL
+        value: "https://{ingressHost}/talk"
 
     service:
       port: 80
@@ -1675,6 +1679,7 @@ rasa:
       enabled: true
       annotations: {}
       hosts:
+        # -- Please update the below URL with the correct host name of the Studio deployment
         - host: chart-example.local
           paths:
             - path: /talk

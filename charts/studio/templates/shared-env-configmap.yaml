@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: shared-environment
+  namespace: {{ .Release.Namespace }}
+data:
+  RASA_MODEL_SERVER_BASE_URL: "{{ .Values.config.ingressHost }}/talk"
+  KEYCLOAK_URL: "http://{{ include "studio.fullname" . }}-keycloak/auth"
+  KEYCLOAK_REALM: "{{ .Values.backend.environmentVariables.KEYCLOAK_REALM.value }}"

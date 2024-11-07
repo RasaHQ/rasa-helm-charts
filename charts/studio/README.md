@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.0-rc3](https://img.shields.io/badge/Version-2.0.0--rc3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0-rc4](https://img.shields.io/badge/Version-2.0.0--rc4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc4
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc4
 ```
 
 ## General Configuration
@@ -221,6 +221,7 @@ modelService:
 | rasa.rasa.command[0] | string | `"python"` |  |
 | rasa.rasa.command[1] | string | `"-m"` |  |
 | rasa.rasa.command[2] | string | `"rasa.model_service"` |  |
+| rasa.rasa.envFrom[0].configMapRef.name | string | `"shared-environment"` |  |
 | rasa.rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |  |
 | rasa.rasa.image.tag | string | `"3.10.7.dev1"` |  |
 | rasa.rasa.ingress.annotations | object | `{}` |  |
@@ -241,9 +242,6 @@ modelService:
 | rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
-| rasa.rasa.overrideEnv[2] | object | `{"name":"RASA_MODEL_SERVER_BASE_URL","value":"https://{INGRESS.HOST.NAME}/talk"}` | Please update the below URL with the correct host name of the Studio deployment |
-| rasa.rasa.overrideEnv[3] | object | `{"name":"KEYCLOAK_URL","value":"http://studio-keycloak/auth"}` | Keycloak URL for authentication using internal Keycloak service |
-| rasa.rasa.overrideEnv[4] | object | `{"name":"KEYCLOAK_REALM","value":"rasa-studio"}` | Keycloak realm name |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |

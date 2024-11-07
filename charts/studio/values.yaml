@@ -824,15 +824,10 @@ rasa:
           secretKeyRef:
             name: "studio-secrets"
             key: "OPENAI_API_KEY_SECRET_KEY"
-      # -- Please update the below URL with the correct host name of the Studio deployment
-      - name: RASA_MODEL_SERVER_BASE_URL
-        value: "https://{INGRESS.HOST.NAME}/talk"
-      # -- Keycloak URL for authentication using internal Keycloak service
-      - name: "KEYCLOAK_URL"
-        value: "http://studio-keycloak/auth"
-      # -- Keycloak realm name
-      - name: KEYCLOAK_REALM
-        value: "rasa-studio"
+
+    envFrom:
+      - configMapRef:
+          name: shared-environment
 
     service:
       port: 80

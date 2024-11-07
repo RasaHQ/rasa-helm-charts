@@ -242,6 +242,8 @@ modelService:
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
 | rasa.rasa.overrideEnv[2] | object | `{"name":"RASA_MODEL_SERVER_BASE_URL","value":"https://{INGRESS.HOST.NAME}/talk"}` | Please update the below URL with the correct host name of the Studio deployment |
+| rasa.rasa.overrideEnv[3] | object | `{"name":"KEYCLOAK_URL","value":"http://studio-keycloak/auth"}` | Keycloak URL for authentication using internal Keycloak service |
+| rasa.rasa.overrideEnv[4] | object | `{"name":"KEYCLOAK_REALM","value":"rasa-studio"}` | Keycloak realm name |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |

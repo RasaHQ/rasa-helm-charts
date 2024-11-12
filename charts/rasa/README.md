@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.1.5-rc1](https://img.shields.io/badge/Version-1.1.5--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.1.5-rc3](https://img.shields.io/badge/Version-1.1.5--rc3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc1
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc3
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc1
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.5-rc3
 ```
 
 ## General Configuration
@@ -213,6 +213,7 @@ rasaProServices:
 | duckling.volumes | list | `[]` | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | fullnameOverride | string | `""` | fullnameOverride overrides the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
+| global.ingressHost | string | `nil` |  |
 | hostAliases | list | `[]` | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable |
 | hostNetwork | bool | `false` | hostNetwork controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets |
@@ -240,7 +241,7 @@ rasaProServices:
 | rasa.image.tag | string | `"3.8.10-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
+| rasa.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
 | rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
 | rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
 | rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |

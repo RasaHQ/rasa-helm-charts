@@ -309,7 +309,7 @@ rasa:
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- ingress.enabled specifies whether an ingress service should be created
-    enabled: false
+    enabled: true
     # -- ingress.className specifies the ingress className to be used
     className: ""
     # -- ingress.lables defines labels to add to the ingress
@@ -602,6 +602,7 @@ global:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+  ingressHost:
 
 # -- hostNetwork controls whether the pod may use the node network namespace
 hostNetwork: false

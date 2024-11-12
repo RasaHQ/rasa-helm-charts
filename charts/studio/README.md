@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.0-rc4](https://img.shields.io/badge/Version-2.0.0--rc4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0-rc5](https://img.shields.io/badge/Version-2.0.0--rc5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc5
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.0-rc5
 ```
 
 ## General Configuration
@@ -179,6 +179,7 @@ modelService:
 | eventIngestion.volumes | list | `[]` | eventIngestion.volumes specify additional volumes for the Studio event ingestion container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
+| global.ingressHost | string | `nil` |  |
 | hostNetwork | bool | `false` | Controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | imagePullSecret defines repository pull secrets |
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
@@ -260,7 +261,6 @@ modelService:
 | rasa.rasaProServices.enabled | bool | `false` |  |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| studioEnabled | bool | `true` | studioEnabled defines if Studio will be deployed # Disable this in case you only want to deploy MTS/MRS |
 | tag | string | `"1.7.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |

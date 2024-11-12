@@ -1,4 +1,3 @@
-{{- if .Values.studioEnabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -63,4 +62,3 @@ spec:
               secretKeyRef:
                 name: {{ .Values.config.database.password.secretName | quote }}
                 key: {{ .Values.config.database.password.secretKey | quote }}
-{{- end }}

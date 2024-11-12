@@ -16,10 +16,6 @@ imagePullSecrets:
   []
   # - name: regcred
 
-# -- studioEnabled defines if Studio will be deployed
-## Disable this in case you only want to deploy MTS/MRS
-studioEnabled: true
-
 # -- repository specifies image repository for Studio
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
@@ -28,7 +24,7 @@ tag: "1.7.0"
 
 config:
   # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
-  ingressHost: INGRESS.HOST.NAME
+  ingressHost: &dns_hostname INGRESS.HOST.NAME
   # -- Define if you will be using https or http with the ingressHost
   connectionType: "http"
   # -- The postgres database instance details for Studio to connect to.
@@ -767,6 +763,7 @@ global:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+  ingressHost:
 
 # -- Controls whether the pod may use the node network namespace
 hostNetwork: false
@@ -862,7 +859,7 @@ rasa:
       annotations: {}
       hosts:
         # -- Please update the below URL with the correct host name of the Studio deployment
-        - host: INGRESS.HOST.NAME
+        - host: *dns_hostname
           paths:
             - path: /talk
               pathType: prefix

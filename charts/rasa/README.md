@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.0-rc](https://img.shields.io/badge/Version-1.2.0--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.0-rc1](https://img.shields.io/badge/Version-1.2.0--rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0-rc
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0-rc1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0-rc
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0-rc1
 ```
 
 ## General Configuration
@@ -256,6 +256,15 @@ rasaProServices:
 | rasa.nodeSelector | object | `{}` | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasa.overrideEnv | list | `[]` | rasa.overrideEnv overrides all default environment variables |
 | rasa.persistence.create | bool | `false` |  |
+| rasa.persistence.csi.driver | string | `nil` |  |
+| rasa.persistence.csi.fsType | string | `nil` |  |
+| rasa.persistence.csi.volumeHandle | string | `nil` |  |
+| rasa.persistence.hostPath.path | string | `nil` |  |
+| rasa.persistence.hostPath.type | string | `nil` |  |
+| rasa.persistence.storageCapacity | string | `"1Gi"` |  |
+| rasa.persistence.storageClassName | string | `nil` |  |
+| rasa.persistence.storageRequests | string | `"1Gi"` |  |
+| rasa.persistence.type | string | `"csi"` |  |
 | rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
 | rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |

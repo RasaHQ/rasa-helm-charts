@@ -12,7 +12,17 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.rasa.persistence.storageClassName }} 
+  storageClassName: {{ .Values.rasa.persistence.storageClassName }}
+  {{- if eq .Values.rasa.persistence.type "csi" }}
+  csi:
+    driver: {{ .Values.rasa.persistence.csi.driver }}
+    volumeHandle: {{ .Values.rasa.persistence.csi.volumeHandle | default "studio-pv" }}
+    fsType: {{ .Values.rasa.persistence.csi.fsType | default "ext4" }}
+  {{- else if eq .Values.rasa.persistence.type "hostPath" }}
+  hostPath:
+    path: {{ .Values.rasa.persistence.hostPath.path | default "/mnt/data" }}
+    type: {{ .Values.rasa.persistence.hostPath.type | default "DirectoryOrCreate" }}
+  {{- end }}
   claimRef:
     name: rasa-pro-data-pvc-{{ .Release.Namespace }}
     namespace: {{ .Release.Namespace }}

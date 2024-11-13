@@ -869,6 +869,11 @@ rasa:
       storageCapacity: 1Gi
       storageRequests: 1Gi
       storageClassName:
+      type: csi
+      csi:
+        driver:
+        fsType:
+        volumeHandle:
 
     # -- rasa.resources specifies the resources limits and requests
     resources: {}

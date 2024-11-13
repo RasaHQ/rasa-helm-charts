@@ -77,10 +77,6 @@ spec:
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
             - name: API_URL
               value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}              
-            - name: MODEL_TRAINING_MOCK_ENABLED
-              value: "false"
-            - name: MODEL_RUNNING_MOCK_ENABLED
-              value: "false"
             - name: KEYCLOAK_API_GRANT_TYPE
               {{- if .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE }}
               value: {{ .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE.value | quote }}
@@ -94,7 +90,6 @@ spec:
               value: "http://rasapro.{{ .Release.Namespace }}:80"
               {{- end }}
             {{- range $key, $value := .Values.backend.environmentVariables }}
-            {{- if and (not (eq $key "MODEL_TRAINING_MOCK_ENABLED")) (not (eq $key "MTS_API_URL")) (not (eq $key "MRS_API_URL")) }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -104,7 +99,6 @@ spec:
                   name: {{ $value.secret.name }}
                   key: {{ $value.secret.key }}
               {{- end }}
-            {{- end }}
             {{- end }}
           {{- if .Values.backend.envFrom }}
           envFrom:

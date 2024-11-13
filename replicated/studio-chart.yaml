@@ -83,7 +83,7 @@ spec:
         waitFotItContainer:
           image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
@@ -97,7 +97,7 @@ spec:
         # -- Keycloak client id
         KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
@@ -150,7 +150,7 @@ spec:
         KC_PROXY:
           value: '{{repl ConfigOption "keycloak_proxy" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
@@ -266,7 +266,7 @@ spec:
             DEPLOYMENT_JOB_TOPIC:
               value: '{{repl ConfigOption "deployment_job_topic" }}'
           ingress:
-            className: '{{repl ConfigOption "ingress_class" }}'
+            className: nginx
             annotations:
               nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
               nginx.ingress.kubernetes.io/proxy-buffers-number: "8"

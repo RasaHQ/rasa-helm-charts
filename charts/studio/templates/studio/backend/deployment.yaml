@@ -75,6 +75,8 @@ spec:
             {{- include "studio.keycloak.url" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
+            - name: API_URL
+              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}              
             - name: MODEL_TRAINING_MOCK_ENABLED
               value: "false"
             - name: MODEL_RUNNING_MOCK_ENABLED
@@ -85,15 +87,9 @@ spec:
               {{- else }}
               value: "password"
               {{- end }}
-            - name: MTS_API_URL
-              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
-              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
-              {{- else }}
-              value: "http://rasapro.{{ .Release.Namespace }}:80"
-              {{- end }}
-            - name: MRS_API_URL
-              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
-              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
+            - name: MS_API_URL
+              {{- if .Values.backend.environmentVariables.MS_API_URL }}
+              value: {{ .Values.backend.environmentVariables.MS_API_URL.value | quote }}
               {{- else }}
               value: "http://rasapro.{{ .Release.Namespace }}:80"
               {{- end }}

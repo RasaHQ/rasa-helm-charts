@@ -15,6 +15,11 @@
 - name: app-dir
   emptyDir: {}
 {{- end }}
+{{ if .Values.rasa.persistence.create -}}
+- name: model-data
+  persistentVolumeClaim:
+    claimName: rasa-pro-data-pvc-{{ .Release.Namespace }}
+{{- end -}}
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}
@@ -30,4 +35,8 @@
   name: "rasa-configuration"
   readOnly: true
 {{- end }}
+{{ if .Values.rasa.persistence.create -}}
+- mountPath: "/app/working-data"
+  name: model-data
+{{- end -}}
 {{- end -}}

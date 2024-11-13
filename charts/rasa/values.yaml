@@ -21,9 +21,6 @@ rasa:
   # Disable this if you want to deploy ONLY Rasa Pro Services
   enabled: true
 
-  # -- rasa.deployOSS enables Rasa Open Source deployment
-  deployOSS: false
-
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
   # rasa.image defines image settings
@@ -309,7 +306,7 @@ rasa:
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
     # -- ingress.enabled specifies whether an ingress service should be created
-    enabled: true
+    enabled: false
     # -- ingress.className specifies the ingress className to be used
     className: ""
     # -- ingress.lables defines labels to add to the ingress
@@ -356,6 +353,13 @@ rasa:
     # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
+
+  # rasa.persistence creates PV and PVC to be used as model service. DO NOT use this if you are only running Rasa Pro.
+  persistence:
+    create: false
+    # storageCapacity: 1Gi
+    # storageRequests: 1Gi
+    # storageClassName:
 
   # -- rasa.nodeSelector allows the deployment to be scheduled on selected nodes
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector

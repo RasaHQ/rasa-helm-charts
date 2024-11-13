@@ -20,7 +20,7 @@ Environment Variables for Rasa Containers
 - name: "JWT_METHOD"
   value: {{ .jwtMethod | quote }}
 # Rasa Pro License
-{{- if or $.Values.rasaProServices.enabled (and $.Values.rasa.enabled (not $.Values.rasa.deployOSS)) }}
+{{- if or $.Values.rasaProServices.enabled $.Values.rasa.enabled }}
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
     secretKeyRef:

@@ -243,6 +243,10 @@ modelService:
 | rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
+| rasa.rasa.persistence.create | bool | `true` |  |
+| rasa.rasa.persistence.storageCapacity | string | `"1Gi"` |  |
+| rasa.rasa.persistence.storageClassName | string | `nil` |  |
+| rasa.rasa.persistence.storageRequests | string | `"1Gi"` |  |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |

@@ -864,6 +864,12 @@ rasa:
             - path: /talk
               pathType: prefix
 
+    persistence:
+      create: true
+      storageCapacity: 1Gi
+      storageRequests: 1Gi
+      storageClassName:
+
     # -- rasa.resources specifies the resources limits and requests
     resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

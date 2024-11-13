@@ -70,7 +70,7 @@ spec:
           {{- if .Values.rasa.args }}
           args:
             {{- toYaml .Values.rasa.args | nindent 12 }}
-          {{- else if .Values.rasa.settings.useDefaultArgs }}
+          {{- else if .Values.rasa.settings.useDefaultArgs | default true }}
           args:
             {{- include "rasa.defaultArgs" . | nindent 12 }}
           {{- if .Values.rasa.additionalArgs }}

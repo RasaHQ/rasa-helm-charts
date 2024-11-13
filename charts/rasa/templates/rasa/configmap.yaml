@@ -1,4 +1,4 @@
-{{- if .Values.rasa.settings.mountDefaultConfigmap }}
+{{- if .Values.rasa.settings.mountDefaultConfigmap | default true }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -24,7 +24,7 @@ data:
 {{- end }}
 {{- if .lockStore.enabled }}
     lock_store:
-      {{- if and $.Values.rasa.enabled .lockStore.useConcurrent ( not $.Values.rasa.deployOSS ) }}
+      {{- if and $.Values.rasa.enabled .lockStore.useConcurrent }}
       type: "concurrent_redis"
       host: {{ .lockStore.url }}
       {{- else }}
@@ -41,7 +41,7 @@ data:
     event_broker:
       {{- omit .eventBroker "enabled" | toYaml | nindent 6 }}
 {{- end }}
-{{- if and .tracing.enabled $.Values.rasa.enabled ( not $.Values.rasa.deployOSS ) }}
+{{- if and .tracing.enabled $.Values.rasa.enabled }}
     tracing:
       {{- omit .tracing "enabled" | toYaml | nindent 6 }}
 {{- end }}

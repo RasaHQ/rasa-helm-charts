@@ -39,8 +39,5 @@ spec:
     requests:
       storage: {{ .Values.rasa.persistence.storageRequests }}
   storageClassName: {{ .Values.rasa.persistence.storageClassName }} 
-  # selector:
-  #   matchLabels:
-  #     name: rasa-pro-data-pv-{{ .Release.Namespace }}
 ---
 {{- end }}

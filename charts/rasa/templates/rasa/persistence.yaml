@@ -16,7 +16,7 @@ spec:
   {{- if eq .Values.rasa.persistence.type "csi" }}
   csi:
     driver: {{ .Values.rasa.persistence.csi.driver }}
-    volumeHandle: {{ .Values.rasa.persistence.csi.volumeHandle | default "studio-pv" }}
+    volumeHandle: {{ .Values.rasa.persistence.csi.volumeHandle }}
     fsType: {{ .Values.rasa.persistence.csi.fsType | default "ext4" }}
   {{- else if eq .Values.rasa.persistence.type "hostPath" }}
   hostPath:

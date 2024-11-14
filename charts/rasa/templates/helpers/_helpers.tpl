@@ -152,7 +152,7 @@ Determine rasa server to run with arguments
 - run
 {{- if .Values.rasa.settings.enableApi }}
 - --enable-api
-{{- end -}}
+{{- end }}
 - --port
 - "{{ .Values.rasa.settings.port }}"
 - --cors

@@ -1,4 +1,4 @@
-{{- if .Values.rasa.persistence.create | default false -}}
+{{- if .Values.rasa.persistence.create -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:

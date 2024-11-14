@@ -111,9 +111,6 @@ backend:
     # * * * * *
     DELETE_CONVERSATIONS_CRON_EXPRESSION:
       value: "0 * * * *"
-    # -- The complete registry URL of the Rasa Plus docker image to be used for training
-    DOCKER_IMAGE_TAG:
-      value: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest"
 
   # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom:
@@ -862,7 +859,7 @@ rasa:
         - host: *dns_hostname
           paths:
             - path: /talk
-              pathType: prefix
+              pathType: Prefix
 
     persistence:
       create: true

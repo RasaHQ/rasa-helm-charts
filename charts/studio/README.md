@@ -250,6 +250,7 @@ modelService:
 | rasa.rasa.persistence.storageClassName | string | `nil` |  |
 | rasa.rasa.persistence.storageRequests | string | `"1Gi"` |  |
 | rasa.rasa.persistence.type | string | `"csi"` |  |
+| rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
 | rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |

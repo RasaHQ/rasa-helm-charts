@@ -872,6 +872,10 @@ rasa:
         fsType:
         volumeHandle:
 
+    podSecurityContext:
+      # -- User ID of the container to access the mounted volume
+      fsGroup: 1001
+
     # -- rasa.resources specifies the resources limits and requests
     resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious

@@ -357,21 +357,13 @@ rasa:
   # rasa.persistence creates PV and PVC to be used as model service. DO NOT use this if you are only running Rasa Pro.
   persistence:
     create: false
-    storageCapacity: 1Gi
-    storageRequests: 1Gi
     storageClassName:
-    # csi or hostPath
-    type: csi
-    csi:
-      # csi driver
-      driver:
-      # file system type, default ext4
-      fsType:
-      # file system ID, efs ID...
-      volumeHandle:
+    storageRequests: 1Gi
+    storageCapacity: 1Gi
     hostPath:
-      path:
-      type:
+      enabled: false
+      # path:
+      # type:
 
   # -- rasa.nodeSelector allows the deployment to be scheduled on selected nodes
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector

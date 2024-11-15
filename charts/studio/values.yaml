@@ -866,11 +866,8 @@ rasa:
       storageCapacity: 1Gi
       storageRequests: 1Gi
       storageClassName:
-      type: csi
-      csi:
-        driver:
-        fsType:
-        volumeHandle:
+      hostPath:
+        enabled: false
 
     podSecurityContext:
       # -- User ID of the container to access the mounted volume

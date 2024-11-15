@@ -235,7 +235,8 @@ spec:
           storageCapacity: 1Gi
           storageRequests: 1Gi
           storageClassName: openebs-hostpath
-          type: hostPath
+          hostPath:
+            enabled: true
 
         # -- rasa.resources specifies the resources limits and requests
         resources: {}

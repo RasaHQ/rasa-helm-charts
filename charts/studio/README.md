@@ -243,13 +243,10 @@ modelService:
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
 | rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
 | rasa.rasa.persistence.create | bool | `true` |  |
-| rasa.rasa.persistence.csi.driver | string | `nil` |  |
-| rasa.rasa.persistence.csi.fsType | string | `nil` |  |
-| rasa.rasa.persistence.csi.volumeHandle | string | `nil` |  |
+| rasa.rasa.persistence.hostPath.enabled | bool | `false` |  |
 | rasa.rasa.persistence.storageCapacity | string | `"1Gi"` |  |
 | rasa.rasa.persistence.storageClassName | string | `nil` |  |
 | rasa.rasa.persistence.storageRequests | string | `"1Gi"` |  |
-| rasa.rasa.persistence.type | string | `"csi"` |  |
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
 | rasa.rasa.readinessProbe.enabled | bool | `true` |  |
 | rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |

@@ -76,7 +76,7 @@ spec:
             - name: WEB_CLIENT_URL
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
             - name: API_URL
-              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}              
+              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}/api"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"{{ end }}              
             - name: KEYCLOAK_API_GRANT_TYPE
               {{- if .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE }}
               value: {{ .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE.value | quote }}

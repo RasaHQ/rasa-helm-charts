@@ -354,17 +354,6 @@ spec:
         Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
       title: Accessing Rasa Studio
       items:
-        - name: install_nginx
-          type: radio
-          title: Deploy on
-          default: on_vm
-          items:
-            - name: on_vm
-              title: Virtual Machine
-            - name: on_kubernetes
-              title: Kubernetes
-            - name: no_ingress
-              title: Do not install
         - name: ingress_hostname
           type: text
           title: Ingress DNS Hostname
@@ -376,12 +365,6 @@ spec:
           title: Connection Type
           default: http
           help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
-        - name: ingress_class
-          type: text
-          title: Ingress Class Name
-          default: nginx
-          help_text: Ingress class name
-          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
         - name: annotations
           type: textarea
           title: Annotations

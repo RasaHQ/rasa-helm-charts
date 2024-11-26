@@ -368,4 +368,3 @@ rasaProServices:
 | rasaProServices.tolerations | list | `[]` | rasaProServices.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasaProServices.volumeMounts | list | `[]` | rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container |
 | rasaProServices.volumes | list | `[]` | rasaProServices.volumes specify additional volumes for the Rasa Pro Services container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| replicated.enabled | bool | `false` |  |

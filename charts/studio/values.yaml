@@ -20,7 +20,7 @@ imagePullSecrets:
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
-tag: "1.7.0"
+tag: "1.10.0rc0"
 
 config:
   # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
@@ -799,7 +799,7 @@ rasa:
     replicaCount: 1
     image:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-      tag: 3.10.7.dev1
+      tag: 3.11.0rc1
 
     settings:
       useDefaultArgs: false

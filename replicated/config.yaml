@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.7.0"
+          default: "1.10.0rc0"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.10.4-latest"
+          default: "3.11.0rc1"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: openai_api_key
           type: text
@@ -68,11 +68,59 @@ spec:
           hidden: true
           default: v1.0.0-beta.27
           help_text: Replicated SDK version
+    - name: Accessing Rasa Studio
+      description: >
+        Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
+      title: Accessing Rasa Studio
+      items:
+        - name: ingress_hostname
+          type: text
+          title: Ingress DNS Hostname
+          default: ""
+          required: true
+          help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
+        - name: connection_type
+          type: text
+          title: Connection Type
+          default: http
+          help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
+        - name: annotations
+          type: textarea
+          title: Annotations
+          help_text: |
+            Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
+            For example, `kubernetes.io/tls-acme: true`.
+          default: ""
+    - name: Model Training and Bot Runs
+      description: >
+        Set the max number of bot runs and max number of parallel trainings
+      title: Model Training and Bot Runs
+      items:
+        - name: max_parallel_bot_runs
+          type: text
+          title: Maximum number of Assistants
+          default: "10"
+          help_text: Maximum number of Asistants to be able to create inside Studio
+        - name: max_parallel_trainings
+          type: text
+          title: Maximum number of parallel trainings
+          default: "10"
+          help_text: Maximum number of parallel trainings. Have in mind that each assistants needs to use at least one training process.
     - name: Keycloak
       description: >
         Here you will configure Keycloak, the authentication solution used by Rasa Studio.
       title: Keycloak
       items:
+        - name: keycloak_admin_username
+          type: text
+          title: Keycloak Admin Username
+          default: kcadmin
+          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
+        - name: keycloak_admin_password
+          type: text
+          title: Keycloak Admin Password
+          default: studio
+          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
         - name: keycloak_realm
           type: text
           title: Keycloak realm
@@ -99,18 +147,6 @@ spec:
           default: admin-cli
           hidden: true
           help_text: Keycloak API client ID
-        - name: keycloak_admin_username
-          type: text
-          title: Keycloak Admin Username
-          required: true
-          default: kcadmin
-          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
-        - name: keycloak_admin_password
-          type: text
-          title: Keycloak Admin Password
-          required: true
-          default: studio
-          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
         - name: keycloak_client_id
           type: text
           title: Keycloak Client ID
@@ -349,29 +385,6 @@ spec:
           title: Node TLS reject unauthorized
           default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-    - name: Accessing Rasa Studio
-      description: >
-        Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
-      title: Accessing Rasa Studio
-      items:
-        - name: ingress_hostname
-          type: text
-          title: Ingress DNS Hostname
-          default: ""
-          required: true
-          help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
-        - name: connection_type
-          type: text
-          title: Connection Type
-          default: http
-          help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
-        - name: annotations
-          type: textarea
-          title: Annotations
-          help_text: |
-            Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
-            For example, `kubernetes.io/tls-acme: true`.
-          default: ""
     - name: Advanced Settings
       description: >
         Here you will optionally configure Kubernetes resource limits and requests for the components of Rasa Studio. If you're not sure what this is, you can safely ignore it.

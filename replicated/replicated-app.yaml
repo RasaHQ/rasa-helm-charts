@@ -20,4 +20,4 @@ spec:
     - studio/deployment/studio-web-client
     - studio/deployment/rasapro
   additionalImages:
-    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.10.4-latest
+    - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:3.11.0rc1

@@ -156,9 +156,7 @@ spec:
     rasa:
       enabled: true
       fullnameOverride: rasapro
-      # TODO: This needs to be configured to also work with external registries. Using this for testing atm.
-      imagePullSecrets:
-        - name: '{{repl ImagePullSecretName }}'
+
       rasa:
         replicaCount: 1
         image:
@@ -182,6 +180,10 @@ spec:
               secretKeyRef:
                 name: "studio-secrets"
                 key: "OPENAI_API_KEY_SECRET_KEY"
+          - name: MAX_PARALLEL_BOT_RUNS
+            value: '{{repl ConfigOption "max_parallel_bot_runs" }}'
+          - name: MAX_PARALLEL_TRAININGS
+            value: '{{repl ConfigOption "max_parallel_trainings" }}'
 
         envFrom:
           - configMapRef:
@@ -237,6 +239,12 @@ spec:
           storageClassName: openebs-hostpath
           hostPath:
             enabled: true
+            path: "/app/working-data"
+
+        podSecurityContext:
+          # -- User ID of the container to access the mounted volume
+          fsGroup: 1001
+          runAsUser: 0
 
         # -- rasa.resources specifies the resources limits and requests
         resources: {}
@@ -265,6 +273,18 @@ spec:
       values:
         imagePullSecrets:
           - name: '{{repl ConfigOption "image_pull_secrets" }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          imagePullSecrets:
+            - name: '{{repl ImagePullSecretName }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          imagePullSecrets:
+            - name: '{{repl ConfigOption "image_pull_secrets" }}'
     - when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
       recursiveMerge: true
       values:

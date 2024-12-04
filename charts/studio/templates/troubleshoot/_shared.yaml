@@ -8,6 +8,7 @@
       - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-keycloak:{{ .Values.tag }}
       - europe-west3-docker.pkg.dev/rasa-releases/studio/studio-event-ingestion:{{ .Values.tag }}
       - europe-west3-docker.pkg.dev/rasa-releases/dependencies/replicated-sdk:v1.0.0-beta.27
+      - europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro:{{ .Values.rasa.rasa.image.tag }}
 {{- end -}}
 
 {{- define "troubleshoot.analyzers.shared" -}}

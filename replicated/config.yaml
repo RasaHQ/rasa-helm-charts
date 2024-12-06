@@ -100,7 +100,7 @@ spec:
           type: text
           title: Maximum number of Assistants
           default: "10"
-          help_text: Maximum number of Asistants to be able to create inside Studio
+          help_text: Maximum number of Assistants to be able to create inside Studio.
         - name: max_parallel_trainings
           type: text
           title: Maximum number of parallel trainings

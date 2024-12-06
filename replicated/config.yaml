@@ -91,7 +91,7 @@ spec:
             Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
             For example, `kubernetes.io/tls-acme: true`.
           default: ""
-    - name: Model Training and Bot Runs
+    - name: Model Training and Running Your Assistants
       description: >
         Configure how many assistants you are expecting to train and use with Studio. 
       title: Model Training and Bot Runs

@@ -66,7 +66,7 @@ spec:
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: v1.0.0-beta.27
+          default: 1.0.0-beta.31
           help_text: Replicated SDK version
     - name: Accessing Rasa Studio
       description: >
@@ -79,10 +79,19 @@ spec:
           default: ""
           required: true
           help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
+          validation:
+            regex:
+              pattern: '^(?:[^:/]+)?[^:/]+(?:\.[^:/]+)+(?:\/)?[^/]$'
+              message: You have either `http(s)://` at the start of your hostname DNS or `/` at the end. Please input only hostname DNS.
         - name: connection_type
-          type: text
+          type: dropdown
           title: Connection Type
           default: http
+          items:
+            - name: http
+              title: http
+            - name: https
+              title: https
           help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
         - name: annotations
           type: textarea

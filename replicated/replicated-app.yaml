@@ -7,7 +7,7 @@ spec:
   icon: https://info.rasa.com/hubfs/Rasa_January2020/Images/rasa-logo-square-ef3444fc36faec97ae8bd7bfb568996d.svg
   requireMinimalRBACPrivileges: false
   allowRollback: true
-  minKotsVersion: 1.79.0
+  minKotsVersion: 1.119.0
   additionalNamespaces:
     - "ingress-nginx"
     - "postgresql"

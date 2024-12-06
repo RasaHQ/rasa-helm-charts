@@ -105,7 +105,7 @@ spec:
           type: text
           title: Maximum number of parallel trainings
           default: "10"
-          help_text: Maximum number of parallel trainings. Have in mind that each assistants needs to use at least one training process.
+          help_text: How many assistants do you expect to train simultaneously?. Have in mind that each assistant needs to use at least one training process.
     - name: Keycloak
       description: >
         Here you will configure Keycloak, the authentication solution used by Rasa Studio.

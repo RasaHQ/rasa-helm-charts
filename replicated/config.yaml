@@ -93,7 +93,7 @@ spec:
           default: ""
     - name: Model Training and Bot Runs
       description: >
-        Set the max number of bot runs and max number of parallel trainings
+        Configure how many assistants you are expecting to train and use with Studio. 
       title: Model Training and Bot Runs
       items:
         - name: max_parallel_bot_runs

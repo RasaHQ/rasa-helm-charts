@@ -103,7 +103,7 @@ spec:
           help_text: Maximum number of Assistants to be able to create inside Studio.
         - name: max_parallel_trainings
           type: text
-          title: Maximum number of parallel trainings
+          title: Maximum number of simultaneous trainings
           default: "10"
           help_text: How many assistants do you expect to train simultaneously?. Have in mind that each assistant needs to use at least one training process.
     - name: Keycloak

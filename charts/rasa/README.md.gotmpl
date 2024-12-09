@@ -43,44 +43,26 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ templat
 
 ### Rasa Pro
 
-To deploy Rasa Pro Services, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
+To deploy Rasa Pro with Analytics, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 rasa:
   enabled: true
-  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: true
 ```
 
-### Rasa Plus only
+### Rasa Pro only
 
 Deploy Rasa Plus by setting `rasa.enabled: true`. Adjust image and image pull settings accordingly.
 
 ```yaml
 rasa:
   enabled: true
-  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: false
 ```
-
-### Rasa Open Source
-
-Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.deployOSS: true`. Adjust image and image pull settings as needed.
-
-```yaml
-rasa:
-  enabled: true
-  deployOSS: true
-  # Other settings...
-rasaProServices:
-  enabled: false
-```
-
-> **Note:** If you already have Rasa OSS/Plus deployed and want to deploy only Rasa Pro Services deployment, set `rasaProServices.enabled: true` and use `false` for other deployments.
-
 
 {{ template "chart.valuesSection" . }}

@@ -40,36 +40,19 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ templ
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
-### Studio
+## Important Notes on `ingressHost` Anchor
 
-To deploy Studio, set `studioEnabled: true`, `modelService.training.enabled: true`, and `modelService.running.enabled: true`. Configure image and image pull settings.
+The `config.ingressHost` field in the `values.yaml` file is defined with an **anchor** (`&dns_hostname`) to ensure consistency and reusability across the Helm chart. 
 
+### Example:
 ```yaml
-studioEnabled: true
-# Other settings...
-modelService:
-  training:
-    enabled: true
-    # Other settings...
-  running:
-    enabled: true
-    # Other settings...
+# values.yaml
+config:
+  ingressHost: &dns_hostname INGRESS.HOST.NAME
 ```
 
-### MTS/MRS only
-
-To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
-
-```yaml
-studioEnabled: false
-# Other settings...
-modelService:
-  training:
-    enabled: true
-    # Other settings...
-  running:
-    enabled: true
-    # Other settings...
-```
+### Guidelines:
+Do *NOT* delete or modify the anchor (`&dns_hostname`).
+If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
 
 {{ template "chart.valuesSection" . }}

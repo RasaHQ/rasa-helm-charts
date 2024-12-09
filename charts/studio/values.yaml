@@ -23,7 +23,10 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 tag: "1.10.0rc0"
 
 config:
-  # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
+  # -- Defines the host name for all the Studio ingress resources.
+  # -- This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart.
+  # -- WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart.
+  # -- If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact.
   ingressHost: &dns_hostname INGRESS.HOST.NAME
   # -- Define if you will be using https or http with the ingressHost
   connectionType: "http"

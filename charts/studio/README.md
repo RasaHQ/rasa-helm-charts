@@ -41,37 +41,20 @@ $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio -
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
-### Studio
+## Important Notes on `ingressHost` Anchor
 
-To deploy Studio, set `studioEnabled: true`, `modelService.training.enabled: true`, and `modelService.running.enabled: true`. Configure image and image pull settings.
+The `config.ingressHost` field in the `values.yaml` file is defined with an **anchor** (`&dns_hostname`) to ensure consistency and reusability across the Helm chart.
 
+### Example:
 ```yaml
-studioEnabled: true
-# Other settings...
-modelService:
-  training:
-    enabled: true
-    # Other settings...
-  running:
-    enabled: true
-    # Other settings...
+# values.yaml
+config:
+  ingressHost: &dns_hostname INGRESS.HOST.NAME
 ```
 
-### MTS/MRS only
-
-To deploy only MTS/MRS, set `studioEnabled: false`, with `modelService.training.enabled` and `modelService.running.enabled` to `true`.  Configure image and image pull settings.
-
-```yaml
-studioEnabled: false
-# Other settings...
-modelService:
-  training:
-    enabled: true
-    # Other settings...
-  running:
-    enabled: true
-    # Other settings...
-```
+### Guidelines:
+Do *NOT* delete or modify the anchor (`&dns_hostname`).
+If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
 
 ## Values
 
@@ -130,7 +113,7 @@ modelService:
 | config.database.port | string | `"5432"` | The database port |
 | config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
-| config.ingressHost | string | `"INGRESS.HOST.NAME"` | Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name. |
+| config.ingressHost | string | `"INGRESS.HOST.NAME"` | If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |
 | config.keycloak.url | string | `""` | config.keycloak.url allows to override the default service endpoint; format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS |

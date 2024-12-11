@@ -6,7 +6,7 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
   chart:
     name: kafka
-    chartVersion: 30.0.4
+    chartVersion: 31.1.0
   
   releaseName: kafka
   namespace: kafka
@@ -18,7 +18,7 @@ spec:
     image:
       registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
       repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kafka'
-      tag: 3.8.0-debian-12-r3
+      tag: 3.9.0-debian-12-r1
       digest: ""
       pullPolicy: IfNotPresent
       pullSecrets:
@@ -80,7 +80,7 @@ spec:
         image:
           registry: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com"}}'
           repository: '{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/kubectl'
-          tag: 1.31.0-debian-12-r0
+          tag: 1.31.2-debian-12-r6
           pullSecrets:
             - '{{repl ImagePullSecretName }}'
       controller:

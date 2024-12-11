@@ -6,7 +6,7 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `postgres_type` `external_postgres` }}'
   chart:
     name: postgresql
-    chartVersion: 15.5.29
+    chartVersion: 16.3.0
   
   releaseName: postgresql
   namespace: postgresql

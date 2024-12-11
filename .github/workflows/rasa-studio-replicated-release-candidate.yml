@@ -61,4 +61,6 @@ jobs:
       replicated-channel: studio-release-candidate
       replicated-version: ${{ needs.check-chart-versions.outputs.studio-version }}
       studio-version: ${{ needs.check-chart-versions.outputs.studio-version }}
+      kafka-version: 31.1.0
+      postgres-version: 16.3.0
     secrets: inherit

@@ -210,7 +210,7 @@ backend:
 
     waitForIt: false
     waitFotItContainer:
-      image: postgres:16.1
+      image: postgres:17.2
 
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/

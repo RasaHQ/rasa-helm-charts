@@ -14,6 +14,8 @@ spec:
   # these values will be supplied to helm template
   values:
     global:
+      security: 
+        allowInsecureImages: true
       postgresql:
         auth:
           postgresPassword: "postgres"

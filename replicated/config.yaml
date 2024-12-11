@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.10.0rc0"
+          default: "1.10.0rc2"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.11.0rc1"
+          default: "3.11.0"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: openai_api_key
           type: text
@@ -61,7 +61,7 @@ spec:
         - name: postgresql_image_tag
           type: text
           hidden: true
-          default: 17.2.0-debian-12-r2
+          default: 17.2.0-debian-12-r2 #16.4.0-debian-12-r8
           help_text: Postgesql version used in embedded database
         - name: replicated_sdk_image_tag
           type: text
@@ -186,6 +186,7 @@ spec:
           title: Wait for PostgreSQL to be ready
           default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
           when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+          hidden: false
           help_text: Enable this if you are using Embedded PostgreSQL
         - name: database_host
           type: text

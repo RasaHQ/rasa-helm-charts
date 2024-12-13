@@ -10,7 +10,7 @@ spec:
     storage: {{ .Values.rasa.persistence.storageCapacity }}
   volumeMode: Filesystem
   accessModes:
-  - ReadWriteMany
+  - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
   storageClassName: {{ .Values.rasa.persistence.storageClassName }}
   hostPath:
@@ -28,7 +28,7 @@ metadata:
   name: rasa-pro-data-pvc-{{ .Release.Namespace }}
 spec:
   accessModes:
-    - ReadWriteMany
+    - ReadWriteOnce
   volumeMode: Filesystem
   resources:
     requests:

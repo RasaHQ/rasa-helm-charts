@@ -804,6 +804,9 @@ rasa:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
       tag: 3.11.0rc1
 
+    strategy:
+      type: Recreate
+
     settings:
       useDefaultArgs: false
       mountDefaultConfigmap: false

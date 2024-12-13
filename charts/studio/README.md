@@ -246,6 +246,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasa.service.targetPort | int | `8000` |  |
 | rasa.rasa.settings.mountDefaultConfigmap | bool | `false` |  |
 | rasa.rasa.settings.useDefaultArgs | bool | `false` |  |
+| rasa.rasa.strategy.type | string | `"Recreate"` |  |
 | rasa.rasaProServices.enabled | bool | `false` |  |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |

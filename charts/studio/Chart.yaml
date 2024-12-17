@@ -9,6 +9,7 @@ sources:
 keywords:
   - Kubernetes
   - Studio
+  - CALM
 maintainers:
   - name: Rasa Infrastructure and Security Team
     url: https://github.com/RasaHQ/rasa-helm-charts

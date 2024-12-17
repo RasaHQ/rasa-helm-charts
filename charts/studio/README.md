@@ -206,7 +206,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasa.command[2] | string | `"rasa.model_service"` |  |
 | rasa.rasa.envFrom[0].configMapRef.name | string | `"shared-environment"` |  |
 | rasa.rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |  |
-| rasa.rasa.image.tag | string | `"3.11.0rc1"` |  |
+| rasa.rasa.image.tag | string | `"3.11.1"` |  |
 | rasa.rasa.ingress.annotations | object | `{}` |  |
 | rasa.rasa.ingress.enabled | bool | `true` |  |
 | rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
@@ -250,7 +250,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasaProServices.enabled | bool | `false` |  |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| tag | string | `"1.10.0rc0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.10.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

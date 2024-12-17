@@ -1,4 +1,5 @@
 {{- define "rasa.containers.volumes" -}}
+{{- if .Values.rasa.settings.mountDefaultConfigmap -}}
 - name: config-dir
   emptyDir: {}
 - name: "rasa-configuration"
@@ -13,10 +14,16 @@
   emptyDir: {}
 - name: app-dir
   emptyDir: {}
+{{- end }}
+{{ if .Values.rasa.persistence.create -}}
+- name: model-data
+  persistentVolumeClaim:
+    claimName: rasa-pro-data-pvc-{{ .Release.Namespace }}
+{{- end -}}
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}
-# Mount the temporary directory for the Rasa global configuration
+{{- if .Values.rasa.settings.mountDefaultConfigmap -}}
 - name: "config-dir"
   mountPath: "/.config"
 - mountPath: "/app/endpoints.yml"
@@ -27,4 +34,9 @@
   subPath: "credentials.yml"
   name: "rasa-configuration"
   readOnly: true
+{{- end }}
+{{ if .Values.rasa.persistence.create -}}
+- mountPath: "/app/working-data"
+  name: model-data
+{{- end -}}
 {{- end -}}

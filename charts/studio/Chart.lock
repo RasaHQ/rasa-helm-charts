@@ -1,6 +1,9 @@
 dependencies:
 - name: replicated
   repository: oci://registry.replicated.com/library
-  version: 1.0.0-beta.27
-digest: sha256:4483f38e235144a9cf69ada6ca73ed15527072fc3775bdefe6dd9e9946eda99b
-generated: "2024-10-16T16:23:05.495804+02:00"
+  version: 1.0.0-beta.31
+- name: rasa
+  repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
+  version: 1.2.0-rc5
+digest: sha256:64c7aada66cd163d0ead6aec3f819c8d8732542f5b87aedc496af57531c7c8c2
+generated: "2024-12-13T15:40:35.436954+01:00"

@@ -6,16 +6,16 @@ spec:
   exclude: 'repl{{ ConfigOptionEquals `postgres_type` `external_postgres` }}'
   chart:
     name: postgresql
-    chartVersion: 15.5.29
+    chartVersion: 16.3.0
   
   releaseName: postgresql
   namespace: postgresql
-  # this is a hack!!! adding this to prevent MTS/MRS to lose connection when Kafka updates
-  weight: 20
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
   values:
     global:
+      security: 
+        allowInsecureImages: true
       postgresql:
         auth:
           postgresPassword: "postgres"

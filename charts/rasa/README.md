@@ -2,19 +2,19 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.1.4](https://img.shields.io/badge/Version-1.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.0](https://img.shields.io/badge/Version-1.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
-- Kubernetes 1.19+
-- Helm 3.0.0+
+- Kubernetes 1.23+
+- Helm 3.8.0+
 
 ## Installing the Chart
 
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.4
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.1.4
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.0
 ```
 
 ## General Configuration
@@ -44,44 +44,27 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --ver
 
 ### Rasa Pro
 
-To deploy Rasa Pro Services, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
+To deploy Rasa Pro with Analytics, set `rasa.enabled: true` and `rasaProServices.enabled: true`. Configure image and image pull settings.
 
 ```yaml
 rasa:
   enabled: true
-  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: true
 ```
 
-### Rasa Plus only
+### Rasa Pro only
 
 Deploy Rasa Plus by setting `rasa.enabled: true`. Adjust image and image pull settings accordingly.
 
 ```yaml
 rasa:
   enabled: true
-  deployOSS: false
   # Other settings...
 rasaProServices:
   enabled: false
 ```
-
-### Rasa Open Source
-
-Deploy Rasa Open Source by setting `rasa.enabled: true` and `rasa.deployOSS: true`. Adjust image and image pull settings as needed.
-
-```yaml
-rasa:
-  enabled: true
-  deployOSS: true
-  # Other settings...
-rasaProServices:
-  enabled: false
-```
-
-> **Note:** If you already have Rasa OSS/Plus deployed and want to deploy only Rasa Pro Services deployment, set `rasaProServices.enabled: true` and use `false` for other deployments.
 
 ## Values
 
@@ -213,6 +196,7 @@ rasaProServices:
 | duckling.volumes | list | `[]` | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | fullnameOverride | string | `""` | fullnameOverride overrides the full qualified app name |
 | global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
+| global.ingressHost | string | `nil` |  |
 | hostAliases | list | `[]` | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable |
 | hostNetwork | bool | `false` | hostNetwork controls whether the pod may use the node network namespace |
 | imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets |
@@ -232,7 +216,6 @@ rasaProServices:
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | rasa.command | list | `[]` | rasa.command overrides the default command for the container |
 | rasa.containerSecurityContext | object | `{"enabled":true}` | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
-| rasa.deployOSS | bool | `false` | rasa.deployOSS enables Rasa Open Source deployment |
 | rasa.enabled | bool | `true` | rasa.enabled enables Rasa Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
@@ -241,7 +224,7 @@ rasaProServices:
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
-| rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
+| rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
 | rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
 | rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file |
@@ -254,6 +237,12 @@ rasaProServices:
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasa.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
 | rasa.nodeSelector | object | `{}` | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| rasa.overrideEnv | list | `[]` | rasa.overrideEnv overrides all default environment variables |
+| rasa.persistence.create | bool | `false` |  |
+| rasa.persistence.hostPath.enabled | bool | `false` |  |
+| rasa.persistence.storageCapacity | string | `"1Gi"` |  |
+| rasa.persistence.storageClassName | string | `nil` |  |
+| rasa.persistence.storageRequests | string | `"1Gi"` |  |
 | rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
 | rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
 | rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
@@ -295,10 +284,12 @@ rasaProServices:
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
+| rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |
 | rasa.settings.telemetry.enabled | bool | `true` | telemetry.enabled allow Rasa to collect anonymous usage details |
+| rasa.settings.useDefaultArgs | bool | `true` | settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case. |
 | rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |
@@ -360,4 +351,3 @@ rasaProServices:
 | rasaProServices.tolerations | list | `[]` | rasaProServices.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | rasaProServices.volumeMounts | list | `[]` | rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container |
 | rasaProServices.volumes | list | `[]` | rasaProServices.volumes specify additional volumes for the Rasa Pro Services container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| replicated.enabled | bool | `false` |  |

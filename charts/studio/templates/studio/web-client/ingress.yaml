@@ -1,4 +1,4 @@
-{{- if and .Values.studioEnabled .Values.webClient.ingress.enabled -}}
+{{- if .Values.webClient.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.webClient.service.port -}}
 {{- if and .Values.webClient.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}

@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.7.0"
+          default: "1.10.0"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,25 +50,8 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.10.4-latest"
+          default: "3.11.1"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
-        - name: model_services_repository
-          type: text
-          title: Model Services Repository URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services/" ))) ""}}'
-          help_text: URL of your private image repository for Model services, without an image name.
-          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
-        - name: model_service_image_tag
-          type: text
-          title: Model Services Version
-          default: "3.3.3-latest"
-          help_text: The version of the Model Services you wish to use, which is used as a tag for the container image. 
-        - name: mrs_nginx_proxy
-          type: text
-          title: Model Services Nginx Proxy Image URL
-          default: '{{repl (ConfigOptionEquals "image_registry" "internal_registry") | ternary (print (HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com") "/" (HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/model-training-and-running-services" )) "/nginx-unprivileged:1.27-alpine") ""}}'
-          help_text: The full path of the Model Services Nginx Proxy Image you wish to use, including the repository name, image name and tag. 
-          when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
         - name: openai_api_key
           type: text
           title: OpenAI API key
@@ -78,43 +61,75 @@ spec:
         - name: postgresql_image_tag
           type: text
           hidden: true
-          default: 16.4.0-debian-12-r8
+          default: 17.2.0-debian-12-r2 #16.4.0-debian-12-r8
           help_text: Postgesql version used in embedded database
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: v1.0.0-beta.27
+          default: 1.0.0-beta.31
           help_text: Replicated SDK version
-    - name: Model Services
+    - name: Accessing Rasa Studio
       description: >
-        Here you will configure the Model Services which are used by Rasa Studio to train and run bots.
-      title: Model Service Replicas
+        Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
+      title: Accessing Rasa Studio
       items:
-        - name: training_consumer_replicas
+        - name: ingress_hostname
           type: text
-          title: Number of Model Training Service Replicas
-          default: "2"
-          help_text: This is the number of replicas you'd like to run of the Training Service. This should be `n+1` the number of bots you expect to build with Rasa Studio. More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
-        - name: running_consumer_replicas
+          title: Ingress DNS Hostname
+          default: ""
+          required: true
+          help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
+          validation:
+            regex:
+              pattern: '^(?:[^:/]+)?[^:/]+(?:\.[^:/]+)+(?:\/)?[^/]$'
+              message: You have either `http(s)://` at the start of your hostname DNS or `/` at the end. Please input only hostname DNS.
+        - name: connection_type
+          type: dropdown
+          title: Connection Type
+          default: http
+          items:
+            - name: http
+              title: http
+            - name: https
+              title: https
+          help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
+        - name: annotations
+          type: textarea
+          title: Annotations
+          help_text: |
+            Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
+            For example, `kubernetes.io/tls-acme: true`.
+          default: ""
+    - name: Model Training and Running Your Assistants
+      description: >
+        Configure how many assistants you are expecting to train and use with Studio.
+      title: Model Training and Bot Runs
+      items:
+        - name: max_parallel_bot_runs
           type: text
-          title: Number of Model Running Service Replicas
-          default: "2"
-          help_text: This is the number of replicas you'd like to run of the Running Service. This should be `n+1` the number of bots you expect to build with Rasa Studio.More information [here](https://rasa.com/docs/studio/deployment/architecture/#:~:text=consumer%20becomes%20available.-,TIP,-The%20number%20of).
-        - name: rasa_training_debug_logs
+          title: Maximum number of Assistants
+          default: "10"
+          help_text: Maximum number of Assistants to be able to create inside Studio.
+        - name: max_parallel_trainings
           type: text
-          title: Enable Rasa training debug logs
-          default: "false"
-          help_text: Set this to `true` if you want to include rasa debug logs during model training
-        - name: rasa_running_debug_logs
-          type: text
-          title: Enable Rasa running debug logs
-          default: "false"
-          help_text: Set this to `true` if you want to include rasa debug logs during model running
+          title: Maximum number of simultaneous trainings
+          default: "10"
+          help_text: How many assistants do you expect to train simultaneously?. Have in mind that each assistant needs to use at least one training process.
     - name: Keycloak
       description: >
         Here you will configure Keycloak, the authentication solution used by Rasa Studio.
       title: Keycloak
       items:
+        - name: keycloak_admin_username
+          type: text
+          title: Keycloak Admin Username
+          default: kcadmin
+          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
+        - name: keycloak_admin_password
+          type: text
+          title: Keycloak Admin Password
+          default: studio
+          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
         - name: keycloak_realm
           type: text
           title: Keycloak realm
@@ -141,18 +156,6 @@ spec:
           default: admin-cli
           hidden: true
           help_text: Keycloak API client ID
-        - name: keycloak_admin_username
-          type: text
-          title: Keycloak Admin Username
-          required: true
-          default: kcadmin
-          help_text: The admin username for Keycloak. This username is used to login to Keycloak admin console.
-        - name: keycloak_admin_password
-          type: text
-          title: Keycloak Admin Password
-          required: true
-          default: studio
-          help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
         - name: keycloak_client_id
           type: text
           title: Keycloak Client ID
@@ -164,171 +167,6 @@ spec:
           title: Keycloak proxy
           hidden: true
           default: "edge"
-
-    - name: Object Storage
-      description: >
-        Here you will configure your object storage, used by Rasa Studio when training and running bots.
-      title: Object Storage
-      items:
-        - name: bucket_provider
-          type: radio
-          title: Bucket Provider
-          default: gcp_bucket
-          items:
-            - name: gcp_bucket
-              title: Google Cloud Storage
-            - name: aws_bucket
-              title: AWS S3 Bucket or MinIO
-              help_text: Select this option if you're going to use AWS S3 or you want to deploy your own storage solution using MinIO. For more information about using MinIO see [here](https://rasa.com/docs/studio/deployment/installation-guide-replicated#object-storage)
-        - name: storage_type
-          type: text
-          title: Storage Type
-          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws_s3"}}'
-          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          hidden: true
-        - name: model_storage_type
-          type: text
-          title: Storage Type
-          default: '{{repl (ConfigOptionEquals "bucket_provider" "gcp_bucket") | ternary "gcs" "aws"}}'
-          help_text: Put `gcs` for Google Cloud storage or `aws` for AWS S3 bucket
-          hidden: true
-        - name: bucket_name
-          type: text
-          title: Bucket Name
-          default: ""
-          required: true
-          help_text: Name of the storage bucket. Make sure to pre-create this bucket in your cloud environment.
-        - name: gcp_credentials
-          type: text
-          title: GCP Service Account (Base-64 Encoded)
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-          help_text: Base-64 encode your GCP service account JSON file and paste it here. The service account should have permission to read and write to your bucket, and create buckets. This is only required if you are using GCS for object storage.
-        - name: google_cloud_project
-          type: text
-          title: Google Cloud Project
-          default: ""
-          help_text: The project ID of the GCP project containing the bucket.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: cloudsdk_compute_zone
-          type: text
-          title: Bucket Region
-          default: ""
-          help_text: The name of the region where the bucket is located such as `us-west1`.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: url_service_account
-          type: text
-          title: Service Account Email
-          default: ""
-          help_text: The email address for the GCP service account you are using.
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "gcp_bucket"}}'
-        - name: aws_access_key_id
-          type: text
-          title: Access Key ID
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: Access Key ID for the AWS IAM or MinIO user that has permission to read and write to the bucket, and create new buckets.
-        - name: aws_secret_access_key
-          type: text
-          title: Secret Access Key
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: Secret Access Key for the AWS IAM or MinIO user that has permission to read and write to the bucket, and create new buckets.
-        - name: aws_region_name
-          type: text
-          title: AWS Region Name
-          default: ""
-          required: true
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-          help_text: The region where the bucket is located such as `eu-west-1`.
-        - name: custom_s3_endpoint
-          type: bool
-          title: Use custom S3 Endpoint
-          default: "0"
-          help_text: Enable this option to specify a custom URL endpoint for an S3-compatible storage service, such as MinIO. This is useful if you are not using Amazon's standard S3 service or if you are operating in a private environment that mimics S3.
-          when: '{{repl ConfigOptionEquals "bucket_provider" "aws_bucket"}}'
-        - name: aws_endpoint_url
-          type: text
-          title: Custom Endpoint URL
-          default: ""
-          help_text: A custom URL endpoint for an S3-compatible storage service.
-          when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-    - name: NFS
-      description: >
-        Here you will configure how Rasa Studio connects to NFS, which is used to persist state when training and running bots. Select Embedded NFS to automatically deploy an embedded NFS server, meaning that you do not have to deploy and manage your own NFS server. Select External NFS to connect to an existing, external NFS service such as AWS EFS.
-      title: NFS Server
-      items:
-        - name: nfs_type
-          type: radio
-          title: NFS Server
-          default: embedded_nfs
-          items:
-            - name: embedded_nfs
-              title: Embedded NFS
-            - name: external_nfs
-              title: External NFS
-        - name: persistence_type
-          type: text
-          title: Persistence Type
-          default: '{{repl (ConfigOptionEquals "nfs_type" "embedded_nfs") | ternary "local" ""}}'
-          help_text: Type of the volume that will be used to store the training data. Valid value is `nfs`. Leave this empty if you are using AWS EFS.
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: nfs_aws_type
-          type: bool
-          title: Using AWS NFS
-          default: "0"
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Please check this if you are using AWS NFS
-        - name: efs_id
-          type: text
-          title: AWS EFS volume ID
-          default: ""
-          help_text: Fill this if you are using AWS NFS. `FileSystemId::MountPoint` of the AWS EFS volume. For example `fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd`.
-          when: '{{repl ConfigOptionEquals "nfs_aws_type" "1"}}'
-        - name: host_path
-          type: text
-          title: Host Path
-          default: /
-          help_text: The full path for the directory on the host machine that will be mounted to the container for training data. For example, if you created a `data` directory in the default user directory on Ubuntu then this would be `/home/ubuntu/data`.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: local_node_name
-          type: text
-          title: Local Node Name
-          default: ""
-          help_text: The hostname of the VM you are installing on to correctly provision the embedded NFS server. You can run `hostname` in the VM's shell to find this.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "embedded_nfs"}}'
-        - name: storage_class_name
-          type: text
-          title: Storage Class name
-          default: "openebs-hostpath"
-          help_text: Storage Class name for Persistent Volume. If you are using AWS EFS then this should be `efs-sc`. If you are using a standard NFS server this should be `standard-rwo`.
-          required: true
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-        - name: storage_capacity
-          type: text
-          title: Storage Capacity
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage Capacity for PV
-        - name: storage_requests
-          type: text
-          title: Storage Requests
-          default: 1Gi
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
-          help_text: Storage requests for PVC
-        - name: nfs_server
-          type: text
-          title: NFS Server Address
-          default: ""
-          help_text: DNS name or IP address of your external NFS server.
-          when: '{{repl ConfigOptionEquals "nfs_type" "external_nfs"}}'
     - name: Database
       description: >
         Here you will configure how Rasa Studio connects to a database. Select Embedded Postgres to use an embedded Postgres database, meaning that you do not have to deploy and manage a Postgres database. We do not recommend this for production workloads. Select External Postgres to use an existing, external Postgres database.
@@ -348,6 +186,7 @@ spec:
           title: Wait for PostgreSQL to be ready
           default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
           when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
+          hidden: false
           help_text: Enable this if you are using Embedded PostgreSQL
         - name: database_host
           type: text
@@ -556,46 +395,6 @@ spec:
           title: Node TLS reject unauthorized
           default: ""
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-    - name: Accessing Rasa Studio
-      description: >
-        Here you will configure how you access Rasa Studio. Pick `Virtual Machine` if you are deploying on a VM, `Kubernetes` if you are deploying in Kubernetes cluster without an Ingress present, or `Do not install` if you already have a controller installed.
-      title: Accessing Rasa Studio
-      items:
-        - name: install_nginx
-          type: radio
-          title: Deploy on
-          default: on_vm
-          items:
-            - name: on_vm
-              title: Virtual Machine
-            - name: on_kubernetes
-              title: Kubernetes
-            - name: no_ingress
-              title: Do not install
-        - name: ingress_hostname
-          type: text
-          title: Ingress DNS Hostname
-          default: ""
-          required: true
-          help_text: The hostname for the VM you are installing on, which you will use to access Rasa Studio.
-        - name: connection_type
-          type: text
-          title: Connection Type
-          default: http
-          help_text: Pick either `http` or `https` depending on how you expect to access Rasa Studio.
-        - name: ingress_class
-          type: text
-          title: Ingress Class Name
-          default: nginx
-          help_text: Ingress class name
-          when: 'repl{{ ConfigOptionEquals `install_nginx` `no_ingress` }}'
-        - name: annotations
-          type: textarea
-          title: Annotations
-          help_text: |
-            Use this textarea to optionally provide annotations specific to your Kubernetes Ingress Controller.
-            For example, `kubernetes.io/tls-acme: true`.
-          default: ""
     - name: Advanced Settings
       description: >
         Here you will optionally configure Kubernetes resource limits and requests for the components of Rasa Studio. If you're not sure what this is, you can safely ignore it.
@@ -701,122 +500,3 @@ spec:
           title: Keycloak Memory requests
           help_text: Configure Keycloak resource requests for Memory
           when: '{{repl ConfigOptionEquals "set_keycloak_resources" "1"}}'
-        - name: configure_rasa_resources
-          type: bool
-          title: Configure Rasa Bot resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Rasa bots
-        - name: rasa_requests_cpu
-          type: text
-          title: Rasa requests CPU
-          default: "1000m"
-          help_text: Value of CPU requests to allocate to the container for Rasa bots
-          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
-        - name: rasa_requests_memory
-          type: text
-          title: Rasa requests memory
-          default: "1Gi"
-          help_text: Value of Memory requests to allocate to the container for Rasa bots
-          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
-        - name: rasa_limits_cpu
-          type: text
-          title: Rasa limits CPU
-          default: "2500m"
-          help_text: Value of Memory limits to allocate to the container for Rasa bots
-          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
-        - name: rasa_limits_memory
-          type: text
-          title: Rasa limits memory
-          default: "2.5Gi"
-          help_text: Value of Memory limits to allocate to the container for Rasa bots
-          when: '{{repl ConfigOptionEquals "configure_rasa_resources" "1"}}'
-        - name: set_model_training_resources
-          type: bool
-          title: Configure MTS resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Model Traning Service
-        - name: set_model_training_orchestrator_limits_cpu
-          type: text
-          title: MTS orchestrator CPU limit
-          help_text: Configure MTS orchestrator resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_orchestrator_limits_memory
-          type: text
-          title: MTS orchestrator Memory limit
-          help_text: Configure MTS orchestrator resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_orchestrator_requests_cpu
-          type: text
-          title: MTS orchestrator CPU requests
-          help_text: Configure MTS orchestrator resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_orchestrator_requests_memory
-          type: text
-          title: MTS orchestrator Memory requests
-          help_text: Configure MTS orchestrator resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_consumer_limits_cpu
-          type: text
-          title: MTS consumer CPU limit
-          help_text: Configure MTS consumer resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_consumer_limits_memory
-          type: text
-          title: MTS consumer Memory limit
-          help_text: Configure MTS consumer resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_consumer_requests_cpu
-          type: text
-          title: MTS consumer CPU requests
-          help_text: Configure MTS consumer resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_training_consumer_requests_memory
-          type: text
-          title: MTS consumer Memory requests
-          help_text: Configure MTS consumer resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-        - name: set_model_running_resources
-          type: bool
-          title: Configure MRS resources
-          default: "0"
-          help_text: Check this option if you want to configure resource requests/limits for Model Running Service
-        - name: set_model_running_orchestrator_limits_cpu
-          type: text
-          title: MRS orchestrator CPU limit
-          help_text: Configure MRS orchestrator resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_orchestrator_limits_memory
-          type: text
-          title: MRS orchestrator Memory limit
-          help_text: Configure MRS orchestrator resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_orchestrator_requests_cpu
-          type: text
-          title: MRS orchestrator CPU requests
-          help_text: Configure MRS orchestrator resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_orchestrator_requests_memory
-          type: text
-          title: MRS orchestrator Memory requests
-          help_text: Configure MRS orchestrator resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_consumer_limits_cpu
-          type: text
-          title: MRS consumer CPU limit
-          help_text: Configure MRS consumer resource limit for CPU
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_consumer_limits_memory
-          type: text
-          title: MRS consumer Memory limit
-          help_text: Configure MRS consumer resource limit for Memory
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_consumer_requests_cpu
-          type: text
-          title: MRS consumer CPU requests
-          help_text: Configure MRS consumer resource requests for CPU
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-        - name: set_model_running_consumer_requests_memory
-          type: text
-          title: MRS consumer Memory requests
-          help_text: Configure MRS consumer resource requests for Memory
-          when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'

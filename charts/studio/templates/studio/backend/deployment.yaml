@@ -1,4 +1,3 @@
-{{- if .Values.studioEnabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -76,30 +75,21 @@ spec:
             {{- include "studio.keycloak.url" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
-            - name: MODEL_TRAINING_MOCK_ENABLED
-              value: "false"
-            - name: MODEL_RUNNING_MOCK_ENABLED
-              value: "false"
+            - name: API_URL
+              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}/api"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"{{ end }}              
             - name: KEYCLOAK_API_GRANT_TYPE
               {{- if .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE }}
               value: {{ .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE.value | quote }}
               {{- else }}
               value: "password"
               {{- end }}
-            - name: MTS_API_URL
-              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
-              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
+            - name: MS_API_URL
+              {{- if .Values.backend.environmentVariables.MS_API_URL }}
+              value: {{ .Values.backend.environmentVariables.MS_API_URL.value | quote }}
               {{- else }}
-              value: "http://model-training-service.{{ .Release.Namespace }}:8000"
-              {{- end }}
-            - name: MRS_API_URL
-              {{- if .Values.backend.environmentVariables.MTS_API_URL }}
-              value: {{ .Values.backend.environmentVariables.MTS_API_URL.value | quote }}
-              {{- else }}
-              value: "http://model-running-service.{{ .Release.Namespace }}:8001"
+              value: "http://rasapro.{{ .Release.Namespace }}:80"
               {{- end }}
             {{- range $key, $value := .Values.backend.environmentVariables }}
-            {{- if and (not (eq $key "MODEL_TRAINING_MOCK_ENABLED")) (not (eq $key "MTS_API_URL")) (not (eq $key "MRS_API_URL")) }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -109,7 +99,6 @@ spec:
                   name: {{ $value.secret.name }}
                   key: {{ $value.secret.key }}
               {{- end }}
-            {{- end }}
             {{- end }}
           {{- if .Values.backend.envFrom }}
           envFrom:
@@ -130,4 +119,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-{{- end }}

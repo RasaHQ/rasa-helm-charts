@@ -10,8 +10,8 @@ spec:
 
   releaseName: studio
   namespace: studio
-  # this is a hack!!! adding this to prevent MTS/MRS to lose connection when Kafka updates
-  weight: 42
+  # NOTE: little bit room so kafka can go first
+  weight: 15
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
@@ -48,8 +48,6 @@ spec:
         preferSSL: '{{repl ConfigOption "prefer_ssl" }}'
         # If true the server will reject db connection which is not present list of supplied CAs.
         rejectUnauthorized: '{{repl ConfigOption "reject_unauthorized" }}'
-        # -- The database name for model training and running service
-        modelServiceDatabaseName: '{{repl ConfigOption "model_service_database" }}'
         # -- The database name for keycloak user management service
         keycloakDatabaseName: '{{repl ConfigOption "keycloak_database" }}'
       keycloak:
@@ -76,14 +74,12 @@ spec:
             key: "KEYCLOAK_API_PASSWORD"
         KEYCLOAK_CLIENT_ID:
           value: '{{repl ConfigOption "keycloak_client_id" }}'
-        DOCKER_IMAGE_TAG:
-          value: '{{repl ConfigOption "rasa_pro_repository" }}:{{repl ConfigOption "rasa_pro_image_tag" }}'
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
           image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
@@ -97,7 +93,7 @@ spec:
         # -- Keycloak client id
         KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
@@ -150,183 +146,121 @@ spec:
         KC_PROXY:
           value: '{{repl ConfigOption "keycloak_proxy" }}'
       ingress:
-        className: '{{repl ConfigOption "ingress_class" }}'
+        className: nginx
         annotations:
           nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
           nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
-    modelService:
-      # -- repository specifies image repository for Studio
-      repository: '{{repl ConfigOption "model_services_repository" }}'
-      # -- tag specifies image tag for Studio
-      tag: '{{repl ConfigOption "model_service_image_tag" }}'
-      rasaProLicense:
-        secretKey: "RASA_PRO_LICENCE"
-      gcpCredentials:
-        secretName: "studio-secrets"
-        secretKey: "GCP_CREDENTIALS"
-      openAiKey:
-        secretKey: "OPENAI_API_KEY_SECRET_KEY"
-      kafka:
-        brokerAddress: '{{repl ConfigOption "kafka_broker" }}'
-        securityProtocol: '{{repl ConfigOption "kafka_security_protocol" }}'
-        saslMechanism: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
-        saslUsername: '{{repl ConfigOption "kafka_username" }}'
-        # -- kafka.saslPassword is a password used to connect to Kafka broker which has SASL authentication method enabled.
-        saslPassword:
-          secretName: "studio-secrets"
-          secretKey: "KAFKA_SASL_PASSWORD"
-        # -- kafka.sslCaLocation defines location from which CA certs should be read. Used when SSL security is enabled (SSL, SASL_SSL).
-        sslCaLocation: '{{repl ConfigOption "kafka_ca_file" }}'
+    rasa:
+      enabled: true
+      fullnameOverride: rasapro
 
-      storage:
-        # -- use "gcs" for Google Cloud Storage, "aws_s3" for AWS S3
-        type: '{{repl ConfigOption "storage_type" }}'
-        # -- Name of the storage bucket. Make sure to pre-create this bucket.
-        bucketName: '{{repl ConfigOption "bucket_name" }}'
-        # -- Needed if STORAGE_TYPE is set to aws_s3. The region where the bucket is located.
-        regionName: '{{repl ConfigOption "aws_region_name" }}'
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        awsAccessKeyId:
-          secretName: "studio-secrets"
-          secretKey: "AWS_ACCESS_KEY_ID"
-        # -- Needed if STORAGE_TYPE is set to aws_s3
-        awsSecretAccessKey:
-          secretName: "studio-secrets"
-          secretKey: "AWS_SECRET_ACCESS_KEY"
-        # -- Needed if STORAGE_TYPE is set to gcs. The project ID of the GCP project.
-        googleCloudProject: '{{repl ConfigOption "google_cloud_project" }}'
-        # -- Needed if STORAGE_TYPE is set to gcs. The zone where the bucket is located.
-        cloudskdComputeZone: '{{repl ConfigOption "cloudsdk_compute_zone" }}'
-        # -- Needed if STORAGE_TYPE is set to gcs. The service account email address.
-        storageServiceAccount:
-          secretName: "studio-secrets"
-          secretKey: "STORAGE_SIGNED_URL_SERVICE_ACCOUNT"
+      rasa:
+        replicaCount: 1
+        image:
+          repository: '{{repl ConfigOption "rasa_pro_repository" }}'
+          tag: '{{repl ConfigOption "rasa_pro_image_tag" }}'
 
-      training:
-        orchestrator:
-          # -- orchestrator.replicaCount specifies number of replicas
-          replicaCount: 1
-          environmentVariables:
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            TRAINING_RESULT_TOPIC:
-              value: '{{repl ConfigOption "training_result_topic" }}'
-            TRAINING_RESULT_CONSUMER_GROUP_ID:
-              value: "training-result-consumer-group"
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            TRAINING_JOB_TOPIC:
-              value: '{{repl ConfigOption "training_job_topic" }}'
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            KAFKA_TRAINING_STATUS_UPDATE_TOPIC:
-              value: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
-        consumer:
-          replicaCount: repl{{ ConfigOption "training_consumer_replicas" }}
-          environmentVariables:
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            KAFKA_JOB_TOPIC:
-              value: '{{repl ConfigOption "training_job_topic" }}'
-            MODEL_TRAINING_KAFKA_CONSUMER_ID:
-              value: "training-result-consumer-group"
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            KAFKA_RESULT_TOPIC:
-              value: '{{repl ConfigOption "training_result_topic" }}'
-            KUBERNETES_BASE_TRAINING_DATA_PATH:
-              value: "/home"
-            KUBERNETES_JOB_BOT_CONFIG_MOUNT:
-              value: "/app"
-            # -- Value of CPU limit to allocate to the container for model training
-            RASA_REQUESTS_CPU:
-              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
-            # -- Value of Memory limit to allocate to the container for model training
-            RASA_REQUESTS_MEMORY:
-              value: '{{repl ConfigOption "rasa_requests_memory" }}'
-            # -- Value of CPU limit to allocate to the container for model training
-            RASA_LIMITS_CPU:
-              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
-            # -- Value of Memory limit to allocate to the container for model training
-            RASA_LIMITS_MEMORY:
-              value: '{{repl ConfigOption "rasa_limits_memory" }}'
-            # -- Set this to true if you want to include rasa debug logs during model training
-            RASA_DEBUG_LOGS:
-              value: '{{repl ConfigOption "rasa_training_debug_logs" }}'
+        settings:
+          useDefaultArgs: false
+          mountDefaultConfigmap: false
 
-      running:
-        orchestrator:
-          # -- orchestrator.replicaCount specifies number of replicas
-          replicaCount: 1
-          environmentVariables:
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            DEPLOYMENT_RESULT_TOPIC:
-              value: '{{repl ConfigOption "deployment_result_topic" }}'
-            DEPLOYMENT_RESULT_CONSUMER_GROUP_ID:
-              value: "deployment-result-consumer-group"
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            DEPLOYMENT_JOB_TOPIC:
-              value: '{{repl ConfigOption "deployment_job_topic" }}'
-          ingress:
-            className: '{{repl ConfigOption "ingress_class" }}'
-            annotations:
-              nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-              nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-              kots.io/placeholder: |-
-                repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 14 }}repl{{ end }}
-        proxy:
-          image: '{{repl ConfigOption "mrs_nginx_proxy" }}'
-        consumer:
-          replicaCount: repl{{ ConfigOption "running_consumer_replicas" }}
-          environmentVariables:
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            DEPLOYMENT_JOB_KAFKA_TOPIC:
-              value: '{{repl ConfigOption "deployment_job_topic" }}'
-            MODEL_DEPLOYMENT_KAFKA_CONSUMER_ID:
-              value: "deployment-result-consumer-group"
-            # -- Kafka topic for internal service communication. Please make sure to pre-create this topic.
-            KAFKA_DEPLOYMENT_RESULT_TOPIC:
-              value: '{{repl ConfigOption "deployment_result_topic" }}'
-            KUBERNETES_BASE_BOT_DATA_PATH:
-              value: "/home"
-            KUBERNETES_JOB_BOT_CONFIG_MOUNT:
-              value: "/app"
-            RASA_REQUESTS_CPU:
-              value: '{{repl ConfigOption "rasa_requests_cpu" }}'
-            # -- Value of Memory limit to allocate to the container for model training
-            RASA_REQUESTS_MEMORY:
-              value: '{{repl ConfigOption "rasa_requests_memory" }}'
-            # -- Value of CPU limit to allocate to the container for model training
-            RASA_LIMITS_CPU:
-              value: '{{repl ConfigOption "rasa_limits_cpu" }}'
-            # -- Value of Memory limit to allocate to the container for model training
-            RASA_LIMITS_MEMORY:
-              value: '{{repl ConfigOption "rasa_limits_memory" }}'
-            # -- Set this to true if you want to include rasa debug logs during model running
-            RASA_DEBUG_LOGS:
-              value: '{{repl ConfigOption "rasa_running_debug_logs" }}'
+        command: ["python", "-m", "rasa.model_service"]
 
-      persistence:
-        # -- Should the PV and PVC be created
-        create: true
-        # -- Type of the volume that will be used to store the training data
-        # Valid values: local, nfs. Leave this empty if you are using AWS EFS.
-        type: '{{repl ConfigOption "persistence_type" }}'
-        # -- If you are deploying to AWS and using EFS for volume, set this value to true.
-        aws: repl{{ eq (ConfigOption "nfs_aws_type") "1"}}
-        # -- FileSystemId::MountPoint of the AWS EFS volume. For example "fs-0bbaea252301ca2d4::fsap-0b4550cc4c77377fd"
-        efs_id: '{{repl ConfigOption "efs_id" }}'
-        # -- Storage Class name for PV. Should be `efs-sc` if you are using AWS EFS. It's "standard-rwo" if you are using NFS server.
-        storageClassName: '{{repl ConfigOption "storage_class_name" }}'
-        # -- Storage Capacity for PV
-        storageCapacity: '{{repl ConfigOption "storage_capacity" }}'
-        # -- Storage requests for PVC
-        storageRequests: '{{repl ConfigOption "storage_requests" }}'
-        # -- DNS name or IP address of the NFS server. This value is used only when type is set to nfs
-        nfsServer: '{{repl ConfigOption "nfs_server" }}'
-        # -- Directory from the host machine that will be mounted to the container for training data. This value is used only when type is set to local
-        hostPath: '{{repl ConfigOption "host_path" }}'
-        # -- Node on which the PV will be created
-        # This value is used only when type is set to local
-        localNodeName: '{{repl ConfigOption "local_node_name" }}'
+        overrideEnv:
+          - name: "RASA_PRO_LICENSE"
+            valueFrom:
+              secretKeyRef:
+                name: "studio-secrets"
+                key: "RASA_PRO_LICENCE"
+          - name: OPENAI_API_KEY
+            valueFrom:
+              secretKeyRef:
+                name: "studio-secrets"
+                key: "OPENAI_API_KEY_SECRET_KEY"
+          - name: MAX_PARALLEL_BOT_RUNS
+            value: '{{repl ConfigOption "max_parallel_bot_runs" }}'
+          - name: MAX_PARALLEL_TRAININGS
+            value: '{{repl ConfigOption "max_parallel_trainings" }}'
+
+        envFrom:
+          - configMapRef:
+              name: shared-environment
+
+        service:
+          port: 80
+          targetPort: 8000
+
+        livenessProbe:
+          enabled: true
+          httpGet:
+            path: /
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+          failureThreshold: 6
+
+        readinessProbe:
+          enabled: true
+          httpGet:
+            path: /
+            port: 8000
+            scheme: HTTP
+          initialDelaySeconds: 30
+          periodSeconds: 15
+          successThreshold: 1
+          timeoutSeconds: 5
+          failureThreshold: 6
+
+        ingress:
+          enabled: true
+          className: nginx
+          annotations:
+            nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+            nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+            kots.io/placeholder: |-
+              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+          hosts:
+            # -- Please update the below URL with the correct host name of the Studio deployment
+            - host: '{{repl ConfigOption "ingress_hostname" }}'
+              paths:
+                - path: /talk
+                  pathType: Prefix
+
+        persistence:
+          create: true
+          storageCapacity: 1Gi
+          storageRequests: 1Gi
+          storageClassName: openebs-hostpath
+          hostPath:
+            enabled: true
+            path: "/app/working-data"
+
+        podSecurityContext:
+          # -- User ID of the container to access the mounted volume
+          fsGroup: 1001
+          runAsUser: 0
+
+        # -- rasa.resources specifies the resources limits and requests
+        resources: {}
+        # We usually recommend not to specify default resources and to leave this as a conscious
+        # choice for the user. This also increases chances charts run on environments with little
+        # resources, such as Minikube. If you do want to specify resources, uncomment the following
+        # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+        # limits:
+        #   cpu: 100m
+        #   memory: 128Mi
+        # requests:
+        #   cpu: 100m
+        #   memory: 128Mi
+
+      rasaProServices:
+        enabled: false
 
   optionalValues:
     - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
@@ -334,33 +268,23 @@ spec:
       values:
         imagePullSecrets:
           - name: '{{repl ImagePullSecretName }}'
-        modelService:
-          training:
-            consumer:
-              environmentVariables:
-                KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ImagePullSecretName }}'
-          running:
-            consumer:
-              environmentVariables:
-                KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ImagePullSecretName }}'
     - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
       recursiveMerge: true
       values:
         imagePullSecrets:
           - name: '{{repl ConfigOption "image_pull_secrets" }}'
-        modelService:
-          training:
-            consumer:
-              environmentVariables:
-                KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ConfigOption "image_pull_secrets" }}'
-          running:
-            consumer:
-              environmentVariables:
-                KUBERNETES_IMAGE_PULL_SECRET_NAME:
-                  value: '{{repl ConfigOption "image_pull_secrets" }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "internal_registry"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          imagePullSecrets:
+            - name: '{{repl ImagePullSecretName }}'
+    - when: '{{repl ConfigOptionEquals "image_registry" "external_registry"}}'
+      recursiveMerge: true
+      values:
+        rasa:
+          imagePullSecrets:
+            - name: '{{repl ConfigOption "image_pull_secrets" }}'
     - when: '{{repl ConfigOptionEquals "set_backend_resources" "1"}}'
       recursiveMerge: true
       values:
@@ -405,70 +329,28 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_keycloak_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_keycloak_requests_memory" }}'
-    - when: '{{repl ConfigOptionEquals "set_model_training_resources" "1"}}'
-      recursiveMerge: true
-      values:
-        modelService:
-          training:
-            orchestrator:
-              resources:
-                limits:
-                  cpu: '{{repl ConfigOption "set_model_training_orchestrator_limits_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_training_orchestrator_limits_memory" }}'
-                requests:
-                  cpu: '{{repl ConfigOption "set_model_training_orchestrator_requests_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_training_orchestrator_requests_memory" }}'
-            consumer:
-              resources:
-                limits:
-                  cpu: '{{repl ConfigOption "set_model_training_consumer_limits_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_training_consumer_limits_memory" }}'
-                requests:
-                  cpu: '{{repl ConfigOption "set_model_training_consumer_requests_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_training_consumer_requests_memory" }}'
-    - when: '{{repl ConfigOptionEquals "set_model_running_resources" "1"}}'
-      recursiveMerge: true
-      values:
-        modelService:
-          running:
-            orchestrator:
-              resources:
-                limits:
-                  cpu: '{{repl ConfigOption "set_model_running_orchestrator_limits_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_running_orchestrator_limits_memory" }}'
-                requests:
-                  cpu: '{{repl ConfigOption "set_model_running_orchestrator_requests_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_running_orchestrator_requests_memory" }}'
-            consumer:
-              resources:
-                limits:
-                  cpu: '{{repl ConfigOption "set_model_running_consumer_limits_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_running_consumer_limits_memory" }}'
-                requests:
-                  cpu: '{{repl ConfigOption "set_model_running_consumer_requests_cpu" }}'
-                  memory: '{{repl ConfigOption "set_model_running_consumer_requests_memory" }}'
-    - when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-      recursiveMerge: true
-      values:
-        modelService:
-          training:
-            orchestrator:
-              environmentVariables:
-                AWS_ENDPOINT_URL:
-                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
-            consumer:
-              environmentVariables:
-                AWS_ENDPOINT_URL:
-                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
-          running:
-            orchestrator:
-              environmentVariables:
-                AWS_ENDPOINT_URL:
-                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
-            consumer:
-              environmentVariables:
-                AWS_ENDPOINT_URL:
-                  value: '{{repl ConfigOption "aws_endpoint_url" }}'
+    # - when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
+    #   recursiveMerge: true
+    #   values:
+    #     modelService:
+    #       training:
+    #         orchestrator:
+    #           environmentVariables:
+    #             AWS_ENDPOINT_URL:
+    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
+    #         consumer:
+    #           environmentVariables:
+    #             AWS_ENDPOINT_URL:
+    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
+    #       running:
+    #         orchestrator:
+    #           environmentVariables:
+    #             AWS_ENDPOINT_URL:
+    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
+    #         consumer:
+    #           environmentVariables:
+    #             AWS_ENDPOINT_URL:
+    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
   builder:
     replicated:
       enabled: true

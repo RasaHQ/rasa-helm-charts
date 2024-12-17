@@ -1,6 +1,5 @@
-name: Rasa Pro Replicated Candidate Release
-run-name: Promote Replicated release to rasa-pro-release-candidate channel
-
+name: Rasa Pro Release Candidate
+run-name: Create Rasa Pro Release Candidate
 on:
   push:
     branches:
@@ -19,7 +18,7 @@ jobs:
       release-candidate: ${{ steps.check-rc.outputs.rc }}
     steps:
     - name: Checkout repo
-      uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
     - name: Read Rasa Studio chart
       id: pro-chart-info
       uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa

@@ -41,7 +41,7 @@ spec:
   {{- end }}
   rules:
     {{- range .Values.rasa.ingress.hosts }}
-    - host: {{ .host | quote }}
+    - host: {{ $.Values.global.ingressHost | default .host | quote }}
       http:
         paths:
           {{- range .paths }}

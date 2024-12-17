@@ -70,16 +70,9 @@ spec:
           {{- if .Values.rasa.args }}
           args:
             {{- toYaml .Values.rasa.args | nindent 12 }}
-          {{- else }}
+          {{- else if .Values.rasa.settings.useDefaultArgs }}
           args:
-            {{- include "rasa.serverType" . | nindent 12 }}
-            - --port
-            - "{{ .Values.rasa.settings.port }}"
-            - --cors
-            - {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
-            {{- if .Values.rasa.settings.debugMode }}
-            - --debug
-            {{- end }}
+            {{- include "rasa.defaultArgs" . | nindent 12 }}
           {{- if .Values.rasa.additionalArgs }}
             {{- toYaml .Values.rasa.additionalArgs | nindent 12 }}
           {{- end }}
@@ -92,8 +85,13 @@ spec:
             - name: http
               containerPort: {{ .Values.rasa.service.port }}
               protocol: TCP
+          {{- if .Values.rasa.overrideEnv }}
+          env:
+            {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
+          {{- else }}
           env:
             {{- include "rasa.containers.env" . | nindent 12 }}
+          {{- end }}
           {{- if .Values.rasa.envFrom }}
           envFrom:
             {{- toYaml .Values.rasa.envFrom | nindent 12 }}

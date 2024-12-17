@@ -54,24 +54,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for Model Training Service
-*/}}
-{{- define "modelTrainingService.selectorLabels" -}}
-app.kubernetes.io/name: model-training-service
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: model-training-service-orchestrator
-{{- end }}
-
-{{/*
-Selector labels for Model Running Service
-*/}}
-{{- define "modelRunningService.selectorLabels" -}}
-app.kubernetes.io/name: model-running-service
-app.kubernetes.io/instance: {{ .Release.Name }}
-app.kubernetes.io/component: model-running-service-orchestrator
-{{- end }}
-
-{{/*
 Selector labels for Nginx Proxy
 */}}
 {{- define "nginx.selectorLabels" -}}
@@ -120,28 +102,6 @@ Create the name of the frontend service account to use for Web Client
 {{- default (include "studio.fullname" .) .Values.webClient.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.webClient.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use for Model Training Service
-*/}}
-{{- define "modelTrainingService.serviceAccountName" -}}
-{{- if .Values.modelService.training.serviceAccount.create }}
-{{- default "model-training-service" .Values.modelService.training.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.modelService.training.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use for Model Training Service
-*/}}
-{{- define "modelRunningService.serviceAccountName" -}}
-{{- if .Values.modelService.running.serviceAccount.create }}
-{{- default "model-running-service" .Values.modelService.running.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.modelService.running.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -221,74 +181,5 @@ Return image repository with tag and image name for Keycloak
 "{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
 {{- else -}}
 "{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return image repository with tag and image name for Model Training Service
-*/}}
-{{- define "modelTrainingService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelService.repository -}}
-"{{ .Values.modelService.repository }}{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.tag }}"
-{{- else -}}
-"{{ .Values.modelService.repository }}/{{ .Values.modelService.training.consumer.image.name }}:{{ .Values.modelService.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return image repository with tag and image name for Model Training Service
-*/}}
-{{- define "modelTrainingService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelService.repository -}}
-"{{ .Values.modelService.repository }}{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
-{{- else -}}
-"{{ .Values.modelService.repository }}/{{ .Values.modelService.training.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return image repository with tag and image name for Model Running Service
-*/}}
-{{- define "modelRunningService.consumer.image" -}}
-{{- if hasSuffix "/" .Values.modelService.repository -}}
-"{{ .Values.modelService.repository }}{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.tag }}"
-{{- else -}}
-"{{ .Values.modelService.repository }}/{{ .Values.modelService.running.consumer.image.name }}:{{ .Values.modelService.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return image repository with tag and image name for Model Running Service
-*/}}
-{{- define "modelRunningService.orchestrator.image" -}}
-{{- if hasSuffix "/" .Values.modelService.repository -}}
-"{{ .Values.modelService.repository }}{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
-{{- else -}}
-"{{ .Values.modelService.repository }}/{{ .Values.modelService.running.orchestrator.image.name }}:{{ .Values.modelService.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-GCP credential volume
-*/}}
-{{- define "gcpCredentials.volumeMount" -}}
-{{- if not (empty .Values.modelService.gcpCredentials.secretName) -}}
-- mountPath: "/config/gcloud/"
-  name: "gcp-auth"
-  readOnly: true
-{{- end -}}
-{{- end -}}
-
-{{/*
-GCP credential volume mount
-*/}}
-{{- define "gcpCredentials.volume" -}}
-{{- if not (empty .Values.modelService.gcpCredentials.secretName) -}}
-- name: "gcp-auth"
-  secret:
-    secretName: {{ .Values.modelService.gcpCredentials.secretName }}
-    items:
-    - key: {{ .Values.modelService.gcpCredentials.secretKey }}
-      path: credentials.json
 {{- end -}}
 {{- end -}}

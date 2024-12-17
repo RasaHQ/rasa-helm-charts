@@ -1,4 +1,3 @@
-{{- if .Values.studioEnabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -56,8 +55,6 @@ spec:
             value: {{ .Values.config.database.host | quote }}
           - name: POSTGRES_PORT
             value: {{ .Values.config.database.port | quote }}
-          - name: POSTGRES_DATABASE
-            value: {{ .Values.config.database.modelServiceDatabaseName | quote }}
           - name: POSTGRES_USERNAME
             value: {{ .Values.config.database.username | quote }}
           - name: POSTGRES_PASSWORD
@@ -65,4 +62,3 @@ spec:
               secretKeyRef:
                 name: {{ .Values.config.database.password.secretName | quote }}
                 key: {{ .Values.config.database.password.secretKey | quote }}
-{{- end }}

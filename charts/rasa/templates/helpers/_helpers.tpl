@@ -148,11 +148,18 @@ Return the appropriate apiVersion for networkpolicy.
 {{/*
 Determine rasa server to run with arguments
 */}}
-{{- define "rasa.serverType" -}}
+{{- define "rasa.defaultArgs" -}}
 - run
 {{- if .Values.rasa.settings.enableApi }}
 - --enable-api
-{{- end -}}
+{{- end }}
+- --port
+- "{{ .Values.rasa.settings.port }}"
+- --cors
+- {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
+{{- if .Values.rasa.settings.debugMode }}
+- --debug
+{{- end }}
 {{- end -}}
 
 {{/*

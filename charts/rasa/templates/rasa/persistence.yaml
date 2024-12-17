@@ -1,0 +1,38 @@
+{{- if and .Values.rasa.persistence.create .Values.rasa.persistence.hostPath.enabled -}}
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: rasa-pro-data-pv-{{ .Release.Namespace }}
+  labels:
+    name: rasa-pro-data-pv-{{ .Release.Namespace }}
+spec:
+  capacity:
+    storage: {{ .Values.rasa.persistence.storageCapacity }}
+  volumeMode: Filesystem
+  accessModes:
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: {{ .Values.rasa.persistence.storageClassName }}
+  hostPath:
+    path: {{ .Values.rasa.persistence.hostPath.path | default "/mnt/data" }}
+    type: {{ .Values.rasa.persistence.hostPath.type | default "DirectoryOrCreate" }}
+  claimRef:
+    name: rasa-pro-data-pvc-{{ .Release.Namespace }}
+    namespace: {{ .Release.Namespace }}
+{{- end }}
+---
+{{- if and .Values.rasa.persistence.create -}}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: rasa-pro-data-pvc-{{ .Release.Namespace }}
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: {{ .Values.rasa.persistence.storageRequests }}
+  storageClassName: {{ .Values.rasa.persistence.storageClassName }} 
+---
+{{- end }}

@@ -21,9 +21,6 @@ rasa:
   # Disable this if you want to deploy ONLY Rasa Pro Services
   enabled: true
 
-  # -- rasa.deployOSS enables Rasa Open Source deployment
-  deployOSS: false
-
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
   # rasa.image defines image settings
@@ -66,7 +63,10 @@ rasa:
     jwtMethod: HS256
     # -- settings.cors is CORS for the passed origin. Default is * to allow all origins
     cors: '*'
-
+    # -- settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case.
+    useDefaultArgs: true
+    # -- settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment.
+    mountDefaultConfigmap: true
     # settings.credentials enables credentials configuration for channel connectors
     credentials:
       # -- credentials.enabled enables credentials configuration for channel connectors
@@ -164,6 +164,8 @@ rasa:
   additionalArgs: []
   # -- rasa.command overrides the default command for the container
   command: []
+  # -- rasa.overrideEnv overrides all default environment variables
+  overrideEnv: []
   # -- rasa.additionalEnv adds additional environment variables
   additionalEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
@@ -316,7 +318,7 @@ rasa:
       # kubernetes.io/tls-acme: "true"
     # -- ingress.hosts specifies the hosts for this ingress
     hosts:
-      - host: chart-example.local
+      - host: INGRESS.HOST.NAME
         paths:
           - path: /api
             pathType: Prefix
@@ -351,6 +353,17 @@ rasa:
     # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
+
+  # rasa.persistence creates PV and PVC to be used as model service. DO NOT use this if you are only running Rasa Pro.
+  persistence:
+    create: false
+    storageClassName:
+    storageRequests: 1Gi
+    storageCapacity: 1Gi
+    hostPath:
+      enabled: false
+      # path:
+      # type:
 
   # -- rasa.nodeSelector allows the deployment to be scheduled on selected nodes
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
@@ -597,6 +610,7 @@ global:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+  ingressHost:
 
 # -- hostNetwork controls whether the pod may use the node network namespace
 hostNetwork: false
@@ -1104,6 +1118,3 @@ actionServer:
   # -- actionServer.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
-
-replicated:
-  enabled: false

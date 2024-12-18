@@ -16,10 +16,6 @@ spec:
   {{- if not .Values.actionServer.autoscaling.enabled }}
   replicas: {{ .Values.actionServer.replicaCount }}
   {{- end }}
-  {{- with .Values.hostAliases }}
-  hostAliases:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
   {{- if .Values.actionServer.strategy }}
   strategy:
     {{- toYaml .Values.actionServer.strategy | nindent 4 }}
@@ -39,6 +35,10 @@ spec:
           {{ toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.hostAliases }}
+      hostAliases:
+        {{- toYaml .Values.hostAliases | nindent 8 }}
+      {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "rasa.dnsPolicy" . }}
       {{- if .Values.dnsConfig }}

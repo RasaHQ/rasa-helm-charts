@@ -10,7 +10,7 @@ metadata:
     {{- end }}
   {{- with .Values.deploymentAnnotations }}
   annotations:
-    {{- toYaml . | nindent 8 }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
   {{- if not .Values.duckling.autoscaling.enabled }}

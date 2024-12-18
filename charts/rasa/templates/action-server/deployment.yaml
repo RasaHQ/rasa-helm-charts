@@ -35,9 +35,9 @@ spec:
           {{ toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
     spec:
-      {{- with .Values.hostAliases }}
+      {{- if .Values.hostAliases }}
       hostAliases:
-        {{- toYaml . | nindent 4 }}
+        {{- toYaml .Values.hostAliases | nindent 8 }}
       {{- end }}
       hostNetwork: {{ .Values.hostNetwork }}
       dnsPolicy: {{ include "rasa.dnsPolicy" . }}

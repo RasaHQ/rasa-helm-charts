@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.2](https://img.shields.io/badge/Version-2.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.2-rc](https://img.shields.io/badge/Version-2.0.2--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.2-rc
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.2-rc
 ```
 
 ## General Configuration
@@ -199,58 +199,14 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
-| rasa.enabled | bool | `true` |  |
-| rasa.fullnameOverride | string | `"rasapro"` |  |
-| rasa.rasa.command[0] | string | `"python"` |  |
-| rasa.rasa.command[1] | string | `"-m"` |  |
-| rasa.rasa.command[2] | string | `"rasa.model_service"` |  |
-| rasa.rasa.envFrom[0].configMapRef.name | string | `"shared-environment"` |  |
-| rasa.rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |  |
-| rasa.rasa.image.tag | string | `"3.11.1"` |  |
-| rasa.rasa.ingress.annotations | object | `{}` |  |
-| rasa.rasa.ingress.enabled | bool | `true` |  |
+| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.11.1"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
 | rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
-| rasa.rasa.livenessProbe.enabled | bool | `true` |  |
-| rasa.rasa.livenessProbe.failureThreshold | int | `6` |  |
-| rasa.rasa.livenessProbe.httpGet.path | string | `"/"` |  |
-| rasa.rasa.livenessProbe.httpGet.port | int | `8000` |  |
-| rasa.rasa.livenessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| rasa.rasa.livenessProbe.initialDelaySeconds | int | `30` |  |
-| rasa.rasa.livenessProbe.periodSeconds | int | `15` |  |
-| rasa.rasa.livenessProbe.successThreshold | int | `1` |  |
-| rasa.rasa.livenessProbe.timeoutSeconds | int | `5` |  |
-| rasa.rasa.overrideEnv[0].name | string | `"RASA_PRO_LICENSE"` |  |
-| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.key | string | `"RASA_PRO_LICENSE_SECRET_KEY"` |  |
-| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
-| rasa.rasa.overrideEnv[1].name | string | `"OPENAI_API_KEY"` |  |
-| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string | `"OPENAI_API_KEY_SECRET_KEY"` |  |
-| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string | `"studio-secrets"` |  |
-| rasa.rasa.persistence.create | bool | `true` |  |
-| rasa.rasa.persistence.hostPath.enabled | bool | `false` |  |
-| rasa.rasa.persistence.storageCapacity | string | `"1Gi"` |  |
-| rasa.rasa.persistence.storageClassName | string | `nil` |  |
-| rasa.rasa.persistence.storageRequests | string | `"1Gi"` |  |
+| rasa.rasa.persistence.storageClassName | string | `nil` | Make sure to set the correct storage class name based on your cluster configuration |
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
-| rasa.rasa.readinessProbe.enabled | bool | `true` |  |
-| rasa.rasa.readinessProbe.failureThreshold | int | `6` |  |
-| rasa.rasa.readinessProbe.httpGet.path | string | `"/"` |  |
-| rasa.rasa.readinessProbe.httpGet.port | int | `8000` |  |
-| rasa.rasa.readinessProbe.httpGet.scheme | string | `"HTTP"` |  |
-| rasa.rasa.readinessProbe.initialDelaySeconds | int | `30` |  |
-| rasa.rasa.readinessProbe.periodSeconds | int | `15` |  |
-| rasa.rasa.readinessProbe.successThreshold | int | `1` |  |
-| rasa.rasa.readinessProbe.timeoutSeconds | int | `5` |  |
-| rasa.rasa.replicaCount | int | `1` |  |
 | rasa.rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
-| rasa.rasa.service.port | int | `80` |  |
-| rasa.rasa.service.targetPort | int | `8000` |  |
-| rasa.rasa.settings.mountDefaultConfigmap | bool | `false` |  |
-| rasa.rasa.settings.useDefaultArgs | bool | `false` |  |
-| rasa.rasa.strategy.type | string | `"Recreate"` |  |
-| rasa.rasaProServices.enabled | bool | `false` |  |
 | replicated.enabled | bool | `false` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| tag | string | `"1.10.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.10.1"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |

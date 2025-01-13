@@ -87,7 +87,7 @@ spec:
               {{- if .Values.backend.environmentVariables.MS_API_URL }}
               value: {{ .Values.backend.environmentVariables.MS_API_URL.value | quote }}
               {{- else }}
-              value: "http://rasapro.{{ .Release.Namespace }}:80"
+              value: "http://rasapro"
               {{- end }}
             {{- range $key, $value := .Values.backend.environmentVariables }}
             - name: {{ $key | upper }}

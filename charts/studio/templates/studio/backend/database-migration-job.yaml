@@ -51,14 +51,3 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          - name: POSTGRES_HOST
-            value: {{ .Values.config.database.host | quote }}
-          - name: POSTGRES_PORT
-            value: {{ .Values.config.database.port | quote }}
-          - name: POSTGRES_USERNAME
-            value: {{ .Values.config.database.username | quote }}
-          - name: POSTGRES_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.config.database.password.secretName | quote }}
-                key: {{ .Values.config.database.password.secretKey | quote }}

@@ -26,31 +26,10 @@ spec:
         limits:
           maxAge: 720h
     - logs:
-        name: app/model-training-service/orchestrator
+        name: app/model-service
         selector: 
-          - app.kubernetes.io/name=model-training-service
+          - app.kubernetes.io/name=rasapro
           - app.kubernetes.io/instance={{ .Release.Name }}
-          - app.kubernetes.io/component=model-training-service-orchestrator
-        limits:
-          maxAge: 720h
-    - logs:
-        name: app/model-training-service/consumer
-        selector: 
-          - app.kubernetes.io/component=model-training-service-consumer
-        limits:
-          maxAge: 720h
-    - logs:
-        name: app/model-running-service/orchestrator
-        selector: 
-          - app.kubernetes.io/name=model-running-service
-          - app.kubernetes.io/instance={{ .Release.Name }}
-          - app.kubernetes.io/component=model-running-service-orchestrator
-        limits:
-          maxAge: 720h
-    - logs:
-        name: app/model-running-service/consumer
-        selector: 
-          - app.kubernetes.io/component=model-running-service-consumer
         limits:
           maxAge: 720h
   analyzers: {{- include "troubleshoot.analyzers.shared" .  | nindent 4 }}

@@ -101,25 +101,10 @@ spec:
     provisioning:
       enabled: true
       topics:
-        - name: '{{repl ConfigOption "training_job_topic" }}'
-          partitions: 1
-          replicationFactor: 1
-        - name: '{{repl ConfigOption "training_result_topic" }}'
-          partitions: 1
-          replicationFactor: 1
         - name: '{{repl ConfigOption "kafka_topic" }}'
           partitions: 1
           replicationFactor: 1
-        - name: '{{repl ConfigOption "kafka_training_status_update_topic" }}'
-          partitions: 1
-          replicationFactor: 1
         - name: '{{repl ConfigOption "kafka_dlq_topic" }}'
-          partitions: 1
-          replicationFactor: 1
-        - name: '{{repl ConfigOption "deployment_result_topic" }}'
-          partitions: 1
-          replicationFactor: 1
-        - name: '{{repl ConfigOption "deployment_job_topic" }}'
           partitions: 1
           replicationFactor: 1
         - name: '{{repl ConfigOption "rasa_assistant_topic" }}'

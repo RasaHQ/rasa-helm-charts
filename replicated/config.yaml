@@ -66,7 +66,7 @@ spec:
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: 1.0.0-beta.31
+          default: 1.0.0
           help_text: Replicated SDK version
     - name: Accessing Rasa Studio
       description: >
@@ -205,7 +205,7 @@ spec:
         - name: database_password
           type: password
           title: Database Password
-          value: '{{repl RandomString 32}}'
+          value: postgres #'{{repl RandomString 32}}'
           required: true
           help_text: The password to connect to your existing database.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
@@ -221,12 +221,6 @@ spec:
           title: Studio Database Name
           default: studio
           help_text: The name of the database used by Rasa Studio.
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: model_service_database
-          type: text
-          title: Model Services Database Name
-          default: modelservice
-          help_text: The name of the database used by the Model Services.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: keycloak_database
           type: text
@@ -288,7 +282,7 @@ spec:
           type: password
           title: Kafka SASL password
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          value: '{{repl RandomString 32}}'
+          value: kafka #'{{repl RandomString 32}}'
           help_text: Kafka SASL password
         - name: kafka_group_id
           type: text
@@ -308,36 +302,6 @@ spec:
           default: rasa-events-dlq
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
-        - name: training_result_topic
-          type: text
-          title: Training Result Topic
-          default: training-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: training_job_topic
-          type: text
-          title: Training Job Topic
-          default: training-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: kafka_training_status_update_topic
-          type: text
-          title: Training Status Update Topic
-          default: training-status-update
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_result_topic
-          type: text
-          title: Deployment Result Topic
-          default: deployment-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_job_topic
-          type: text
-          title: Deployment Job Topic
-          default: deployment-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
         - name: rasa_assistant_topic
           type: text
           title: Rasa Assistant Topic

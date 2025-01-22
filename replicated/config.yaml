@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.10.1"
+          default: "1.11.0"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.11.1"
+          default: "3.11.3"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: openai_api_key
           type: text
@@ -66,7 +66,7 @@ spec:
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: 1.0.0-beta.31
+          default: 1.0.0
           help_text: Replicated SDK version
     - name: Accessing Rasa Studio
       description: >
@@ -203,9 +203,9 @@ spec:
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
           help_text: The username to connect to your existing database.
         - name: database_password
-          type: text
+          type: password
           title: Database Password
-          default: postgres
+          value: postgres #'{{repl RandomString 32}}'
           required: true
           help_text: The password to connect to your existing database.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
@@ -221,12 +221,6 @@ spec:
           title: Studio Database Name
           default: studio
           help_text: The name of the database used by Rasa Studio.
-          when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
-        - name: model_service_database
-          type: text
-          title: Model Services Database Name
-          default: modelservice
-          help_text: The name of the database used by the Model Services.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: keycloak_database
           type: text
@@ -285,10 +279,10 @@ spec:
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka SASL username
         - name: kafka_password
-          type: text
+          type: password
           title: Kafka SASL password
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          default: kafka
+          value: kafka #'{{repl RandomString 32}}'
           help_text: Kafka SASL password
         - name: kafka_group_id
           type: text
@@ -308,36 +302,6 @@ spec:
           default: rasa-events-dlq
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
-        - name: training_result_topic
-          type: text
-          title: Training Result Topic
-          default: training-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: training_job_topic
-          type: text
-          title: Training Job Topic
-          default: training-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: kafka_training_status_update_topic
-          type: text
-          title: Training Status Update Topic
-          default: training-status-update
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_result_topic
-          type: text
-          title: Deployment Result Topic
-          default: deployment-result
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
-        - name: deployment_job_topic
-          type: text
-          title: Deployment Job Topic
-          default: deployment-job
-          when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          help_text: Kafka topic for internal service communication. Please make sure to pre-create this topic.
         - name: rasa_assistant_topic
           type: text
           title: Rasa Assistant Topic

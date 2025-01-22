@@ -61,7 +61,9 @@ spec:
     backend:
       environmentVariables:
         DATABASE_URL:
-          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "studio_database" }}?schema=public'
+          secret:
+            name: "studio-secrets"
+            value: "DATABASE_URL"
         KEYCLOAK_REALM:
           value: '{{repl ConfigOption "keycloak_realm" }}'
         KEYCLOAK_API_CLIENT_ID:
@@ -103,7 +105,9 @@ spec:
     eventIngestion:
       environmentVariables:
         DATABASE_URL:
-          value: 'postgresql://{{repl ConfigOption "database_username" }}:{{repl ConfigOption "database_password" }}@{{repl ConfigOption "database_host" }}:{{repl ConfigOption "database_port" }}/{{repl ConfigOption "studio_database" }}?schema=public'
+          secret:
+            name: "studio-secrets"
+            value: "DATABASE_URL"
         KAFKA_SASL_MECHANISM:
           value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
         KAFKA_SASL_USERNAME:

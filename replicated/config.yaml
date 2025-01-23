@@ -205,7 +205,7 @@ spec:
         - name: database_password
           type: password
           title: Database Password
-          value: postgres #'{{repl RandomString 32}}'
+          value: '{{repl RandomString 32}}'
           required: true
           help_text: The password to connect to your existing database.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
@@ -282,7 +282,7 @@ spec:
           type: password
           title: Kafka SASL password
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          value: kafka #'{{repl RandomString 32}}'
+          value: '{{repl RandomString 32}}'
           help_text: Kafka SASL password
         - name: kafka_group_id
           type: text

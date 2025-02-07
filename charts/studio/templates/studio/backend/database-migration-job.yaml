@@ -1,3 +1,4 @@
+{{- if .Values.backend.migration.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -51,3 +52,4 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
+{{- end }}

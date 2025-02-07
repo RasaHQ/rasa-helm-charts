@@ -200,7 +200,7 @@ backend:
   # -- Define Studio Database Migration job settings
   migration:
     # -- migration.enable specifies whether a database migration job should be created
-    enable: true
+    enabled: true
     # -- migration.image specifies which image database migration job should use
     image:
       # -- image.name specifies the repository of the image
@@ -427,6 +427,8 @@ webClient:
 
 # Studio Event Ingestion component specific configuration
 eventIngestion:
+  # -- eventIngestion.enabled specifies whether the event ingestion component should be deployed or not
+  enabled: true
   # -- replicaCount specifies number of replicas
   replicaCount: 1
   # -- Define image settings

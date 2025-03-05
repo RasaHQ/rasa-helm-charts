@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.11.0"
+          default: "1.12.0.dev2"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.11.3"
+          default: "3.12.0.dev7"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
         - name: openai_api_key
           type: text

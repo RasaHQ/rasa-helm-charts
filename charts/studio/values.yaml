@@ -599,6 +599,8 @@ eventIngestion:
 
 # Studio Keycloak component specific configuration
 keycloak:
+  # -- keycloak.enabled specifies whether the keycloak component should be deployed or not
+  enabled: true
   # -- replicaCount specifies number of replicas
   replicaCount: 1
   # -- Define image settings

@@ -672,6 +672,8 @@ keycloak:
 
   # -- Define service
   service:
+    # -- service.enabled specifies whether service should be created
+    enabled: true
     # -- service.type specifies service type
     type: ClusterIP
     # -- service.port specifies service port

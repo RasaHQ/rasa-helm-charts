@@ -167,16 +167,15 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | imagePullSecrets | list | `[]` | imagePullSecret defines repository pull secrets |
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers allows to specify additional containers for the deployment |
 | keycloak.affinity | object | `{}` | keycloak.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| keycloak.enabled | bool | `true` | keycloak.enabled specifies whether the keycloak component should be deployed or not |
+| keycloak.enabled | bool | `true` | keycloak.enabled specifies whether Keycloak should be deployed or not |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom is used to add environment variables from ConfigMap or Secret |
 | keycloak.environmentVariables | object | `{"KC_PROXY":{"value":"edge"}}` | keycloak.environmentVariables defines environment variables for deployment Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | image.name specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| keycloak.ingress | object | `{"annotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| keycloak.ingress | object | `{"annotations":{},"className":"","labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
 | keycloak.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | keycloak.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| keycloak.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
 | keycloak.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | keycloak.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -187,8 +186,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | keycloak.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | keycloak.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |
 | keycloak.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
-| keycloak.service | object | `{"enabled":true,"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
-| keycloak.service.enabled | bool | `true` | service.enabled specifies whether service should be created |
+| keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
 | keycloak.service.port | int | `80` | service.port specifies service port |
 | keycloak.service.targetPort | int | `8080` | service.targetPort specifies service target port |
 | keycloak.service.type | string | `"ClusterIP"` | service.type specifies service type |

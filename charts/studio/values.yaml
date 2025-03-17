@@ -599,7 +599,7 @@ eventIngestion:
 
 # Studio Keycloak component specific configuration
 keycloak:
-  # -- keycloak.enabled specifies whether the keycloak component should be deployed or not
+  # -- keycloak.enabled specifies whether Keycloak should be deployed or not
   enabled: true
   # -- replicaCount specifies number of replicas
   replicaCount: 1
@@ -672,8 +672,6 @@ keycloak:
 
   # -- Define service
   service:
-    # -- service.enabled specifies whether service should be created
-    enabled: true
     # -- service.type specifies service type
     type: ClusterIP
     # -- service.port specifies service port
@@ -710,8 +708,6 @@ keycloak:
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
-    # -- ingress.enabled specifies whether an ingress service should be created
-    enabled: true
     # -- ingress.className specifies the ingress className to be used
     className: ""
     # -- ingress.labels defines labels to add to the ingress

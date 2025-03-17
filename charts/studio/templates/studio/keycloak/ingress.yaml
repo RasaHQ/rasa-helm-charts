@@ -1,4 +1,4 @@
-{{- if .Values.keycloak.ingress.enabled -}}
+{{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.keycloak.service.port -}}
 {{- if and .Values.keycloak.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
@@ -54,5 +54,5 @@ spec:
               {{- else }}
               serviceName: {{ $fullName }}-keycloak
               servicePort: {{ $svcPort }}
-              {{- end }}
+              {{- end }}  
 {{- end }}

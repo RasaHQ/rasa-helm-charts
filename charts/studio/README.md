@@ -187,7 +187,8 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | keycloak.replicaCount | int | `1` | replicaCount specifies number of replicas |
 | keycloak.resources | object | `{}` | keycloak.resources specifies the resources limits and requests |
 | keycloak.securityContext | object | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` | keycloak.securityContext defines security context that allows you to overwrite the pod-level security context |
-| keycloak.service | object | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
+| keycloak.service | object | `{"enabled":true,"port":80,"targetPort":8080,"type":"ClusterIP"}` | Define service |
+| keycloak.service.enabled | bool | `true` | service.enabled specifies whether service should be created |
 | keycloak.service.port | int | `80` | service.port specifies service port |
 | keycloak.service.targetPort | int | `8080` | service.targetPort specifies service target port |
 | keycloak.service.type | string | `"ClusterIP"` | service.type specifies service type |

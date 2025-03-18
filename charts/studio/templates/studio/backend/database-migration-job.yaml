@@ -52,4 +52,8 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
+          {{- if not .Values.keycloak.enabled }}
+          - name: SKIP_KEYCLOAK
+            value: "true"
+          {{- end }}
 {{- end }}

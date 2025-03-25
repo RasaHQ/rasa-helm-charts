@@ -2,8 +2,6 @@
 Environment Variables for Studio between Keycloak and Backend
 */}}
 {{- define "studio.shared.env" -}}
-- name: KEYCLOAK_ADMIN
-  value: {{ .Values.config.keycloak.adminUsername | quote }}
 - name: KEYCLOAK_ADMIN_USERNAME
   value: {{ .Values.config.keycloak.adminUsername | quote }}
 # -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.

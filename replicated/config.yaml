@@ -51,7 +51,7 @@ spec:
           type: text
           title: Rasa Pro Version
           default: "3.12.0.dev7"
-          help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/studio/change-log/compatibility-matrix/)
+          help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/reference/changelogs/compatibility-matrix/#studiopro-versions-compatibility)
         - name: openai_api_key
           type: text
           title: OpenAI API key
@@ -66,7 +66,7 @@ spec:
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: 1.0.0
+          default: 1.2.0
           help_text: Replicated SDK version
     - name: Accessing Rasa Studio
       description: >
@@ -128,6 +128,7 @@ spec:
         - name: keycloak_admin_password
           type: text
           title: Keycloak Admin Password
+          required: true
           default: studio
           help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console.
         - name: keycloak_realm

@@ -14,7 +14,6 @@ Environment Variables for Studio between Keycloak and Backend
       key: {{ .Values.config.keycloak.adminPassword.secretKey | quote }}
 {{- end -}}
 
-
 {{/*
 Environment Variables for Keycloak Containers
 */}}

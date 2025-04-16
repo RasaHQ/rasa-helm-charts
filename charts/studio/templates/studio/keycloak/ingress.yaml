@@ -1,4 +1,4 @@
-{{- if .Values.keycloak.enabled }}
+{{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.keycloak.service.port -}}
 {{- if and .Values.keycloak.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
@@ -21,9 +21,12 @@ metadata:
     {{- if .Values.keycloak.ingress.labels }}
 {{ toYaml .Values.keycloak.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.keycloak.ingress.annotations }}
   annotations:
+  {{- with .Values.config.ingressAnnotations }}
     {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.keycloak.ingress.additionalAnnotations }}
+    {{- toYaml .Values.keycloak.ingress.additionalAnnotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if and .Values.keycloak.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}

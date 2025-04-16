@@ -21,9 +21,12 @@ metadata:
     {{- if .Values.webClient.ingress.labels }}
 {{ toYaml .Values.webClient.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.webClient.ingress.annotations }}
   annotations:
+  {{- with .Values.config.ingressAnnotations }}
     {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.webClient.ingress.additionalAnnotations }}
+    {{- toYaml .Values.webClient.ingress.additionalAnnotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if and .Values.webClient.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}

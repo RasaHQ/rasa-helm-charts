@@ -21,9 +21,12 @@ metadata:
     {{- if .Values.backend.ingress.labels }}
 {{ toYaml .Values.backend.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.backend.ingress.annotations }}
   annotations:
+  {{- with .Values.config.ingressAnnotations }}
     {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if .Values.backend.ingress.additionalAnnotations }}
+    {{- toYaml .Values.backend.ingress.additionalAnnotations | nindent 4 }}
   {{- end }}
 spec:
   {{- if and .Values.backend.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}

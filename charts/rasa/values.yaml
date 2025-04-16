@@ -30,7 +30,7 @@ rasa:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.12.1-latest"
+    tag: "3.12.6-latest"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

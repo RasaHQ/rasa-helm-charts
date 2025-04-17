@@ -2,8 +2,8 @@
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.webClient.service.port -}}
 {{- if and .Values.webClient.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.webClient.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.webClient.ingress.annotations "kubernetes.io/ingress.class" .Values.webClient.ingress.className}}
+  {{- if not (hasKey .Values.config.ingressAnnotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.config.ingressAnnotations "kubernetes.io/ingress.class" .Values.webClient.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -21,13 +21,7 @@ metadata:
     {{- if .Values.webClient.ingress.labels }}
 {{ toYaml .Values.webClient.ingress.labels | indent 4 }}
     {{- end }}
-  annotations:
-  {{- with .Values.config.ingressAnnotations }}
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
-  {{- if .Values.webClient.ingress.additionalAnnotations }}
-    {{- toYaml .Values.webClient.ingress.additionalAnnotations | nindent 4 }}
-  {{- end }}
+  {{- include "webclient.ingress.annotations" . | nindent 2 }}
 spec:
   {{- if and .Values.webClient.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.webClient.ingress.className }}

@@ -6,7 +6,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: studio
-    chartVersion: 1.2.6
+    chartVersion: 2.0.13
 
   releaseName: studio
   namespace: studio
@@ -30,11 +30,6 @@ spec:
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
       ingressHost: '{{repl ConfigOption "ingress_hostname" }}'
-      ingressAnnotations:
-        nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-        nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-        kots.io/placeholder: |-
-          repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
       # -- Define if you will be using https or http with the ingressHost
       connectionType: '{{repl ConfigOption "connection_type" }}'
       # -- The postgres database instance details for Studio to connect to.
@@ -87,11 +82,11 @@ spec:
           image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'
       ingress:
         className: nginx
-        # annotations:
-        #   nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-        #   nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-        #   kots.io/placeholder: |-
-        #     repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+        additionalAnnotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     webClient:
       environmentVariables:
@@ -101,11 +96,11 @@ spec:
         KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
         className: nginx
-        # annotations:
-        #   nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-        #   nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-        #   kots.io/placeholder: |-
-        #     repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+        additionalAnnotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     eventIngestion:
       environmentVariables:
@@ -156,11 +151,11 @@ spec:
           value: '{{repl ConfigOption "keycloak_proxy" }}'
       ingress:
         className: nginx
-        # annotations:
-        #   nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-        #   nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
-        #   kots.io/placeholder: |-
-        #     repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+        additionalAnnotations:
+          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
+          kots.io/placeholder: |-
+            repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     rasa:
       enabled: true
@@ -233,7 +228,7 @@ spec:
             nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
             nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
             kots.io/placeholder: |-
-              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
+              repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 12 }}repl{{ end }}
           hosts:
             # -- Please update the below URL with the correct host name of the Studio deployment
             - host: '{{repl ConfigOption "ingress_hostname" }}'
@@ -338,28 +333,7 @@ spec:
             requests:
               cpu: '{{repl ConfigOption "set_keycloak_requests_cpu" }}'
               memory: '{{repl ConfigOption "set_keycloak_requests_memory" }}'
-    # - when: '{{repl ConfigOptionEquals "custom_s3_endpoint" "1"}}'
-    #   recursiveMerge: true
-    #   values:
-    #     modelService:
-    #       training:
-    #         orchestrator:
-    #           environmentVariables:
-    #             AWS_ENDPOINT_URL:
-    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
-    #         consumer:
-    #           environmentVariables:
-    #             AWS_ENDPOINT_URL:
-    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
-    #       running:
-    #         orchestrator:
-    #           environmentVariables:
-    #             AWS_ENDPOINT_URL:
-    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
-    #         consumer:
-    #           environmentVariables:
-    #             AWS_ENDPOINT_URL:
-    #               value: '{{repl ConfigOption "aws_endpoint_url" }}'
+
   builder:
     replicated:
       enabled: true

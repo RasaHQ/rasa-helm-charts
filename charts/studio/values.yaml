@@ -28,6 +28,7 @@ config:
   # -- WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart.
   # -- If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact.
   ingressHost: &dns_hostname INGRESS.HOST.NAME
+  # -- Define the ingress annotations to be used for ALL the ingress resources.
   ingressAnnotations: {}
   # -- Define if you will be using https or http with the ingressHost
   connectionType: "http"
@@ -223,8 +224,7 @@ backend:
     # -- ingress.labels defines labels to add to the ingress
     labels: {}
     # -- ingress.annotations defines annotations to add to the ingress
-    additionalAnnotations:
-      {}
+    additionalAnnotations: {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
     # -- ingress.tls spefices the TLS configuration for ingress

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.13-rc.0](https://img.shields.io/badge/Version-2.0.13--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.13](https://img.shields.io/badge/Version-2.0.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13-rc.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13-rc.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13
 ```
 
 ## General Configuration
@@ -113,7 +113,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.database.port | string | `"5432"` | The database port |
 | config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
-| config.ingressAnnotations | object | `{}` |  |
+| config.ingressAnnotations | object | `{}` | Define the ingress annotations to be used for ALL the ingress resources. |
 | config.ingressHost | string | `"INGRESS.HOST.NAME"` | If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |

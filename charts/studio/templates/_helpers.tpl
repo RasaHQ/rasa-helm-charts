@@ -130,6 +130,45 @@ Return the appropriate apiVersion for networkpolicy.
 {{- end }}
 
 {{/*
+Return annotations for ingress, along with per service annotations for Backend
+*/}}
+{{- define "backend.ingress.annotations" -}}
+{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $additional := .Values.backend.ingress.additionalAnnotations | default dict }}
+{{- $annotations := merge $global $additional }}
+{{- if $annotations }}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return annotations for ingress, along with per service annotations for Keycloak
+*/}}
+{{- define "keycloak.ingress.annotations" -}}
+{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $additional := .Values.keycloak.ingress.additionalAnnotations | default dict }}
+{{- $annotations := merge $global $additional }}
+{{- if $annotations }}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Return annotations for ingress, along with per service annotations for Web Client
+*/}}
+{{- define "webclient.ingress.annotations" -}}
+{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $additional := .Values.webClient.ingress.additionalAnnotations | default dict }}
+{{- $annotations := merge $global $additional }}
+{{- if $annotations }}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
 Return image repository with tag and image name for Backend
 */}}
 {{- define "studio.backend.image" -}}

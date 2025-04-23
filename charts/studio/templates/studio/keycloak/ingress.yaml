@@ -1,9 +1,9 @@
-{{- if .Values.keycloak.enabled }}
+{{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.keycloak.service.port -}}
 {{- if and .Values.keycloak.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.keycloak.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.keycloak.ingress.annotations "kubernetes.io/ingress.class" .Values.keycloak.ingress.className}}
+  {{- if not (hasKey .Values.config.ingressAnnotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.config.ingressAnnotations "kubernetes.io/ingress.class" .Values.keycloak.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -21,10 +21,7 @@ metadata:
     {{- if .Values.keycloak.ingress.labels }}
 {{ toYaml .Values.keycloak.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.keycloak.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "keycloak.ingress.annotations" . | nindent 2 }}
 spec:
   {{- if and .Values.keycloak.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.keycloak.ingress.className }}

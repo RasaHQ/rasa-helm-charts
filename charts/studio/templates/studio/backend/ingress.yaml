@@ -2,8 +2,8 @@
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.backend.service.port -}}
 {{- if and .Values.backend.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
-  {{- if not (hasKey .Values.backend.ingress.annotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.backend.ingress.annotations "kubernetes.io/ingress.class" .Values.backend.ingress.className}}
+  {{- if not (hasKey .Values.config.ingressAnnotations "kubernetes.io/ingress.class") }}
+  {{- $_ := set .Values.config.ingressAnnotations "kubernetes.io/ingress.class" .Values.backend.ingress.className}}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -21,10 +21,7 @@ metadata:
     {{- if .Values.backend.ingress.labels }}
 {{ toYaml .Values.backend.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.backend.ingress.annotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "backend.ingress.annotations" . | nindent 2 }}
 spec:
   {{- if and .Values.backend.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
   ingressClassName: {{ .Values.backend.ingress.className }}

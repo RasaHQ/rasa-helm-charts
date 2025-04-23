@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.12](https://img.shields.io/badge/Version-2.0.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.13](https://img.shields.io/badge/Version-2.0.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.12
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.12
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.13
 ```
 
 ## General Configuration
@@ -77,8 +77,8 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.image | object | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` | Define image settings |
 | backend.image.name | string | `"studio-backend"` | image.name specifies image repository |
 | backend.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| backend.ingress | object | `{"annotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
-| backend.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
+| backend.ingress | object | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| backend.ingress.additionalAnnotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | backend.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | backend.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
 | backend.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
@@ -113,6 +113,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.database.port | string | `"5432"` | The database port |
 | config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for db connection |
 | config.database.username | string | `""` | The database username |
+| config.ingressAnnotations | object | `{}` | Define the ingress annotations to be used for ALL the ingress resources. |
 | config.ingressHost | string | `"INGRESS.HOST.NAME"` | If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | The admin password for Keycloak. This password is used to login to Keycloak admin console. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | The admin username for Keycloak. This username is used to login to Keycloak admin console. |
@@ -173,9 +174,10 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | Define image settings |
 | keycloak.image.name | string | `"studio-keycloak"` | image.name specifies image repository |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| keycloak.ingress | object | `{"annotations":{},"className":"","labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
-| keycloak.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
+| keycloak.ingress | object | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| keycloak.ingress.additionalAnnotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | keycloak.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
+| keycloak.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
 | keycloak.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | keycloak.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | keycloak.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
@@ -200,7 +202,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
-| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.12.5"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
+| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.12.6-latest"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
 | rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.persistence.storageClassName | string | `nil` | Make sure to set the correct storage class name based on your cluster configuration |
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
@@ -208,7 +210,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | replicated.enabled | bool | `false` |  |
 | replicated.sdkVersion | string | `"1.2.0"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| tag | string | `"1.12.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.12.2"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |
 | webClient.affinity | object | `{}` | webClient.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | webClient.envFrom | list | `[]` | webClient.envFrom is used to add environment variables from ConfigMap or Secret |
@@ -218,8 +220,8 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | webClient.image | object | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` | Define image settings |
 | webClient.image.name | string | `"studio-web-client"` | image.name specifies image repository |
 | webClient.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| webClient.ingress | object | `{"annotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
-| webClient.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
+| webClient.ingress | object | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` | Configure the ingress resource that allows you to access the deployment installation. # ref: http://kubernetes.io/docs/user-guide/ingress/ |
+| webClient.ingress.additionalAnnotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | webClient.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | webClient.ingress.enabled | bool | `true` | ingress.enabled specifies whether an ingress service should be created |
 | webClient.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |

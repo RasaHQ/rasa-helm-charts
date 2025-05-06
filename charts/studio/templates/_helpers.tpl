@@ -130,10 +130,10 @@ Return the appropriate apiVersion for networkpolicy.
 {{- end }}
 
 {{/*
-Return annotations for ingress, along with per service annotations for Backend
+Return annotations for ingress, combining global and per-service annotations for Backend
 */}}
 {{- define "backend.ingress.annotations" -}}
-{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.backend.ingress.additionalAnnotations | default dict }}
 {{- $annotations := merge $global $additional }}
 {{- if $annotations }}
@@ -146,7 +146,7 @@ annotations:
 Return annotations for ingress, along with per service annotations for Keycloak
 */}}
 {{- define "keycloak.ingress.annotations" -}}
-{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.keycloak.ingress.additionalAnnotations | default dict }}
 {{- $annotations := merge $global $additional }}
 {{- if $annotations }}
@@ -156,10 +156,10 @@ annotations:
 {{- end }}
 
 {{/*
-Return annotations for ingress, along with per service annotations for Web Client
+Return annotations for ingress, combining global and per-service annotations for Web Client
 */}}
 {{- define "webclient.ingress.annotations" -}}
-{{- $global := .Values.config.ingressAnnotations | default dict }}
+{{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.webClient.ingress.additionalAnnotations | default dict }}
 {{- $annotations := merge $global $additional }}
 {{- if $annotations }}

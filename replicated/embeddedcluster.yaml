@@ -4,6 +4,11 @@ metadata:
   name: embedded-cluster-config
 spec:
   version: 2.4.0+k8s-1.30
+  domains:
+    # Your proxy registry custom domain
+    proxyRegistryDomain: registry.rasa.com
+    # Your app service custom domain
+    replicatedAppDomain: replicated.rasa.com
   unsupportedOverrides:
     k0s: |
       config:

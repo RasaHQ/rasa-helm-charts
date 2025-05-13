@@ -84,11 +84,14 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.ingress.labels | object | `{}` | ingress.labels defines labels to add to the ingress |
 | backend.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | Override default liveness probe settings |
-| backend.migration | object | `{"enabled":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | Define Studio Database Migration job settings |
+| backend.migration | object | `{"affinity":{},"enabled":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | Define Studio Database Migration job settings |
+| backend.migration.affinity | object | `{}` | migration.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | backend.migration.enabled | bool | `true` | migration.enable specifies whether a database migration job should be created |
 | backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | migration.image specifies which image database migration job should use |
 | backend.migration.image.name | string | `"studio-database-migration"` | image.name specifies the repository of the image |
 | backend.migration.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
+| backend.migration.nodeSelector | object | `{}` | migration.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
+| backend.migration.tolerations | list | `[]` | migration.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
 | backend.nodeSelector | object | `{}` | backend.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | backend.podAnnotations | object | `{}` | backend.podAnnotations defines annotations to add to the pod |
 | backend.podSecurityContext | object | `{"enabled":true}` | backend.podSecurityContext defines pod security context |

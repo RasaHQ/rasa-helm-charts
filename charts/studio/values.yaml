@@ -796,7 +796,7 @@ podLabels: {}
 
 replicated:
   enabled: false
-  sdkVersion: "1.2.0"
+  sdkVersion: "1.5.2"
 
 # -- Define the resources for the Rasa Pro model server
 rasa:

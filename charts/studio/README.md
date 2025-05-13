@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.0.14](https://img.shields.io/badge/Version-2.0.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.15-rc.0](https://img.shields.io/badge/Version-2.0.15--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.14
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.15-rc.0
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.14
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.0.15-rc.0
 ```
 
 ## General Configuration
@@ -208,7 +208,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
 | rasa.rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
 | replicated.enabled | bool | `false` |  |
-| replicated.sdkVersion | string | `"1.2.0"` |  |
+| replicated.sdkVersion | string | `"1.5.2"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | tag | string | `"1.12.2"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers allows to specify additional containers for the deployment |

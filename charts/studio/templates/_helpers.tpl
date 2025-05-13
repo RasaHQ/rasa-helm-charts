@@ -135,11 +135,11 @@ Return annotations for ingress, combining global and per-service annotations for
 {{- define "backend.ingress.annotations" -}}
 {{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.backend.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional }}
-{{- if $annotations }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
 annotations:
   {{- toYaml $annotations | nindent 2 }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -148,11 +148,11 @@ Return annotations for ingress, along with per service annotations for Keycloak
 {{- define "keycloak.ingress.annotations" -}}
 {{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.keycloak.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional }}
-{{- if $annotations }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
 annotations:
   {{- toYaml $annotations | nindent 2 }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{/*
@@ -161,11 +161,11 @@ Return annotations for ingress, combining global and per-service annotations for
 {{- define "webclient.ingress.annotations" -}}
 {{- $global := .Values.config.ingressAnnotations | default dict | toYaml | fromYaml }}
 {{- $additional := .Values.webClient.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional }}
-{{- if $annotations }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
 annotations:
   {{- toYaml $annotations | nindent 2 }}
-{{- end }}
+{{- end -}}
 {{- end }}
 
 {{/*

@@ -30,6 +30,9 @@ spec:
     config:
       # -- Defines the host name for all the Studio ingress resources. Make sure you provide a valid host name.
       ingressHost: '{{repl ConfigOption "ingress_hostname" }}'
+      ingressAnnotations:
+        nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
+        nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
       # -- Define if you will be using https or http with the ingressHost
       connectionType: '{{repl ConfigOption "connection_type" }}'
       # -- The postgres database instance details for Studio to connect to.
@@ -83,8 +86,6 @@ spec:
       ingress:
         className: nginx
         additionalAnnotations:
-          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
@@ -97,8 +98,6 @@ spec:
       ingress:
         className: nginx
         additionalAnnotations:
-          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
@@ -152,8 +151,6 @@ spec:
       ingress:
         className: nginx
         additionalAnnotations:
-          nginx.ingress.kubernetes.io/proxy-buffer-size: "16k"
-          nginx.ingress.kubernetes.io/proxy-buffers-number: "8"
           kots.io/placeholder: |-
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 

@@ -214,6 +214,19 @@ backend:
     waitFotItContainer:
       image: postgres:17.2
 
+    # -- migration.nodeSelector allows the deployment to be scheduled on selected nodes
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    nodeSelector: {}
+
+    # -- migration.tolerations defines tolerations for pod assignment
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    tolerations: []
+
+    # -- migration.affinity allows the deployment to schedule using affinity rules
+    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    affinity: {}
+
   # -- Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -796,7 +809,7 @@ podLabels: {}
 
 replicated:
   enabled: false
-  sdkVersion: "1.2.0"
+  sdkVersion: "1.5.2"
 
 # -- Define the resources for the Rasa Pro model server
 rasa:

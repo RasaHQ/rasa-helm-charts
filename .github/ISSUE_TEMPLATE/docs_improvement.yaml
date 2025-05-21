@@ -1,0 +1,53 @@
+name: Docs Improvement
+description: Suggest improvements or corrections to Helm chart documentation
+title: "[DOCS] "
+labels:
+- documentation
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for helping improve the Helm chart documentation!
+        Please provide as much detail as possible.
+
+  - type: textarea
+    id: current-behavior
+    attributes:
+      label: What is unclear or missing?
+      description: Describe the section or content that is confusing, incorrect, or missing from the Helm chart documentation.
+      placeholder: The explanation for the `values.yaml` configuration is missing for...
+
+  - type: textarea
+    id: suggested-change
+    attributes:
+      label: Suggested change
+      description: How would you improve the documentation?
+      placeholder: Add an example for configuring ingress with TLS...
+
+  - type: dropdown
+    attributes:
+      label: Related helm chart
+      description: Pick a helm chart this docs improvement relates to
+      multiple: false
+      options:
+        - rasa-pro
+        - rasa-studio
+        - other
+    validations:
+      required: true
+
+  - type: input
+    attributes:
+      label: Helm chart version
+      description: Version of the Helm chart this issue relates to
+      placeholder: e.g. 1.2.2
+    validations:
+      required: true
+
+  - type: textarea
+    id: references
+    attributes:
+      label: Links or references (optional)
+      description: Add any relevant links, documentation, or examples to support your suggestion.
+    validations:
+      required: false

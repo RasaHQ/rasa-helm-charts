@@ -16,6 +16,8 @@ body:
       label: What is unclear or missing?
       description: Describe the section or content that is confusing, incorrect, or missing from the Helm chart documentation.
       placeholder: The explanation for the `values.yaml` configuration is missing for...
+    validations:
+      required: true
 
   - type: textarea
     id: suggested-change
@@ -23,6 +25,8 @@ body:
       label: Suggested change
       description: How would you improve the documentation?
       placeholder: Add an example for configuring ingress with TLS...
+    validations:
+      required: true
 
   - type: dropdown
     attributes:

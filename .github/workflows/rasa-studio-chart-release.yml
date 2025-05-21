@@ -40,9 +40,7 @@ jobs:
 
       - name: Login to Helm registry using Google Auth token
         run: |-
-          echo '$HELM_REGISTRY_TOKEN' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
-        env:
-          HELM_REGISTRY_TOKEN: ${{ steps.auth.outputs.access_token }}
+          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
 
       - name: Read Helm Chart
         id: chart-info
@@ -56,10 +54,7 @@ jobs:
 
       - name: Push Helm Charts to Google Artifact Registry
         id: release
-        run: helm push $CHART_NAME-$CHART_VERSION.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
-        env:
-          CHART_NAME: ${{ steps.chart-info.outputs.name }}
-          CHART_VERSION: ${{ steps.chart-info.outputs.version }}
+        run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
 
       - name: Notify Slack of successful release 💬
         if: steps.release.outcome == 'success'
@@ -67,11 +62,9 @@ jobs:
         with:
           # Send notication to #release slack channel
           channel-id: 'C024Z61K9QU'
-          slack-message: "🚀 New *Studio* Helm Chart version `$CHART_NAME-$CHART_VERSION` has been released!"
+          slack-message: "🚀 New *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          CHART_NAME: ${{ steps.chart-info.outputs.name }}
-          CHART_VERSION: ${{ steps.chart-info.outputs.version }}
 
       - name: Notify Slack of unsuccessful release ⛔️
         if: steps.release.outcome == 'failure'
@@ -79,14 +72,10 @@ jobs:
         with:
           # Send notication to #release slack channel
           channel-id: 'C024Z61K9QU'
-          slack-message: "⛔️ *Studio* Helm Chart version `$CHART_NAME-$CHART_VERSION` could not be released 😱! Please check out <https://github.com/$GITHUB_REPO/actions/runs/$GITHUB_RUN_ID|Github Action workflow log>"
+          slack-message: "⛔️ *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          CHART_NAME: ${{ steps.chart-info.outputs.name }}
-          CHART_VERSION: ${{ steps.chart-info.outputs.version }}
-          GITHUB_REPO: ${{ github.repository }}
-          GITHUB_RUN_ID: ${{ github.run_id }}
-
+          
       - name: Get previous release tag
         id: previous-release
         uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42
@@ -94,11 +83,8 @@ jobs:
       - name: Create Studio Release Tag
         uses: rickstaa/action-create-tag@55450aa830ede05bcbb37fbdad678e36c73e9d15
         with:
-          tag: "$CHART_NAME-$CHART_VERSION"
+          tag: "${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}"
           tag_exists_error: false
-        env:
-          CHART_NAME: ${{ steps.chart-info.outputs.name }}
-          CHART_VERSION: ${{ steps.chart-info.outputs.version }}
 
       - name: Build Studio changelog
         id: changelog
@@ -113,21 +99,16 @@ jobs:
                 }
               ]
             }
-          fromTag: "$FROM_TAG"
+          fromTag: "${{ steps.previous-release.outputs.latestTag }}"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          FROM_TAG: ${{ steps.previous-release.outputs.latestTag }} 
 
       - name: Create Studio Release
         uses: mikepenz/action-gh-release@ac23f2c4388204c6081863ead928a6f05fd7838a
         with:
-          tag_name: $CHART_NAME-$CHART_VERSION
-          body: $CHANGELOG
-        env:
-          CHART_NAME: ${{ steps.chart-info.outputs.name }}
-          CHART_VERSION: ${{ steps.chart-info.outputs.version }}
-          CHANGELOG: ${{ steps.changelog.outputs.changelog }}
-
+          tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
+          body: ${{ steps.changelog.outputs.changelog }}
+      
   replicated-release:
     name: Promote Replicated release
     needs: [release]

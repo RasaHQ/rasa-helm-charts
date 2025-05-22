@@ -107,15 +107,4 @@ spec:
       {{- if .Values.backend.additionalContainers }}
         {{- toYaml .Values.backend.additionalContainers | nindent 8 }}
       {{- end }}
-      {{- with .Values.backend.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.backend.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.backend.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "studio.backend.scheduling" . | nindent 6 }}

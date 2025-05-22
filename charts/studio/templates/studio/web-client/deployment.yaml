@@ -83,6 +83,7 @@ spec:
       {{- if .Values.webClient.additionalContainers }}
         {{- toYaml .Values.webClient.additionalContainers | nindent 8 }}
       {{- end }}
+      {{- include "studio.webClient.scheduling" . | nindent 6 }}
       volumes:
       - name: configmap
         configMap:
@@ -92,15 +93,3 @@ spec:
             path: "config.js"
       - emptyDir: {}
         name: nginx
-      {{- with .Values.webClient.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.webClient.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.webClient.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}

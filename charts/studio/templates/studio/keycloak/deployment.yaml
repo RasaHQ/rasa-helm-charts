@@ -90,16 +90,5 @@ spec:
       {{- if .Values.keycloak.additionalContainers }}
         {{- toYaml .Values.keycloak.additionalContainers | nindent 8 }}
       {{- end }}
-      {{- with .Values.keycloak.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.keycloak.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.keycloak.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "studio.keycloak.scheduling" . | nindent 6 }}
 {{- end }}

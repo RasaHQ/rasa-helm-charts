@@ -67,6 +67,23 @@ config:
     # This is used by Keycloak to store its user management data.
     keycloakDatabaseName: "keycloak"
 
+  # -- config.keycloak defines the Keycloak configuration settings.
+  # This section configures the authentication and authorization service.
+  keycloak:
+    # -- config.keycloak.url overrides the default service endpoint for Keycloak.
+    # Format is `http(s)://<ingressHost>/auth`.
+    # Required only if your cluster redirects internal HTTP traffic to HTTPS.
+    url: ""
+    # -- config.keycloak.adminUsername is the admin username for Keycloak.
+    # This username is used to login to the Keycloak admin console.
+    adminUsername: "kcadmin"
+    # -- config.keycloak.adminPassword defines the admin password for Keycloak.
+    # This password is used to login to the Keycloak admin console.
+    # The password is stored in a Kubernetes secret.
+    adminPassword:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_ADMIN_PASSWORD"
+
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
   nodeSelector: {}
@@ -112,23 +129,6 @@ config:
   # - key: "key2"
   #   operator: "Exists"
   #   effect: "NoExecute"
-
-  # -- config.keycloak defines the Keycloak configuration settings.
-  # This section configures the authentication and authorization service.
-  keycloak:
-    # -- config.keycloak.url overrides the default service endpoint for Keycloak.
-    # Format is `http(s)://<ingressHost>/auth`.
-    # Required only if your cluster redirects internal HTTP traffic to HTTPS.
-    url: ""
-    # -- config.keycloak.adminUsername is the admin username for Keycloak.
-    # This username is used to login to the Keycloak admin console.
-    adminUsername: "kcadmin"
-    # -- config.keycloak.adminPassword defines the admin password for Keycloak.
-    # This password is used to login to the Keycloak admin console.
-    # The password is stored in a Kubernetes secret.
-    adminPassword:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_ADMIN_PASSWORD"
 
 # Studio Backend component specific configuration
 backend:

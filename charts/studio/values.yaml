@@ -86,6 +86,7 @@ config:
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
+  # Not possible to combine with component-specific configurations for each scheduling option.
   nodeSelector: {}
   # Example:
   # nodeSelector:

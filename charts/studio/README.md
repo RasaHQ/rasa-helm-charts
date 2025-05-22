@@ -154,7 +154,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. |
 | config.keycloak.url | string | `""` | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. |
-| config.nodeSelector | object | `{}` | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. |
+| config.nodeSelector | object | `{}` | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. |
 | config.tolerations | list | `[]` | Pod tolerations for all deployments. These settings can be overridden by component-specific configurations. |
 | deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio deployments |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Studio deployment |

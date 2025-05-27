@@ -16,7 +16,7 @@ env:
 
 jobs:
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       studio-version: ${{ steps.chart-info.outputs.version }}
 

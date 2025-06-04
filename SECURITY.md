@@ -5,7 +5,7 @@
 We take the security of Rasa Helm Charts seriously. If you believe you have found a security vulnerability, please follow these steps:
 
 1. **Do Not** disclose the vulnerability publicly
-2. Email the Rasa Security Team at infrasecteam@rasa.com with the following information:
+2. Email the Rasa Security Team at security@rasa.com with the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
    - Potential impact of the vulnerability
@@ -46,7 +46,7 @@ Rasa Helm Charts includes several security features:
 
 ## Security Contacts
 
-- Security Team: infrasecteam@rasa.com
+- Security Team: security@rasa.com
 
 ## Additional Resources
 

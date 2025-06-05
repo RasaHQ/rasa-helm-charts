@@ -4,8 +4,8 @@
 
 We take the security of Rasa Helm Charts seriously. If you believe you have found a security vulnerability, please follow these steps:
 
-1. **Do Not** disclose the vulnerability publicly
-2. Email the Rasa Security Team at security@rasa.com with the following information:
+- Please allow us **90 days** to fix an acknowledged issue before publicly disclosing.
+- Email the Rasa Security Team at security@rasa.com with the following information:
    - Description of the vulnerability
    - Steps to reproduce the issue
    - Potential impact of the vulnerability
@@ -13,9 +13,11 @@ We take the security of Rasa Helm Charts seriously. If you believe you have foun
 
 ### What to Expect
 
-- You will receive an acknowledgment of your report within 48 hours
-- We will investigate the issue and keep you updated on our progress
-- Once the issue is resolved, we will:
+We will review the information sent and prioritise any confirmed vulnerabilities in line with our [Responsible Disclosure policy](https://rasa.com/responsible-disclosure-policy/). 
+We will investigate all legitimate reports and do our best to fix the problem quickly. Please allow us 90 days to fix an acknowledged issue before publicly disclosing. If you haven't already done so, we recommend reading the [policy](https://rasa.com/responsible-disclosure-policy/). 
+
+
+If required, in line with our Responsible Disclosure Policy, we will:
   - Credit you in the security advisory (unless you prefer to remain anonymous)
   - Notify you when the fix is released
   - Add the vulnerability to our security advisories list
@@ -26,7 +28,7 @@ When using Rasa Helm Charts, we recommend following these security best practice
 
 1. **Regular Updates**: Keep your Helm Charts up to date with the latest security patches
 2. **Secret Management**: Use Kubernetes secrets for sensitive data
-3. **Network Policies**: Apply network policies to restrict pod-to-pod communication
+3. **Network Policies**: Apply network policies to restrict pod-to-pod communicationg
 4. **Resource Limits**: Set appropriate resource limits for all containers
 5. **Security Context**: Use security contexts to run containers with minimal privileges
 6. **TLS**: Enable TLS for all external communications

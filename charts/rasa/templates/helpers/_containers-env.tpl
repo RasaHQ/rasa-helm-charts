@@ -7,18 +7,24 @@ Environment Variables for Rasa Containers
 - name: "RASA_DUCKLING_HTTP_URL"
   value: "{{ include "rasa.ducklingUrl" $ }}"
 {{- end }}
+{{- if .authToken }}
 - name: "AUTH_TOKEN"
   valueFrom:
     secretKeyRef:
       name: {{ .authToken.secretName }}
       key: {{ .authToken.secretKey }}
+{{- end }}
+{{- if .jwtSecret }}
 - name: "JWT_SECRET"
   valueFrom:
     secretKeyRef:
       name: {{ .jwtSecret.secretName }}
       key: {{ .jwtSecret.secretKey }}
+{{- end }}
+{{- if .jwtMethod }}
 - name: "JWT_METHOD"
   value: {{ .jwtMethod | quote }}
+{{- end }}
 # Rasa Pro License
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.enabled }}
 - name: "RASA_PRO_LICENSE" 

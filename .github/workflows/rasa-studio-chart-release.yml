@@ -19,6 +19,10 @@ jobs:
     runs-on: ubuntu-24.04
     outputs:
       studio-version: ${{ steps.chart-info.outputs.version }}
+    
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repository
@@ -29,7 +33,7 @@ jobs:
       - name: Install Helm 3
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
         with:
-          version: v3.11.2
+          version: v3.15.2
 
       - name: Authenticate to Google Cloud
         id: google-auth

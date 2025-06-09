@@ -18,6 +18,10 @@ jobs:
   release:
     runs-on: ubuntu-24.04
 
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
@@ -27,14 +31,15 @@ jobs:
       - name: Install Helm 3
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
         with:
-          version: v3.11.2
+          version: v3.15.2
 
       - name: Authenticate to Google Cloud
         id: auth
         uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
         with:
           token_format: 'access_token'
-          credentials_json: ${{ secrets.HELM_RELEASE_CREDENTIALS }}
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
+          service_account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
 
       - name: Login to Helm registry using Google Auth token
         run: |-

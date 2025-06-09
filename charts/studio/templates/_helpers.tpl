@@ -222,3 +222,138 @@ Return image repository with tag and image name for Keycloak
 "{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
+
+{{/*
+Backend pod scheduling configuration
+*/}}
+{{- define "studio.backend.scheduling" -}}
+{{- if .Values.config.nodeSelector }}
+nodeSelector:
+  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
+{{- else if .Values.backend.nodeSelector }}
+nodeSelector:
+  {{- .Values.backend.nodeSelector | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.affinity }}
+affinity:
+  {{- .Values.config.affinity | toYaml | nindent 2 }}
+{{- else if .Values.backend.affinity }}
+affinity:
+  {{- .Values.backend.affinity | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.tolerations }}
+tolerations:
+  {{- .Values.config.tolerations | toYaml | nindent 2 }}
+{{- else if .Values.backend.tolerations }}
+tolerations:
+  {{- .Values.backend.tolerations | toYaml | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Web Client pod scheduling configuration
+*/}}
+{{- define "studio.webClient.scheduling" -}}
+{{- if .Values.config.nodeSelector }}
+nodeSelector:
+  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
+{{- else if .Values.webClient.nodeSelector }}
+nodeSelector:
+  {{- .Values.webClient.nodeSelector | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.affinity }}
+affinity:
+  {{- .Values.config.affinity | toYaml | nindent 2 }}
+{{- else if .Values.webClient.affinity }}
+affinity:
+  {{- .Values.webClient.affinity | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.tolerations }}
+tolerations:
+  {{- .Values.config.tolerations | toYaml | nindent 2 }}
+{{- else if .Values.webClient.tolerations }}
+tolerations:
+  {{- .Values.webClient.tolerations | toYaml | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Event Ingestion pod scheduling configuration
+*/}}
+{{- define "studio.eventIngestion.scheduling" -}}
+{{- if .Values.config.nodeSelector }}
+nodeSelector:
+  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
+{{- else if .Values.eventIngestion.nodeSelector }}
+nodeSelector:
+  {{- .Values.eventIngestion.nodeSelector | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.affinity }}
+affinity:
+  {{- .Values.config.affinity | toYaml | nindent 2 }}
+{{- else if .Values.eventIngestion.affinity }}
+affinity:
+  {{- .Values.eventIngestion.affinity | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.tolerations }}
+tolerations:
+  {{- .Values.config.tolerations | toYaml | nindent 2 }}
+{{- else if .Values.eventIngestion.tolerations }}
+tolerations:
+  {{- .Values.eventIngestion.tolerations | toYaml | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Keycloak pod scheduling configuration
+*/}}
+{{- define "studio.keycloak.scheduling" -}}
+{{- if .Values.config.nodeSelector }}
+nodeSelector:
+  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
+{{- else if .Values.keycloak.nodeSelector }}
+nodeSelector:
+  {{- .Values.keycloak.nodeSelector | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.affinity }}
+affinity:
+  {{- .Values.config.affinity | toYaml | nindent 2 }}
+{{- else if .Values.keycloak.affinity }}
+affinity:
+  {{- .Values.keycloak.affinity | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.tolerations }}
+tolerations:
+  {{- .Values.config.tolerations | toYaml | nindent 2 }}
+{{- else if .Values.keycloak.tolerations }}
+tolerations:
+  {{- .Values.keycloak.tolerations | toYaml | nindent 2 }}
+{{- end }}
+{{- end }}
+
+{{/*
+Backend migration pod scheduling configuration
+*/}}
+{{- define "studio.backend.migration.scheduling" -}}
+{{- if .Values.config.nodeSelector }}
+nodeSelector:
+  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
+{{- else if .Values.backend.migration.nodeSelector }}
+nodeSelector:
+  {{- .Values.backend.migration.nodeSelector | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.affinity }}
+affinity:
+  {{- .Values.config.affinity | toYaml | nindent 2 }}
+{{- else if .Values.backend.migration.affinity }}
+affinity:
+  {{- .Values.backend.migration.affinity | toYaml | nindent 2 }}
+{{- end }}
+{{- if .Values.config.tolerations }}
+tolerations:
+  {{- .Values.config.tolerations | toYaml | nindent 2 }}
+{{- else if .Values.backend.migration.tolerations }}
+tolerations:
+  {{- .Values.backend.migration.tolerations | toYaml | nindent 2 }}
+{{- end }}
+{{- end }}

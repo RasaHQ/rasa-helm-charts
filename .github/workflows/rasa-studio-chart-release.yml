@@ -16,7 +16,7 @@ env:
 
 jobs:
   release:
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     outputs:
       studio-version: ${{ steps.chart-info.outputs.version }}
 
@@ -32,15 +32,12 @@ jobs:
           version: v3.11.2
 
       - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
+        id: google-auth
+        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa
         with:
-          token_format: 'access_token'
-          credentials_json: ${{ secrets.HELM_RELEASE_CREDENTIALS }}
-
-      - name: Login to Helm registry using Google Auth token
-        run: |-
-          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
+          service_account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
 
       - name: Read Helm Chart
         id: chart-info
@@ -48,13 +45,20 @@ jobs:
         with:
           path: charts/studio/
 
-      - name: Package Helm release
-        id: package
-        run: helm package charts/studio/ --dependency-update
-
-      - name: Push Helm Charts to Google Artifact Registry
+      - name: Package and push chart
         id: release
-        run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
+        env:
+          ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+          CHART_PATH: charts/studio
+          CHART_URI: oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
+          CHART_TAR: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz
+          REGISTRY_URL: https://${{ env.ARTIFACT_REGISTRY }}
+        run: |
+          echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+          helm dependency update "${CHART_PATH}"
+          helm package "${CHART_PATH}"
+          helm push "${CHART_TAR}" "${CHART_URI}"
+          echo "uri=${CHART_URI}" >> $GITHUB_OUTPUT
 
       - name: Notify Slack of successful release 💬
         if: steps.release.outcome == 'success'

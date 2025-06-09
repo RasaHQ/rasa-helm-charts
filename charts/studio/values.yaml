@@ -23,55 +23,139 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 tag: "1.12.2"
 
 config:
-  # -- Defines the host name for all the Studio ingress resources.
-  # -- This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart.
-  # -- WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart.
-  # -- If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact.
+  # -- Defines the host name for all Studio ingress resources.
+  # This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart.
+  # WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart.
+  # If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact.
   ingressHost: &dns_hostname INGRESS.HOST.NAME
+
   # -- Define the ingress annotations to be used for ALL the ingress resources.
+  # These annotations will be applied to all ingress resources created by this chart.
+  # Example:
+  #   kubernetes.io/ingress.class: nginx
+  #   cert-manager.io/cluster-issuer: letsencrypt-prod
   ingressAnnotations: {}
-  # -- Define if you will be using https or http with the ingressHost
+
+  # -- Define if you will be using https or http with the ingressHost.
+  # Valid values are "http" or "https". This setting affects how services communicate with each other.
   connectionType: "http"
+
   # -- The postgres database instance details for Studio to connect to.
+  # This section configures the database connection parameters for Studio.
   database:
-    # -- The database host name
+    # -- The database host name or IP address where PostgreSQL is running.
+    # Example: "postgres.example.com" or "10.0.0.1"
     host: ""
-    # -- The database port
+    # -- The database port number for PostgreSQL.
+    # Default PostgreSQL port is 5432
     port: "5432"
-    # -- The database username
+    # -- The database username for Studio to connect with.
+    # This user should have appropriate permissions on the database.
     username: ""
-    # -- The database password
+    # -- The database password configuration.
+    # This references a Kubernetes secret containing the database password.
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
-    # -- Set to true if you want to use SSL for db connection
+    # -- Set to true if you want to use SSL for database connection.
+    # When enabled, Studio will attempt to establish an encrypted connection to the database.
     preferSSL: "true"
-    # If true the server will reject db connection which is not present list of supplied CAs.
+    # -- If true, the server will reject database connections which are not present in the list of supplied CAs.
+    # This provides additional security by ensuring only trusted certificates are accepted.
     rejectUnauthorized: ""
-    # -- The database name for keycloak user management service
+    # -- The database name for Keycloak user management service.
+    # This is used by Keycloak to store its user management data.
     keycloakDatabaseName: "keycloak"
+
+  # -- config.keycloak defines the Keycloak configuration settings.
+  # This section configures the authentication and authorization service.
   keycloak:
-    # -- config.keycloak.url allows to override the default service endpoint; format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS
+    # -- config.keycloak.url overrides the default service endpoint for Keycloak.
+    # Format is `http(s)://<ingressHost>/auth`.
+    # Required only if your cluster redirects internal HTTP traffic to HTTPS.
     url: ""
-    # -- The admin username for Keycloak. This username is used to login to Keycloak admin console.
+    # -- config.keycloak.adminUsername is the admin username for Keycloak.
+    # This username is used to login to the Keycloak admin console.
     adminUsername: "kcadmin"
-    # -- The admin password for Keycloak. This password is used to login to Keycloak admin console.
+    # -- config.keycloak.adminPassword defines the admin password for Keycloak.
+    # This password is used to login to the Keycloak admin console.
+    # The password is stored in a Kubernetes secret.
     adminPassword:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_ADMIN_PASSWORD"
 
+  # -- Common pod scheduling configuration for all deployments.
+  # These settings can be overridden by component-specific configurations.
+  # Not possible to combine with component-specific configurations for each scheduling option.
+  nodeSelector: {}
+  # Example:
+  # nodeSelector:
+  #   kubernetes.io/os: linux
+  #   node-role.kubernetes.io/worker: "true"
+
+  # -- Pod affinity and anti-affinity rules for all deployments.
+  # These settings can be overridden by component-specific configurations.
+  affinity: {}
+  # Example:
+  # affinity:
+  #   nodeAffinity:
+  #     requiredDuringSchedulingIgnoredDuringExecution:
+  #       nodeSelectorTerms:
+  #       - matchExpressions:
+  #         - key: kubernetes.io/os
+  #           operator: In
+  #           values:
+  #           - linux
+  #   podAffinity:
+  #     preferredDuringSchedulingIgnoredDuringExecution:
+  #     - weight: 100
+  #       podAffinityTerm:
+  #         labelSelector:
+  #           matchExpressions:
+  #           - key: app
+  #             operator: In
+  #             values:
+  #             - database
+  #         topologyKey: kubernetes.io/hostname
+
+  # -- Pod tolerations for all deployments.
+  # These settings can be overridden by component-specific configurations.
+  tolerations: []
+  # Example:
+  # tolerations:
+  # - key: "key1"
+  #   operator: "Equal"
+  #   value: "value1"
+  #   effect: "NoSchedule"
+  # - key: "key2"
+  #   operator: "Exists"
+  #   effect: "NoExecute"
+
 # Studio Backend component specific configuration
 backend:
-  # -- replicaCount specifies number of replicas
+  # -- backend.replicaCount is the number of replicas for the Studio Backend deployment.
+  # Increase this value for high availability and better load distribution.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#replicas
   replicaCount: 1
-  # -- Define image settings
+
+  # -- backend.image defines the container image settings for the backend service.
+  # This section defines the container image settings for the backend service.
+  # Ref: https://kubernetes.io/docs/concepts/containers/images/
   image:
-    # -- image.name specifies image repository
+    # -- backend.image.name is the name of the Studio Backend container image.
+    # This should match the image name in your container registry.
     name: "studio-backend"
-    # -- image.pullPolicy specifies image pull policy
+    # -- backend.image.pullPolicy is the container image pull policy.
+    # Valid values: Always, IfNotPresent, Never
+    # Always: Always pull the image
+    # IfNotPresent: Only pull if not present locally
+    # Never: Never pull the image
+    # Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
     pullPolicy: IfNotPresent
 
-  # -- backend.environmentVariables defines environment variables for deployment
+  # -- backend.environmentVariables defines the environment variables for the Studio Backend deployment.
+  # These variables configure the runtime behavior of the backend service.
+  # Each variable can be set either directly with a value or from a Kubernetes secret.
   # Example: Specify the string value for variables
   #   value: my-value
   # Example: Specify the value for variables sourced from a Secret.
@@ -79,180 +163,261 @@ backend:
   #     name: my-secret
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+  # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
-    # -- The URL of the database to connect to in the format postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public
+    # -- backend.environmentVariables.DATABASE_URL is the database connection URL for Studio Backend.
+    # Format: postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public
+    # This should be stored in a Kubernetes secret for security.
+    # Ref: https://kubernetes.io/docs/concepts/configuration/secret/
     DATABASE_URL:
       secret:
         name: "studio-secrets"
         key: "DATABASE_URL"
+    # -- backend.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
+    # This defines the authentication realm where Studio users will be managed.
     KEYCLOAK_REALM:
       value: "rasa-studio"
+    # -- backend.environmentVariables.KEYCLOAK_API_CLIENT_ID is the Keycloak client ID for API access.
+    # This client is used by Studio Backend to authenticate with Keycloak.
     KEYCLOAK_API_CLIENT_ID:
       value: "admin-cli"
-    # -- These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
+    # -- backend.environmentVariables.KEYCLOAK_API_USERNAME is the username for Studio Backend to communicate with Keycloak.
+    # This account needs appropriate permissions in Keycloak to manage users.
     KEYCLOAK_API_USERNAME:
       value: "realmadmin"
-    # -- These credentials are used by Studio Backend Server to communicate with Keycloak’s user management module
+    # -- backend.environmentVariables.KEYCLOAK_API_PASSWORD is the password for Studio Backend to communicate with Keycloak.
+    # This should be stored in a Kubernetes secret for security.
+    # Ref: https://kubernetes.io/docs/concepts/configuration/secret/
     KEYCLOAK_API_PASSWORD:
       secret:
         name: "studio-secrets"
         key: "KEYCLOAK_API_PASSWORD"
-    # -- DELETE_CONVERSATIONS_OLDER_THAN_HOURS defines how often you want to run the cron job to delete
-    # -- older conversation data from Studio database. The value should be in hours. The cron job won't
-    # -- run if the "DELETE_CONVERSATIONS_OLDER_THAN_HOURS" value is left undefined.
+    # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
+    # Conversations older than this value will be deleted by the cleanup cron job.
+    # Leave empty to disable automatic conversation cleanup.
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
     DELETE_CONVERSATIONS_OLDER_THAN_HOURS:
       value: ""
-    # -- DELETE_CONVERSATIONS_CRON_EXPRESSION defines the cron schedule for the cron job to delete older
-    # -- conversation data from Studio database. The value should be in the cron format. Default value is hourly
-    # -- https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
-    #  ┌───────────── minute (0 - 59)
-    # | ┌───────────── hour (0 - 23)
-    # │ │ ┌───────────── day of the month (1 - 31)
-    # │ │ │ ┌───────────── month (1 - 12)
-    # │ │ │ │ ┌───────────── day of the week (0 - 6) (Sunday to Saturday)
-    # │ │ │ │ │
-    # │ │ │ │ │
-    # │ │ │ │ │
-    # * * * * *
+    # -- backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job.
+    # Format: "minute hour day-of-month month day-of-week"
+    # Example: "0 * * * *" runs every hour
+    # Default: Runs every hour at minute 0
+    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
     DELETE_CONVERSATIONS_CRON_EXPRESSION:
       value: "0 * * * *"
 
-  # -- backend.envFrom is used to add environment variables from ConfigMap or Secret
+  # -- backend.envFrom defines additional environment variables from ConfigMap or Secret.
+  # These will be mounted as environment variables in the container.
+  # Example:
+  # - configMapRef:
+  #     name: my-configmap
+  # - secretRef:
+  #     name: my-secret
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
   envFrom:
     []
-    # - configMapRef:
-    #     name: my-configmap
 
-  # -- backend.additionalContainers allows to specify additional containers for the deployment
+  # -- backend.additionalContainers defines additional containers to run alongside the main Studio Backend container.
+  # These containers will be part of the same pod and share the pod's network namespace.
+  # Example:
+  # - name: sidecar
+  #   image: busybox
+  #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
+  # Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers
   additionalContainers: []
-  #  - name: extra
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
 
-  # -- Define service account
+  # -- backend.serviceAccount defines the Kubernetes service account used by the backend pod.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
+    # -- backend.serviceAccount.create determines whether to create a new service account.
     create: false
-    # -- serviceAccount.annotations defines annotations to add to the service account
+    # -- backend.serviceAccount.annotations defines annotations to add to the service account.
+    # Useful for cloud provider specific configurations.
     annotations: {}
-    # -- serviceAccount.name defines the name of the service account to use.
-    ## If not set and create is true, a name is generated using the fullname template
+    # -- backend.serviceAccount.name is the name of the service account to use.
+    # If not set and create is true, a name is generated using the fullname template.
     name: ""
 
-  # -- backend.podAnnotations defines annotations to add to the pod
+  # -- backend.podAnnotations defines annotations to add to the backend pod.
+  # Example:
+  #   container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
+  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   podAnnotations:
     {}
-    # container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
 
-  # -- backend.podSecurityContext defines pod security context
+  # -- backend.podSecurityContext defines the security settings for the entire pod.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   podSecurityContext:
+    # -- backend.podSecurityContext.enabled determines whether to enable the pod security context.
     enabled: true
+    # -- backend.podSecurityContext.fsGroup is the group ID to run the container as.
     # fsGroup: 2000
 
-  # -- backend.securityContext defines security context that allows you to overwrite the pod-level security context
+  # -- backend.securityContext defines the security settings for the backend container.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
   securityContext:
+    # -- backend.securityContext.enabled determines whether to enable the security context.
     enabled: true
+    # -- backend.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
+    # Should be false for security best practices.
     allowPrivilegeEscalation: false
+    # -- backend.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
+    # Should be true for security best practices.
     runAsNonRoot: true
+    # -- backend.securityContext.capabilities defines the Linux capabilities configuration.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
     capabilities:
+      # -- backend.securityContext.capabilities.drop defines capabilities to drop from the container.
+      # ALL drops all capabilities for maximum security.
       drop:
         - ALL
+      # -- backend.securityContext.capabilities.add defines capabilities to add to the container.
+      # Uncomment and modify if specific capabilities are needed.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
+    # -- backend.securityContext.privileged determines whether to run the container in privileged mode.
+    # Should be false for security best practices.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
     # privileged: false
+    # -- backend.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
+    # Can be enabled for additional security.
     # readOnlyRootFilesystem: true
+    # -- backend.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
+    # -- backend.securityContext.seccompProfile defines the seccomp profile configuration.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container
     # seccompProfile:
     #   type: RuntimeDefault
 
-  # -- Define service
+  # -- backend.service defines how the backend service is exposed within the cluster.
+  # Ref: https://kubernetes.io/docs/concepts/services-networking/service/
   service:
-    # -- service.type specifies service type
+    # -- backend.service.type is the type of Kubernetes service.
+    # Valid values: ClusterIP, NodePort, LoadBalancer, ExternalName
+    # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
     type: ClusterIP
-    # -- service.port specifies service port
+    # -- backend.service.port is the port number for the service.
     port: 80
-    # -- service.targetPort specifies service target port
+    # -- backend.service.targetPort is the target port in the container.
+    # This should match the port your application listens on.
     targetPort: 4000
 
-  # -- Override default liveness probe settings
+  # -- backend.livenessProbe defines the liveness probe configuration.
+  # This determines if the container is alive and functioning.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   livenessProbe:
+    # -- backend.livenessProbe.enabled determines whether to enable the liveness probe.
     enabled: true
+    # -- backend.livenessProbe.httpGet defines the HTTP GET probe configuration.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command
     httpGet:
+      # -- backend.livenessProbe.httpGet.path is the path to check for liveness.
       path: /api/health
+      # -- backend.livenessProbe.httpGet.port is the port to check for liveness.
       port: 4000
+      # -- backend.livenessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- backend.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 15
+    # -- backend.livenessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- backend.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy.
     failureThreshold: 6
 
-  # -- Override default readiness probe settings
+  # -- backend.readinessProbe defines the readiness probe configuration.
+  # This determines if the container is ready to receive traffic.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
   readinessProbe:
+    # -- backend.readinessProbe.enabled determines whether to enable the readiness probe.
     enabled: true
+    # -- backend.readinessProbe.httpGet defines the HTTP GET probe configuration.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-readiness-probe
     httpGet:
+      # -- backend.readinessProbe.httpGet.path is the path to check for readiness.
       path: /api/health
+      # -- backend.readinessProbe.httpGet.port is the port to check for readiness.
       port: 4000
+      # -- backend.readinessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- backend.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 15
+    # -- backend.readinessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- backend.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- backend.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- backend.readinessProbe.failureThreshold is the number of failures before the container is considered not ready.
     failureThreshold: 6
 
-  # -- Define Studio Database Migration job settings
+  # -- backend.migration defines the database migration job configuration.
+  # This section controls the database schema migration process.
+  # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/
   migration:
-    # -- migration.enable specifies whether a database migration job should be created
+    # -- backend.migration.enabled determines whether to enable the database migration job.
+    # Set to false if you want to handle migrations manually.
     enabled: true
-    # -- migration.image specifies which image database migration job should use
+    # -- backend.migration.image defines the image configuration for the migration job.
     image:
-      # -- image.name specifies the repository of the image
+      # -- backend.migration.image.name is the name of the migration container image.
       name: "studio-database-migration"
-      # -- image.pullPolicy specifies image pull policy
+      # -- backend.migration.image.pullPolicy is the container image pull policy.
       pullPolicy: IfNotPresent
 
+    # -- backend.migration.waitForIt determines whether to wait for the database to be ready before running migrations.
     waitForIt: false
+    # -- backend.migration.waitFotItContainer defines the configuration for the wait-for-it container.
     waitFotItContainer:
       image: postgres:17.2
 
-    # -- migration.nodeSelector allows the deployment to be scheduled on selected nodes
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-    ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+    # -- backend.migration.nodeSelector defines which nodes the migration job can run on.
+    # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
     nodeSelector: {}
 
-    # -- migration.tolerations defines tolerations for pod assignment
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+    # -- backend.migration.tolerations defines tolerations for the migration job.
+    # This allows the job to run on nodes with matching taints.
+    # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
     tolerations: []
 
-    # -- migration.affinity allows the deployment to schedule using affinity rules
-    ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+    # -- backend.migration.affinity defines affinity rules for the migration job.
+    # This controls where the job can be scheduled.
+    # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     affinity: {}
 
-  # -- Configure the ingress resource that allows you to access the deployment installation.
-  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  # -- backend.ingress defines how the backend service is exposed externally.
+  # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ingress:
-    # -- ingress.enabled specifies whether an ingress service should be created
+    # -- backend.ingress.enabled determines whether to create an ingress resource.
     enabled: true
-    # -- ingress.className specifies the ingress className to be used
+    # -- backend.ingress.className is the ingress class name.
+    # This should match your cluster's ingress controller.
+    # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
     className: ""
-    # -- ingress.labels defines labels to add to the ingress
+    # -- backend.ingress.labels defines labels to add to the ingress resource.
+    # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
     labels: {}
-    # -- ingress.annotations defines annotations to add to the ingress
+    # -- backend.ingress.additionalAnnotations defines additional annotations for the ingress resource.
+    # Example:
+    #   kubernetes.io/ingress.class: nginx
+    #   cert-manager.io/cluster-issuer: letsencrypt-prod
+    # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
     additionalAnnotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    # -- ingress.tls spefices the TLS configuration for ingress
+    # -- backend.ingress.tls defines the TLS configuration for the ingress.
+    # Example:
+    # - secretName: chart-example-tls
+    #   hosts:
+    #     - chart-example.local
     tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
 
-  # -- backend.resources specifies the resources limits and requests
+  # -- backend.resources defines the resource limits and requests for Studio Backend.
+  # This controls the compute resources allocated to the backend container.
+  # Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
   resources:
     {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # Example configuration:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -260,43 +425,51 @@ backend:
     #   cpu: 100m
     #   memory: 128Mi
 
-  # -- backend.autoscaling specifies the HPA settings
+  # -- backend.autoscaling defines the Horizontal Pod Autoscaling configuration.
+  # This enables automatic scaling of the backend deployment based on metrics.
+  # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
   autoscaling:
-    # -- autoscaling.enabled specifies whether autoscaling should be enabled
+    # -- backend.autoscaling.enabled determines whether to enable horizontal pod autoscaling.
     enabled: false
-    # -- autoscaling.minReplicas specifies the minimum number of replicas
+    # -- backend.autoscaling.minReplicas is the minimum number of replicas.
     minReplicas: 1
-    # -- autoscaling.maxReplicas specifies the maximum number of replicas
+    # -- backend.autoscaling.maxReplicas is the maximum number of replicas.
     maxReplicas: 100
-    # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
+    # -- backend.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage.
+    # The HPA will scale the deployment to maintain this CPU utilization.
+    # Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
     targetCPUUtilizationPercentage: 80
+    # -- backend.autoscaling.targetMemoryUtilizationPercentage is the target memory utilization percentage.
+    # Uncomment to enable memory-based scaling.
     # targetMemoryUtilizationPercentage: 80
 
-  # -- backend.nodeSelector allows the deployment to be scheduled on selected nodes
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  # -- backend.nodeSelector defines which nodes the backend pods can run on.
+  # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
   nodeSelector: {}
 
-  # -- backend.tolerations defines tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  # -- backend.tolerations defines tolerations for the backend pods.
+  # This allows the pods to run on nodes with matching taints.
+  # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/
   tolerations: []
 
-  # -- backend.affinity allows the deployment to schedule using affinity rules
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # -- backend.affinity defines affinity rules for the backend pods.
+  # This controls where the pods can be scheduled.
+  # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
 # Studio Web Client component specific configuration
 webClient:
-  # -- replicaCount specifies number of replicas
+  # -- webClient.replicaCount is the number of replicas for the Web Client deployment.
   replicaCount: 1
-  # -- Define image settings
+
+  # -- webClient.image defines the container image settings for the web client service.
   image:
-    # -- image.name specifies image repository
+    # -- webClient.image.name is the name of the Web Client container image.
     name: "studio-web-client"
-    # -- image.pullPolicy specifies image pull policy
+    # -- webClient.image.pullPolicy is the container image pull policy.
     pullPolicy: IfNotPresent
 
-  # -- webClient.environmentVariables defines environment variables for deployment
+  # -- webClient.environmentVariables defines the environment variables for the Web Client deployment.
   # Example: Specify the string value for variables
   #   value: my-value
   # Example: Specify the value for variables sourced from a Secret.
@@ -305,119 +478,146 @@ webClient:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- Keycloak realm name
+    # -- webClient.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
     KEYCLOAK_REALM: "rasa-studio"
-    # -- Keycloak client id
+    # -- webClient.environmentVariables.KEYCLOAK_CLIENT_ID is the Keycloak client ID for the web client.
     KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
 
-  # -- webClient.envFrom is used to add environment variables from ConfigMap or Secret
+  # -- webClient.envFrom defines additional environment variables from ConfigMap or Secret.
+  # Example:
+  # - configMapRef:
+  #     name: my-configmap
+  # - secretRef:
+  #     name: my-secret
   envFrom:
     []
-    # - configMapRef:
-    #     name: my-configmap
 
-  # -- webClient.additionalContainers allows to specify additional containers for the deployment
+  # -- webClient.additionalContainers defines additional containers to run alongside the main Web Client container.
+  # Example:
+  # - name: sidecar
+  #   image: busybox
+  #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
   additionalContainers: []
-  #  - name: extra
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
 
-  # -- Define service account
+  # -- webClient.serviceAccount defines the Kubernetes service account used by the web client pod.
   serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
+    # -- webClient.serviceAccount.create determines whether to create a new service account.
     create: false
-    # -- serviceAccount.annotations defines annotations to add to the service account
+    # -- webClient.serviceAccount.annotations defines annotations to add to the service account.
     annotations: {}
-    # -- serviceAccount.name defines the name of the service account to use.
-    ## If not set and create is true, a name is generated using the fullname template
+    # -- webClient.serviceAccount.name is the name of the service account to use.
     name: ""
 
-  # -- webClient.podAnnotations defines annotations to add to the pod
+  # -- webClient.podAnnotations defines annotations to add to the web client pod.
+  # Example:
+  #   container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
   podAnnotations:
     {}
-    # container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
 
-  # -- webClient.podSecurityContext defines pod security context
+  # -- webClient.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:
+    # -- webClient.podSecurityContext.enabled determines whether to enable the pod security context.
     enabled: true
+    # -- webClient.podSecurityContext.fsGroup is the group ID to run the container as.
     # fsGroup: 2000
 
-  # -- webClient.securityContext defines security context that allows you to overwrite the pod-level security context
+  # -- webClient.securityContext defines the security settings for the web client container.
   securityContext:
+    # -- webClient.securityContext.enabled determines whether to enable the security context.
     enabled: true
+    # -- webClient.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
     allowPrivilegeEscalation: false
+    # -- webClient.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
     runAsNonRoot: true
+    # -- webClient.securityContext.capabilities defines the Linux capabilities configuration.
     capabilities:
+      # -- webClient.securityContext.capabilities.drop defines capabilities to drop from the container.
       drop:
         - ALL
+      # -- webClient.securityContext.capabilities.add defines capabilities to add to the container.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
+    # -- webClient.securityContext.privileged determines whether to run the container in privileged mode.
     # privileged: false
+    # -- webClient.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
     # readOnlyRootFilesystem: true
+    # -- webClient.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
+    # -- webClient.securityContext.seccompProfile defines the seccomp profile configuration.
     # seccompProfile:
     #   type: RuntimeDefault
 
-  # -- Define service
+  # -- webClient.service defines how the web client service is exposed within the cluster.
   service:
-    # -- service.type specifies service type
+    # -- webClient.service.type is the type of Kubernetes service.
     type: ClusterIP
-    # -- service.port specifies service port
+    # -- webClient.service.port is the port number for the service.
     port: 80
-    # -- service.targetPort specifies service target port
+    # -- webClient.service.targetPort is the target port in the container.
     targetPort: 8080
 
-  # -- Override default liveness probe settings
+  # -- webClient.livenessProbe defines the liveness probe configuration.
   livenessProbe:
+    # -- webClient.livenessProbe.enabled determines whether to enable the liveness probe.
     enabled: true
+    # -- webClient.livenessProbe.httpGet defines the HTTP GET probe configuration.
     httpGet:
+      # -- webClient.livenessProbe.httpGet.path is the path to check for liveness.
       path: /
+      # -- webClient.livenessProbe.httpGet.port is the port to check for liveness.
       port: 8080
+      # -- webClient.livenessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- webClient.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 15
+    # -- webClient.livenessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- webClient.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- webClient.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- webClient.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy.
     failureThreshold: 6
 
-  # -- Override default readiness probe settings
+  # -- webClient.readinessProbe defines the readiness probe configuration.
   readinessProbe:
+    # -- webClient.readinessProbe.enabled determines whether to enable the readiness probe.
     enabled: true
+    # -- webClient.readinessProbe.httpGet defines the HTTP GET probe configuration.
     httpGet:
+      # -- webClient.readinessProbe.httpGet.path is the path to check for readiness.
       path: /
+      # -- webClient.readinessProbe.httpGet.port is the port to check for readiness.
       port: 8080
+      # -- webClient.readinessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- webClient.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 15
+    # -- webClient.readinessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- webClient.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- webClient.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- webClient.readinessProbe.failureThreshold is the number of failures before the container is considered not ready.
     failureThreshold: 6
 
-  # -- Configure the ingress resource that allows you to access the deployment installation.
-  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  # -- webClient.ingress defines how the web client service is exposed externally.
   ingress:
-    # -- ingress.enabled specifies whether an ingress service should be created
+    # -- webClient.ingress.enabled determines whether to create an ingress resource.
     enabled: true
-    # -- ingress.className specifies the ingress className to be used
+    # -- webClient.ingress.className is the ingress class name.
     className: ""
-    # -- ingress.labels defines labels to add to the ingress
+    # -- webClient.ingress.labels defines labels to add to the ingress resource.
     labels: {}
-    # -- ingress.annotations defines annotations to add to the ingress
+    # -- webClient.ingress.additionalAnnotations defines additional annotations for the ingress resource.
     additionalAnnotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    # -- ingress.tls spefices the TLS configuration for ingress
+    # -- webClient.ingress.tls defines the TLS configuration for the ingress.
     tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
 
-  # -- webClient.resources specifies the resources limits and requests
+  # -- webClient.resources defines the resource limits and requests for the web client.
   resources:
     {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # Example configuration:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -425,34 +625,30 @@ webClient:
     #   cpu: 100m
     #   memory: 128Mi
 
-  # -- webClient.nodeSelector allows the deployment to be scheduled on selected nodes
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  # -- webClient.nodeSelector defines which nodes the web client pods can run on.
   nodeSelector: {}
 
-  # -- webClient.tolerations defines tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  # -- webClient.tolerations defines tolerations for the web client pods.
   tolerations: []
 
-  # -- webClient.affinity allows the deployment to schedule using affinity rules
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # -- webClient.affinity defines affinity rules for the web client pods.
   affinity: {}
 
 # Studio Event Ingestion component specific configuration
 eventIngestion:
-  # -- eventIngestion.enabled specifies whether the event ingestion component should be deployed or not
+  # -- eventIngestion.enabled determines whether to deploy the event ingestion component.
   enabled: true
-  # -- replicaCount specifies number of replicas
+  # -- eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment.
   replicaCount: 1
-  # -- Define image settings
+
+  # -- eventIngestion.image defines the container image settings for the event ingestion service.
   image:
-    # -- image.name specifies image repository
-    name:
-      "studio-event-ingestion"
-      # -- image.pullPolicy specifies image pull policy
+    # -- eventIngestion.image.name is the name of the Event Ingestion container image.
+    name: "studio-event-ingestion"
+    # -- eventIngestion.image.pullPolicy is the container image pull policy.
     pullPolicy: IfNotPresent
 
-  # -- eventIngestion.environmentVariables defines environment variables for deployment
+  # -- eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment.
   # Example: Specify the string value for variables
   #   value: my-value
   # Example: Specify the value for variables sourced from a Secret.
@@ -461,123 +657,141 @@ eventIngestion:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- The URL of the database to connect to in the format postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public. This should be same as the one defined for backend.
+    # -- eventIngestion.environmentVariables.DATABASE_URL is the database connection URL for Event Ingestion.
+    # Format: postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
     DATABASE_URL:
       secret:
         name: "studio-secrets"
         key: "DATABASE_URL"
-    # -- Set to true if you want to use SSL
+    # -- eventIngestion.environmentVariables.KAFKA_ENABLE_SSL determines whether to enable SSL for Kafka connections.
     KAFKA_ENABLE_SSL:
       value: ""
-    # -- Set to true if you want to use SSL with custom certs
+    # -- eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL determines whether to use custom SSL certificates for Kafka.
     KAFKA_CUSTOM_SSL:
       value: ""
-    # -- Path to the CA file
+    # -- eventIngestion.environmentVariables.KAFKA_CA_FILE is the path to the CA certificate file for Kafka SSL.
     KAFKA_CA_FILE:
       value: ""
-    # -- Path to the client key file
+    # -- eventIngestion.environmentVariables.KAFKA_KEY_FILE is the path to the client key file for Kafka SSL.
     KAFKA_KEY_FILE:
       value: ""
-    # -- Path to the client certificate file
+    # -- eventIngestion.environmentVariables.KAFKA_CERT_FILE is the path to the client certificate file for Kafka SSL.
     KAFKA_CERT_FILE:
       value: ""
-    # -- Defaults to true, the server certificate is verified against the list of supplied CA
+    # -- eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED determines whether to verify server certificates.
     KAFKA_REJECT_UNAUTHORIZED:
       value: ""
-    # -- Instructs the application to allow untrusted certificates. Set this to 0 if using untrusted certificates for Kafka.
+    # -- eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates.
     NODE_TLS_REJECT_UNAUTHORIZED:
       value: ""
-    # -- Supported values are plain, SCRAM-SHA-256 or SCRAM-SHA-512. You can leave it empty if you are not using SASL.
+    # -- eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM is the SASL mechanism for Kafka authentication.
+    # Supported values: plain, SCRAM-SHA-256, SCRAM-SHA-512
     KAFKA_SASL_MECHANISM:
       value: ""
+    # -- eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication.
     KAFKA_SASL_USERNAME:
       value: ""
+    # -- eventIngestion.environmentVariables.KAFKA_SASL_PASSWORD is the SASL password for Kafka authentication.
     KAFKA_SASL_PASSWORD:
       secret:
         name: "studio-secrets"
         key: "KAFKA_SASL_PASSWORD"
-    # -- Kafka broker address
+    # -- eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker.
     KAFKA_BROKER_ADDRESS:
       value: ""
-    # -- Kafka topic to which to Rasa Pro assistant will publish events. Make sure that you pre-create these on your own.
+    # -- eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events.
     KAFKA_TOPIC:
       value: "rasa-events"
-    # -- Kafka topic to which unprocessed Rasa Pro assistant events will be pushed by Studio. Make sure that you pre-create these on your own.
+    # -- eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC is the Kafka topic for unprocessed events.
     KAFKA_DLQ_TOPIC:
       value: "rasa-events-dlq"
-    # -- This is the Kafka group id that should be unique for Studio so that Studio can receive a copy of all the Rasa Pro events streamed to the topic.
+    # -- eventIngestion.environmentVariables.KAFKA_GROUP_ID is the Kafka consumer group ID for Studio.
     KAFKA_GROUP_ID:
       value: "studio"
 
-  # -- eventIngestion.envFrom is used to add environment variables from ConfigMap or Secret
+  # -- eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret.
+  # Example:
+  # - configMapRef:
+  #     name: my-configmap
+  # - secretRef:
+  #     name: my-secret
   envFrom:
     []
-    # - configMapRef:
-    #     name: my-configmap
 
-  # -- eventIngestion.additionalContainers allows to specify additional containers for the deployment
+  # -- eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container.
+  # Example:
+  # - name: sidecar
+  #   image: busybox
+  #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
   additionalContainers: []
-  #  - name: extra
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
 
-  # -- eventIngestion.volumes specify additional volumes for the Studio event ingestion container
-  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+  # -- eventIngestion.volumes defines additional volumes for the Event Ingestion container.
+  # Example:
+  # - name: config-volume
+  #   configMap:
+  #     name: special-config
   volumes:
     []
-    # - hostPath:
-    #   path: <HOST_PATH>
-    #   name: <VOLUME_NAME>
 
-  # -- eventIngestion.volumeMounts specifies additional volumes to mount in the Studio event ingestion container
+  # -- eventIngestion.volumeMounts defines where to mount the volumes in the Event Ingestion container.
+  # Example:
+  # - name: config-volume
+  #   mountPath: /etc/config
+  #   readOnly: true
   volumeMounts:
     []
-    # - name: <VOLUME_NAME>
-    #   mountPath: <CONTAINER_PATH>
-    #   readOnly: true
 
-  # -- Define service account
+  # -- eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod.
   serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
+    # -- eventIngestion.serviceAccount.create determines whether to create a new service account.
     create: false
-    # -- serviceAccount.annotations defines annotations to add to the service account
+    # -- eventIngestion.serviceAccount.annotations defines annotations to add to the service account.
     annotations: {}
-    # -- serviceAccount.name defines the name of the service account to use.
-    ## If not set and create is true, a name is generated using the fullname template
+    # -- eventIngestion.serviceAccount.name is the name of the service account to use.
     name: ""
 
-  # -- eventIngestion.podAnnotations defines to add to the pod
+  # -- eventIngestion.podAnnotations defines annotations to add to the event ingestion pod.
+  # Example:
+  #   container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
   podAnnotations:
     {}
-    # container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
 
-  # -- eventIngestion.podSecurityContext defines pod security context
+  # -- eventIngestion.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:
+    # -- eventIngestion.podSecurityContext.enabled determines whether to enable the pod security context.
     enabled: true
+    # -- eventIngestion.podSecurityContext.fsGroup is the group ID to run the container as.
     # fsGroup: 2000
 
-  # -- eventIngestion.securityContext defines security context that allows you to overwrite the pod-level security context
+  # -- eventIngestion.securityContext defines the security settings for the event ingestion container.
   securityContext:
+    # -- eventIngestion.securityContext.enabled determines whether to enable the security context.
     enabled: true
+    # -- eventIngestion.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
     allowPrivilegeEscalation: false
+    # -- eventIngestion.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
     runAsNonRoot: true
+    # -- eventIngestion.securityContext.capabilities defines the Linux capabilities configuration.
     capabilities:
+      # -- eventIngestion.securityContext.capabilities.drop defines capabilities to drop from the container.
       drop:
         - ALL
+      # -- eventIngestion.securityContext.capabilities.add defines capabilities to add to the container.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
+    # -- eventIngestion.securityContext.privileged determines whether to run the container in privileged mode.
     # privileged: false
+    # -- eventIngestion.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
     # readOnlyRootFilesystem: true
+    # -- eventIngestion.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
+    # -- eventIngestion.securityContext.seccompProfile defines the seccomp profile configuration.
     # seccompProfile:
     #   type: RuntimeDefault
 
-  # -- eventIngestion.resources specifies the resources limits and requests
+  # -- eventIngestion.resources defines the resource limits and requests for the event ingestion service.
   resources:
     {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # Example configuration:
     # limits:
     #   cpu: 100m
     #   memory: 128Mi
@@ -585,45 +799,42 @@ eventIngestion:
     #   cpu: 100m
     #   memory: 128Mi
 
-  # -- eventIngestion.autoscaling specifies the HPA settings
+  # -- eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration.
   autoscaling:
-    # -- autoscaling.enabled specifies whether autoscaling should be enabled
+    # -- eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling.
     enabled: false
-    # -- autoscaling.minReplicas specifies the minimum number of replicas
+    # -- eventIngestion.autoscaling.minReplicas is the minimum number of replicas.
     minReplicas: 1
-    # -- autoscaling.maxReplicas specifies the maximum number of replicas
+    # -- eventIngestion.autoscaling.maxReplicas is the maximum number of replicas.
     maxReplicas: 100
-    # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
+    # -- eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage.
     targetCPUUtilizationPercentage: 80
+    # -- eventIngestion.autoscaling.targetMemoryUtilizationPercentage is the target memory utilization percentage.
     # targetMemoryUtilizationPercentage: 80
 
-  # -- eventIngestion.nodeSelector allows the deployment to be scheduled on selected nodes
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  # -- eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on.
   nodeSelector: {}
 
-  # -- eventIngestion.tolerations defines tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  # -- eventIngestion.tolerations defines tolerations for the event ingestion pods.
   tolerations: []
 
-  # -- eventIngestion.affinity allows the deployment to schedule using affinity rules
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # -- eventIngestion.affinity defines affinity rules for the event ingestion pods.
   affinity: {}
 
 # Studio Keycloak component specific configuration
 keycloak:
-  # -- keycloak.enabled specifies whether Keycloak should be deployed or not
+  # -- keycloak.enabled determines whether to deploy the Keycloak authentication service.
   enabled: true
-  # -- replicaCount specifies number of replicas
+  # -- keycloak.replicaCount is the number of replicas for the Keycloak deployment.
   replicaCount: 1
-  # -- Define image settings
+  # -- keycloak.image defines the container image settings for the Keycloak service.
   image:
-    # -- image.name specifies image repository
+    # -- keycloak.image.name is the name of the Keycloak container image.
     name: "studio-keycloak"
-    # -- image.pullPolicy specifies image pull policy
+    # -- keycloak.image.pullPolicy is the container image pull policy.
     pullPolicy: IfNotPresent
 
-  # -- keycloak.environmentVariables defines environment variables for deployment
+  # -- keycloak.environmentVariables defines the environment variables for the Keycloak deployment.
   # Example: Specify the string value for variables
   #   value: my-value
   # Example: Specify the value for variables sourced from a Secret.
@@ -632,118 +843,147 @@ keycloak:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # Set value to edge to enable communication through HTTP between the proxy/load balancer and Keycloak. Useful for highly secure internal network where the reverse proxy keeps a secure connection (HTTP over TLS) with clients while communicating with Keycloak using HTTP.
+    # -- keycloak.environmentVariables.KC_PROXY determines the proxy configuration for Keycloak.
+    # Set to "edge" to enable HTTP communication between proxy/load balancer and Keycloak.
+    # Useful for secure internal networks where the reverse proxy maintains HTTPS with clients.
     KC_PROXY:
       value: "edge"
 
-  # -- keycloak.envFrom is used to add environment variables from ConfigMap or Secret
+  # -- keycloak.envFrom defines additional environment variables from ConfigMap or Secret.
+  # Example:
+  # - configMapRef:
+  #     name: my-configmap
+  # - secretRef:
+  #     name: my-secret
   envFrom:
     []
-    # - configMapRef:
-    #     name: my-configmap
 
-  # -- keycloak.additionalContainers allows to specify additional containers for the deployment
+  # -- keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container.
+  # Example:
+  # - name: sidecar
+  #   image: busybox
+  #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
   additionalContainers: []
-  #  - name: extra
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
 
-  # -- Define service account
+  # -- keycloak.serviceAccount defines the Kubernetes service account used by the Keycloak pod.
   serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
+    # -- keycloak.serviceAccount.create determines whether to create a new service account.
     create: false
-    # -- serviceAccount.annotations defines annotations to add to the service account
+    # -- keycloak.serviceAccount.annotations defines annotations to add to the service account.
     annotations: {}
-    # -- serviceAccount.name defines the name of the service account to use.
-    ## If not set and create is true, a name is generated using the fullname template
+    # -- keycloak.serviceAccount.name is the name of the service account to use.
     name: ""
 
-  # -- keycloak.podAnnotations defines annotations to add to the pod
+  # -- keycloak.podAnnotations defines annotations to add to the Keycloak pod.
+  # Example:
+  #   container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
   podAnnotations:
     {}
-    # container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
 
-  # -- keycloak.podSecurityContext defines pod security context
+  # -- keycloak.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:
+    # -- keycloak.podSecurityContext.enabled determines whether to enable the pod security context.
     enabled: true
+    # -- keycloak.podSecurityContext.fsGroup is the group ID to run the container as.
     # fsGroup: 2000
 
-  # -- keycloak.securityContext defines security context that allows you to overwrite the pod-level security context
+  # -- keycloak.securityContext defines the security settings for the Keycloak container.
   securityContext:
+    # -- keycloak.securityContext.enabled determines whether to enable the security context.
     enabled: true
+    # -- keycloak.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
     allowPrivilegeEscalation: false
+    # -- keycloak.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
     runAsNonRoot: true
+    # -- keycloak.securityContext.capabilities defines the Linux capabilities configuration.
     capabilities:
+      # -- keycloak.securityContext.capabilities.drop defines capabilities to drop from the container.
       drop:
         - ALL
+      # -- keycloak.securityContext.capabilities.add defines capabilities to add to the container.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
+    # -- keycloak.securityContext.privileged determines whether to run the container in privileged mode.
     # privileged: false
+    # -- keycloak.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
     # readOnlyRootFilesystem: true
+    # -- keycloak.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
+    # -- keycloak.securityContext.seccompProfile defines the seccomp profile configuration.
     # seccompProfile:
     #   type: RuntimeDefault
 
-  # -- Define service
+  # -- keycloak.service defines how the Keycloak service is exposed within the cluster.
   service:
-    # -- service.type specifies service type
+    # -- keycloak.service.type is the type of Kubernetes service.
     type: ClusterIP
-    # -- service.port specifies service port
+    # -- keycloak.service.port is the port number for the service.
     port: 80
-    # -- service.targetPort specifies service target port
+    # -- keycloak.service.targetPort is the target port in the container.
     targetPort: 8080
 
-  # -- Override default liveness probe settings
+  # -- keycloak.livenessProbe defines the liveness probe configuration.
   livenessProbe:
+    # -- keycloak.livenessProbe.enabled determines whether to enable the liveness probe.
     enabled: true
+    # -- keycloak.livenessProbe.httpGet defines the HTTP GET probe configuration.
     httpGet:
+      # -- keycloak.livenessProbe.httpGet.path is the path to check for liveness.
       path: /auth
+      # -- keycloak.livenessProbe.httpGet.port is the port to check for liveness.
       port: 8080
+      # -- keycloak.livenessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- keycloak.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 30
+    # -- keycloak.livenessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- keycloak.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- keycloak.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- keycloak.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy.
     failureThreshold: 6
 
-  # -- Override default readiness probe settings
+  # -- keycloak.readinessProbe defines the readiness probe configuration.
   readinessProbe:
+    # -- keycloak.readinessProbe.enabled determines whether to enable the readiness probe.
     enabled: true
+    # -- keycloak.readinessProbe.httpGet defines the HTTP GET probe configuration.
     httpGet:
+      # -- keycloak.readinessProbe.httpGet.path is the path to check for readiness.
       path: /auth
+      # -- keycloak.readinessProbe.httpGet.port is the port to check for readiness.
       port: 8080
+      # -- keycloak.readinessProbe.httpGet.scheme is the protocol to use for the check.
       scheme: HTTP
+    # -- keycloak.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
     initialDelaySeconds: 30
+    # -- keycloak.readinessProbe.periodSeconds is how often to perform the probe.
     periodSeconds: 15
+    # -- keycloak.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
     successThreshold: 1
+    # -- keycloak.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out.
     timeoutSeconds: 5
+    # -- keycloak.readinessProbe.failureThreshold is the number of failures before the container is considered not ready.
     failureThreshold: 6
 
-  # -- Configure the ingress resource that allows you to access the deployment installation.
-  ## ref: http://kubernetes.io/docs/user-guide/ingress/
+  # -- keycloak.ingress defines how the Keycloak service is exposed externally.
   ingress:
-    # -- ingress.enabled specifies whether an ingress service should be created
+    # -- keycloak.ingress.enabled determines whether to create an ingress resource.
     enabled: true
-    # -- ingress.className specifies the ingress className to be used
+    # -- keycloak.ingress.className is the ingress class name.
     className: ""
-    # -- ingress.labels defines labels to add to the ingress
+    # -- keycloak.ingress.labels defines labels to add to the ingress resource.
     labels: {}
-    # -- ingress.annotations defines annotations to add to the ingress
+    # -- keycloak.ingress.additionalAnnotations defines additional annotations for the ingress resource.
     additionalAnnotations: {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    # -- ingress.tls spefices the TLS configuration for ingress
+    # -- keycloak.ingress.tls defines the TLS configuration for the ingress.
     tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
 
-  # -- keycloak.resources specifies the resources limits and requests
+  # -- keycloak.resources defines the resource limits and requests for the Keycloak service.
   resources:
     {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+    # Example configuration:
     # limits:
     #   cpu: 500m
     #   memory: 512Mi
@@ -751,17 +991,13 @@ keycloak:
     #   cpu: 500m
     #   memory: 512Mi
 
-  # -- keycloak.nodeSelector allows the deployment to be scheduled on selected nodes
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+  # -- keycloak.nodeSelector defines which nodes the Keycloak pods can run on.
   nodeSelector: {}
 
-  # -- keycloak.tolerations defines tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+  # -- keycloak.tolerations defines tolerations for the Keycloak pods.
   tolerations: []
 
-  # -- keycloak.affinity allows the deployment to schedule using affinity rules
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+  # -- keycloak.affinity defines affinity rules for the Keycloak pods.
   affinity: {}
 
 # Network policy settings

@@ -8,6 +8,9 @@ data:
     window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ if .Values.keycloak.ingress.hostName }}{{ .Values.keycloak.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/auth";
     window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }};
     window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
+    window.VOICE_INSPECTOR_ENABLED = {{ .Values.webClient.environmentVariables.VOICE_INSPECTOR_ENABLED | quote | default "false" }};
+    window.SILENCE_TIMEOUT_ENABLED = {{ .Values.webClient.environmentVariables.SILENCE_TIMEOUT_ENABLED | quote | default "false" }};
+    window.EDIT_SYSTEM_RESPONSES_ENABLED = {{ .Values.webClient.environmentVariables.EDIT_SYSTEM_RESPONSES_ENABLED | quote | default "false" }};
     {{- with .Values.webClient.environmentVariables.CURRENT_VERSION_NUMBER }}
     window.CURRENT_VERSION_NUMBER = {{ . | quote | trim }};
     {{- else }}

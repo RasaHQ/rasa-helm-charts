@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.1.3](https://img.shields.io/badge/Version-2.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.1.4-rc](https://img.shields.io/badge/Version-2.1.4--rc-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.4-rc
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.4-rc
 ```
 
 ## General Configuration
@@ -96,9 +96,11 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.livenessProbe.periodSeconds | int | `15` | backend.livenessProbe.periodSeconds is how often to perform the probe. |
 | backend.livenessProbe.successThreshold | int | `1` | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. |
 | backend.livenessProbe.timeoutSeconds | int | `5` | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. |
-| backend.migration | object | `{"affinity":{},"enabled":true,"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
+| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
 | backend.migration.affinity | object | `{}` | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | backend.migration.enabled | bool | `true` | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. |
+| backend.migration.environmentVariables | object | `{"SKIP_KEYCLOAK":{"value":"false"}}` | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.migration.environmentVariables.SKIP_KEYCLOAK | object | `{"value":"false"}` | backend.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation. Set to "true" if you have already created the Keycloak database manually. |
 | backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | backend.migration.image defines the image configuration for the migration job. |
 | backend.migration.image.name | string | `"studio-database-migration"` | backend.migration.image.name is the name of the migration container image. |
 | backend.migration.image.pullPolicy | string | `"IfNotPresent"` | backend.migration.image.pullPolicy is the container image pull policy. |

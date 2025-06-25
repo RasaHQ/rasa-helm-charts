@@ -54,12 +54,11 @@ spec:
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
           {{- if not .Values.keycloak.enabled }}
-          {{- if not (hasKey .Values.backend.migration.environmentVariables "SKIP_KEYCLOAK") }}
           - name: SKIP_KEYCLOAK
             value: "true"
           {{- end }}
-          {{- end }}
           {{- range $key, $value := .Values.backend.migration.environmentVariables }}
+          {{- if not (and (eq $key "SKIP_KEYCLOAK") (not $.Values.keycloak.enabled)) }}
           - name: {{ $key | upper }}
             {{- if $value.value }}
             value: {{ $value.value | quote }}
@@ -69,5 +68,6 @@ spec:
                 name: {{ $value.secret.name }}
                 key: {{ $value.secret.key }}
             {{- end }}
+          {{- end }}
           {{- end }}
 {{- end }}

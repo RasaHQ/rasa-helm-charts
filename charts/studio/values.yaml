@@ -373,6 +373,20 @@ backend:
     waitFotItContainer:
       image: postgres:17.2
 
+    # -- backend.migration.environmentVariables defines the environment variables for the migration job.
+    # Example: Specify the string value for variables
+    #   value: my-value
+    # Example: Specify the value for variables sourced from a Secret.
+    #   secret:
+    #     name: my-secret
+    #     key: my-secret-key
+    # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
+    environmentVariables:
+      # -- backend.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation.
+      # Set to "true" if you have already created the Keycloak database manually.
+      SKIP_KEYCLOAK:
+        value: "false"
+
     # -- backend.migration.nodeSelector defines which nodes the migration job can run on.
     # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
     nodeSelector: {}

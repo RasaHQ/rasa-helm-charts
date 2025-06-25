@@ -57,4 +57,17 @@ spec:
           - name: SKIP_KEYCLOAK
             value: "true"
           {{- end }}
+          {{- range $key, $value := .Values.backend.migration.environmentVariables }}
+          {{- if not (and (eq $key "SKIP_KEYCLOAK") (not $.Values.keycloak.enabled)) }}
+          - name: {{ $key | upper }}
+            {{- if $value.value }}
+            value: {{ $value.value | quote }}
+            {{- else if $value.secret }}
+            valueFrom:
+              secretKeyRef:
+                name: {{ $value.secret.name }}
+                key: {{ $value.secret.key }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
 {{- end }}

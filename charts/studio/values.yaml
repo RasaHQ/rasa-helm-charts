@@ -36,6 +36,12 @@ config:
   #   cert-manager.io/cluster-issuer: letsencrypt-prod
   ingressAnnotations: {}
 
+  # -- Define the ingress class name to be used for ALL the ingress resources.
+  # This value will be applied to all ingress resources created by this chart.
+  # Example: "nginx", "istio", "traefik"
+  # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
+  ingressClassName: ""
+
   # -- Define if you will be using https or http with the ingressHost.
   # Valid values are "http" or "https". This setting affects how services communicate with each other.
   connectionType: "http"
@@ -1059,7 +1065,7 @@ podLabels: {}
 
 replicated:
   enabled: false
-  sdkVersion: "1.5.2"
+  sdkVersion: "1.7.1"
 
 # -- Define the resources for the Rasa Pro model server
 rasa:

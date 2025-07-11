@@ -1,9 +1,12 @@
 {{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.keycloak.service.port -}}
-{{- if and .Values.keycloak.ingress.className (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
+{{- if and (or .Values.keycloak.ingress.className .Values.config.ingressClassName) (not (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion)) }}
   {{- if not (hasKey .Values.config.ingressAnnotations "kubernetes.io/ingress.class") }}
-  {{- $_ := set .Values.config.ingressAnnotations "kubernetes.io/ingress.class" .Values.keycloak.ingress.className}}
+  {{- $className := .Values.keycloak.ingress.className | default .Values.config.ingressClassName }}
+  {{- if $className }}
+  {{- $_ := set .Values.config.ingressAnnotations "kubernetes.io/ingress.class" $className }}
+  {{- end }}
   {{- end }}
 {{- end }}
 {{- if semverCompare ">=1.19-0" .Capabilities.KubeVersion.GitVersion -}}
@@ -23,8 +26,11 @@ metadata:
     {{- end }}
   {{- include "keycloak.ingress.annotations" . | nindent 2 }}
 spec:
-  {{- if and .Values.keycloak.ingress.className (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
-  ingressClassName: {{ .Values.keycloak.ingress.className }}
+  {{- if and (or .Values.keycloak.ingress.className .Values.config.ingressClassName) (semverCompare ">=1.18-0" .Capabilities.KubeVersion.GitVersion) }}
+  {{- $className := .Values.keycloak.ingress.className | default .Values.config.ingressClassName }}
+  {{- if $className }}
+  ingressClassName: {{ $className }}
+  {{- end }}
   {{- end }}
   {{- if .Values.keycloak.ingress.tls }}
   tls:

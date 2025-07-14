@@ -96,6 +96,13 @@ rasa:
         enabled: false
         # url: ""
         # waitTimeBetweenPulls: 20
+      # -- endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component.
+      # See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups
+      modelGroups:
+        # - id: openai-direct # Unique identifier for the model group
+        #   models:
+        #     - provider: openai
+        #       model: gpt-4o-2024-11-20
       # -- endpoints.trackerStore assistant's conversations are stored within a tracker store
       # See: https://rasa.com/docs/rasa/tracker-stores
       trackerStore:

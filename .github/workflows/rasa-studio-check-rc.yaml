@@ -1,4 +1,4 @@
-name: Check if RC
+name: Check if RC for Rasa Studio
 
 on:
   pull_request:

@@ -84,7 +84,7 @@ rasaProServices:
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"3.12.0-latest"` | image.tag specifies image tag |
+| actionServer.image.tag | string | `"3.13.0-latest"` | image.tag specifies image tag |
 | actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -220,7 +220,7 @@ rasaProServices:
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.12.6-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.13.1-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -318,7 +318,7 @@ rasaProServices:
 | rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL.value | string | `""` |  |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `"3.5.0-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |

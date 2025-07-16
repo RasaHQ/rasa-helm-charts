@@ -98,7 +98,7 @@ rasa:
         # waitTimeBetweenPulls: 20
       # -- endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component.
       # See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups
-      modelGroups:
+      modelGroups: []
         # - id: openai-direct # Unique identifier for the model group
         #   models:
         #     - provider: openai

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.4](https://img.shields.io/badge/Version-1.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.5](https://img.shields.io/badge/Version-1.2.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.4
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.5
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.4
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.5
 ```
 
 ## General Configuration
@@ -84,7 +84,7 @@ rasaProServices:
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"3.12.0-latest"` | image.tag specifies image tag |
+| actionServer.image.tag | string | `"3.13.0-latest"` | image.tag specifies image tag |
 | actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -220,7 +220,7 @@ rasaProServices:
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.12.6-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.13.2-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -277,6 +277,7 @@ rasaProServices:
 | rasa.settings.endpoints.additionalEndpoints | object | `{}` | `endpoints.additionalEndpoints` to add more settings to `endpoints.yml` |
 | rasa.settings.endpoints.eventBroker | object | `{"enabled":false}` | endpoints.eventBroker allows you to connect your running assistant to other services that process the data See: https://rasa.com/docs/rasa/event-brokers |
 | rasa.settings.endpoints.lockStore | object | `{"enabled":false,"url":"","useConcurrent":true}` | endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order See: https://rasa.com/docs/rasa/lock-stores |
+| rasa.settings.endpoints.modelGroups | string | `nil` | endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component. See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups |
 | rasa.settings.endpoints.models | object | `{"enabled":false}` | endpoints.models provides loading models from the storage See: https://rasa.com/docs/rasa/model-storage |
 | rasa.settings.endpoints.tracing | object | `{"enabled":false}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
 | rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
@@ -317,7 +318,7 @@ rasaProServices:
 | rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL.value | string | `""` |  |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `"3.5.0-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |

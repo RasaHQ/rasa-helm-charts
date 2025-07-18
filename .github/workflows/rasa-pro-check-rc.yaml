@@ -1,0 +1,34 @@
+name: Check if RC for Rasa Pro
+
+on:
+  pull_request:
+    paths:
+      - 'charts/rasa/**'
+      - '!charts/studio/**'
+
+jobs:
+  check-rc:
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      with:
+        fetch-depth: 0
+    
+    - name: Read Helm Chart
+      id: chart-info
+      uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+      with:
+        path: charts/rasa/
+
+    - name: Check if its release candidate
+      run: |
+        VERSION=${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
+    
+        if [[ $VERSION != *-rc* ]]; then
+          echo "The Helm chart version is not a release candidate."
+        else
+          echo "The Helm chart version is a release candidate. Please change version in Chart.yaml to match release versioning."
+          exit 1
+        fi

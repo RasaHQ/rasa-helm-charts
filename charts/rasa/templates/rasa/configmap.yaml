@@ -18,6 +18,10 @@ data:
     models:
       {{- omit .models "enabled" | toYaml | nindent 6 }}
 {{- end }}
+{{- if .modelGroups }}
+    model_groups:
+      {{- toYaml .modelGroups | nindent 6 }}
+{{- end }}
 {{- if .trackerStore.enabled }}
     tracker_store:
       {{- omit .trackerStore "enabled" | toYaml  | nindent 6 }}

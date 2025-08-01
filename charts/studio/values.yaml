@@ -870,6 +870,8 @@ keycloak:
       value: "true"
     KC_PROXY_HEADERS:
       value: "xforwarded"
+    KC_PROXY:
+      value: "edge"
 
   # -- keycloak.envFrom defines additional environment variables from ConfigMap or Secret.
   # Example:

@@ -863,11 +863,13 @@ keycloak:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- keycloak.environmentVariables.KC_PROXY determines the proxy configuration for Keycloak.
-    # Set to "edge" to enable HTTP communication between proxy/load balancer and Keycloak.
+    # -- keycloak.environmentVariables.KC_HTTP_ENABLED determines the proxy configuration for Keycloak.
+    # Set to "true" to enable HTTP communication between proxy/load balancer and Keycloak.
     # Useful for secure internal networks where the reverse proxy maintains HTTPS with clients.
-    KC_PROXY:
-      value: "edge"
+    KC_HTTP_ENABLED:
+      value: "true"
+    KC_PROXY_HEADERS:
+      value: "xforwarded"
 
   # -- keycloak.envFrom defines additional environment variables from ConfigMap or Secret.
   # Example:

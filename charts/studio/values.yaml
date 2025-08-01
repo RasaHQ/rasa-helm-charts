@@ -868,8 +868,13 @@ keycloak:
     # Useful for secure internal networks where the reverse proxy maintains HTTPS with clients.
     KC_HTTP_ENABLED:
       value: "true"
+    # -- keycloak.environmentVariables.KC_PROXY_HEADERS determines the proxy headers for Keycloak.
+    # Set to "xforwarded" to enable parsing of non-standard X-Forwarded-* headers, such as X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Forwarded-Port.
+    # https://www.keycloak.org/server/reverseproxy
     KC_PROXY_HEADERS:
       value: "xforwarded"
+    # -- legacy keycloak value to enable HTTP communication between proxy/loadbalancer and Keycloak.
+    # This is deprecated (replaced by KC_HTTP_ENABLED) and will be removed in future releases.
     KC_PROXY:
       value: "edge"
 

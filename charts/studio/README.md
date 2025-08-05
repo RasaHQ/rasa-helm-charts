@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.1.7-rc1](https://img.shields.io/badge/Version-2.1.7-rc1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.1.7-rc2](https://img.shields.io/badge/Version-2.1.7--rc2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc2
 ```
 
 ## General Configuration
@@ -219,8 +219,10 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | keycloak.affinity | object | `{}` | keycloak.affinity defines affinity rules for the Keycloak pods. |
 | keycloak.enabled | bool | `true` | keycloak.enabled determines whether to deploy the Keycloak authentication service. |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret |
-| keycloak.environmentVariables | object | `{"KC_PROXY":{"value":"edge"}}` | keycloak.environmentVariables defines the environment variables for the Keycloak deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
-| keycloak.environmentVariables.KC_PROXY | object | `{"value":"edge"}` | keycloak.environmentVariables.KC_PROXY determines the proxy configuration for Keycloak. Set to "edge" to enable HTTP communication between proxy/load balancer and Keycloak. Useful for secure internal networks where the reverse proxy maintains HTTPS with clients. |
+| keycloak.environmentVariables | object | `{"KC_HTTP_ENABLED":{"value":"true"},"KC_PROXY":{"value":"edge"},"KC_PROXY_HEADERS":{"value":"xforwarded"}}` | keycloak.environmentVariables defines the environment variables for the Keycloak deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| keycloak.environmentVariables.KC_HTTP_ENABLED | object | `{"value":"true"}` | keycloak.environmentVariables.KC_HTTP_ENABLED determines the proxy configuration for Keycloak. Set to "true" to enable HTTP communication between proxy/load balancer and Keycloak. Useful for secure internal networks where the reverse proxy maintains HTTPS with clients. |
+| keycloak.environmentVariables.KC_PROXY | object | `{"value":"edge"}` | legacy keycloak value to enable HTTP communication between proxy/loadbalancer and Keycloak. This is deprecated (replaced by KC_HTTP_ENABLED) and will be removed in future releases. |
+| keycloak.environmentVariables.KC_PROXY_HEADERS | object | `{"value":"xforwarded"}` | keycloak.environmentVariables.KC_PROXY_HEADERS determines the proxy headers for Keycloak. Set to "xforwarded" to enable parsing of non-standard X-Forwarded-* headers, such as X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Forwarded-Port. https://www.keycloak.org/server/reverseproxy |
 | keycloak.image | object | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` | keycloak.image defines the container image settings for the Keycloak service. |
 | keycloak.image.name | string | `"studio-keycloak"` | keycloak.image.name is the name of the Keycloak container image. |
 | keycloak.image.pullPolicy | string | `"IfNotPresent"` | keycloak.image.pullPolicy is the container image pull policy. |

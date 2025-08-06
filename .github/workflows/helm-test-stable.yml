@@ -79,6 +79,11 @@ jobs:
         kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
         echo "PostgreSQL is ready!"
 
+    - name: Create Keycloak database
+      run: |
+        kubectl exec -n test-namespace deployment/postgres-test -- psql -U test -d test -c "CREATE DATABASE keycloak;"
+        echo "Keycloak database created!"
+
     - name: Debug cluster info
       run: |
         echo "Kind version:"
@@ -196,6 +201,11 @@ jobs:
       run: |
         kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
         echo "PostgreSQL is ready!"
+
+    - name: Create Keycloak database
+      run: |
+        kubectl exec -n test-namespace deployment/postgres-test -- psql -U test -d test -c "CREATE DATABASE keycloak;"
+        echo "Keycloak database created!"
 
     - name: Debug cluster info
       run: |

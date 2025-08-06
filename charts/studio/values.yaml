@@ -232,6 +232,18 @@ backend:
   # Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers
   additionalContainers: []
 
+  # -- backend.initContainers defines init containers to run before the main Studio Backend container starts.
+  # These containers must complete successfully before the main container starts.
+  # Example:
+  # - name: wait-for-database
+  #   image: postgres:15-alpine
+  #   command: ["sh", "-c", "until pg_isready -h db-host -p 5432; do sleep 2; done"]
+  # - name: wait-for-keycloak
+  #   image: curlimages/curl:8.4.0
+  #   command: ["sh", "-c", "until curl -f http://keycloak-service:8080/health; do sleep 5; done"]
+  # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+  initContainers: []
+
   # -- backend.serviceAccount defines the Kubernetes service account used by the backend pod.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   serviceAccount:

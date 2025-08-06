@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.1.7-rc5](https://img.shields.io/badge/Version-2.1.7--rc5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.1.7-rc10](https://img.shields.io/badge/Version-2.1.7--rc10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc5
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc10
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc5
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.7-rc10
 ```
 
 ## General Configuration
@@ -85,6 +85,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.ingress.enabled | bool | `true` | backend.ingress.enabled determines whether to create an ingress resource. |
 | backend.ingress.labels | object | `{}` | backend.ingress.labels defines labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
 | backend.ingress.tls | list | `[]` | backend.ingress.tls defines the TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local |
+| backend.initContainers | list | `[]` | backend.initContainers defines init containers to run before the main Studio Backend container starts. These containers must complete successfully before the main container starts. Example: - name: wait-for-database   image: postgres:15-alpine   command: ["sh", "-c", "until pg_isready -h db-host -p 5432; do sleep 2; done"] - name: wait-for-keycloak   image: curlimages/curl:8.4.0   command: ["sh", "-c", "until curl -f http://keycloak-service:8080/health; do sleep 5; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
 | backend.livenessProbe | object | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` | backend.livenessProbe defines the liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ |
 | backend.livenessProbe.enabled | bool | `true` | backend.livenessProbe.enabled determines whether to enable the liveness probe. |
 | backend.livenessProbe.failureThreshold | int | `6` | backend.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy. |

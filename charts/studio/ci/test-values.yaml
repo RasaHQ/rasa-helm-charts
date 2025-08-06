@@ -31,6 +31,27 @@ backend:
     requests:
       cpu: 50m
       memory: 64Mi
+  # Add init containers for testing
+  initContainers:
+    - name: wait-for-keycloak
+      image: curlimages/curl:8.4.0
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "Waiting for Keycloak to be ready..."
+          until curl -f --connect-timeout 5 --max-time 10 \
+            http://{{ include "studio.fullname" . }}-keycloak:{{ .Values.keycloak.service.port }}/auth || exit 1; do
+            echo "Keycloak is not ready yet, waiting..."
+            sleep 5
+          done
+          echo "Keycloak is ready!"
+      resources:
+        limits:
+          cpu: 50m
+          memory: 64Mi
+        requests:
+          cpu: 25m
+          memory: 32Mi
 
 # Minimal web client configuration
 webClient:

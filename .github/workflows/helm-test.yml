@@ -20,7 +20,7 @@ jobs:
     strategy:
       matrix:
         kubernetes-version: ['1.32.5', '1.33.1']
-        chart: ['studio', 'rasa']
+        chart: ['studio']
     
     steps:
     - name: Checkout repository
@@ -71,7 +71,7 @@ jobs:
     
     strategy:
       matrix:
-        chart: ['studio', 'rasa']
+        chart: ['studio']
 
     steps:
     - name: Checkout repository

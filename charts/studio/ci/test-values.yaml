@@ -1,0 +1,59 @@
+# Test values for Studio chart
+# This file contains minimal configuration for testing the chart
+
+# Disable external dependencies for testing
+replicated:
+  enabled: false
+
+rasa:
+  enabled: false
+
+# Minimal backend configuration
+backend:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Minimal web client configuration
+webClient:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
+
+# Disable ingress for testing
+ingress:
+  enabled: false
+
+# Use in-memory database for testing
+database:
+  type: sqlite
+  sqlite:
+    enabled: true
+
+# Disable Keycloak for testing
+keycloak:
+  enabled: false
+
+# Minimal event ingestion
+eventIngestion:
+  enabled: true
+  replicaCount: 1
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi 

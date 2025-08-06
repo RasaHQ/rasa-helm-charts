@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "studio.fullname" . }}-test-readiness"
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+    test: readiness
+  annotations:
+    "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+spec:
+  containers:
+    - name: readiness-test
+      image: bitnami/kubectl:1.28
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "Waiting for all pods to be ready..."
+          
+          # Wait for backend deployment
+          {{- if .Values.backend.enabled }}
+          kubectl wait --for=condition=available --timeout=300s deployment/{{ include "studio.fullname" . }}-backend
+          echo "Backend deployment is ready"
+          {{- end }}
+          
+          # Wait for web client deployment
+          {{- if .Values.webClient.enabled }}
+          kubectl wait --for=condition=available --timeout=300s deployment/{{ include "studio.fullname" . }}-web-client
+          echo "Web client deployment is ready"
+          {{- end }}
+          
+          # Wait for event ingestion deployment
+          {{- if .Values.eventIngestion.enabled }}
+          kubectl wait --for=condition=available --timeout=300s deployment/{{ include "studio.fullname" . }}-event-ingestion
+          echo "Event ingestion deployment is ready"
+          {{- end }}
+          
+          # Wait for Keycloak deployment
+          {{- if .Values.keycloak.enabled }}
+          kubectl wait --for=condition=available --timeout=300s deployment/{{ include "studio.fullname" . }}-keycloak
+          echo "Keycloak deployment is ready"
+          {{- end }}
+          
+          echo "All deployments are ready!"
+          
+          # Check pod status
+          kubectl get pods -l {{ include "studio.selectorLabels" . }}
+  restartPolicy: Never
+  serviceAccountName: {{ include "studio.fullname" . }}-test
+  {{- if .Values.testing.nodeSelector }}
+  nodeSelector:
+    {{- toYaml .Values.testing.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.testing.tolerations }}
+  tolerations:
+    {{- toYaml .Values.testing.tolerations | nindent 4 }}
+  {{- end }} 

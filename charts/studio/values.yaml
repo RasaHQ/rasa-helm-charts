@@ -1169,3 +1169,13 @@ rasa:
 
   rasaProServices:
     enabled: false
+
+# -- Testing configuration
+testing:
+  enabled: true
+  # -- Node selector for test pods
+  nodeSelector: {}
+  # -- Tolerations for test pods
+  tolerations: []
+  # -- Test timeout in seconds
+  timeout: 300

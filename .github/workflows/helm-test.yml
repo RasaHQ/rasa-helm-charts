@@ -1,0 +1,141 @@
+name: Helm Chart Testing
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - '.github/workflows/helm-test.yml'
+      - 'ct.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'charts/**'
+      - '.github/workflows/helm-test.yml'
+      - 'ct.yaml'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-24.04
+    
+    strategy:
+      matrix:
+        kubernetes-version: ['1.28', '1.29']
+        chart: ['studio', 'rasa']
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      with:
+        fetch-depth: 0
+
+    - name: Fetch history
+      run: git fetch --prune
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Install chart-testing
+      uses: helm/chart-testing-action@afea100a513515fbd68b0e72a7bb0ae34cb62aec
+
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        node_image: kindest/node:v${{ matrix.kubernetes-version }}
+        cluster_name: test-cluster
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config ct.yaml)
+        if [[ -n "$changed" ]]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Run chart-testing (lint)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct lint --config ct.yaml
+
+    - name: Run chart-testing (install)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct install --config ct.yaml
+
+    - name: Run chart-testing (upgrade)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct upgrade --config ct.yaml
+
+  security-scan:
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    
+    strategy:
+      matrix:
+        chart: ['studio', 'rasa']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Update dependencies
+      run: helm dependency build ./charts/${{ matrix.chart }}
+
+    - name: Generate Helm template
+      run: helm template ./charts/${{ matrix.chart }} --output-dir ./output
+
+    - name: Scan chart with Snyk IAC
+      uses: snyk/actions/iac@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: test
+        file: ./output/
+        args: --report --severity-threshold=high
+
+  integration-test:
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    
+    strategy:
+      matrix:
+        chart: ['studio']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Create kind cluster
+      uses: helm/kind-action@v1.2.0
+      with:
+        node_image: kindest/node:v1.29
+        cluster_name: integration-test
+
+    - name: Install chart with test values
+      run: |
+        helm install test-${{ matrix.chart }} ./charts/${{ matrix.chart }} \
+          --values ./charts/${{ matrix.chart }}/ci/test-values.yaml \
+          --wait --timeout 10m
+
+    - name: Run Helm tests
+      run: |
+        helm test test-${{ matrix.chart }} --timeout 5m
+
+    - name: Verify deployment status
+      run: |
+        kubectl get pods -l app.kubernetes.io/instance=test-${{ matrix.chart }}
+        kubectl get services -l app.kubernetes.io/instance=test-${{ matrix.chart }}
+
+    - name: Cleanup
+      if: always()
+      run: |
+        helm uninstall test-${{ matrix.chart }} || true 

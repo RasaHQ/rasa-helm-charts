@@ -287,6 +287,10 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | replicated.sdkVersion | string | `"1.7.1"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | tag | string | `"1.13.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| testing | object | `{"enabled":true,"nodeSelector":{},"timeout":300,"tolerations":[]}` | Testing configuration |
+| testing.nodeSelector | object | `{}` | Node selector for test pods |
+| testing.timeout | int | `300` | Test timeout in seconds |
+| testing.tolerations | list | `[]` | Tolerations for test pods |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | webClient.affinity | object | `{}` | webClient.affinity defines affinity rules for the web client pods. |
 | webClient.envFrom | list | `[]` | webClient.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret |

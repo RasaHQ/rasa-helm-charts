@@ -4,12 +4,32 @@ metadata:
   name: "{{ include "studio.fullname" . }}-test-connection"
   labels:
     {{- include "studio.labels" . | nindent 4 }}
+    test: connection
   annotations:
     "helm.sh/hook": test
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
 spec:
   containers:
-    - name: wget
-      image: busybox
-      command: ['wget']
-      args: ['{{ include "studio.fullname" . }}:{{ .Values.backend.service.port }}']
+    - name: connection-test
+      image: curlimages/curl:8.4.0
+      command: ['sh', '-c']
+      args:
+        - |
+          echo "Testing backend service connectivity..."
+          curl -f --connect-timeout 30 --max-time 60 \
+            http://{{ include "studio.fullname" . }}-backend:{{ .Values.backend.service.port }}/health || exit 1
+          
+          echo "Testing web client service connectivity..."
+          curl -f --connect-timeout 30 --max-time 60 \
+            http://{{ include "studio.fullname" . }}-web-client:{{ .Values.webClient.service.port }} || exit 1
+          
+          echo "All connection tests passed!"
   restartPolicy: Never
+  {{- if .Values.testing.nodeSelector }}
+  nodeSelector:
+    {{- toYaml .Values.testing.nodeSelector | nindent 4 }}
+  {{- end }}
+  {{- if .Values.testing.tolerations }}
+  tolerations:
+    {{- toYaml .Values.testing.tolerations | nindent 4 }}
+  {{- end }}

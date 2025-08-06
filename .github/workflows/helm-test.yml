@@ -19,7 +19,7 @@ jobs:
     
     strategy:
       matrix:
-        kubernetes-version: ['1.28.5', '1.29.14']
+        kubernetes-version: ['1.28.15', '1.29.14']
         chart: ['studio']
     
     steps:

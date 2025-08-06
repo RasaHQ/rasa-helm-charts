@@ -19,7 +19,7 @@ jobs:
     
     strategy:
       matrix:
-        kubernetes-version: ['1.28.5']
+        kubernetes-version: ['1.28.15']
         chart: ['studio']
     
     steps:
@@ -136,7 +136,7 @@ jobs:
     - name: Create kind cluster
       uses: helm/kind-action@v1.2.0
       with:
-        node_image: kindest/node:v1.28.5
+        node_image: kindest/node:v1.28.15
         cluster_name: integration-test-${{ matrix.chart }}
 
     - name: Debug cluster info

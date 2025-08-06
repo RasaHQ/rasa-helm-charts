@@ -22,10 +22,10 @@ The Studio chart includes several types of tests:
 ### Kubernetes Version Compatibility
 
 The chart has been tested with the following Kubernetes versions:
-- **v1.28.5** (stable, recommended for CI/CD)
+- **v1.28.15** (stable, recommended for CI/CD)
 - **v1.29.14** (latest stable)
 
-For local testing, we recommend using `kindest/node:v1.28.5` as it's the most stable version.
+For local testing, we recommend using `kindest/node:v1.28.15` as it's the most stable version.
 
 ### Running Tests Locally
 
@@ -37,7 +37,7 @@ For local testing, we recommend using `kindest/node:v1.28.5` as it's the most st
 
 2. **Create a test cluster:**
    ```bash
-   kind create cluster --name test-cluster --image kindest/node:v1.28.5
+   kind create cluster --name test-cluster --image kindest/node:v1.28.15
    ```
 
 3. **Run chart testing:**

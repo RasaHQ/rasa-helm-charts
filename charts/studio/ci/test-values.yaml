@@ -48,7 +48,7 @@ config:
 
 # Disable Keycloak for testing
 keycloak:
-  enabled: false
+  enabled: true
   ingress:
     enabled: false
 

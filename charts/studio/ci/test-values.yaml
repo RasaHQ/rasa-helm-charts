@@ -12,6 +12,8 @@ rasa:
 backend:
   enabled: true
   replicaCount: 1
+  ingress:
+    enabled: false
   resources:
     limits:
       cpu: 100m
@@ -24,6 +26,8 @@ backend:
 webClient:
   enabled: true
   replicaCount: 1
+  ingress:
+    enabled: false
   resources:
     limits:
       cpu: 100m
@@ -31,10 +35,6 @@ webClient:
     requests:
       cpu: 50m
       memory: 64Mi
-
-# Disable ingress for testing
-ingress:
-  enabled: false
 
 # Database configuration for testing
 # Minimal config for pg_isready and SSL settings
@@ -49,6 +49,8 @@ config:
 # Disable Keycloak for testing
 keycloak:
   enabled: false
+  ingress:
+    enabled: false
 
 # Minimal event ingestion
 eventIngestion:

@@ -49,6 +49,10 @@ jobs:
       run: |
         kind create cluster --name test-cluster-${{ matrix.kubernetes-version }}-${{ matrix.chart }} --image kindest/node:v${{ matrix.kubernetes-version }}
 
+    - name: Create test namespace
+      run: |
+        kubectl create namespace test-namespace
+
     - name: Debug cluster info
       run: |
         echo "Kind version:"
@@ -136,6 +140,10 @@ jobs:
     - name: Create kind cluster
       run: |
         kind create cluster --name integration-test-${{ matrix.chart }} --image kindest/node:v1.29.14
+
+    - name: Create test namespace
+      run: |
+        kubectl create namespace test-namespace
 
     - name: Debug cluster info
       run: |

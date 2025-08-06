@@ -8,14 +8,31 @@ sources: list(str(), required=False)
 maintainers: list(include('maintainer'), required=False)
 icon: str(required=False)
 apiVersion: str(required=False)
+type: str(required=False)
 engine: str(required=False)
 condition: str(required=False)
 tags: str(required=False)
 deprecated: bool(required=False)
 kubeVersion: str(required=False)
 annotations: map(str(), str(), required=False)
+dependencies: list(include('dependency'), required=False)
 ---
 maintainer:
   name: str(required=False)
   email: str(required=False)
   url: str(required=False)
+
+---
+dependency:
+  name: str()
+  version: str()
+  repository: str(required=False)
+  condition: str(required=False)
+  tags: list(str(), required=False)
+  import-values: list(include('import-value'), required=False)
+  alias: str(required=False)
+
+---
+import-value:
+  child: str()
+  parent: str()

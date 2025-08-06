@@ -19,7 +19,7 @@ jobs:
     
     strategy:
       matrix:
-        kubernetes-version: ['1.32.5']
+        kubernetes-version: ['1.30.13']
         chart: ['studio']
     
     steps:
@@ -42,7 +42,7 @@ jobs:
     - name: Install kind
       uses: helm/kind-action@v1.2.0
       with:
-        version: v0.29.0
+        version: v0.26.0
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.2.0
@@ -131,12 +131,12 @@ jobs:
     - name: Install kind
       uses: helm/kind-action@v1.2.0
       with:
-        version: v0.29.0
+        version: v0.26.0
 
     - name: Create kind cluster
       uses: helm/kind-action@v1.2.0
       with:
-        node_image: kindest/node:v1.32.5
+        node_image: kindest/node:v1.30.13
         cluster_name: integration-test-${{ matrix.chart }}
 
     - name: Debug cluster info

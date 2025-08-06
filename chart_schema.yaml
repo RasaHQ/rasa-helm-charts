@@ -21,7 +21,6 @@ maintainer:
   name: str(required=False)
   email: str(required=False)
   url: str(required=False)
-
 ---
 dependency:
   name: str()

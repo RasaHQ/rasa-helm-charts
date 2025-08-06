@@ -39,12 +39,19 @@ backend:
       args:
         - |
           echo "Waiting for Keycloak to be ready..."
-          until curl -f --connect-timeout 5 --max-time 10 \
-            http://{{ include "studio.fullname" . }}-keycloak:{{ .Values.keycloak.service.port }}/auth || exit 1; do
+          # Find and test the Keycloak service
+          while true; do
+            KEYCLOAK_SERVICE=$(kubectl get svc -n test-namespace | grep -E ".*-keycloak$" | awk '{print $1}' | head -1)
+            if [ -n "$KEYCLOAK_SERVICE" ]; then
+              echo "Found Keycloak service: $KEYCLOAK_SERVICE"
+              if curl -f --connect-timeout 5 --max-time 10 http://$KEYCLOAK_SERVICE:80/auth; then
+                echo "Keycloak is ready!"
+                break
+              fi
+            fi
             echo "Keycloak is not ready yet, waiting..."
             sleep 5
           done
-          echo "Keycloak is ready!"
       resources:
         limits:
           cpu: 50m
@@ -83,6 +90,7 @@ keycloak:
   enabled: true
   ingress:
     enabled: false
+
 
 # Minimal event ingestion
 eventIngestion:

@@ -79,9 +79,35 @@ jobs:
         kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
         echo "PostgreSQL is ready!"
 
-    - name: Create Keycloak databaseG
+    - name: Create Keycloak database
       run: |
-        kubectl exec -n test-namespace deployment/postgres-test -- psql -U test -d test -c "CREATE DATABASE keycloak;"
+        echo "Checking PostgreSQL service..."
+        kubectl get svc -n test-namespace
+        echo "Checking PostgreSQL pods..."
+        kubectl get pods -n test-namespace -l app=postgres-test
+        echo "Creating Keycloak database..."
+        cat <<EOF | kubectl apply -f -
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: create-keycloak-db
+          namespace: test-namespace
+        spec:
+          template:
+            spec:
+              containers:
+              - name: postgres-client
+                image: postgres:15-alpine
+                command: ["psql"]
+                args: ["-h", "postgres-test", "-p", "5432", "-U", "test", "-d", "test", "-c", "CREATE DATABASE keycloak;"]
+                env:
+                - name: PGPASSWORD
+                  value: "test"
+              restartPolicy: Never
+          backoffLimit: 3
+        EOF
+        kubectl wait --for=condition=complete --timeout=60s job/create-keycloak-db -n test-namespace
+        kubectl delete job create-keycloak-db -n test-namespace
         echo "Keycloak database created!"
 
     - name: Debug cluster info

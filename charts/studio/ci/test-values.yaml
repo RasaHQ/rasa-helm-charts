@@ -34,12 +34,12 @@ backend:
   # Add init containers for testing
   initContainers:
     - name: wait-for-keycloak
-      image: curlimages/curl:8.4.0
+      image: bitnami/kubectl:1.28
       command: ['sh', '-c']
       args:
         - |
           echo "Waiting for Keycloak to be ready..."
-          # Find and test the Keycloak service
+          # Find the Keycloak service and wait for it to be ready
           while true; do
             KEYCLOAK_SERVICE=$(kubectl get svc -n test-namespace | grep -E ".*-keycloak$" | awk '{print $1}' | head -1)
             if [ -n "$KEYCLOAK_SERVICE" ]; then

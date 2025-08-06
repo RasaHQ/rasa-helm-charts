@@ -53,6 +53,11 @@ jobs:
       run: |
         kubectl create namespace test-namespace
 
+    - name: Wait for node to be ready
+      run: |
+        kubectl wait --for=condition=Ready node --all --timeout=300s
+        echo "Node is ready!"
+
     - name: Debug cluster info
       run: |
         echo "Kind version:"
@@ -144,6 +149,11 @@ jobs:
     - name: Create test namespace
       run: |
         kubectl create namespace test-namespace
+
+    - name: Wait for node to be ready
+      run: |
+        kubectl wait --for=condition=Ready node --all --timeout=300s
+        echo "Node is ready!"
 
     - name: Debug cluster info
       run: |

@@ -204,7 +204,7 @@ jobs:
 
     - name: Create Keycloak database
       run: |
-        kubectl exec -n test-namespace deployment/postgres-test -- psql -h localhost -p 5432 -U test -d test -c "CREATE DATABASE keycloak;"
+        kubectl run postgres-client --rm -i --restart=Never --image=postgres:15-alpine --namespace=test-namespace -- psql -h postgres-test -p 5432 -U test -d test -c "CREATE DATABASE keycloak;"
         echo "Keycloak database created!"
 
     - name: Debug cluster info

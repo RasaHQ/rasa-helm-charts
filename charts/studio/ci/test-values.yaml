@@ -37,12 +37,14 @@ ingress:
   enabled: false
 
 # Database configuration for testing
-# Using default PostgreSQL configuration with minimal settings
-database:
-  host: "localhost"
-  port: "5432"
-  username: "test"
-  preferSSL: "false"
+# Minimal config for pg_isready and SSL settings
+config:
+  database:
+    host: "postgres-test"
+    port: "5432"
+    username: "test"
+    preferSSL: "false"
+    rejectUnauthorized: ""
 
 # Disable Keycloak for testing
 keycloak:
@@ -50,7 +52,7 @@ keycloak:
 
 # Minimal event ingestion
 eventIngestion:
-  enabled: true
+  enabled: false
   replicaCount: 1
   resources:
     limits:

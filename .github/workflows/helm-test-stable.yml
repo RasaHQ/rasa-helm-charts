@@ -70,6 +70,15 @@ jobs:
           --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
           -n test-namespace
 
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/workflows/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
+
     - name: Debug cluster info
       run: |
         echo "Kind version:"
@@ -178,6 +187,15 @@ jobs:
           --from-literal=RASA_PRO_LICENSE_SECRET_KEY="test" \
           --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
           -n test-namespace
+
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/workflows/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
 
     - name: Debug cluster info
       run: |

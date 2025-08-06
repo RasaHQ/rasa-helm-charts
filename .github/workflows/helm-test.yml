@@ -61,7 +61,7 @@ jobs:
     - name: Create test secrets
       run: |
         kubectl create secret generic studio-secrets \
-          --from-literal=DATABASE_URL="postgresql://test:test@localhost:5432/test" \
+          --from-literal=DATABASE_URL="postgresql://test:test@postgres-test:5432/test" \
           --from-literal=KAFKA_SASL_PASSWORD="test" \
           --from-literal=KEYCLOAK_ADMIN_PASSWORD="test" \
           --from-literal=DATABASE_PASSWORD="test" \
@@ -69,6 +69,15 @@ jobs:
           --from-literal=RASA_PRO_LICENSE_SECRET_KEY="test" \
           --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
           -n test-namespace
+
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/workflows/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
 
     - name: Debug cluster info
       run: |
@@ -178,6 +187,15 @@ jobs:
           --from-literal=RASA_PRO_LICENSE_SECRET_KEY="test" \
           --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
           -n test-namespace
+
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/workflows/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
 
     - name: Debug cluster info
       run: |

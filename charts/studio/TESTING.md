@@ -19,6 +19,14 @@ The Studio chart includes several types of tests:
 - Kubernetes cluster (kind, minikube, or other)
 - chart-testing (ct) tool
 
+### Kubernetes Version Compatibility
+
+The chart has been tested with the following Kubernetes versions:
+- **v1.32.5** (stable, recommended for CI/CD)
+- **v1.33.1** (latest stable)
+
+For local testing, we recommend using `kindest/node:v1.32.5` as it's the most stable version.
+
 ### Running Tests Locally
 
 1. **Install chart-testing:**
@@ -29,7 +37,7 @@ The Studio chart includes several types of tests:
 
 2. **Create a test cluster:**
    ```bash
-   kind create cluster --name test-cluster
+   kind create cluster --name test-cluster --image kindest/node:v1.32.5
    ```
 
 3. **Run chart testing:**

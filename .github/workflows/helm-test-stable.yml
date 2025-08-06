@@ -1,16 +1,16 @@
-name: Helm Chart Testing
+name: Helm Chart Testing (Stable)
 
 on:
   pull_request:
     paths:
       - 'charts/**'
-      - '.github/workflows/helm-test.yml'
+      - '.github/workflows/helm-test*.yml'
       - 'ct.yaml'
   push:
     branches: [main]
     paths:
       - 'charts/**'
-      - '.github/workflows/helm-test.yml'
+      - '.github/workflows/helm-test*.yml'
       - 'ct.yaml'
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
     
     strategy:
       matrix:
-        kubernetes-version: ['1.32.5', '1.33.1']
+        kubernetes-version: ['1.32.5']
         chart: ['studio', 'rasa']
     
     steps:
@@ -117,7 +117,7 @@ jobs:
     - name: Create kind cluster
       uses: helm/kind-action@v1.2.0
       with:
-        node_image: kindest/node:v1.33.1
+        node_image: kindest/node:v1.32.5
         cluster_name: integration-test-${{ matrix.chart }}
 
     - name: Install chart with test values

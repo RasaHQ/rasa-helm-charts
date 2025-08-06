@@ -36,11 +36,13 @@ webClient:
 ingress:
   enabled: false
 
-# Use in-memory database for testing
+# Database configuration for testing
+# Using default PostgreSQL configuration with minimal settings
 database:
-  type: sqlite
-  sqlite:
-    enabled: true
+  host: "localhost"
+  port: "5432"
+  username: "test"
+  preferSSL: "false"
 
 # Disable Keycloak for testing
 keycloak:

@@ -43,12 +43,20 @@ spec:
           {{- end }}
           
           # Validate database configuration
-          {{- if eq .Values.database.type "sqlite" }}
+          {{- if .Values.database }}
+            {{- if .Values.database.type }}
+              {{- if eq .Values.database.type "sqlite" }}
           echo "✓ Using SQLite database"
-          {{- else if eq .Values.database.type "postgresql" }}
+              {{- else if eq .Values.database.type "postgresql" }}
           echo "✓ Using PostgreSQL database"
-          {{- else }}
+              {{- else }}
           echo "⚠ Unknown database type: {{ .Values.database.type }}"
+              {{- end }}
+            {{- else }}
+          echo "✓ Using default PostgreSQL database configuration"
+            {{- end }}
+          {{- else }}
+          echo "✓ Using default database configuration"
           {{- end }}
           
           echo "Chart configuration validation completed!"

@@ -34,10 +34,16 @@ backend:
   # Add init containers for testing
   initContainers:
     - name: wait-for-keycloak
-      image: bitnami/kubectl:1.28
+      image: alpine:3.18
       command: ['sh', '-c']
       args:
         - |
+          echo "Installing kubectl and curl..."
+          apk add --no-cache curl
+          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
+          chmod +x kubectl
+          mv kubectl /usr/local/bin/
+          
           echo "Waiting for Keycloak to be ready..."
           # Find the Keycloak service and wait for it to be ready
           while true; do

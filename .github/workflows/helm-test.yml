@@ -54,7 +54,7 @@ jobs:
         echo "Kind version:"
         kind version
         echo "Kubernetes version:"
-        kubectl version --short
+        kubectl version
         echo "Cluster nodes:"
         kubectl get nodes -o wide
 
@@ -142,7 +142,7 @@ jobs:
         echo "Kind version:"
         kind version
         echo "Kubernetes version:"
-        kubectl version --short
+        kubectl version
         echo "Cluster nodes:"
         kubectl get nodes -o wide
 

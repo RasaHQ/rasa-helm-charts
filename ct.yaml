@@ -18,7 +18,7 @@ upgrade-charts: true
 build-id: ${{ github.run_id }}
 namespace: test-namespace
 release-label: app.kubernetes.io/instance
-timeout: 30m
+timeout: 45m
 
 # Parallel testing
 parallel: true

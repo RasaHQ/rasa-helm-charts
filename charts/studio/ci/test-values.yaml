@@ -1,6 +1,6 @@
 # Test values for Studio chart
 # This file contains minimal configuration for testing the chart
-# 
+#
 # Timeout Strategy:
 # - Chart-testing timeout: 20m (set in ct.yaml)
 # - Backend liveness probe: 120s initial delay + 8 failures × 15s = 240s total
@@ -47,46 +47,9 @@ backend:
     requests:
       cpu: 50m
       memory: 64Mi
-<<<<<<< HEAD
-  # Add init containers for testing
-  initContainers:
-    - name: wait-for-keycloak
-      image: alpine:3.18
-      command: ['sh', '-c']
-      args:
-        - |
-          echo "Installing kubectl and curl..."
-          apk add --no-cache curl
-          curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
-          chmod +x kubectl
-          mv kubectl /usr/local/bin/
-
-          echo "Waiting for Keycloak to be ready..."
-          # Find the Keycloak service and wait for it to be ready
-          while true; do
-            KEYCLOAK_SERVICE=$(kubectl get svc -n test-namespace | grep -E ".*-keycloak$" | awk '{print $1}' | head -1)
-            if [ -n "$KEYCLOAK_SERVICE" ]; then
-              echo "Found Keycloak service: $KEYCLOAK_SERVICE"
-              if curl -f --connect-timeout 5 --max-time 10 http://$KEYCLOAK_SERVICE:80/auth; then
-                echo "Keycloak is ready!"
-                break
-              fi
-            fi
-            echo "Keycloak is not ready yet, waiting..."
-            sleep 5
-          done
-      resources:
-        limits:
-          cpu: 50m
-          memory: 64Mi
-        requests:
-          cpu: 25m
-          memory: 32Mi
-=======
   # No init containers needed for testing
   # The backend will handle Keycloak connection on its own
   initContainers: []
->>>>>>> e93d4e0 (Increase test timeout)
 
 # Minimal web client configuration
 webClient:

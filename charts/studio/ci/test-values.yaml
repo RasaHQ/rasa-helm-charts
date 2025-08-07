@@ -36,8 +36,8 @@ backend:
     httpGet:
       path: /api/health
       port: 4000
-    initialDelaySeconds: 60
-    periodSeconds: 10
+    initialDelaySeconds: 120
+    periodSeconds: 15
     timeoutSeconds: 5
     failureThreshold: 10
   resources:
@@ -81,6 +81,25 @@ keycloak:
   enabled: true
   ingress:
     enabled: false
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /auth
+      port: 8080
+    initialDelaySeconds: 120
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 8
+  # Add readiness probe for backend health checks
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /auth
+      port: 8080
+    initialDelaySeconds: 120
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 10
 
 
 # Minimal event ingestion

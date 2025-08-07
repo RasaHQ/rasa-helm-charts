@@ -1,5 +1,11 @@
 # Test values for Studio chart
 # This file contains minimal configuration for testing the chart
+# 
+# Timeout Strategy:
+# - Chart-testing timeout: 20m (set in ct.yaml)
+# - Backend liveness probe: 120s initial delay + 8 failures × 15s = 240s total
+# - Backend readiness probe: 60s initial delay + 10 failures × 10s = 160s total
+# - Total probe time: ~400s (6.7 minutes) - well within the 20m chart-testing timeout
 
 # Disable external dependencies for testing
 replicated:
@@ -14,16 +20,26 @@ backend:
   replicaCount: 1
   ingress:
     enabled: false
+  # Add liveness probe for backend health checks
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /health
+      port: 4000
+    initialDelaySeconds: 120
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 8
   # Add readiness probe for backend health checks
   readinessProbe:
     enabled: true
     httpGet:
       path: /health
       port: 4000
-    initialDelaySeconds: 10
-    periodSeconds: 5
-    timeoutSeconds: 3
-    failureThreshold: 3
+    initialDelaySeconds: 60
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
   resources:
     limits:
       cpu: 100m
@@ -31,6 +47,7 @@ backend:
     requests:
       cpu: 50m
       memory: 64Mi
+<<<<<<< HEAD
   # Add init containers for testing
   initContainers:
     - name: wait-for-keycloak
@@ -65,6 +82,11 @@ backend:
         requests:
           cpu: 25m
           memory: 32Mi
+=======
+  # No init containers needed for testing
+  # The backend will handle Keycloak connection on its own
+  initContainers: []
+>>>>>>> e93d4e0 (Increase test timeout)
 
 # Minimal web client configuration
 webClient:

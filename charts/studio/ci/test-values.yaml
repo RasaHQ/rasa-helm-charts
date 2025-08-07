@@ -3,9 +3,9 @@
 #
 # Timeout Strategy:
 # - Chart-testing timeout: 20m (set in ct.yaml)
-# - Backend liveness probe: 120s initial delay + 8 failures × 15s = 240s total
-# - Backend readiness probe: 60s initial delay + 10 failures × 10s = 160s total
-# - Total probe time: ~400s (6.7 minutes) - well within the 20m chart-testing timeout
+# - Backend liveness probe: 180s initial delay + 8 failures × 20s = 340s total (5.7 minutes)
+# - Backend readiness probe: 180s initial delay + 10 failures × 20s = 380s total (6.3 minutes)
+# - Total probe time: ~12 minutes - well within the 20m chart-testing timeout
 
 # Disable external dependencies for testing
 replicated:
@@ -26,9 +26,9 @@ backend:
     httpGet:
       path: /api/health
       port: 4000
-    initialDelaySeconds: 120
-    periodSeconds: 15
-    timeoutSeconds: 5
+    initialDelaySeconds: 180
+    periodSeconds: 20
+    timeoutSeconds: 10
     failureThreshold: 8
   # Add readiness probe for backend health checks
   readinessProbe:
@@ -36,9 +36,9 @@ backend:
     httpGet:
       path: /api/health
       port: 4000
-    initialDelaySeconds: 120
-    periodSeconds: 15
-    timeoutSeconds: 5
+    initialDelaySeconds: 180
+    periodSeconds: 20
+    timeoutSeconds: 10
     failureThreshold: 10
   resources:
     limits:
@@ -47,8 +47,7 @@ backend:
     requests:
       cpu: 50m
       memory: 64Mi
-  # No init containers needed for testing
-  # The backend will handle Keycloak connection on its own
+  # No init containers - let backend handle Keycloak connection
   initContainers: []
 
 # Minimal web client configuration
@@ -76,30 +75,11 @@ config:
     rejectUnauthorized: ""
     keycloakDatabaseName: "keycloak"
 
-# Disable Keycloak for testing
+# Enable Keycloak for testing
 keycloak:
   enabled: true
   ingress:
     enabled: false
-  livenessProbe:
-    enabled: true
-    httpGet:
-      path: /auth
-      port: 8080
-    initialDelaySeconds: 120
-    periodSeconds: 15
-    timeoutSeconds: 5
-    failureThreshold: 8
-  # Add readiness probe for backend health checks
-  readinessProbe:
-    enabled: true
-    httpGet:
-      path: /auth
-      port: 8080
-    initialDelaySeconds: 120
-    periodSeconds: 15
-    timeoutSeconds: 5
-    failureThreshold: 10
 
 
 # Minimal event ingestion

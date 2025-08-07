@@ -5,6 +5,8 @@
 # - Chart-testing timeout: 20m (set in ct.yaml)
 # - Backend liveness probe: 180s initial delay + 8 failures × 20s = 340s total (5.7 minutes)
 # - Backend readiness probe: 180s initial delay + 10 failures × 20s = 380s total (6.3 minutes)
+# - Keycloak liveness probe: 120s initial delay + 8 failures × 15s = 240s total (4 minutes)
+# - Keycloak readiness probe: 60s initial delay + 10 failures × 10s = 160s total (2.7 minutes)
 # - Total probe time: ~12 minutes - well within the 20m chart-testing timeout
 
 # Disable external dependencies for testing
@@ -26,7 +28,7 @@ backend:
     httpGet:
       path: /api/health
       port: 4000
-    initialDelaySeconds: 180
+    initialDelaySeconds: 240
     periodSeconds: 20
     timeoutSeconds: 10
     failureThreshold: 8
@@ -36,7 +38,7 @@ backend:
     httpGet:
       path: /api/health
       port: 4000
-    initialDelaySeconds: 180
+    initialDelaySeconds: 240
     periodSeconds: 20
     timeoutSeconds: 10
     failureThreshold: 10
@@ -80,6 +82,26 @@ keycloak:
   enabled: true
   ingress:
     enabled: false
+  # Add liveness probe for Keycloak health checks
+  livenessProbe:
+    enabled: true
+    httpGet:
+      path: /auth
+      port: 8080
+    initialDelaySeconds: 120
+    periodSeconds: 15
+    timeoutSeconds: 5
+    failureThreshold: 8
+  # Add readiness probe for Keycloak health checks
+  readinessProbe:
+    enabled: true
+    httpGet:
+      path: /auth
+      port: 8080
+    initialDelaySeconds: 120
+    periodSeconds: 10
+    timeoutSeconds: 5
+    failureThreshold: 10
 
 
 # Minimal event ingestion

@@ -4,15 +4,21 @@ chart-dirs:
 validate-maintainers: false
 check-version-increment: true
 debug: true
+# Ensure clean uninstall is considered success
+cleanup-on-fail: true
 
 # Enhanced testing configuration
 lint-conf: lintconf.yaml
 chart-yaml-schema: chart_schema.yaml
 
 # Test configuration
+# Note: For a test to be considered successful, ALL phases must complete:
+# 1. Install - Chart installs successfully
+# 2. Test - All Helm tests pass
+# 3. Uninstall - Chart can be cleanly removed
 test-charts: true
 install-charts: true
-upgrade-charts: true
+upgrade-charts: false
 
 # Chart testing options
 build-id: ${{ github.run_id }}

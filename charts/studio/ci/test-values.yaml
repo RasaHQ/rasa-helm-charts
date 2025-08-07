@@ -24,7 +24,7 @@ backend:
   livenessProbe:
     enabled: true
     httpGet:
-      path: /health
+      path: /api/health
       port: 4000
     initialDelaySeconds: 120
     periodSeconds: 15
@@ -34,7 +34,7 @@ backend:
   readinessProbe:
     enabled: true
     httpGet:
-      path: /health
+      path: /api/health
       port: 4000
     initialDelaySeconds: 60
     periodSeconds: 10
@@ -86,11 +86,3 @@ keycloak:
 # Minimal event ingestion
 eventIngestion:
   enabled: false
-  replicaCount: 1
-  resources:
-    limits:
-      cpu: 100m
-      memory: 128Mi
-    requests:
-      cpu: 50m
-      memory: 64Mi

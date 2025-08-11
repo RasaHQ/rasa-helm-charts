@@ -1,0 +1,279 @@
+name: Helm Chart Testing (Stable)
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - '.github/workflows/helm-test*.yml'
+      - 'ct.yaml'
+  push:
+    branches: [main]
+    paths:
+      - 'charts/**'
+      - '.github/workflows/helm-test*.yml'
+      - 'ct.yaml'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-24.04
+    
+    strategy:
+      matrix:
+        kubernetes-version: ['1.29.14']
+        chart: ['studio']
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+      with:
+        fetch-depth: 0
+
+    - name: Fetch history
+      run: git fetch --prune
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Install chart-testing
+      uses: helm/chart-testing-action@afea100a513515fbd68b0e72a7bb0ae34cb62aec
+
+    - name: Install kind
+      run: |
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+
+    - name: Create kind cluster
+      run: |
+        kind create cluster --name test-cluster-${{ matrix.kubernetes-version }}-${{ matrix.chart }} --image kindest/node:v${{ matrix.kubernetes-version }}
+
+    - name: Create test namespace
+      run: |
+        kubectl create namespace test-namespace
+
+    - name: Wait for node to be ready
+      run: |
+        kubectl wait --for=condition=Ready node --all --timeout=300s
+        echo "Node is ready!"
+
+    - name: Create test secrets
+      run: |
+        kubectl create secret generic studio-secrets \
+          --from-literal=DATABASE_URL="postgresql://test:test@postgres-test:5432/test" \
+          --from-literal=KAFKA_SASL_PASSWORD="test" \
+          --from-literal=KEYCLOAK_ADMIN_PASSWORD="test" \
+          --from-literal=DATABASE_PASSWORD="test" \
+          --from-literal=KEYCLOAK_API_PASSWORD="test" \
+          --from-literal=RASA_PRO_LICENSE_SECRET_KEY="test" \
+          --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
+          -n test-namespace
+
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/utils/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
+
+    - name: Create Keycloak database
+      run: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: create-keycloak-db
+          namespace: test-namespace
+        spec:
+          template:
+            spec:
+              containers:
+              - name: postgres-client
+                image: postgres:15-alpine
+                command: ["psql"]
+                args: ["-h", "postgres-test", "-p", "5432", "-U", "test", "-d", "test", "-c", "CREATE DATABASE keycloak;"]
+                env:
+                - name: PGPASSWORD
+                  value: "test"
+              restartPolicy: Never
+          backoffLimit: 3
+        EOF
+        kubectl wait --for=condition=complete --timeout=60s job/create-keycloak-db -n test-namespace
+        kubectl delete job create-keycloak-db -n test-namespace
+        echo "Keycloak database created!"
+
+    - name: Debug cluster info
+      run: |
+        echo "Kind version:"
+        kind version
+        echo "Kubernetes version:"
+        kubectl version
+        echo "Cluster nodes:"
+        kubectl get nodes -o wide
+
+    - name: Run chart-testing (list-changed)
+      id: list-changed
+      run: |
+        changed=$(ct list-changed --config ct.yaml)
+        if [[ -n "$changed" ]]; then
+          echo "changed=true" >> $GITHUB_OUTPUT
+        fi
+
+    - name: Run chart-testing (lint)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct lint --config ct.yaml
+
+    - name: Run chart-testing (install)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct install --config ct.yaml
+
+    - name: Run chart-testing (upgrade)
+      if: steps.list-changed.outputs.changed == 'true'
+      run: ct upgrade --config ct.yaml
+
+  security-scan:
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    
+    strategy:
+      matrix:
+        chart: ['studio']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Update dependencies
+      run: helm dependency build ./charts/${{ matrix.chart }}
+
+    - name: Generate Helm template
+      run: helm template ./charts/${{ matrix.chart }} --output-dir ./output
+
+    - name: Scan chart with Snyk IAC
+      uses: snyk/actions/iac@master
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        command: test
+        file: ./output/
+        args: --report --severity-threshold=high
+
+  integration-test:
+    runs-on: ubuntu-24.04
+    needs: lint-and-test
+    
+    strategy:
+      matrix:
+        chart: ['studio']
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+
+    - name: Install Helm
+      uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+      with:
+        version: v3.11.2
+
+    - name: Install kind
+      run: |
+        curl -Lo ./kind https://kind.sigs.k8s.io/dl/v0.29.0/kind-linux-amd64
+        chmod +x ./kind
+        sudo mv ./kind /usr/local/bin/kind
+
+    - name: Create kind cluster
+      run: |
+        kind create cluster --name integration-test-${{ matrix.chart }} --image kindest/node:v1.29.14
+
+    - name: Create test namespace
+      run: |
+        kubectl create namespace test-namespace
+
+    - name: Wait for node to be ready
+      run: |
+        kubectl wait --for=condition=Ready node --all --timeout=300s
+        echo "Node is ready!"
+
+    - name: Create test secrets
+      run: |
+        kubectl create secret generic studio-secrets \
+          --from-literal=DATABASE_URL="postgresql://test:test@postgres-test:5432/test" \
+          --from-literal=KAFKA_SASL_PASSWORD="test" \
+          --from-literal=KEYCLOAK_ADMIN_PASSWORD="test" \
+          --from-literal=DATABASE_PASSWORD="test" \
+          --from-literal=KEYCLOAK_API_PASSWORD="test" \
+          --from-literal=RASA_PRO_LICENSE_SECRET_KEY="test" \
+          --from-literal=OPENAI_API_KEY_SECRET_KEY="test" \
+          -n test-namespace
+
+    - name: Deploy PostgreSQL for testing
+      run: |
+        kubectl apply -f .github/utils/postgres-test.yaml
+
+    - name: Wait for PostgreSQL to be ready
+      run: |
+        kubectl wait --for=condition=available --timeout=300s deployment/postgres-test -n test-namespace
+        echo "PostgreSQL is ready!"
+
+    - name: Create Keycloak database
+      run: |
+        cat <<EOF | kubectl apply -f -
+        apiVersion: batch/v1
+        kind: Job
+        metadata:
+          name: create-keycloak-db
+          namespace: test-namespace
+        spec:
+          template:
+            spec:
+              containers:
+              - name: postgres-client
+                image: postgres:15-alpine
+                command: ["psql"]
+                args: ["-h", "postgres-test", "-p", "5432", "-U", "test", "-d", "test", "-c", "CREATE DATABASE keycloak;"]
+                env:
+                - name: PGPASSWORD
+                  value: "test"
+              restartPolicy: Never
+          backoffLimit: 3
+        EOF
+        kubectl wait --for=condition=complete --timeout=60s job/create-keycloak-db -n test-namespace
+        kubectl delete job create-keycloak-db -n test-namespace
+        echo "Keycloak database created!"
+
+    - name: Debug cluster info
+      run: |
+        echo "Kind version:"
+        kind version
+        echo "Kubernetes version:"
+        kubectl version
+        echo "Cluster nodes:"
+        kubectl get nodes -o wide
+
+    - name: Install chart with test values
+      run: |
+        helm install test-${{ matrix.chart }} ./charts/${{ matrix.chart }} \
+          --values ./charts/${{ matrix.chart }}/ci/test-values.yaml \
+          --wait --timeout 10m
+
+    - name: Run Helm tests
+      run: |
+        helm test test-${{ matrix.chart }} --timeout 5m
+
+    - name: Verify deployment status
+      run: |
+        kubectl get pods -l app.kubernetes.io/instance=test-${{ matrix.chart }}
+        kubectl get services -l app.kubernetes.io/instance=test-${{ matrix.chart }}
+
+    - name: Cleanup
+      if: always()
+      run: |
+        helm uninstall test-${{ matrix.chart }} || true 

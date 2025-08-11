@@ -66,3 +66,12 @@ Rasa Pro:
 ## Contributing
 
 We'd love to have you contribute! Please refer to our [contribution guidelines](CONTRIBUTING.md) for details.
+
+## Other Rasa Products
+
+You can find our older Helm charts for other Rasa products here:
+
+- [Rasa Open Source](https://github.com/RasaHQ/helm-charts/tree/main/charts/rasa)
+- [Rasa Action Server](https://github.com/RasaHQ/helm-charts/tree/main/charts/rasa-action-server)
+- [Rasa X/Enterprise](https://github.com/RasaHQ/rasa-x-helm)
+- [Duckling](https://github.com/RasaHQ/helm-charts/tree/main/charts/duckling)

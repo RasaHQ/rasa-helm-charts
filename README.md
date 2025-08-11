@@ -6,8 +6,8 @@ Rasa Studio and Rasa Pro, ready to launch on Kubernetes using [Kubernetes Helm](
 
 Chart usage can be found:
 
-- [Rasa Studio](https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md)
-- [Rasa Pro](https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/README.md)
+- [Rasa Studio](https://helm.rasa.com/charts/studio/)
+- [Rasa Pro](https://helm.rasa.com/charts/rasa/)
 
 ## License
 

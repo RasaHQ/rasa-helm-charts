@@ -42,7 +42,7 @@ jobs:
     name: Register Rasa Studio chart
     needs: [check-chart-versions]
     if: needs.check-chart-versions.outputs.release-candidate == 'true'
-    uses: RasaHQ/infrasec-workflows/.github/workflows/register-private-helm-chart.yml@main
+    uses: ./.github/workflows/register-private-helm-chart.yml
     with:
         github-repo: ${{ github.repository }}
         github-ref: ${{ github.ref }}
@@ -56,7 +56,7 @@ jobs:
     name: Promote Replicated release
     needs: [register-helm-chart, check-chart-versions]
     if: needs.check-chart-versions.outputs.release-candidate == 'true'
-    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
+    uses: ./.github/workflows/promote-replicated-release.yml
     with:
       replicated-channel: studio-release-candidate
       replicated-version: ${{ needs.check-chart-versions.outputs.studio-version }}

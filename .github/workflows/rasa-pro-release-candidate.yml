@@ -41,7 +41,7 @@ jobs:
     name: Register Rasa Pro chart
     needs: [check-chart-versions]
     if: needs.check-chart-versions.outputs.release-candidate == 'true'
-    uses: RasaHQ/infrasec-workflows/.github/workflows/register-private-helm-chart.yml@main
+    uses: ./.github/workflows/register-private-helm-chart.yml
     with:
         github-repo: ${{ github.repository }}
         github-ref: ${{ github.ref }}

@@ -1,0 +1,132 @@
+# This reusable workflow promotes a release of Rasa Platform to an existing
+# Replicated channel using Helm charts from a Google Artifact Registry repo,
+# assuming that the caller Github repo has a directory at root called 
+# "replicated" with all the necessary Replicated config YAML files.
+# 
+# To configure this workflow:
+#
+# 1. Ensure the required Google Cloud APIs are enabled in your project:
+#
+#    Artifact Registry    artifactregistry.googleapis.com
+#
+# 2. Create and configure Workload Identity Federation through a Service Account for GitHub:
+#    https://github.com/google-github-actions/auth#workload-identity-federation-through-a-service-account
+#
+# 3. Ensure the required IAM permissions are granted to the service account
+#
+#    Artifact Registry Reader
+#     (roles/artifactregistry.reader)                 (project or repository level)
+#
+# 4. Ensure all the Helm charts required for the Replicated release are in an accessible artifact repository
+#
+# 5. Add the REPLICATED_APP and REPLICATED_TOKEN secrets in your Github Actions settings
+# 
+name: Promotes a new release of Rasa Platform to a Replicated channel
+
+on:
+  workflow_call:
+    secrets:
+      REPLICATED_APP:
+        required: true
+      REPLICATED_TOKEN:
+        required: true
+    inputs:
+      replicated-channel:
+        description: The name of the Replicated channel to promote the release to
+        required: true
+        type: string
+      replicated-version:
+        description: The version to assign the Replicated release
+        required: true
+        type: string
+      studio-version:
+        description: The version of the Rasa Studio chart to pull from the private registry
+        required: true
+        type: string
+      kafka-version:
+        description: The version of the kafka chart to pull from the private registry
+        default: '31.1.0'
+        type: string
+      postgres-version:
+        description: The version of the postgresql chart to pull from the private registry
+        default: '16.3.0'
+        type: string
+      gcp-project-id:
+        description: Your Google Cloud project ID
+        default: rasa-releases
+        type: string
+      gcp-identity-provider:
+        description: |
+          The full identifier of your Workload Identity Provider, including the project number, pool name, and provider name
+          e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+        default: projects/611793044667/locations/global/workloadIdentityPools/github-actions-pool/providers/oidc-provider
+        type: string
+      gcp-service-account:
+        description: |
+          The email address for an Google service account that can access your artifact repository via your identity provider
+          e.g. my-service-account@my-project.iam.gserviceaccount.com
+        default: register-artifacts@rasa-releases.iam.gserviceaccount.com
+        type: string
+      gar-location:
+        description: The location of your Google Artifact Registry (e.g. the region)
+        default: europe-west3
+        type: string
+      gar-repository:
+        description: The repository in your Artifact Registry location containing the Helm charts
+        default: helm-charts
+        type: string
+
+env:
+  REGISTRY_URL: https://${{ inputs.gar-location }}-docker.pkg.dev
+  REPOSITORY_URI: oci://${{ inputs.gar-location }}-docker.pkg.dev/${{ inputs.gcp-project-id }}/${{ inputs.gar-repository }}
+  STUDIO_VERSION: ${{ inputs.studio-version }}
+  KAFKA_VERSION: ${{ inputs.kafka-version }}
+  POSTGRES_VERSION: ${{ inputs.postgres-version }}
+
+jobs:
+  promote-replicated-release:
+    name: Promote Rasa Platform release to Replicated
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+      - name: Setup Helm 3
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        with:
+          version: v3.11.2
+      - name: Authenticate to Google Cloud
+        id: auth
+        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
+        with:
+          token_format: 'access_token'
+          workload_identity_provider: ${{ inputs.gcp-identity-provider }}
+          service_account: ${{ inputs.gcp-service-account }}
+      - name: Login to Helm registry using Google Auth token
+        env:
+          ACCESS_TOKEN: ${{ steps.auth.outputs.access_token }}
+        run: |-
+          echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+      - name: Pull Helm charts
+        run: |
+          helm pull "${REPOSITORY_URI}/studio" --version "${STUDIO_VERSION}" -d ./replicated
+          helm pull "${REPOSITORY_URI}/kafka" --version "${KAFKA_VERSION}" -d ./replicated
+          helm pull "${REPOSITORY_URI}/postgresql" --version "${POSTGRES_VERSION}" -d ./replicated
+      - name: Update chart versions for release
+        uses: mikefarah/yq@f15500b20a1c991c8729870ba60a4dc3524b6a94
+        with:
+          cmd: |
+            yq -i '.spec.chart.chartVersion = strenv(STUDIO_VERSION)' ./replicated/studio-chart.yaml
+            yq -i '.spec.chart.chartVersion = strenv(KAFKA_VERSION)' ./replicated/kafka-chart.yaml
+            yq -i '.spec.chart.chartVersion = strenv(POSTGRES_VERSION)' ./replicated/postgresql-chart.yaml
+      - name: Promote the release
+        uses: replicatedhq/action-kots-release@configurable-endpoint
+        with:
+          replicated-app: ${{ secrets.REPLICATED_APP }}
+          replicated-api-token: ${{ secrets.REPLICATED_TOKEN }}
+          replicated-api-origin: https://api.replicated.com/vendor
+          yaml-dir: ./replicated
+          promote-channel: "${{ inputs.replicated-channel }}"
+          version: ${{ inputs.replicated-version }}

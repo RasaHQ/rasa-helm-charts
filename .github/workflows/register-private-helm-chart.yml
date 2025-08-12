@@ -1,0 +1,123 @@
+# This reusable workflow pushes a copy of a Helm chart from a public Github repo to a private Artifact Registry repo
+# See https://cloud.google.com/artifact-registry/docs/helm/authentication and https://cloud.google.com/artifact-registry/docs/helm/manage-charts
+# 
+# To configure this workflow:
+#
+# 1. Ensure the required Google Cloud APIs are enabled in your project:
+#
+#    Artifact Registry    artifactregistry.googleapis.com
+#
+# 2. Create and configure Workload Identity Federation through a Service Account for GitHub:
+#    https://github.com/google-github-actions/auth#workload-identity-federation-through-a-service-account
+#
+# 3. Ensure the required IAM permissions are granted
+#
+#    Artifact Registry Writer
+#     (roles/artifactregistry.writer)                 (project or repository level)
+#
+# 4. If necessary, create a new repository in Artifact Registry
+name: Register private Helm chart
+
+on:
+  workflow_call:
+    inputs:
+      github-repo:
+        description: The owner and name (e.g. `repo-owner/repo-name`) of a public Github repo containing the Helm chart
+        required: true
+        type: string
+      github-ref:
+        description: The reference (e.g. commit SHA, git tag, branch name) of the Github repo to checkout
+        required: true
+        type: string
+      chart-path:
+        description: The relative path to the Helm chart (i.e. the directory with Chart.yaml) from the root of the Github repo 
+        required: true
+        type: string
+      gcp-project-id:
+        description: Your Google Cloud project ID
+        required: true
+        type: string
+      gcp-identity-provider:
+        description: |
+          The full identifier of your Workload Identity Provider, including the project number, pool name, and provider name
+          e.g. projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider
+        required: true
+        type: string
+      gcp-service-account:
+        description: |
+          The email address for an Google service account that can access your artifact repository via your identity provider
+          e.g. my-service-account@my-project.iam.gserviceaccount.com
+        required: true
+        type: string
+      gar-location:
+        description: The location of your Google Artifact Registry to push the Helm chart to to, e.g. the region
+        required: true
+        type: string
+      gar-repository:
+        description: An existing repository in your Artifact Registry location to push the Helm chart to to image
+        required: true
+        type: string
+    outputs:
+      gar-chart-uri:
+        description: The URI of the Helm chart in Google Artifact Registry
+        value: ${{ jobs.register-helm-chart.outputs.uri }}
+jobs:
+  register-helm-chart:
+    name: Push Helm chart to Artifact Registry
+    runs-on: ubuntu-latest
+    container:
+      image: alpine/helm:3.15.2
+    outputs:
+      uri: ${{ steps.register-helm-chart.outputs.uri }}
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout Helm chart repo
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332
+        with:
+          repository: ${{ inputs.github-repo }}
+          ref: ${{ inputs.github-ref }}
+
+      - name: Generate access token
+        id: google-auth
+        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ inputs.gcp-identity-provider }}
+          service_account: '${{ inputs.gcp-service-account }}'
+
+      - name: Get chart name
+        id: get-chart-name
+        env:
+          CHART_PATH: ${{ inputs.chart-path }}
+        uses: mikefarah/yq@f15500b20a1c991c8729870ba60a4dc3524b6a94
+        with:
+          cmd: |
+            export CHART_NAME=$(yq ".name" "${CHART_PATH}/Chart.yaml")
+            echo "name=${CHART_NAME}" >> $GITHUB_OUTPUT
+
+      - name: Get chart version
+        id: get-chart-version
+        env:
+          CHART_PATH: ${{ inputs.chart-path }}
+        uses: mikefarah/yq@f15500b20a1c991c8729870ba60a4dc3524b6a94
+        with:
+          cmd: |
+            export CHART_VERSION=$(yq ".version" "${CHART_PATH}/Chart.yaml")
+            echo "version=${CHART_VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Package and push chart
+        id: register-helm-chart
+        env:
+          ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+          CHART_PATH: ${{ inputs.chart-path }}
+          CHART_URI: oci://${{ inputs.gar-location }}-docker.pkg.dev/${{ inputs.gcp-project-id }}/${{ inputs.gar-repository }}
+          CHART_TAR: ${{ steps.get-chart-name.outputs.name }}-${{ steps.get-chart-version.outputs.version }}.tgz
+          REGISTRY_URL: https://${{ inputs.gar-location }}-docker.pkg.dev
+        run: |
+          echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+          helm dependency update "${CHART_PATH}"
+          helm package "${CHART_PATH}"
+          helm push "${CHART_TAR}" "${CHART_URI}"
+          echo "uri=${CHART_URI}" >> $GITHUB_OUTPUT

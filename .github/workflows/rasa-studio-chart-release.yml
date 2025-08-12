@@ -122,7 +122,7 @@ jobs:
   replicated-release:
     name: Promote Replicated release
     needs: [release]
-    uses: RasaHQ/infrasec-workflows/.github/workflows/promote-replicated-release.yml@main
+    uses: ./.github/workflows/promote-replicated-release.yml
     with:
       replicated-channel: Stable
       replicated-version: ${{ needs.release.outputs.studio-version }}

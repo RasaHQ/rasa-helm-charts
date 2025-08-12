@@ -11,7 +11,7 @@ Chart usage can be found:
 
 ## License
 
-`By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available on [rasa.com](https://rasa.com/eula). Please review the EULA carefully before proceeding.`
+By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available on [rasa.com](https://rasa.com/eula). Please review the EULA carefully before proceeding.
 
 ## TL;DR
 

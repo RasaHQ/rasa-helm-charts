@@ -71,6 +71,7 @@ spec:
           resources:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
+            {{- include "studio.backend.env" . | nindent 12 }}
             {{- include "studio.shared.env" . | nindent 12 }}
             {{- include "studio.keycloak.url" . | nindent 12 }}
             {{- include "studio.backend.keycloak" . | nindent 12 }}

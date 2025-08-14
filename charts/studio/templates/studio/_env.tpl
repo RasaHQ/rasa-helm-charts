@@ -43,3 +43,21 @@ Keycloak URL
   value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
 {{- end -}}
 {{- end -}}
+
+{{- define "studio.backend.env" -}}
+- name: DB_USERNAME
+  value: {{ .Values.config.database.username | quote }}
+- name: DB_PASS
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.database.password.secretName | quote }}
+      key: {{ .Values.config.database.password.secretKey | quote }}
+- name: DB_HOST
+  value: {{ .Values.config.database.host | quote }}
+- name: DB_PORT
+  value: {{ .Values.config.database.port | quote }}
+- name: DB_NAME
+  value: {{ .Values.config.database.backendDatabaseName | quote }}
+- name: DB_QUERY
+  value: {{ .Values.config.database.queryParams | quote }}
+{{- end -}}

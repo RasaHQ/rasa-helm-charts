@@ -16,7 +16,7 @@ global:
 cloudnativepg:
   # -- Enable CloudNativePG cluster deployment
   enabled: true
-  
+
   # -- Set to true to install the CloudNativePG operator via Helm dependency
   operator:
     enabled: false
@@ -28,17 +28,17 @@ cloudnativepg:
     instances: 1
     # -- PostgreSQL container image to use
     imageName: "ghcr.io/cloudnative-pg/postgresql:16"
-    
+
     # Storage configuration for PostgreSQL
     storage:
       # -- Storage size for PostgreSQL data
       size: "20Gi"
       # -- Storage class name. Change to your storage class
       storageClass: "gp2"
-    
+
     # -- Enable superuser access (creates <cluster>-superuser secret)
     enableSuperuserAccess: true
-    
+
     # Bootstrap configuration for initial database setup
     bootstrap:
       initdb:
@@ -46,12 +46,12 @@ cloudnativepg:
         database: "app"
         # -- Database owner/user to create during initialization
         owner: "appuser"
-    
+
     # Monitoring configuration
     monitoring:
       # -- Enable Prometheus PodMonitor for metrics collection
       enablePodMonitor: false
-    
+
     # -- Additional PostgreSQL configuration parameters
     # Example:
     # postgresql:
@@ -60,7 +60,7 @@ cloudnativepg:
     #     shared_buffers: "256MB"
     postgresql:
       parameters: {}
-    
+
     # -- Resource limits and requests for PostgreSQL containers
     # Example:
     # resources:
@@ -76,7 +76,7 @@ cloudnativepg:
 strimzi:
   # -- Enable Strimzi Kafka cluster deployment
   enabled: true
-  
+
   # -- Set to true to install the Strimzi Kafka operator via Helm dependency
   operator:
     enabled: false
@@ -84,7 +84,7 @@ strimzi:
   kafka:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
     nameOverride: ""
-    
+
     # Kafka cluster annotations for operator configuration
     annotations:
       kraft:
@@ -93,7 +93,7 @@ strimzi:
       nodePools:
         # -- Use KafkaNodePool resources for node management
         enabled: true
-    
+
     # Entity Operator configuration
     entityOperator:
       topicOperator:
@@ -102,7 +102,7 @@ strimzi:
       userOperator:
         # -- Enable Kafka User Operator for user management
         enabled: true
-    
+
     # Kafka listeners configuration
     # -- Kafka listeners define how clients connect to the cluster
     listeners:
@@ -112,7 +112,7 @@ strimzi:
         tls: false
         authentication:
           type: scram-sha-512
-    
+
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers
     # With 1 broker, keep replication factors at 1 (increase when scaling out)
@@ -122,7 +122,7 @@ strimzi:
       transaction.state.log.min.isr: 1
       default.replication.factor: 1
       min.insync.replicas: 1
-    
+
     # -- Resource limits and requests for Kafka brokers
     # Example:
     # resources:
@@ -144,7 +144,7 @@ strimzi:
       replicas: 1
       # -- Node pool roles for controllers
       roles: ["controller"]
-      
+
       # Storage configuration for controllers
       storage:
         # -- Storage type for controller nodes
@@ -155,7 +155,7 @@ strimzi:
         class: "gp2"
         # -- Whether to delete PVC when node pool is deleted
         deleteClaim: false
-      
+
       # -- Resource limits and requests for controller nodes
       # Example:
       # resources:
@@ -166,7 +166,7 @@ strimzi:
       #     cpu: "100m"
       #     memory: "256Mi"
       resources: {}
-    
+
     # Broker node pool configuration
     brokers:
       # -- Enable broker node pool deployment
@@ -175,7 +175,7 @@ strimzi:
       replicas: 1
       # -- Node pool roles for brokers
       roles: ["broker"]
-      
+
       # Storage configuration for brokers
       storage:
         # -- Storage type for broker nodes (JBOD allows multiple volumes)
@@ -187,7 +187,7 @@ strimzi:
             size: "100Gi"
             class: "gp2"
             deleteClaim: false
-      
+
       # -- Resource limits and requests for broker nodes
       # Example:
       # resources:
@@ -215,7 +215,7 @@ strimzi:
       config:
         retention.ms: 604800000  # 7 days
         cleanup.policy: "delete"
-    
+
     # Additional topics can be added here
     # Example:
     # customTopic:
@@ -234,7 +234,7 @@ strimzi:
       enabled: true
       # -- Kafka user name for main application
       name: "app-user"
-      
+
       # Authentication configuration
       authentication:
         # -- Authentication type for Kafka user
@@ -243,7 +243,7 @@ strimzi:
         password:
           secretName: "app-secrets"
           secretKey: "KAFKA_SASL_PASSWORD"
-      
+
       # Authorization can be added here
       # Example:
       # authorization:
@@ -253,7 +253,7 @@ strimzi:
       #         type: topic
       #         name: app-events
       #       operation: Read
-    
+
     # Additional users can be added here
     # Example:
     # customUser:

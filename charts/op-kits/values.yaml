@@ -260,11 +260,6 @@ strimzi:
     #   authentication:
     #     type: "scram-sha-512"
 
-# Prerequisites: 
-# - CloudNativePG operator must be installed in the cluster
-# - Strimzi Kafka operator must be installed in the cluster  
-# See README.md for detailed installation instructions
-
 # Common settings applied to all resources
 # -- Additional labels to apply to all resources
 # Example:

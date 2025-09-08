@@ -31,6 +31,12 @@ jobs:
     - name: Setup Helm chart testing
       uses: helm/chart-testing-action@afea100a513515fbd68b0e72a7bb0ae34cb62aec
 
+    - name: Add Helm repositories
+      run: |
+        helm repo add cnpg https://cloudnative-pg.github.io/charts
+        helm repo add strimzi https://strimzi.io/charts/
+        helm repo update
+
     - name: Run chart-testing (list-changed)
       id: list-changed
       run: |
@@ -70,6 +76,12 @@ jobs:
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
         with:
           version: v3.11.2
+
+      - name: Add Helm repositories
+        run: |
+          helm repo add cnpg https://cloudnative-pg.github.io/charts
+          helm repo add strimzi https://strimzi.io/charts/
+          helm repo update
 
       - name: Update dependencies
         run: helm dependency build ./charts/${{ matrix.charts }}

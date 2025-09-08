@@ -8,8 +8,8 @@ Operator Kits Helm Chart
 
 - Kubernetes 1.23+
 - Helm 3.8.0+
-- CloudNativePG operator installed (if not using dependency)
-- Strimzi Kafka operator installed (if not using dependency)
+- CloudNativePG operator must be pre-installed in the cluster
+- Strimzi Kafka operator must be pre-installed in the cluster
 
 ## Installing the Chart
 
@@ -29,6 +29,8 @@ $ helm delete my-release
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
 
+> **Note**: This only removes application resources (PostgreSQL and Kafka clusters). The operators will remain installed and can be reused for other deployments.
+
 ## Pull the Chart
 
 To pull chart contents for your own convenience:
@@ -37,33 +39,83 @@ To pull chart contents for your own convenience:
 $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1g
 ```
 
-## Operator Dependencies
+## Operator Installation
 
-This chart can optionally install the required operators as dependencies:
+Before installing this chart, you **must** install the required operators in your cluster. We recommend installing operators in their own dedicated namespaces for better separation and management.
 
-### Installing with Operators
+### 1. CloudNativePG Operator
 
-To install the chart with the operators included:
+Install the CloudNativePG operator in its dedicated namespace:
 
 ```console
-$ helm install my-release . --set cloudnativepg.operator.enabled=true --set strimzi.operator.enabled=true
+# Add the CloudNativePG Helm repository
+$ helm repo add cnpg https://cloudnative-pg.github.io/charts
+$ helm repo update
+
+# Install CloudNativePG operator in cnpg-system namespace
+$ helm install cnpg-operator cnpg/cloudnative-pg \
+    --namespace cnpg-system \
+    --create-namespace
 ```
 
-### Manual Operator Installation
+### 2. Strimzi Kafka Operator
 
-If you prefer to install the operators manually:
+Install the Strimzi Kafka operator in its dedicated namespace with cluster-wide permissions:
 
-1. **CloudNativePG Operator:**
-   ```console
-   $ helm repo add cnpg https://cloudnative-pg.github.io/charts
-   $ helm install cnpg cnpg/cloudnative-pg
-   ```
+```console
+# Add the Strimzi Helm repository
+$ helm repo add strimzi https://strimzi.io/charts/
+$ helm repo update
 
-2. **Strimzi Kafka Operator:**
-   ```console
-   $ helm repo add strimzi https://strimzi.io/charts/
-   $ helm install strimzi strimzi/strimzi-kafka-operator
-   ```
+# Install Strimzi operator in strimzi-system namespace
+$ helm install strimzi-operator strimzi/strimzi-kafka-operator \
+    --namespace strimzi-system \
+    --create-namespace \
+    --set watchAnyNamespace=true
+```
+
+> **Important**: The `watchAnyNamespace=true` setting allows the Strimzi operator to manage Kafka resources across all namespaces in the cluster. This is required for the operator to manage resources created by this chart in different namespaces.
+
+### 3. Verify Operator Installation
+
+After installing the operators, verify they are running:
+
+```console
+# Check CloudNativePG operator
+$ kubectl get pods -n cnpg-system
+
+# Check Strimzi operator
+$ kubectl get pods -n strimzi-system
+```
+
+### 4. Install Application Resources
+
+Once operators are installed and running, you can deploy your application resources:
+
+```console
+# Install the op-kits chart in your application namespace
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
+    --version 0.1.0-rc.1g \
+    --namespace my-app-namespace \
+    --create-namespace
+```
+
+## Uninstalling Operators
+
+If you need to completely remove the operators from your cluster:
+
+```console
+# Remove CloudNativePG operator
+$ helm uninstall cnpg-operator -n cnpg-system
+
+# Remove Strimzi operator 
+$ helm uninstall strimzi-operator -n strimzi-system
+
+# Optionally remove the namespaces (only if empty)
+$ kubectl delete namespace cnpg-system strimzi-system
+```
+
+> **Warning**: Removing operators will affect all PostgreSQL and Kafka clusters managed by them across the entire cluster.
 
 ## General Configuration
 
@@ -101,6 +153,9 @@ When scaling Kafka brokers, remember to adjust replication factors:
 
 ```yaml
 strimzi:
+  nodePools:
+    brokers:
+      replicas: 3  # Scale brokers
   kafka:
     config:
       default.replication.factor: 3  # Match your broker count
@@ -110,12 +165,28 @@ strimzi:
       replicas: 3  # Match your broker count
 ```
 
+### Namespace Considerations
+
+Since operators are installed cluster-wide but in dedicated namespaces, you can deploy multiple instances of this chart in different namespaces:
+
+```console
+# Deploy for development
+$ helm install dev-app . --namespace development
+
+# Deploy for staging 
+$ helm install staging-app . --namespace staging
+
+# Deploy for production
+$ helm install prod-app . --namespace production
+```
+
+Each deployment will create its own PostgreSQL and Kafka clusters, all managed by the same operators.
+
 ## Values
 
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for all pods Example: affinity:   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: kubernetes.io/os           operator: In           values:           - linux   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname |
-| cloudnative-pg | object | `{}` |  |
 | cloudnativepg.cluster.bootstrap.initdb.database | string | `"app"` | Database name to create during initialization |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | `"appuser"` | Database owner/user to create during initialization |
 | cloudnativepg.cluster.enableSuperuserAccess | bool | `true` | Enable superuser access (creates <cluster>-superuser secret) |
@@ -128,15 +199,12 @@ strimzi:
 | cloudnativepg.cluster.storage.size | string | `"20Gi"` | Storage size for PostgreSQL data |
 | cloudnativepg.cluster.storage.storageClass | string | `"gp2"` | Storage class name. Change to your storage class |
 | cloudnativepg.enabled | bool | `true` | Enable CloudNativePG cluster deployment |
-| cloudnativepg.operator | object | `{"enabled":false,"namespace":"cnpg-system"}` | Set to true to install the CloudNativePG operator via Helm dependency |
-| cloudnativepg.operator.namespace | string | `"cnpg-system"` | Namespace where the CloudNativePG operator will be installed When enabled, the operator should be installed in this dedicated namespace |
 | commonAnnotations | object | `{}` | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" |
 | commonLabels | object | `{}` | Additional labels to apply to all resources Example: commonLabels:   environment: production   team: platform |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | global.namespace | string | `""` | Global namespace override. If empty, uses release namespace |
 | nameOverride | string | `""` | Override name of app |
 | nodeSelector | object | `{}` | Node selector for all pods Example: nodeSelector:   kubernetes.io/os: linux   node-role.kubernetes.io/worker: "true" |
-| strimzi-kafka-operator.watchAnyNamespace | bool | `true` | Configure the Strimzi operator to watch all namespaces This allows the operator to manage Kafka resources across all namespaces |
 | strimzi.enabled | bool | `true` | Enable Strimzi Kafka cluster deployment |
 | strimzi.kafka.annotations.kraft.enabled | bool | `true` | Enable KRaft mode (no ZooKeeper required) |
 | strimzi.kafka.annotations.nodePools.enabled | bool | `true` | Use KafkaNodePool resources for node management |
@@ -160,8 +228,6 @@ strimzi:
 | strimzi.nodePools.controllers.storage.deleteClaim | bool | `false` | Whether to delete PVC when node pool is deleted |
 | strimzi.nodePools.controllers.storage.size | string | `"20Gi"` | Storage size for controller nodes |
 | strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
-| strimzi.operator | object | `{"enabled":false,"namespace":"strimzi-system"}` | Set to true to install the Strimzi Kafka operator via Helm dependency |
-| strimzi.operator.namespace | string | `"strimzi-system"` | Namespace where the Strimzi Kafka operator will be installed When enabled, the operator should be installed in this dedicated namespace |
 | strimzi.topics.events.config | object | `{"cleanup.policy":"delete","retention.ms":604800000}` | Topic configuration parameters |
 | strimzi.topics.events.enabled | bool | `true` | Enable main events topic creation |
 | strimzi.topics.events.name | string | `"app-events"` | Topic name for main application events |

@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.0-rc.1](https://img.shields.io/badge/Version-0.1.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.0-rc.1g](https://img.shields.io/badge/Version-0.1.0--rc.1g-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1g
 ```
 
 ## Uninstalling the Chart
@@ -34,7 +34,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1g
 ```
 
 ## Operator Dependencies
@@ -115,6 +115,7 @@ strimzi:
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for all pods Example: affinity:   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: kubernetes.io/os           operator: In           values:           - linux   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname |
+| cloudnative-pg | object | `{}` |  |
 | cloudnativepg.cluster.bootstrap.initdb.database | string | `"app"` | Database name to create during initialization |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | `"appuser"` | Database owner/user to create during initialization |
 | cloudnativepg.cluster.enableSuperuserAccess | bool | `true` | Enable superuser access (creates <cluster>-superuser secret) |
@@ -127,13 +128,15 @@ strimzi:
 | cloudnativepg.cluster.storage.size | string | `"20Gi"` | Storage size for PostgreSQL data |
 | cloudnativepg.cluster.storage.storageClass | string | `"gp2"` | Storage class name. Change to your storage class |
 | cloudnativepg.enabled | bool | `true` | Enable CloudNativePG cluster deployment |
-| cloudnativepg.operator | object | `{"enabled":false}` | Set to true to install the CloudNativePG operator via Helm dependency |
+| cloudnativepg.operator | object | `{"enabled":false,"namespace":"cnpg-system"}` | Set to true to install the CloudNativePG operator via Helm dependency |
+| cloudnativepg.operator.namespace | string | `"cnpg-system"` | Namespace where the CloudNativePG operator will be installed When enabled, the operator should be installed in this dedicated namespace |
 | commonAnnotations | object | `{}` | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" |
 | commonLabels | object | `{}` | Additional labels to apply to all resources Example: commonLabels:   environment: production   team: platform |
 | fullnameOverride | string | `""` | Override the full qualified app name |
 | global.namespace | string | `""` | Global namespace override. If empty, uses release namespace |
 | nameOverride | string | `""` | Override name of app |
 | nodeSelector | object | `{}` | Node selector for all pods Example: nodeSelector:   kubernetes.io/os: linux   node-role.kubernetes.io/worker: "true" |
+| strimzi-kafka-operator.watchAnyNamespace | bool | `true` | Configure the Strimzi operator to watch all namespaces This allows the operator to manage Kafka resources across all namespaces |
 | strimzi.enabled | bool | `true` | Enable Strimzi Kafka cluster deployment |
 | strimzi.kafka.annotations.kraft.enabled | bool | `true` | Enable KRaft mode (no ZooKeeper required) |
 | strimzi.kafka.annotations.nodePools.enabled | bool | `true` | Use KafkaNodePool resources for node management |
@@ -157,7 +160,8 @@ strimzi:
 | strimzi.nodePools.controllers.storage.deleteClaim | bool | `false` | Whether to delete PVC when node pool is deleted |
 | strimzi.nodePools.controllers.storage.size | string | `"20Gi"` | Storage size for controller nodes |
 | strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
-| strimzi.operator | object | `{"enabled":false}` | Set to true to install the Strimzi Kafka operator via Helm dependency |
+| strimzi.operator | object | `{"enabled":false,"namespace":"strimzi-system"}` | Set to true to install the Strimzi Kafka operator via Helm dependency |
+| strimzi.operator.namespace | string | `"strimzi-system"` | Namespace where the Strimzi Kafka operator will be installed When enabled, the operator should be installed in this dedicated namespace |
 | strimzi.topics.events.config | object | `{"cleanup.policy":"delete","retention.ms":604800000}` | Topic configuration parameters |
 | strimzi.topics.events.enabled | bool | `true` | Enable main events topic creation |
 | strimzi.topics.events.name | string | `"app-events"` | Topic name for main application events |

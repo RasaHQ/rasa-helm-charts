@@ -1,6 +1,39 @@
 🎉 Operator Kits have been deployed successfully!
 
-This chart deploys the following operator resources:
+{{- if or .Values.cloudnativepg.operator.enabled .Values.strimzi.operator.enabled }}
+⚠️  OPERATOR INSTALLATION REQUIRED:
+{{- if .Values.cloudnativepg.operator.enabled }}
+
+📦 CloudNativePG Operator:
+  Install the operator in its dedicated namespace:
+  helm install cnpg-operator . \
+    --set cloudnativepg.operator.enabled=true \
+    --set cloudnativepg.enabled=false \
+    --set strimzi.enabled=false \
+    --namespace {{ .Values.cloudnativepg.operator.namespace }} \
+    --create-namespace
+{{- end }}
+{{- if .Values.strimzi.operator.enabled }}
+
+📦 Strimzi Kafka Operator:
+  Install the operator in its dedicated namespace:
+  helm install strimzi-operator . \
+    --set strimzi.operator.enabled=true \
+    --set strimzi.enabled=false \
+    --set cloudnativepg.enabled=false \
+    --namespace {{ .Values.strimzi.operator.namespace }} \
+    --create-namespace
+{{- end }}
+
+Then redeploy this chart with operators disabled:
+  helm upgrade {{ .Release.Name }} . \
+    --set cloudnativepg.operator.enabled=false \
+    --set strimzi.operator.enabled=false \
+    --namespace {{ .Release.Namespace }}
+
+{{- end }}
+
+This chart deploys the following resources:
 
 {{- if .Values.cloudnativepg.enabled }}
 

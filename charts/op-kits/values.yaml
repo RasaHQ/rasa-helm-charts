@@ -20,6 +20,9 @@ cloudnativepg:
   # -- Set to true to install the CloudNativePG operator via Helm dependency
   operator:
     enabled: false
+    # -- Namespace where the CloudNativePG operator will be installed
+    # When enabled, the operator should be installed in this dedicated namespace
+    namespace: "cnpg-system"
 
   cluster:
     # -- (string) Override cluster name. If empty, uses "{{ release-name }}-pg"
@@ -80,6 +83,9 @@ strimzi:
   # -- Set to true to install the Strimzi Kafka operator via Helm dependency
   operator:
     enabled: false
+    # -- Namespace where the Strimzi Kafka operator will be installed
+    # When enabled, the operator should be installed in this dedicated namespace
+    namespace: "strimzi-system"
 
   kafka:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
@@ -261,6 +267,22 @@ strimzi:
     #   name: "custom-user"
     #   authentication:
     #     type: "scram-sha-512"
+
+# Dependency chart configurations
+# Configuration values passed to dependency charts when operator.enabled=true
+
+# CloudNativePG operator chart configuration
+# Values passed to the cloudnative-pg subchart when cloudnativepg.operator.enabled=true
+cloudnative-pg: {}
+  # Default configuration for CloudNativePG operator
+  # Add any operator-specific configuration here if needed
+
+# Strimzi Kafka operator chart configuration
+# Values passed to the strimzi-kafka-operator subchart when strimzi.operator.enabled=true
+strimzi-kafka-operator:
+  # -- Configure the Strimzi operator to watch all namespaces
+  # This allows the operator to manage Kafka resources across all namespaces
+  watchAnyNamespace: true
 
 # Common settings applied to all resources
 # -- Additional labels to apply to all resources

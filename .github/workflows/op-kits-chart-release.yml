@@ -1,13 +1,14 @@
-name: Release Rasa Helm Chart
+---
+name: Release Op-Kits Helm Chart
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'charts/rasa/**'
+      - 'charts/op-kits/**'
+      - '!charts/rasa/**'
       - '!charts/studio/**'
-      - '!charts/op-kits/**'
       - '!replicated/**'
 
 env:
@@ -18,6 +19,8 @@ env:
 jobs:
   release:
     runs-on: ubuntu-24.04
+    outputs:
+      op-kits-version: ${{ steps.chart-info.outputs.version }}
 
     permissions:
       contents: write
@@ -37,38 +40,42 @@ jobs:
           version: v3.15.2
 
       - name: Authenticate to Google Cloud
-        id: auth
-        uses: google-github-actions/auth@ef5d53e30bbcd8d0836f4288f5e50ff3e086997d
+        id: google-auth
+        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa
         with:
-          token_format: 'access_token'
+          token_format: access_token
           workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
           service_account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
-
-      - name: Login to Helm registry using Google Auth token
-        run: |-
-          echo '${{ steps.auth.outputs.access_token }}' | helm registry login -u oauth2accesstoken --password-stdin https://${{ env.ARTIFACT_REGISTRY }}
 
       - name: Read Helm Chart
         id: chart-info
         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
         with:
-          path: charts/rasa/
+          path: charts/op-kits/
 
-      - name: Package Helm release
-        id: package
-        run: helm package charts/rasa/ --dependency-update
-
-      - name: Push Helm Charts to Google Artifact Registry
+      - name: Package and push chart
         id: release
-        run: helm push ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
+        env:
+          ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
+          CHART_PATH: charts/op-kits
+          CHART_URI: oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
+          CHART_TAR: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz
+          REGISTRY_URL: https://${{ env.ARTIFACT_REGISTRY }}
+        run: |
+          echo "${ACCESS_TOKEN}" | helm registry login \
+            -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+          helm dependency update "${CHART_PATH}"
+          helm package "${CHART_PATH}"
+          helm push "${CHART_TAR}" "${CHART_URI}"
+          echo "uri=${CHART_URI}" >> $GITHUB_OUTPUT
 
       - name: Notify Slack of successful release 💬
         if: steps.release.outcome == 'success'
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
           # Send notication to #release slack channel
-          channel-id: 'C024Z61K9QU'
-          slack-message: "🚀 New *Rasa* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!"
+          channel-id: 'C0351QXJ5CP'
+          slack-message: 🚀 New *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
@@ -77,8 +84,8 @@ jobs:
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
           # Send notication to #release slack channel
-          channel-id: 'C024Z61K9QU'
-          slack-message: "⛔️ *Rasa* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
+          channel-id: 'C0351QXJ5CP'
+          slack-message: ⛔️ *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
@@ -86,12 +93,13 @@ jobs:
         id: previous-release
         uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42
 
-      - name: Create Rasa Release Tag
+      - name: Create Op-Kits Release Tag
         uses: rickstaa/action-create-tag@55450aa830ede05bcbb37fbdad678e36c73e9d15
         with:
-          tag: "${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}"
+          tag: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
+          tag_exists_error: false
 
-      - name: Build Rasa changelog
+      - name: Build Op-Kits changelog
         id: changelog
         uses: mikepenz/release-changelog-builder-action@6fd5cc6eaf7567dbd0f9666061215bb476f012fc
         with:
@@ -99,8 +107,8 @@ jobs:
             {
               "categories": [
                 {
-                    "title": "## 🚀 Rasa Helm Chart",
-                    "labels": ["rasa"]
+                    "title": "## 🚀 Op-Kits Helm Chart",
+                    "labels": ["op-kits"]
                 }
               ]
             }
@@ -108,7 +116,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create Rasa Release
+      - name: Create Op-Kits Release
         uses: mikepenz/action-gh-release@ac23f2c4388204c6081863ead928a6f05fd7838a
         with:
           tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}

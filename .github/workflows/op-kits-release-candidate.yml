@@ -1,0 +1,61 @@
+---
+name: Op-Kits Release Candidate
+run-name: Create Op-Kits Release Candidate
+
+on:
+  push:
+    branches:
+      - release/*
+    paths:
+      - charts/op-kits/**
+      - '!charts/rasa/**'
+      - '!charts/studio/**'
+      - '!replicated/**'
+
+jobs:
+  check-chart-versions:
+    name: Check chart versions
+    runs-on: ubuntu-24.04
+    outputs:
+      op-kits-version: ${{ steps.op-kits-chart-info.outputs.version }}
+      release-candidate: ${{ steps.check-rc.outputs.rc }}
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Read Op-Kits chart
+        id: op-kits-chart-info
+        uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+        with:
+          path: charts/op-kits/
+
+      - name: Check Op-Kits chart version
+        id: check-rc
+        if: github.event_name != 'pull_request' && !startsWith(github.base_ref, 'release/')
+        env:
+          VERSION: ${{ steps.op-kits-chart-info.outputs.name }}-${{ steps.op-kits-chart-info.outputs.version }}
+        run: |
+          if [[ $VERSION == *-rc* ]]; then
+            echo "The Helm chart version is a release candidate."
+            echo "rc=true" >> $GITHUB_OUTPUT
+          else
+            echo "The Helm chart version is not a release candidate."
+            echo "Please add \`-rc*\` after the version in Chart.yaml."
+            echo "rc=false" >> $GITHUB_OUTPUT
+          fi
+
+  register-helm-chart:
+    name: Register Op-Kits chart
+    needs: [check-chart-versions]
+    if: needs.check-chart-versions.outputs.release-candidate == 'true'
+    uses: ./.github/workflows/register-private-helm-chart.yml
+    with:
+      github-repo: ${{ github.repository }}
+      github-ref: ${{ github.ref }}
+      chart-path: charts/op-kits
+      gcp-project-id: rasa-releases
+      gcp-identity-provider: projects/611793044667/locations/global/workloadIdentityPools/github-actions-pool/providers/oidc-provider
+      gcp-service-account: register-artifacts@rasa-releases.iam.gserviceaccount.com
+      gar-location: europe-west3
+      gar-repository: helm-charts

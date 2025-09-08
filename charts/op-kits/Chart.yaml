@@ -1,0 +1,29 @@
+apiVersion: v2
+name: op-kits
+description: Operator Kits Helm Chart
+type: application
+version: 0.1.0
+home: https://helm.rasa.com/
+sources:
+  - https://helm.rasa.com/charts/op-kits
+keywords:
+  - postgresql
+  - kafka
+  - cloudnativepg
+  - strimzi
+  - operators
+  - database
+  - messaging
+maintainers:
+  - name: Rasa Infrastructure and Security Team
+    url: https://github.com/RasaHQ/rasa-helm-charts
+    email: support@rasa.com
+dependencies:
+  - name: cloudnative-pg
+    version: "^0.20.0"
+    repository: "https://cloudnative-pg.github.io/charts"
+    condition: cloudnativepg.operator.enabled
+  - name: strimzi-kafka-operator
+    version: "^0.40.0"
+    repository: "https://strimzi.io/charts/"
+    condition: strimzi.operator.enabled

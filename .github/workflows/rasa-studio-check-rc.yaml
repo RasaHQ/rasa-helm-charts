@@ -5,6 +5,7 @@ on:
     paths:
       - 'charts/studio/**'
       - '!charts/rasa/**'
+      - '!charts/op-kits/**'
 
 jobs:
   check-rc:

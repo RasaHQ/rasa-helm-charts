@@ -6,3 +6,6 @@ studio:
 
 replicated:
 - replicated/**
+
+op-kits:
+- charts/op-kits/**

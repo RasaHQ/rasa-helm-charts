@@ -1,0 +1,77 @@
+🎉 Operator Kits have been deployed successfully!
+
+This chart deploys the following operator resources:
+
+{{- if .Values.cloudnativepg.enabled }}
+
+📊 CloudNativePG PostgreSQL Cluster:
+  - Cluster Name: {{ include "op-kits.cloudnativepg.clusterName" . }}
+  - Namespace: {{ include "op-kits.namespace" . }}
+  - Instances: {{ .Values.cloudnativepg.cluster.instances }}
+  - Database: {{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
+  - Storage: {{ .Values.cloudnativepg.cluster.storage.size }}
+
+To get the PostgreSQL connection details:
+  kubectl get secrets -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-app -o yaml
+  kubectl get secrets -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser -o yaml
+
+To connect to PostgreSQL:
+  kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.cloudnativepg.clusterName" . }}-rw 5432:5432
+  # Then connect to localhost:5432 with credentials from the secrets above
+
+{{- end }}
+
+{{- if .Values.strimzi.enabled }}
+
+🚀 Strimzi Kafka Cluster:
+  - Kafka Cluster: {{ include "op-kits.strimzi.kafkaName" . }}
+  - Namespace: {{ include "op-kits.namespace" . }}
+  {{- if .Values.strimzi.nodePools.controllers.enabled }}
+  - Controllers: {{ .Values.strimzi.nodePools.controllers.replicas }}
+  {{- end }}
+  {{- if .Values.strimzi.nodePools.brokers.enabled }}
+  - Brokers: {{ .Values.strimzi.nodePools.brokers.replicas }}
+  {{- end }}
+
+📝 Kafka Topics:
+{{- range $name, $topic := .Values.strimzi.topics }}
+{{- if and $topic.enabled (ne $name "enabled") }}
+  - {{ $topic.name }} ({{ $topic.partitions }} partitions)
+{{- end }}
+{{- end }}
+
+{{- $hasUsers := false }}
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+{{- $hasUsers = true }}
+{{- end }}
+{{- end }}
+{{- if $hasUsers }}
+👤 Kafka Users:
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+  - {{ $user.name }}
+{{- end }}
+{{- end }}
+
+To get Kafka connection details:
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+  kubectl get secrets -n {{ include "op-kits.namespace" $ }} {{ $user.name }} -o yaml
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+
+To access Kafka:
+  kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap 9092:9092
+  # Then connect to localhost:9092 with SASL credentials from the user secrets
+
+{{- end }}
+
+🔍 To monitor the deployment status:
+  kubectl get all -n {{ include "op-kits.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+📚 For more information:
+  - CloudNativePG: https://cloudnative-pg.io/
+  - Strimzi Kafka: https://strimzi.io/

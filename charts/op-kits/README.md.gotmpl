@@ -1,0 +1,112 @@
+{{ template "chart.header" . }}
+{{ template "chart.description" . }}
+
+{{ template "chart.versionBadge" . }}{{ template "chart.typeBadge" . }}
+
+## Prerequisites
+
+- Kubernetes 1.23+
+- Helm 3.8.0+
+- CloudNativePG operator installed (if not using dependency)
+- Strimzi Kafka operator installed (if not using dependency)
+
+## Installing the Chart
+
+To install the chart with the release name `my-release`:
+
+```console
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+```
+
+## Uninstalling the Chart
+
+To uninstall/delete the `my-release` deployment:
+
+```console
+$ helm delete my-release
+```
+
+The command removes all the Kubernetes components associated with the chart and deletes the release.
+
+## Pull the Chart
+
+To pull chart contents for your own convenience:
+
+```console
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ template "chart.name" . }} --version {{ template "chart.version" . }}
+```
+
+## Operator Dependencies
+
+This chart can optionally install the required operators as dependencies:
+
+### Installing with Operators
+
+To install the chart with the operators included:
+
+```console
+$ helm install my-release . --set cloudnativepg.operator.enabled=true --set strimzi.operator.enabled=true
+```
+
+### Manual Operator Installation
+
+If you prefer to install the operators manually:
+
+1. **CloudNativePG Operator:**
+   ```console
+   $ helm repo add cnpg https://cloudnative-pg.github.io/charts
+   $ helm install cnpg cnpg/cloudnative-pg
+   ```
+
+2. **Strimzi Kafka Operator:**
+   ```console
+   $ helm repo add strimzi https://strimzi.io/charts/
+   $ helm install strimzi strimzi/strimzi-kafka-operator
+   ```
+
+## General Configuration
+
+- **CloudNativePG**: Configure PostgreSQL clusters with customizable storage, instances, and monitoring
+- **Strimzi Kafka**: Configure Kafka clusters with KRaft mode, node pools, topics, and users
+- **Storage Classes**: Make sure to set the correct storage class names based on your cluster configuration
+- **Resource Management**: Configure CPU, memory limits and requests for optimal performance
+
+## Important Configuration Notes
+
+### Storage Configuration
+
+Both PostgreSQL and Kafka require persistent storage. Update the storage class names in your values:
+
+```yaml
+cloudnativepg:
+  cluster:
+    storage:
+      storageClass: "your-storage-class"  # Update this
+
+strimzi:
+  nodePools:
+    controllers:
+      storage:
+        class: "your-storage-class"  # Update this
+    brokers:
+      storage:
+        volumes:
+          - class: "your-storage-class"  # Update this
+```
+
+### Scaling Considerations
+
+When scaling Kafka brokers, remember to adjust replication factors:
+
+```yaml
+strimzi:
+  kafka:
+    config:
+      default.replication.factor: 3  # Match your broker count
+      min.insync.replicas: 2
+  topics:
+    events:
+      replicas: 3  # Match your broker count
+```
+
+{{ template "chart.valuesSection" . }}

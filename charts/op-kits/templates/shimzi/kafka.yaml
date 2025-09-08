@@ -1,0 +1,50 @@
+{{- if .Values.strimzi.enabled }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: Kafka
+metadata:
+  name: {{ include "op-kits.strimzi.kafkaName" . }}
+  namespace: {{ include "op-kits.namespace" . }}
+  labels:
+    {{- include "op-kits.strimzi.labels" . | nindent 4 }}
+  annotations:
+    {{- if .Values.strimzi.kafka.annotations.kraft.enabled }}
+    strimzi.io/kraft: "enabled"
+    {{- end }}
+    {{- if .Values.strimzi.kafka.annotations.nodePools.enabled }}
+    strimzi.io/node-pools: "enabled"
+    {{- end }}
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  entityOperator:
+    {{- if .Values.strimzi.kafka.entityOperator.topicOperator.enabled }}
+    topicOperator: {}
+    {{- end }}
+    {{- if .Values.strimzi.kafka.entityOperator.userOperator.enabled }}
+    userOperator: {}
+    {{- end }}
+  kafka:
+    listeners:
+      {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}
+    config:
+      {{- toYaml .Values.strimzi.kafka.config | nindent 6 }}
+    {{- with .Values.strimzi.kafka.resources }}
+    resources:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+  {{- with .Values.nodeSelector }}
+  template:
+    pod:
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+  {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+  {{- end }}
+{{- end }}

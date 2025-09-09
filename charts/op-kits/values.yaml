@@ -185,7 +185,7 @@ strimzi:
       storage:
         # -- Storage type for broker nodes (JBOD allows multiple volumes)
         type: "jbod"
-        # -- Storage volumes configuration for brokersg
+        # -- Storage volumes configuration for brokers
         volumes:
           - id: 0
             type: "persistent-claim"

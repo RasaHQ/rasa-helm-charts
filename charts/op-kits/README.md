@@ -219,7 +219,7 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | strimzi.nodePools.brokers.resources | object | `{}` | Resource limits and requests for broker nodes Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "200m"     memory: "512Mi" |
 | strimzi.nodePools.brokers.roles | list | `["broker"]` | Node pool roles for brokers |
 | strimzi.nodePools.brokers.storage.type | string | `"jbod"` | Storage type for broker nodes (JBOD allows multiple volumes) |
-| strimzi.nodePools.brokers.storage.volumes | list | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"20Gi","type":"persistent-claim"}]` | Storage volumes configuration for brokersg |
+| strimzi.nodePools.brokers.storage.volumes | list | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"20Gi","type":"persistent-claim"}]` | Storage volumes configuration for brokers |
 | strimzi.nodePools.controllers.enabled | bool | `true` | Enable controller node pool deployment |
 | strimzi.nodePools.controllers.replicas | int | `1` | Number of controller replicas |
 | strimzi.nodePools.controllers.resources | object | `{}` | Resource limits and requests for controller nodes Example: resources:   limits:     cpu: "500m"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |

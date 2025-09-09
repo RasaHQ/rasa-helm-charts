@@ -62,8 +62,7 @@ jobs:
           CHART_TAR: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz
           REGISTRY_URL: https://${{ env.ARTIFACT_REGISTRY }}
         run: |
-          echo "${ACCESS_TOKEN}" | helm registry login \
-            -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+          echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
           helm dependency update "${CHART_PATH}"
           helm package "${CHART_PATH}"
           helm push "${CHART_TAR}" "${CHART_URI}"
@@ -75,7 +74,7 @@ jobs:
         with:
           # Send notication to #release slack channel
           channel-id: 'C0351QXJ5CP'
-          slack-message: 🚀 New *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!
+          slack-message: "🚀 New *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
@@ -85,7 +84,7 @@ jobs:
         with:
           # Send notication to #release slack channel
           channel-id: 'C0351QXJ5CP'
-          slack-message: ⛔️ *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>
+          slack-message: "⛔️ *Op-Kits* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 

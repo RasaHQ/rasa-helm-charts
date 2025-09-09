@@ -159,7 +159,7 @@ strimzi:
         # -- Storage class for controller nodes
         class: "gp2"
         # -- Whether to delete PVC when node pool is deleted
-        deleteClaim: false
+        deleteClaim: true
 
       # -- Resource limits and requests for controller nodes
       # Example:
@@ -185,13 +185,13 @@ strimzi:
       storage:
         # -- Storage type for broker nodes (JBOD allows multiple volumes)
         type: "jbod"
-        # -- Storage volumes configuration for brokers
+        # -- Storage volumes configuration for brokersg
         volumes:
           - id: 0
             type: "persistent-claim"
-            size: "100Gi"
+            size: "20Gi"
             class: "gp2"
-            deleteClaim: false
+            deleteClaim: true
 
       # -- Resource limits and requests for broker nodes
       # Example:
@@ -233,7 +233,7 @@ strimzi:
     #     retention.ms: 604800000  # 7 days
     #     cleanup.policy: "delete"
 
-    # rasa-assistant:
+    # rasaAssistant:
     #   enabled: true
     #   name: "rasa-assistant"
     #   partitions: 1
@@ -303,7 +303,7 @@ commonLabels: {}
 #   prometheus.io/port: "8080"
 commonAnnotations: {}
 
-# Pod scheduling configuration for all resources
+# Pod scheduling configuration for CloudNativePG ONLY
 # -- Node selector for all pods
 # Example:
 # nodeSelector:

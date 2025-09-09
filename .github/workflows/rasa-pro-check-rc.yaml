@@ -6,6 +6,8 @@ on:
       - 'charts/rasa/**'
       - '!charts/studio/**'
       - '!charts/op-kits/**'
+      - '!replicated/**'
+      - '!.github/**'
 
 jobs:
   check-rc:

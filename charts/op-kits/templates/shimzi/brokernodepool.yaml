@@ -1,0 +1,38 @@
+{{- if and .Values.strimzi.enabled .Values.strimzi.nodePools.brokers.enabled }}
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaNodePool
+metadata:
+  name: {{ include "op-kits.strimzi.kafkaName" . }}-brokers
+  namespace: {{ include "op-kits.namespace" . }}
+  labels:
+    {{- include "op-kits.strimzi.labels" . | nindent 4 }}
+    strimzi.io/cluster: {{ include "op-kits.strimzi.kafkaName" . }}
+  {{- with .Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  roles:
+    {{- toYaml .Values.strimzi.nodePools.brokers.roles | nindent 4 }}
+  replicas: {{ .Values.strimzi.nodePools.brokers.replicas }}
+  storage:
+    type: {{ .Values.strimzi.nodePools.brokers.storage.type }}
+    volumes:
+      {{- toYaml .Values.strimzi.nodePools.brokers.storage.volumes | nindent 6 }}
+  {{- with .Values.strimzi.nodePools.brokers.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.tolerations .Values.affinity }}
+  template:
+    pod:
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  {{- end }}
+{{- end }}

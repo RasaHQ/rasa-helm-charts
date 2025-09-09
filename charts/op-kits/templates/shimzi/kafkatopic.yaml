@@ -1,0 +1,26 @@
+{{- range $name, $topic := .Values.strimzi.topics }}
+{{- if $topic.enabled }}
+{{- if not (eq $name "enabled") }}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaTopic
+metadata:
+  name: {{ $topic.name }}
+  namespace: {{ include "op-kits.namespace" $ }}
+  labels:
+    {{- include "op-kits.strimzi.labels" $ | nindent 4 }}
+    strimzi.io/cluster: {{ include "op-kits.strimzi.kafkaName" $ }}
+  {{- with $.Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  partitions: {{ $topic.partitions }}
+  replicas: {{ $topic.replicas }}
+  {{- with $topic.config }}
+  config:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -1,0 +1,54 @@
+{{- if .Values.cloudnativepg.enabled }}
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: {{ include "op-kits.cloudnativepg.clusterName" . }}
+  namespace: {{ include "op-kits.namespace" . }}
+  labels:
+    {{- include "op-kits.cloudnativepg.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.cloudnativepg.cluster.annotations }}
+  annotations:
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.cloudnativepg.cluster.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  instances: {{ .Values.cloudnativepg.cluster.instances }}
+  imageName: {{ .Values.cloudnativepg.cluster.imageName }}
+  storage:
+    size: {{ .Values.cloudnativepg.cluster.storage.size }}
+    storageClass: {{ .Values.cloudnativepg.cluster.storage.storageClass }}
+  enableSuperuserAccess: {{ .Values.cloudnativepg.cluster.enableSuperuserAccess }}
+  bootstrap:
+    initdb:
+      database: {{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
+      owner: {{ .Values.cloudnativepg.cluster.bootstrap.initdb.owner }}
+  monitoring:
+    enablePodMonitor: {{ .Values.cloudnativepg.cluster.monitoring.enablePodMonitor }}
+  {{- with .Values.cloudnativepg.cluster.postgresql.parameters }}
+  postgresql:
+    parameters:
+      {{- toYaml . | nindent 6 }}
+  {{- end }}
+  {{- with .Values.cloudnativepg.cluster.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+  {{- if or .Values.nodeSelector .Values.tolerations .Values.affinity }}
+  affinity:
+    {{- with .Values.nodeSelector }}
+    nodeSelector:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+    tolerations:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    {{- with .Values.affinity }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+{{- end }}

@@ -1,0 +1,33 @@
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if $user.enabled }}
+{{- if not (eq $name "enabled") }}
+---
+apiVersion: kafka.strimzi.io/v1beta2
+kind: KafkaUser
+metadata:
+  name: {{ $user.name }}
+  namespace: {{ include "op-kits.namespace" $ }}
+  labels:
+    {{- include "op-kits.strimzi.labels" $ | nindent 4 }}
+    strimzi.io/cluster: {{ include "op-kits.strimzi.kafkaName" $ }}
+  {{- with $.Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  authentication:
+    type: {{ $user.authentication.type }}
+    {{- with $user.authentication.password }}
+    password:
+      valueFrom:
+        secretKeyRef:
+          name: {{ .secretName }}
+          key: {{ .secretKey }}
+    {{- end }}
+  {{- with $user.authorization }}
+  authorization:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

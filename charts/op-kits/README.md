@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.0-rc.1g](https://img.shields.io/badge/Version-0.1.0--rc.1g-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.0-rc.2](https://img.shields.io/badge/Version-0.1.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1g
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -36,7 +36,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.1g
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.0-rc.2
 ```
 
 ## Operator Installation
@@ -95,7 +95,7 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.0-rc.1g \
+    --version 0.1.0-rc.2 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -187,6 +187,7 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | Key | Type | Default | Description |
 |-----|------|---------|-------------|
 | affinity | object | `{}` | Affinity rules for all pods Example: affinity:   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: kubernetes.io/os           operator: In           values:           - linux   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname |
+| cloudnativepg.cluster.annotations | object | `{}` | Additional annotations to apply to the PostgreSQL Cluster resource Example: annotations:   backup.postgresql.cnpg.io/enabled: "true"   monitoring.postgresql.cnpg.io/scrape: "true" |
 | cloudnativepg.cluster.bootstrap.initdb.database | string | `"app"` | Database name to create during initialization |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | `"appuser"` | Database owner/user to create during initialization |
 | cloudnativepg.cluster.enableSuperuserAccess | bool | `true` | Enable superuser access (creates <cluster>-superuser secret) |
@@ -206,8 +207,7 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | nameOverride | string | `""` | Override name of app |
 | nodeSelector | object | `{}` | Node selector for all pods Example: nodeSelector:   kubernetes.io/os: linux   node-role.kubernetes.io/worker: "true" |
 | strimzi.enabled | bool | `true` | Enable Strimzi Kafka cluster deployment |
-| strimzi.kafka.annotations.kraft.enabled | bool | `true` | Enable KRaft mode (no ZooKeeper required) |
-| strimzi.kafka.annotations.nodePools.enabled | bool | `true` | Use KafkaNodePool resources for node management |
+| strimzi.kafka.annotations | object | `{"strimzi.io/kraft":"enabled","strimzi.io/node-pools":"enabled"}` | Annotations to apply to the Kafka Cluster resource Includes both operator configuration and custom annotations Example: annotations:   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources   strimzi.io/restart: "true"           # Custom restart annotation   kafka.strimzi.io/logging: "debug"    # Custom logging annotation |
 | strimzi.kafka.config | object | `{"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
 | strimzi.kafka.entityOperator.topicOperator.enabled | bool | `true` | Enable Kafka Topic Operator for topic management |
 | strimzi.kafka.entityOperator.userOperator.enabled | bool | `true` | Enable Kafka User Operator for user management |
@@ -228,11 +228,7 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | strimzi.nodePools.controllers.storage.deleteClaim | bool | `false` | Whether to delete PVC when node pool is deleted |
 | strimzi.nodePools.controllers.storage.size | string | `"20Gi"` | Storage size for controller nodes |
 | strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
-| strimzi.topics.events.config | object | `{"cleanup.policy":"delete","retention.ms":604800000}` | Topic configuration parameters |
-| strimzi.topics.events.enabled | bool | `true` | Enable main events topic creation |
-| strimzi.topics.events.name | string | `"app-events"` | Topic name for main application events |
-| strimzi.topics.events.partitions | int | `6` | Number of partitions (adjust for throughput) |
-| strimzi.topics.events.replicas | int | `1` | Number of replicas (set to 3 when you scale brokers to 3) |
+| strimzi.topics | object | `{}` |  |
 | strimzi.users.app.authentication.password | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"app-secrets"}` | Password configuration sourced from Kubernetes secret |
 | strimzi.users.app.authentication.type | string | `"scram-sha-512"` | Authentication type for Kafka user |
 | strimzi.users.app.enabled | bool | `true` | Enable main application user creation |

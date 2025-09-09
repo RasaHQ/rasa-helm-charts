@@ -6,16 +6,15 @@ metadata:
   namespace: {{ include "op-kits.namespace" . }}
   labels:
     {{- include "op-kits.strimzi.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.strimzi.kafka.annotations }}
   annotations:
-    {{- if .Values.strimzi.kafka.annotations.kraft.enabled }}
-    strimzi.io/kraft: "enabled"
-    {{- end }}
-    {{- if .Values.strimzi.kafka.annotations.nodePools.enabled }}
-    strimzi.io/node-pools: "enabled"
-    {{- end }}
     {{- with .Values.commonAnnotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+    {{- with .Values.strimzi.kafka.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
 spec:
   entityOperator:
     {{- if .Values.strimzi.kafka.entityOperator.topicOperator.enabled }}

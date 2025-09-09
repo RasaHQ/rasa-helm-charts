@@ -6,9 +6,14 @@ metadata:
   namespace: {{ include "op-kits.namespace" . }}
   labels:
     {{- include "op-kits.cloudnativepg.labels" . | nindent 4 }}
-  {{- with .Values.commonAnnotations }}
+  {{- if or .Values.commonAnnotations .Values.cloudnativepg.cluster.annotations }}
   annotations:
+    {{- with .Values.commonAnnotations }}
     {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.cloudnativepg.cluster.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
   {{- end }}
 spec:
   instances: {{ .Values.cloudnativepg.cluster.instances }}

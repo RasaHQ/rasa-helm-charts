@@ -1,6 +1,16 @@
 🎉 Operator Kits have been deployed successfully!
 
-This chart deploys the following operator resources:
+📋 Prerequisites verified:
+{{- if .Values.cloudnativepg.enabled }}
+  ✅ CloudNativePG operator (required for PostgreSQL clusters)
+{{- end }}
+{{- if .Values.strimzi.enabled }}
+  ✅ Strimzi Kafka operator (required for Kafka clusters)
+{{- end }}
+
+💡 If operators are not installed, see README.md for installation instructions.
+
+This chart deploys the following resources:
 
 {{- if .Values.cloudnativepg.enabled }}
 
@@ -11,13 +21,36 @@ This chart deploys the following operator resources:
   - Database: {{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
   - Storage: {{ .Values.cloudnativepg.cluster.storage.size }}
 
-To get the PostgreSQL connection details:
-  kubectl get secrets -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-app -o yaml
-  kubectl get secrets -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser -o yaml
+📋 PostgreSQL Connection Information:
 
-To connect to PostgreSQL:
-  kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.cloudnativepg.clusterName" . }}-rw 5432:5432
-  # Then connect to localhost:5432 with credentials from the secrets above
+  Internal DNS Name (from within cluster):
+    {{ include "op-kits.cloudnativepg.clusterName" . }}-rw.{{ include "op-kits.namespace" . }}.svc.cluster.local:5432
+
+  Connection String Template:
+    postgresql://[username]:[password]@{{ include "op-kits.cloudnativepg.clusterName" . }}-rw.{{ include "op-kits.namespace" . }}.svc.cluster.local:5432/{{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
+
+  Environment Variables for Applications (Superuser - can create databases):
+    POSTGRES_HOST={{ include "op-kits.cloudnativepg.clusterName" . }}-rw.{{ include "op-kits.namespace" . }}.svc.cluster.local
+    POSTGRES_PORT=5432
+    POSTGRES_DATABASE={{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
+    POSTGRES_USER=[from secret: {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser]
+    POSTGRES_PASSWORD=[from secret: {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser]
+
+  Get superuser credentials:
+    kubectl get secret -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser -o jsonpath='{.data.username}' | base64 -d
+    kubectl get secret -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser -o jsonpath='{.data.password}' | base64 -d
+
+  Alternative - Application user (limited privileges):
+    kubectl get secret -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-app -o jsonpath='{.data.username}' | base64 -d
+    kubectl get secret -n {{ include "op-kits.namespace" . }} {{ include "op-kits.cloudnativepg.clusterName" . }}-app -o jsonpath='{.data.password}' | base64 -d
+    
+  ⚠️  Note: The app user has limited privileges. To create databases, use the superuser 
+      or grant CREATE DATABASE permission to the app user:
+      GRANT CREATE ON DATABASE {{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }} TO {{ .Values.cloudnativepg.cluster.bootstrap.initdb.owner }};
+
+  For local development (port-forward):
+    kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.cloudnativepg.clusterName" . }}-rw 5432:5432
+    # Then use: postgresql://[username]:[password]@localhost:5432/{{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}
 
 {{- end }}
 
@@ -54,23 +87,116 @@ To connect to PostgreSQL:
 {{- end }}
 {{- end }}
 
-To get Kafka connection details:
+📋 Kafka Connection Information:
+
+  Internal Bootstrap Servers (from within cluster):
+    {{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092
+
+  Environment Variables for Applications:
+    KAFKA_BROKER_ADDRESS={{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092
+    KAFKA_SASL_MECHANISM=SCRAM-SHA-512
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if and $user.enabled (ne $name "enabled") }}
-  kubectl get secrets -n {{ include "op-kits.namespace" $ }} {{ $user.name }} -o yaml
+    KAFKA_SASL_USERNAME={{ $user.name }}
+    KAFKA_SASL_PASSWORD=[from secret: {{ $user.name }}]
 {{- break }}
 {{- end }}
 {{- end }}
+
+  Get Kafka credentials:
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+    kubectl get secret -n {{ include "op-kits.namespace" $ }} {{ $user.name }} -o jsonpath='{.data.password}' | base64 -d
+{{- break }}
+{{- end }}
 {{- end }}
 
-To access Kafka:
-  kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap 9092:9092
-  # Then connect to localhost:9092 with SASL credentials from the user secrets
+  Available Topics:
+{{- range $name, $topic := .Values.strimzi.topics }}
+{{- if and $topic.enabled (ne $name "enabled") }}
+    - {{ $topic.name }} ({{ $topic.partitions }} partitions, {{ $topic.replicas }} replicas)
+{{- end }}
+{{- end }}
+
+  For local development (port-forward):
+    kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap 9092:9092
+    # Then use: localhost:9092 with SASL credentials
+
+{{- end }}
 
 {{- end }}
 
 🔍 To monitor the deployment status:
   kubectl get all -n {{ include "op-kits.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }}
+
+{{- if or .Values.cloudnativepg.enabled .Values.strimzi.enabled }}
+
+🚀 Example Application Configuration:
+
+  Kubernetes Deployment with Environment Variables:
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: my-app
+  spec:
+    template:
+      spec:
+        containers:
+        - name: app
+          image: my-app:latest
+          env:
+{{- if .Values.cloudnativepg.enabled }}
+          # PostgreSQL Configuration (Superuser - can create databases)
+          - name: POSTGRES_HOST
+            value: "{{ include "op-kits.cloudnativepg.clusterName" . }}-rw.{{ include "op-kits.namespace" . }}.svc.cluster.local"
+          - name: POSTGRES_PORT
+            value: "5432"
+          - name: POSTGRES_DATABASE
+            value: "{{ .Values.cloudnativepg.cluster.bootstrap.initdb.database }}"
+          - name: POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser
+                key: username
+          - name: POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ include "op-kits.cloudnativepg.clusterName" . }}-superuser
+                key: password
+          # Alternative: Use app user (limited privileges)
+          # - name: POSTGRES_USER
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: {{ include "op-kits.cloudnativepg.clusterName" . }}-app
+          #       key: username
+          # - name: POSTGRES_PASSWORD
+          #   valueFrom:
+          #     secretKeyRef:
+          #       name: {{ include "op-kits.cloudnativepg.clusterName" . }}-app
+          #       key: password
+{{- end }}
+{{- if .Values.strimzi.enabled }}
+          # Kafka Configuration
+          - name: KAFKA_BROKER_ADDRESS
+            value: "{{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092"
+          - name: KAFKA_SASL_MECHANISM
+            value: "SCRAM-SHA-512"
+{{- range $name, $user := .Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+          - name: KAFKA_SASL_USERNAME
+            value: "{{ $user.name }}"
+          - name: KAFKA_SASL_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ $user.name }}
+                key: password
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+  ```
+{{- end }}
 
 📚 For more information:
   - CloudNativePG: https://cloudnative-pg.io/

@@ -17,9 +17,8 @@ cloudnativepg:
   # -- Enable CloudNativePG cluster deployment
   enabled: true
 
-  # -- Set to true to install the CloudNativePG operator via Helm dependency
-  operator:
-    enabled: false
+  # CloudNativePG operator must be pre-installed in the cluster
+  # See README.md for installation instructions
 
   cluster:
     # -- (string) Override cluster name. If empty, uses "{{ release-name }}-pg"
@@ -28,6 +27,13 @@ cloudnativepg:
     instances: 1
     # -- PostgreSQL container image to use
     imageName: "ghcr.io/cloudnative-pg/postgresql:16"
+
+    # -- Additional annotations to apply to the PostgreSQL Cluster resource
+    # Example:
+    # annotations:
+    #   backup.postgresql.cnpg.io/enabled: "true"
+    #   monitoring.postgresql.cnpg.io/scrape: "true"
+    annotations: {}
 
     # Storage configuration for PostgreSQL
     storage:
@@ -77,31 +83,30 @@ strimzi:
   # -- Enable Strimzi Kafka cluster deployment
   enabled: true
 
-  # -- Set to true to install the Strimzi Kafka operator via Helm dependency
-  operator:
-    enabled: false
+  # Strimzi Kafka operator must be pre-installed in the cluster
+  # See README.md for installation instructions
 
   kafka:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
     nameOverride: ""
 
-    # Kafka cluster annotations for operator configuration
+    # -- Annotations to apply to the Kafka Cluster resource
+    # Includes both operator configuration and custom annotations
+    # Example:
+    # annotations:
+    #   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)
+    #   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources
+    #   strimzi.io/restart: "true"           # Custom restart annotation
+    #   kafka.strimzi.io/logging: "debug"    # Custom logging annotation
     annotations:
-      kraft:
-        # -- Enable KRaft mode (no ZooKeeper required)
-        enabled: true
-      nodePools:
-        # -- Use KafkaNodePool resources for node management
-        enabled: true
+      strimzi.io/kraft: "enabled"
+      strimzi.io/node-pools: "enabled"
 
     # Entity Operator configuration
+    # Topic and User operators are enabled by default with empty configuration
     entityOperator:
-      topicOperator:
-        # -- Enable Kafka Topic Operator for topic management
-        enabled: true
-      userOperator:
-        # -- Enable Kafka User Operator for user management
-        enabled: true
+      topicOperator: {}
+      userOperator: {}
 
     # Kafka listeners configuration
     # -- Kafka listeners define how clients connect to the cluster
@@ -200,21 +205,42 @@ strimzi:
       resources: {}
 
   # Kafka Topics Configuration
-  topics:
-    # Main events topic configuration
-    events:
-      # -- Enable main events topic creation
-      enabled: true
-      # -- Topic name for main application events
-      name: "app-events"
-      # -- Number of partitions (adjust for throughput)
-      partitions: 6
-      # -- Number of replicas (set to 3 when you scale brokers to 3)
-      replicas: 1
-      # -- Topic configuration parameters
-      config:
-        retention.ms: 604800000  # 7 days
-        cleanup.policy: "delete"
+  topics: {}
+    # rasaEvents:
+    #   enabled: true
+    #   name: "rasa-events"
+    #   partitions: 1
+    #   replicas: 1
+    #   config:
+    #     retention.ms: 604800000  # 7 days
+    #     cleanup.policy: "delete"
+
+    # rasaEventsDlq:
+    #   enabled: true
+    #   name: "rasa-events-dlq"
+    #   partitions: 1
+    #   replicas: 1
+    #   config:
+    #     retention.ms: 1209600000  # 14 days
+    #     cleanup.policy: "delete"
+
+    # rasaCoreEvents:
+    #   enabled: true
+    #   name: "rasa-core-events"
+    #   partitions: 1
+    #   replicas: 1
+    #   config:
+    #     retention.ms: 604800000  # 7 days
+    #     cleanup.policy: "delete"
+
+    # rasa-assistant:
+    #   enabled: true
+    #   name: "rasa-assistant"
+    #   partitions: 1
+    #   replicas: 1
+    #   config:
+    #     retention.ms: 604800000  # 7 days
+    #     cleanup.policy: "delete"
 
     # Additional topics can be added here
     # Example:

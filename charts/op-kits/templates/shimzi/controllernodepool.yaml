@@ -24,18 +24,16 @@ spec:
   resources:
     {{- toYaml . | nindent 4 }}
   {{- end }}
-  {{- with .Values.nodeSelector }}
+  {{- if or .Values.tolerations .Values.affinity }}
   template:
     pod:
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-  {{- end }}
-  {{- with .Values.tolerations }}
+      {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-  {{- end }}
-  {{- with .Values.affinity }}
+      {{- end }}
+      {{- with .Values.affinity }}
       affinity:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
   {{- end }}
 {{- end }}

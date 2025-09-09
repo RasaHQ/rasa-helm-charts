@@ -30,18 +30,16 @@ spec:
     resources:
       {{- toYaml . | nindent 6 }}
     {{- end }}
-  {{- with .Values.nodeSelector }}
-  template:
-    pod:
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-  {{- end }}
-  {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-  {{- end }}
-  {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-  {{- end }}
+    {{- if or .Values.tolerations .Values.affinity }}
+    template:
+      pod:
+        {{- with .Values.tolerations }}
+        tolerations:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+        {{- with .Values.affinity }}
+        affinity:
+          {{- toYaml . | nindent 10 }}
+        {{- end }}
+    {{- end }}
 {{- end }}

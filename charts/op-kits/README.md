@@ -209,8 +209,8 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | strimzi.enabled | bool | `true` | Enable Strimzi Kafka cluster deployment |
 | strimzi.kafka.annotations | object | `{"strimzi.io/kraft":"enabled","strimzi.io/node-pools":"enabled"}` | Annotations to apply to the Kafka Cluster resource Includes both operator configuration and custom annotations Example: annotations:   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources   strimzi.io/restart: "true"           # Custom restart annotation   kafka.strimzi.io/logging: "debug"    # Custom logging annotation |
 | strimzi.kafka.config | object | `{"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
-| strimzi.kafka.entityOperator.topicOperator.enabled | bool | `true` | Enable Kafka Topic Operator for topic management |
-| strimzi.kafka.entityOperator.userOperator.enabled | bool | `true` | Enable Kafka User Operator for user management |
+| strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
+| strimzi.kafka.entityOperator.userOperator | object | `{}` |  |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.kafka.resources | object | `{}` | Resource limits and requests for Kafka brokers Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "100m"     memory: "512Mi" |

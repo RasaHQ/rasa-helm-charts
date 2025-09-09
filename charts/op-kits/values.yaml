@@ -103,13 +103,10 @@ strimzi:
       strimzi.io/node-pools: "enabled"
 
     # Entity Operator configuration
+    # Topic and User operators are enabled by default with empty configuration
     entityOperator:
-      topicOperator:
-        # -- Enable Kafka Topic Operator for topic management
-        enabled: true
-      userOperator:
-        # -- Enable Kafka User Operator for user management
-        enabled: true
+      topicOperator: {}
+      userOperator: {}
 
     # Kafka listeners configuration
     # -- Kafka listeners define how clients connect to the cluster

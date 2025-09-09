@@ -17,12 +17,10 @@ metadata:
   {{- end }}
 spec:
   entityOperator:
-    {{- if .Values.strimzi.kafka.entityOperator.topicOperator.enabled }}
-    topicOperator: {}
-    {{- end }}
-    {{- if .Values.strimzi.kafka.entityOperator.userOperator.enabled }}
-    userOperator: {}
-    {{- end }}
+    topicOperator:
+      {{- toYaml .Values.strimzi.kafka.entityOperator.topicOperator | nindent 6 }}
+    userOperator:
+      {{- toYaml .Values.strimzi.kafka.entityOperator.userOperator | nindent 6 }}
   kafka:
     listeners:
       {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}

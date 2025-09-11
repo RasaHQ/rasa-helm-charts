@@ -3,7 +3,7 @@ name: Release Op-Kits Helm Chart
 on:
   push:
     branches:
-      - test-slack-notifications/
+      - test-slack-notifications
 
 jobs:
   release:

@@ -63,15 +63,22 @@ config:
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
+    # -- The database name for Keycloak user management service.
+    # This is used by Keycloak to store its user management data.
+    keycloakDatabaseName: "keycloak"
+    # -- The database name for Studio backend services.
+    # This is used by Studio to store its data.
+    backendDatabaseName: "studio"
+    # -- The database connection URL query parameters.
+    # These parameters are used to configure the database connection.
+    # Example: "sslmode=require&connect_timeout=30"
+    queryParams: ""
     # -- Set to true if you want to use SSL for database connection.
     # When enabled, Studio will attempt to establish an encrypted connection to the database.
     preferSSL: "true"
     # -- If true, the server will reject database connections which are not present in the list of supplied CAs.
     # This provides additional security by ensuring only trusted certificates are accepted.
     rejectUnauthorized: ""
-    # -- The database name for Keycloak user management service.
-    # This is used by Keycloak to store its user management data.
-    keycloakDatabaseName: "keycloak"
 
   # -- config.keycloak defines the Keycloak configuration settings.
   # This section configures the authentication and authorization service.
@@ -171,14 +178,6 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
-    # -- backend.environmentVariables.DATABASE_URL is the database connection URL for Studio Backend.
-    # Format: postgresql://${database.username}:${database.password}@${database.host}:${database.port}/studio?schema=public
-    # This should be stored in a Kubernetes secret for security.
-    # Ref: https://kubernetes.io/docs/concepts/configuration/secret/
-    DATABASE_URL:
-      secret:
-        name: "studio-secrets"
-        key: "DATABASE_URL"
     # -- backend.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
     # This defines the authentication realm where Studio users will be managed.
     KEYCLOAK_REALM:
@@ -677,12 +676,6 @@ eventIngestion:
   #     key: my-secret-key
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   environmentVariables:
-    # -- eventIngestion.environmentVariables.DATABASE_URL is the database connection URL for Event Ingestion.
-    # Format: postgresql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${DB_NAME}?schema=public
-    DATABASE_URL:
-      secret:
-        name: "studio-secrets"
-        key: "DATABASE_URL"
     # -- eventIngestion.environmentVariables.KAFKA_ENABLE_SSL determines whether to enable SSL for Kafka connections.
     KAFKA_ENABLE_SSL:
       value: ""

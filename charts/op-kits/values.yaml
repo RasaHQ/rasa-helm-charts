@@ -89,6 +89,9 @@ strimzi:
   kafka:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
     nameOverride: ""
+    # -- Container image for Kafka
+    # image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0"
+    image: ""
 
     # -- Annotations to apply to the Kafka Cluster resource
     # Includes both operator configuration and custom annotations
@@ -288,6 +291,89 @@ strimzi:
     #   authentication:
     #     type: "scram-sha-512"
 
+# Valkey Configuration
+valkey:
+  # -- Enable Valkey cluster deployment
+  enabled: true
+
+  # Valkey operator must be pre-installed in the cluster
+  # See README.md for installation instructions
+
+  cluster:
+    # -- (string) Override cluster name. If empty, uses "{{ release-name }}-valkey"
+    nameOverride: ""
+    # -- Number of primary nodes; set >1 only if you intend to run Valkey Cluster
+    nodes: 1
+    # -- Replicas per primary (0 = standalone, >0 = primary + replicas)
+    replicas: 0
+    # -- Container image for Valkey
+    # image: "ghcr.io/hyperspike/valkey:8.0.2"
+    image: ""
+
+    # -- Additional annotations to apply to the Valkey Cluster resource
+    # Example:
+    # annotations:
+    #   valkey.hyperspike.io/monitoring: "enabled"
+    #   valkey.hyperspike.io/backup: "enabled"
+    annotations: {}
+
+    # Service password configuration
+    servicePassword:
+      # -- Whether the service password is optional
+      optional: false
+      # -- Secret name containing the Valkey password
+      name: "app-secrets"
+      # -- Secret key for the Valkey password
+      key: "VALKEY_PASSWORD"
+
+    # -- Enable volume permissions initialization
+    volumePermissions: true
+
+    # Storage configuration for Valkey
+    storage:
+      spec:
+        # -- Access modes for Valkey storage
+        accessModes:
+          - ReadWriteOnce
+        # -- Storage size for Valkey data
+        resources:
+          requests:
+            storage: "10Gi"
+        # -- Storage class name. Change to your storage class
+        storageClassName: "gp2"
+
+    # -- Resource limits and requests for Valkey containers
+    # Example:
+    # resources:
+    #   limits:
+    #     cpu: "1"
+    #     memory: "1Gi"
+    #   requests:
+    #     cpu: "100m"
+    #     memory: "256Mi"
+    resources: []
+      # requests:
+      #   cpu: "100m"
+      #   memory: "128Mi"
+      # limits:
+      #   cpu: "500m"
+      #   memory: "512Mi"
+
+    # TLS configuration (optional)
+    # -- Enable TLS (requires cert-manager)
+    tls: false
+    # -- Certificate issuer name
+    certIssuer: "selfsigned"
+    # -- Certificate issuer type
+    certIssuerType: "ClusterIssuer"
+
+    # External access configuration (optional)
+    externalAccess:
+      # -- Enable external access to Valkey cluster
+      enabled: false
+      # -- Type of external access (LoadBalancer, NodePort, etc.)
+      type: "LoadBalancer"
+
 # Common settings applied to all resources
 # -- Additional labels to apply to all resources
 # Example:
@@ -303,7 +389,7 @@ commonLabels: {}
 #   prometheus.io/port: "8080"
 commonAnnotations: {}
 
-# Pod scheduling configuration for CloudNativePG ONLY
+# Pod scheduling configuration for CloudNativePG and Valkey ONLY
 # -- Node selector for all pods
 # Example:
 # nodeSelector:

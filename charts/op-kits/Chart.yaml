@@ -2,7 +2,7 @@ apiVersion: v2
 name: op-kits
 description: Operator Kits Helm Chart
 type: application
-version: 0.1.1
+version: 0.1.2
 home: https://helm.rasa.com/
 sources:
   - https://helm.rasa.com/charts/op-kits

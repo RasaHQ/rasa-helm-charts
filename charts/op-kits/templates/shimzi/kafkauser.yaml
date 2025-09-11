@@ -15,15 +15,17 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
+  {{- with $user.authentication }}
   authentication:
-    type: {{ $user.authentication.type }}
-    {{- with $user.authentication.password }}
+    type: {{ .type }}
+    {{- with .password }}
     password:
       valueFrom:
         secretKeyRef:
           name: {{ .secretName }}
           key: {{ .secretKey }}
     {{- end }}
+  {{- end }}
   {{- with $user.authorization }}
   authorization:
     {{- toYaml . | nindent 4 }}

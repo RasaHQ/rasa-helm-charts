@@ -73,6 +73,17 @@ Strimzi Kafka cluster name
 {{- end }}
 
 {{/*
+Valkey cluster name
+*/}}
+{{- define "op-kits.valkey.clusterName" -}}
+{{- if .Values.valkey.cluster.nameOverride }}
+{{- .Values.valkey.cluster.nameOverride }}
+{{- else }}
+{{- printf "%s-valkey" (include "op-kits.fullname" .) }}
+{{- end }}
+{{- end }}
+
+{{/*
 Common labels for CloudNativePG resources
 */}}
 {{- define "op-kits.cloudnativepg.labels" -}}
@@ -86,6 +97,14 @@ Common labels for Strimzi resources
 {{- define "op-kits.strimzi.labels" -}}
 {{ include "op-kits.labels" . }}
 app.kubernetes.io/component: messaging
+{{- end }}
+
+{{/*
+Common labels for Valkey resources
+*/}}
+{{- define "op-kits.valkey.labels" -}}
+{{ include "op-kits.labels" . }}
+app.kubernetes.io/component: cache
 {{- end }}
 
 {{/*

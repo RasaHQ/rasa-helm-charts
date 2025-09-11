@@ -1,0 +1,69 @@
+{{- if .Values.valkey.enabled }}
+apiVersion: hyperspike.io/v1
+kind: Valkey
+metadata:
+  name: {{ include "op-kits.valkey.clusterName" . }}
+  namespace: {{ include "op-kits.namespace" . }}
+  labels:
+    {{- include "op-kits.valkey.labels" . | nindent 4 }}
+  {{- if or .Values.commonAnnotations .Values.valkey.cluster.annotations }}
+  annotations:
+    {{- with .Values.commonAnnotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.valkey.cluster.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+  {{- end }}
+spec:
+  # number of primaries; set >1 only if you intend to run Valkey Cluster
+  nodes: {{ .Values.valkey.cluster.nodes }}
+  # replicas per primary (0 = standalone, >0 = primary + replicas)
+  replicas: {{ .Values.valkey.cluster.replicas }}
+
+  servicePassword:
+    optional: {{ .Values.valkey.cluster.servicePassword.optional }}
+    name: {{ .Values.valkey.cluster.servicePassword.name | quote }}
+    key: {{ .Values.valkey.cluster.servicePassword.key | quote }}
+  
+  volumePermissions: {{ .Values.valkey.cluster.volumePermissions }}
+
+  {{- with .Values.valkey.cluster.image }}
+  # Container image
+  image: {{ . | quote }}
+  {{- end }}
+
+  storage:
+    {{- toYaml .Values.valkey.cluster.storage | nindent 4 }}
+
+  {{- with .Values.valkey.cluster.resources }}
+  resources:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- if .Values.valkey.cluster.tls }}
+  # Enable TLS (requires cert-manager)
+  tls: {{ .Values.valkey.cluster.tls }}
+  certIssuer: {{ .Values.valkey.cluster.certIssuer }}
+  certIssuerType: {{ .Values.valkey.cluster.certIssuerType }}
+  {{- end }}
+
+  {{- if .Values.valkey.cluster.externalAccess.enabled }}
+  # External access configuration
+  externalAccess:
+    enabled: {{ .Values.valkey.cluster.externalAccess.enabled }}
+    type: {{ .Values.valkey.cluster.externalAccess.type }}
+  {{- end }}
+
+  {{- with .Values.nodeSelector }}
+  # Node selector
+  nodeSelector:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+
+  {{- with .Values.tolerations }}
+  # Tolerations
+  tolerations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}

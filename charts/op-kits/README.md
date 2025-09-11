@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.2-rc.1](https://img.shields.io/badge/Version-0.1.2--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.2-rc.2](https://img.shields.io/badge/Version-0.1.2--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -16,7 +16,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -36,7 +36,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.2
 ```
 
 ## Operator Installation
@@ -95,7 +95,7 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.2-rc.1 \
+    --version 0.1.2-rc.2 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -211,6 +211,7 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | strimzi.kafka.config | object | `{"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
 | strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
 | strimzi.kafka.entityOperator.userOperator | object | `{}` |  |
+| strimzi.kafka.image | string | `""` | Container image for Kafka image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0" |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.kafka.resources | object | `{}` | Resource limits and requests for Kafka brokers Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "100m"     memory: "512Mi" |
@@ -234,3 +235,22 @@ Each deployment will create its own PostgreSQL and Kafka clusters, all managed b
 | strimzi.users.app.enabled | bool | `true` | Enable main application user creation |
 | strimzi.users.app.name | string | `"app-user"` | Kafka user name for main application |
 | tolerations | list | `[]` | Tolerations for all pods Example: tolerations: - key: "key1"   operator: "Equal"   value: "value1"   effect: "NoSchedule" - key: "key2"   operator: "Exists"   effect: "NoExecute" |
+| valkey.cluster.annotations | object | `{}` | Additional annotations to apply to the Valkey Cluster resource Example: annotations:   valkey.hyperspike.io/monitoring: "enabled"   valkey.hyperspike.io/backup: "enabled" |
+| valkey.cluster.certIssuer | string | `"selfsigned"` | Certificate issuer name |
+| valkey.cluster.certIssuerType | string | `"ClusterIssuer"` | Certificate issuer type |
+| valkey.cluster.externalAccess.enabled | bool | `false` | Enable external access to Valkey cluster |
+| valkey.cluster.externalAccess.type | string | `"LoadBalancer"` | Type of external access (LoadBalancer, NodePort, etc.) |
+| valkey.cluster.image | string | `""` | Container image for Valkey image: "ghcr.io/hyperspike/valkey:8.0.2" |
+| valkey.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-valkey" |
+| valkey.cluster.nodes | int | `1` | Number of primary nodes; set >1 only if you intend to run Valkey Cluster |
+| valkey.cluster.replicas | int | `0` | Replicas per primary (0 = standalone, >0 = primary + replicas) |
+| valkey.cluster.resources | list | `[]` | Resource limits and requests for Valkey containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
+| valkey.cluster.servicePassword.key | string | `"VALKEY_PASSWORD"` | Secret key for the Valkey password |
+| valkey.cluster.servicePassword.name | string | `"app-secrets"` | Secret name containing the Valkey password |
+| valkey.cluster.servicePassword.optional | bool | `false` | Whether the service password is optional |
+| valkey.cluster.storage.spec.accessModes | list | `["ReadWriteOnce"]` | Access modes for Valkey storage |
+| valkey.cluster.storage.spec.resources | object | `{"requests":{"storage":"10Gi"}}` | Storage size for Valkey data |
+| valkey.cluster.storage.spec.storageClassName | string | `"gp2"` | Storage class name. Change to your storage class |
+| valkey.cluster.tls | bool | `false` | Enable TLS (requires cert-manager) |
+| valkey.cluster.volumePermissions | bool | `true` | Enable volume permissions initialization |
+| valkey.enabled | bool | `true` | Enable Valkey cluster deployment |

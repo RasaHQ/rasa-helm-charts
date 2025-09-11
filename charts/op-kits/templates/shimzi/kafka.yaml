@@ -22,6 +22,10 @@ spec:
     userOperator:
       {{- toYaml .Values.strimzi.kafka.entityOperator.userOperator | nindent 6 }}
   kafka:
+    {{- with .Values.strimzi.kafka.image }}
+    # Container image
+    image: {{ . | quote }}
+    {{- end }}
     listeners:
       {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}
     config:

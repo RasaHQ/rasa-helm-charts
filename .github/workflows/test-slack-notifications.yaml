@@ -23,7 +23,7 @@ jobs:
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
           # Send notication to #release slack channel
-          channel-id: 'C06Q93Q00RG'
+          channel-id: 'C0351QXJ5CP'
           slack-message: "🚀 New *Op-Kits* Helm Chart version `op-kits-0.1.2` has been released!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

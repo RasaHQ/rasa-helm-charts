@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.2-rc.2](https://img.shields.io/badge/Version-0.1.2--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -10,13 +10,14 @@ Operator Kits Helm Chart
 - Helm 3.8.0+
 - CloudNativePG operator must be pre-installed in the cluster
 - Strimzi Kafka operator must be pre-installed in the cluster
+- Valkey operator must be pre-installed in the cluster
 
 ## Installing the Chart
 
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2
 ```
 
 ## Uninstalling the Chart
@@ -36,7 +37,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2
 ```
 
 ## Operator Installation
@@ -76,7 +77,22 @@ $ helm install strimzi-operator strimzi/strimzi-kafka-operator \
 
 > **Important**: The `watchAnyNamespace=true` setting allows the Strimzi operator to manage Kafka resources across all namespaces in the cluster. This is required for the operator to manage resources created by this chart in different namespaces.
 
-### 3. Verify Operator Installation
+### 3. Valkey Operator
+
+Install the Valkey operator using the official Helm chart:
+
+```console
+# Add the Hyperspike Helm repository
+$ helm repo add hyperspike https://charts.hyperspike.io
+$ helm repo update
+
+# Install Valkey operator in valkey-system namespace
+$ helm install valkey-operator hyperspike/valkey-operator \
+    --namespace valkey-system \
+    --create-namespace
+```
+
+### 4. Verify Operator Installation
 
 After installing the operators, verify they are running:
 
@@ -86,16 +102,19 @@ $ kubectl get pods -n cnpg-system
 
 # Check Strimzi operator
 $ kubectl get pods -n strimzi-system
+
+# Check Valkey operator
+$ kubectl get pods -n valkey-system
 ```
 
-### 4. Install Application Resources
+### 5. Install Application Resources
 
 Once operators are installed and running, you can deploy your application resources:
 
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.2-rc.2 \
+    --version 0.1.2 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -111,16 +130,20 @@ $ helm uninstall cnpg-operator -n cnpg-system
 # Remove Strimzi operator 
 $ helm uninstall strimzi-operator -n strimzi-system
 
+# Remove Valkey operator
+$ helm uninstall valkey-operator -n valkey-system
+
 # Optionally remove the namespaces (only if empty)
-$ kubectl delete namespace cnpg-system strimzi-system
+$ kubectl delete namespace cnpg-system strimzi-system valkey-system
 ```
 
-> **Warning**: Removing operators will affect all PostgreSQL and Kafka clusters managed by them across the entire cluster.
+> **Warning**: Removing operators will affect all PostgreSQL, Kafka, and Valkey clusters managed by them across the entire cluster.
 
 ## General Configuration
 
 - **CloudNativePG**: Configure PostgreSQL clusters with customizable storage, instances, and monitoring
 - **Strimzi Kafka**: Configure Kafka clusters with KRaft mode, node pools, topics, and users
+- **Valkey**: Configure Redis-compatible in-memory data store clusters with persistence and replication
 - **Storage Classes**: Make sure to set the correct storage class names based on your cluster configuration
 - **Resource Management**: Configure CPU, memory limits and requests for optimal performance
 
@@ -128,7 +151,7 @@ $ kubectl delete namespace cnpg-system strimzi-system
 
 ### Storage Configuration
 
-Both PostgreSQL and Kafka require persistent storage. Update the storage class names in your values:
+PostgreSQL, Kafka, and Valkey require persistent storage. Update the storage class names in your values:
 
 ```yaml
 cloudnativepg:
@@ -145,6 +168,12 @@ strimzi:
       storage:
         volumes:
           - class: "your-storage-class"  # Update this
+
+valkey:
+  cluster:
+    storage:
+      spec:
+        storageClassName: "your-storage-class"  # Update this
 ```
 
 ### Scaling Considerations
@@ -180,7 +209,7 @@ $ helm install staging-app . --namespace staging
 $ helm install prod-app . --namespace production
 ```
 
-Each deployment will create its own PostgreSQL and Kafka clusters, all managed by the same operators.
+Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all managed by the same operators.
 
 ## Values
 

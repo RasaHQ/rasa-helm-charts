@@ -7,6 +7,9 @@
 {{- if .Values.strimzi.enabled }}
   ✅ Strimzi Kafka operator (required for Kafka clusters)
 {{- end }}
+{{- if .Values.valkey.enabled }}
+  ✅ Valkey operator (required for Valkey clusters)
+{{- end }}
 
 💡 If operators are not installed, see README.md for installation instructions.
 
@@ -126,9 +129,41 @@ This chart deploys the following resources:
 
 {{- end }}
 
+{{- if .Values.valkey.enabled }}
+
+🗄️ Valkey Cluster:
+  - Cluster Name: {{ include "op-kits.valkey.clusterName" . }}
+  - Namespace: {{ include "op-kits.namespace" . }}
+  - Nodes: {{ .Values.valkey.cluster.nodes }}
+  - Replicas per node: {{ .Values.valkey.cluster.replicas }}
+  - Storage: {{ .Values.valkey.cluster.storage.spec.resources.requests.storage }}
+
+📋 Valkey Connection Information:
+
+  Internal DNS Name (from within cluster):
+    {{ include "op-kits.valkey.clusterName" . }}.{{ include "op-kits.namespace" . }}.svc.cluster.local:6379
+
+  Connection String Template:
+    redis://{{ include "op-kits.valkey.clusterName" . }}.{{ include "op-kits.namespace" . }}.svc.cluster.local:6379
+
+  Environment Variables for Applications:
+    VALKEY_HOST={{ include "op-kits.valkey.clusterName" . }}.{{ include "op-kits.namespace" . }}.svc.cluster.local
+    VALKEY_PORT=6379
+    VALKEY_PASSWORD=[from secret: {{ .Values.valkey.cluster.servicePassword.name }}]
+
+  Get Valkey password:
+    kubectl get secret -n {{ include "op-kits.namespace" . }} {{ .Values.valkey.cluster.servicePassword.name }} -o jsonpath='{.data.{{ .Values.valkey.cluster.servicePassword.key }}}' | base64 -d
+
+  For local development (port-forward):
+    kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.valkey.clusterName" . }} 6379:6379
+    # Then use: redis://localhost:6379 with password
+
+{{- end }}
+
 🔍 To monitor the deployment status:
   kubectl get all -n {{ include "op-kits.namespace" . }} -l app.kubernetes.io/instance={{ .Release.Name }}
 
 📚 For more information:
   - CloudNativePG: https://cloudnative-pg.io/
   - Strimzi Kafka: https://strimzi.io/
+  - Valkey: https://valkey.io/

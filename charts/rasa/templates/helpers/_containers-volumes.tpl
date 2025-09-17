@@ -26,6 +26,10 @@
 {{- if .Values.rasa.settings.mountDefaultConfigmap -}}
 - name: "config-dir"
   mountPath: "/.config"
+- name: "app-dir"
+  mountPath: "/app"
+- name: "models"
+  mountPath: "/app/models"
 - mountPath: "/app/endpoints.yml"
   subPath: "endpoints.yml"
   name: "rasa-configuration"

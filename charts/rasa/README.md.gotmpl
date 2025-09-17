@@ -65,4 +65,24 @@ rasaProServices:
   enabled: false
 ```
 
+### Use MiniO instead of S3
+
+To use MiniO instead of S3, set `AWS_ENDPOINT_URL` environment variable to the URL of the MiniO server along with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables. Also provide `AWS_REGION` and `BUCKET_NAME` environment variables.
+
+```yaml
+rasa:
+  settings:
+    additionalEnv:
+      - name: AWS_ENDPOINT_URL
+        value: "http://minio.example.com"
+      - name: AWS_ACCESS_KEY_ID
+        value: "minio"
+      - name: AWS_SECRET_ACCESS_KEY
+        value: "minio123"
+      - name: AWS_REGION
+        value: "us-east-1"
+      - name: BUCKET_NAME
+        value: "rasa-models"
+```
+
 {{ template "chart.valuesSection" . }}

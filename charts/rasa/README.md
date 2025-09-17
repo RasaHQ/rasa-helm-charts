@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.7-rc.1](https://img.shields.io/badge/Version-1.2.7--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7-rc.1
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7-rc.1
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
 ```
 
 ## General Configuration
@@ -64,6 +64,26 @@ rasa:
   # Other settings...
 rasaProServices:
   enabled: false
+```
+
+### Use MiniO instead of S3
+
+To use MiniO instead of S3, set `AWS_ENDPOINT_URL` environment variable to the URL of the MiniO server along with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables. Also provide `AWS_REGION` and `BUCKET_NAME` environment variables.
+
+```yaml
+rasa:
+  settings:
+    additionalEnv:
+      - name: AWS_ENDPOINT_URL
+        value: "http://minio.example.com"
+      - name: AWS_ACCESS_KEY_ID
+        value: "minio"
+      - name: AWS_SECRET_ACCESS_KEY
+        value: "minio123"
+      - name: AWS_REGION
+        value: "us-east-1"
+      - name: BUCKET_NAME
+        value: "rasa-models"
 ```
 
 ## Values

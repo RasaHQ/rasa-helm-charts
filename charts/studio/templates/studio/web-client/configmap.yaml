@@ -6,8 +6,8 @@ data:
   windowVariables: |
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ if .Values.backend.ingress.hostName }}{{ .Values.backend.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/api";
     window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ if .Values.keycloak.ingress.hostName }}{{ .Values.keycloak.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/auth";
-    window.KEYCLOAK_REALM = {{ .Values.webClient.environmentVariables.KEYCLOAK_REALM | quote }};
-    window.KEYCLOAK_CLIENT_ID = {{ .Values.webClient.environmentVariables.KEYCLOAK_CLIENT_ID | quote }};
+    window.KEYCLOAK_REALM = {{ .Values.config.keycloak.realm | quote }};
+    window.KEYCLOAK_CLIENT_ID = {{ .Values.config.keycloak.clientId | quote }};
     window.VOICE_INSPECTOR_ENABLED = {{ .Values.webClient.environmentVariables.VOICE_INSPECTOR_ENABLED | quote | default "false" }};
     window.SILENCE_TIMEOUT_ENABLED = {{ .Values.webClient.environmentVariables.SILENCE_TIMEOUT_ENABLED | quote | default "false" }};
     window.EDIT_SYSTEM_RESPONSES_ENABLED = {{ .Values.webClient.environmentVariables.EDIT_SYSTEM_RESPONSES_ENABLED | quote | default "false" }};

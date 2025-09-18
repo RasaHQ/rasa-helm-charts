@@ -43,3 +43,22 @@ Keycloak URL
   value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
 {{- end -}}
 {{- end -}}
+
+{{/*
+Backend Keycloak env
+*/}}
+{{- define "studio.backend.keycloak" -}}
+- name: KEYCLOAK_REALM
+  value: {{ .Values.config.keycloak.realm | quote }}
+- name: KEYCLOAK_CLIENT_ID
+  value: {{ .Values.config.keycloak.clientId | quote }}
+- name: KEYCLOAK_API_CLIENT_ID
+  value: {{ .Values.config.keycloak.apiClientId | quote }}
+- name: KEYCLOAK_API_USERNAME
+  value: {{ .Values.config.keycloak.apiUsername | quote }}
+- name: KEYCLOAK_API_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.keycloak.apiPassword.secretName | quote }}
+      key: {{ .Values.config.keycloak.apiPassword.secretKey | quote }}
+{{- end -}}

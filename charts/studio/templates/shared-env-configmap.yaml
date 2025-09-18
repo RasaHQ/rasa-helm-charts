@@ -6,4 +6,4 @@ metadata:
 data:
   RASA_MODEL_SERVER_BASE_URL: "{{ .Values.config.connectionType }}://{{ .Values.rasa.rasa.ingress.hostName | default .Values.config.ingressHost }}/talk"
   KEYCLOAK_URL: "http://{{ include "studio.fullname" . }}-keycloak/auth"
-  KEYCLOAK_REALM: "{{ .Values.backend.environmentVariables.KEYCLOAK_REALM.value }}"
+  KEYCLOAK_REALM: "{{ .Values.config.keycloak.realm }}"

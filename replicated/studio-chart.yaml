@@ -61,6 +61,18 @@ spec:
         adminPassword:
           secretName: "studio-secrets"
           secretKey: "KEYCLOAK_ADMIN_PASSWORD"
+        # -- The realm name for Keycloak. This realm is used by Studio to manage users and clients.
+        realm: '{{repl ConfigOption "keycloak_realm" }}'
+        # -- The client ID for Keycloak. This client is used by Studio to authenticate with Keycloak.
+        clientId: '{{repl ConfigOption "keycloak_client_id" }}'
+        # -- The API client ID for Keycloak. This client is used by Studio Backend to authenticate with Keycloak.
+        apiClientId: '{{repl ConfigOption "keycloak_api_client_id" }}'
+        # -- The API username for Keycloak. This username is used by Studio Backend to authenticate with Keycloak.
+        apiUsername: '{{repl ConfigOption "keycloak_api_username" }}'
+        # -- The API password for Keycloak. This password is used by Studio Backend to authenticate with Keycloak.
+        apiPassword:
+          secretName: "studio-secrets"
+          secretKey: "KEYCLOAK_API_PASSWORD"
 
     backend:
       environmentVariables:
@@ -68,18 +80,6 @@ spec:
           secret:
             name: "studio-secrets"
             value: "DATABASE_URL"
-        KEYCLOAK_REALM:
-          value: '{{repl ConfigOption "keycloak_realm" }}'
-        KEYCLOAK_API_CLIENT_ID:
-          value: '{{repl ConfigOption "keycloak_api_client_id" }}'
-        KEYCLOAK_API_USERNAME:
-          value: '{{repl ConfigOption "keycloak_api_username" }}'
-        KEYCLOAK_API_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KEYCLOAK_API_PASSWORD"
-        KEYCLOAK_CLIENT_ID:
-          value: '{{repl ConfigOption "keycloak_client_id" }}'
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
@@ -90,11 +90,6 @@ spec:
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     webClient:
-      environmentVariables:
-        # -- Keycloak realm name
-        KEYCLOAK_REALM: '{{repl ConfigOption "keycloak_realm" }}'
-        # -- Keycloak client id
-        KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
         additionalAnnotations:
           kots.io/placeholder: |-

@@ -10,8 +10,6 @@ spec:
   minKotsVersion: 1.119.0
   additionalNamespaces:
     - "ingress-nginx"
-    - "postgresql"
-    - "kafka"
     - "studio"
     - "cnpg-system"
     - "strimzi-system"

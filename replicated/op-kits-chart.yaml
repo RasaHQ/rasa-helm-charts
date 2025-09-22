@@ -47,7 +47,7 @@ spec:
       topics:
         rasaEvents:
           enabled: true
-          name: "rasa-events"
+          name: '{{repl ConfigOption "kafka_topic" }}'
           partitions: 1
           replicas: 1
           config:
@@ -56,7 +56,7 @@ spec:
 
         rasaEventsDlq:
           enabled: true
-          name: "rasa-events-dlq"
+          name: '{{repl ConfigOption "kafka_dlq_topic" }}'
           partitions: 1
           replicas: 1
           config:
@@ -65,7 +65,7 @@ spec:
 
         rasaCoreEvents:
           enabled: true
-          name: "rasa-core-events"
+          name: '{{repl ConfigOption "rasa_core_events_topic" }}'
           partitions: 1
           replicas: 1
           config:
@@ -74,7 +74,7 @@ spec:
 
         rasaAssistant:
           enabled: true
-          name: "rasa-assistant"
+          name: '{{repl ConfigOption "rasa_assistant_topic" }}'
           partitions: 1
           replicas: 1
           config:

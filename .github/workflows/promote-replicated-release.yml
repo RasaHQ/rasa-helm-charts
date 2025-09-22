@@ -47,14 +47,6 @@ on:
         description: The version of the op-kits chart to pull from the private registry
         default: '0.1.2'
         type: string
-      kafka-version:
-        description: The version of the kafka chart to pull from the private registry
-        default: '31.1.0'
-        type: string
-      postgres-version:
-        description: The version of the postgresql chart to pull from the private registry
-        default: '16.3.0'
-        type: string
       gcp-project-id:
         description: Your Google Cloud project ID
         default: rasa-releases
@@ -85,8 +77,6 @@ env:
   REPOSITORY_URI: oci://${{ inputs.gar-location }}-docker.pkg.dev/${{ inputs.gcp-project-id }}/${{ inputs.gar-repository }}
   STUDIO_VERSION: ${{ inputs.studio-version }}
   OP_KITS_VERSION: ${{ inputs.op-kits-version }}
-  KAFKA_VERSION: ${{ inputs.kafka-version }}
-  POSTGRES_VERSION: ${{ inputs.postgres-version }}
 
 jobs:
   promote-replicated-release:
@@ -118,16 +108,12 @@ jobs:
         run: |
           helm pull "${REPOSITORY_URI}/studio" --version "${STUDIO_VERSION}" -d ./replicated
           helm pull "${REPOSITORY_URI}/op-kits" --version "${OP_KITS_VERSION}" -d ./replicated
-          helm pull "${REPOSITORY_URI}/kafka" --version "${KAFKA_VERSION}" -d ./replicated
-          helm pull "${REPOSITORY_URI}/postgresql" --version "${POSTGRES_VERSION}" -d ./replicated
       - name: Update chart versions for release
         uses: mikefarah/yq@f15500b20a1c991c8729870ba60a4dc3524b6a94
         with:
           cmd: |
             yq -i '.spec.chart.chartVersion = strenv(STUDIO_VERSION)' ./replicated/studio-chart.yaml
             yq -i '.spec.chart.chartVersion = strenv(OP_KITS_VERSION)' ./replicated/op-kits-chart.yaml
-            yq -i '.spec.chart.chartVersion = strenv(KAFKA_VERSION)' ./replicated/kafka-chart.yaml
-            yq -i '.spec.chart.chartVersion = strenv(POSTGRES_VERSION)' ./replicated/postgresql-chart.yaml
       - name: Promote the release
         uses: replicatedhq/action-kots-release@configurable-endpoint
         with:

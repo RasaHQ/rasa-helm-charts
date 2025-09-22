@@ -46,8 +46,8 @@ spec:
         username: '{{repl ConfigOption "database_username" }}'
         # -- The database password
         password:
-          secretName: "op-kits-pg-superuser"
-          secretKey: "password"
+          secretName: "studio-secrets"
+          secretKey: "DATABASE_PASSWORD"
         # -- Set to true if you want to use SSL for db connection
         preferSSL: '{{repl ConfigOption "prefer_ssl" }}'
         # If true the server will reject db connection which is not present list of supplied CAs.

@@ -36,6 +36,13 @@ spec:
           storage:
             class: openebs-hostpath
             size: 10Gi
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "2Gi"
         brokers:
           storage:
             volumes:
@@ -44,6 +51,13 @@ spec:
                 size: "20Gi"
                 class: "openebs-hostpath"
                 deleteClaim: true
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "750m"
+              memory: "2Gi"
       topics:
         rasaEvents:
           enabled: true

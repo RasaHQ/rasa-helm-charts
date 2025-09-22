@@ -81,6 +81,11 @@ spec:
             name: "op-kits-pg-superuser"
             value: "uri"
       migration:
+        environmentVariables:
+          DATABASE_URL:
+            secret:
+              name: "op-kits-pg-superuser"
+              value: "uri"
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
           image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'

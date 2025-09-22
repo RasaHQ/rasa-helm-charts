@@ -30,7 +30,7 @@ spec:
     strimzi:
       enabled: true
       kafka:
-        image: "strimzi/kafka:0.20.1-kafka-2.6.0"
+        image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0"
       nodePools:
         controllers:
           storage:

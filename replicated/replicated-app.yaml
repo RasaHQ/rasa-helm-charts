@@ -13,6 +13,8 @@ spec:
     - "postgresql"
     - "kafka"
     - "studio"
+    - "cnpg-system"
+    - "strimzi-system"
   statusInformers:
     - studio/deployment/studio-backend
     - studio/deployment/studio-keycloak

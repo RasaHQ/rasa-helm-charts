@@ -46,8 +46,8 @@ spec:
         username: '{{repl ConfigOption "database_username" }}'
         # -- The database password
         password:
-          secretName: "studio-secrets"
-          secretKey: "DATABASE_PASSWORD"
+          secretName: "op-kits-pg-superuser"
+          secretKey: "password"
         # -- Set to true if you want to use SSL for db connection
         preferSSL: '{{repl ConfigOption "prefer_ssl" }}'
         # If true the server will reject db connection which is not present list of supplied CAs.
@@ -78,8 +78,8 @@ spec:
       environmentVariables:
         DATABASE_URL:
           secret:
-            name: "studio-secrets"
-            value: "DATABASE_URL"
+            name: "op-kits-pg-superuser"
+            value: "uri"
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
@@ -99,8 +99,8 @@ spec:
       environmentVariables:
         DATABASE_URL:
           secret:
-            name: "studio-secrets"
-            value: "DATABASE_URL"
+            name: "op-kits-pg-superuser"
+            value: "uri"
         KAFKA_SASL_MECHANISM:
           value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
         KAFKA_SASL_USERNAME:

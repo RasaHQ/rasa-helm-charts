@@ -1,0 +1,89 @@
+apiVersion: kots.io/v1beta2
+kind: HelmChart
+metadata:
+  name: op-kits
+spec:
+  # chart identifies a matching chart from a .tgz
+  chart:
+    name: op-kits
+    chartVersion: 0.1.2
+
+  releaseName: op-kits
+  namespace: studio
+  weight: 10
+
+  # values are used in the customer environment, as a pre-render step
+  # these values will be supplied to helm template
+  values:
+    cloudnativepg:
+      enabled: true
+      cluster:
+        imageName: "ghcr.io/cloudnative-pg/postgresql:16"
+        instances: 1
+        storage:
+          size: 10Gi
+          storageClass: openebs-hostpath
+        bootstrap:
+          initdb:
+            database: studio
+            owner: studiouser
+    strimzi:
+      enabled: true
+      kafka:
+        image: "ghcr.io/strimzi/kafka:0.47.0-kafka-4.0.0"
+      nodePools:
+        controllers:
+          storage:
+            class: openebs-hostpath
+            size: 10Gi
+        brokers:
+          storage:
+            class: openebs-hostpath
+            size: 10Gi
+      topics:
+        rasaEvents:
+          enabled: true
+          name: "rasa-events"
+          partitions: 1
+          replicas: 1
+          config:
+            retention.ms: 604800000  # 7 days
+            cleanup.policy: "delete"
+
+        rasaEventsDlq:
+          enabled: true
+          name: "rasa-events-dlq"
+          partitions: 1
+          replicas: 1
+          config:
+            retention.ms: 1209600000  # 14 days
+            cleanup.policy: "delete"
+
+        rasaCoreEvents:
+          enabled: true
+          name: "rasa-core-events"
+          partitions: 1
+          replicas: 1
+          config:
+            retention.ms: 604800000  # 7 days
+            cleanup.policy: "delete"
+
+        rasaAssistant:
+          enabled: true
+          name: "rasa-assistant"
+          partitions: 1
+          replicas: 1
+          config:
+            retention.ms: 604800000  # 7 days
+            cleanup.policy: "delete"
+    users:
+      app:
+        enabled: true
+        name: "studio-app"
+        authentication:
+          type: "scram-sha-512"
+          password:
+            secretName: "studio-secrets"
+            secretKey: "KAFKA_SASL_PASSWORD"
+    valkey:
+      enabled: false

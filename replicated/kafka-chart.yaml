@@ -3,7 +3,7 @@ kind: HelmChart
 metadata:
   name: kafka
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `kafka_type` `external_kafka` }}'
+  exclude: true
   chart:
     name: kafka
     chartVersion: 31.1.0

@@ -3,7 +3,7 @@ kind: HelmChart
 metadata:
   name: postgresql
 spec:
-  exclude: 'repl{{ ConfigOptionEquals `postgres_type` `external_postgres` }}'
+  exclude: true
   chart:
     name: postgresql
     chartVersion: 16.3.0

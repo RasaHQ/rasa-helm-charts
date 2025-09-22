@@ -21,9 +21,9 @@ spec:
       repositories:
       - name: ingress-nginx
         url: https://kubernetes.github.io/ingress-nginx
-      - name: cnpg-operator
+      - name: cnpg
         url: https://cloudnative-pg.github.io/charts
-      - name: strimzi-operator
+      - name: strimzi
         url: https://strimzi.io/charts/
       charts:
       - name: ingress-nginx
@@ -44,11 +44,11 @@ spec:
               patch:
                 image:
                   digest: ""
-      - name: cnpg-operator
+      - name: cnpg
         chartname: cnpg/cloudnative-pg
         namespace: cnpg-system
         version: "0.26.0"
-      - name: strimzi-operator
+      - name: strimzi
         chartname: strimzi/strimzi-kafka-operator
         namespace: strimzi-system
         version: "0.47.0"

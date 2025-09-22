@@ -11,8 +11,6 @@ spec:
   additionalNamespaces:
     - "ingress-nginx"
     - "studio"
-    - "cnpg-system"
-    - "strimzi-system"
     - "postgresql"
     - "kafka"
   statusInformers:

@@ -31,8 +31,11 @@ spec:
       pullSecrets:
         - '{{repl ImagePullSecretName }}'
   builder:
+    global:
+      security: 
+        allowInsecureImages: true
     image:
-      registry: europe-west3-docker.pkg.dev/rasa-releases/
+      registry: europe-west3-docker.pkg.dev/rasa-releases
       repository: dependencies/postgresql
       tag: 17.2.0-debian-12-r2 #16.4.0-debian-12-r8
       digest: ""

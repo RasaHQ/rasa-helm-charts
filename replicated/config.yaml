@@ -86,7 +86,7 @@ spec:
         - name: connection_type
           type: dropdown
           title: Connection Type
-          default: http
+          default: https
           items:
             - name: http
               title: http
@@ -187,7 +187,7 @@ spec:
           title: Wait for PostgreSQL to be ready
           default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
           when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
-          hidden: false
+          hidden: true
           help_text: Enable this if you are using Embedded PostgreSQL
         - name: database_host
           type: text
@@ -261,6 +261,7 @@ spec:
           default: "0"
           when: '{{repl ConfigOptionEquals "kafka_type" "embedded_kafka"}}'
           help_text: Enable this if you want to expose Kafka externally through DNS. Use `<ingress dns hostname>:30002` to connect to it.
+          hidden: true
         - name: kafka_broker
           type: text
           title: Kafka Broker Address

@@ -10,8 +10,8 @@ spec:
 
   releaseName: studio
   namespace: studio
-  # NOTE: little bit room so kafka can go first
-  weight: 15
+  # NOTE: little bit room so op-kits can go first
+  weight: 30
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
@@ -81,11 +81,6 @@ spec:
             name: "op-kits-pg-superuser"
             key: "uri"
       migration:
-        environmentVariables:
-          DATABASE_URL:
-            secret:
-              name: "op-kits-pg-superuser"
-              key: "uri"
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
           image: '{{repl HasLocalRegistry | ternary LocalRegistryHost "registry.rasa.com" }}/{{repl HasLocalRegistry | ternary LocalRegistryNamespace (print "proxy/" (LicenseFieldValue "appSlug") "/europe-west3-docker.pkg.dev/rasa-releases/dependencies" ) }}/postgresql:{{repl ConfigOption "postgresql_image_tag" }}'

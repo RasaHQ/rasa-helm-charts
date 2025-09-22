@@ -19,3 +19,8 @@ spec:
     - studio/deployment/studio-event-ingestion
     - studio/deployment/studio-web-client
     - studio/deployment/rasapro
+additionalImages:
+  - name: postgresql
+    image: ghcr.io/cloudnative-pg/postgresql:16
+  - name: kafka
+    image: quay.io/strimzi/kafka:0.47.0-kafka-4.0.0

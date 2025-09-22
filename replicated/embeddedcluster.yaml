@@ -24,7 +24,7 @@ spec:
       - name: cloudnative-pg
         url: https://cloudnative-pg.github.io/charts
       - name: strimzi
-        url: https://strimzi.io/charts/
+        url: https://strimzi.io/charts
       charts:
       - name: ingress-nginx
         chartname: ingress-nginx/ingress-nginx

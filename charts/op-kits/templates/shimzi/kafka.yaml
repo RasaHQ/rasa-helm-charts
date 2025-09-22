@@ -24,7 +24,7 @@ spec:
   kafka:
     {{- with .Values.strimzi.kafka.image }}
     # Container image
-    image: {{ . | quote }}
+    image: "{{ .repository }}:{{ .tag }}"
     {{- end }}
     listeners:
       {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}

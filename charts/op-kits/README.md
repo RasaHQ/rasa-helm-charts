@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.2](https://img.shields.io/badge/Version-0.1.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.3
 ```
 
 ## Uninstalling the Chart
@@ -37,7 +37,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.3
 ```
 
 ## Operator Installation
@@ -114,7 +114,7 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.2 \
+    --version 0.1.3 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -220,7 +220,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | cloudnativepg.cluster.bootstrap.initdb.database | string | `"app"` | Database name to create during initialization |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | `"appuser"` | Database owner/user to create during initialization |
 | cloudnativepg.cluster.enableSuperuserAccess | bool | `true` | Enable superuser access (creates <cluster>-superuser secret) |
-| cloudnativepg.cluster.imageName | string | `"ghcr.io/cloudnative-pg/postgresql:16"` | PostgreSQL container image to use |
+| cloudnativepg.cluster.image | object | `{"repository":"ghcr.io/cloudnative-pg/postgresql","tag":"16"}` | PostgreSQL container image to use |
 | cloudnativepg.cluster.instances | int | `1` | Number of PostgreSQL instances in the cluster |
 | cloudnativepg.cluster.monitoring.enablePodMonitor | bool | `false` | Enable Prometheus PodMonitor for metrics collection |
 | cloudnativepg.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-pg" |
@@ -240,7 +240,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | strimzi.kafka.config | object | `{"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
 | strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
 | strimzi.kafka.entityOperator.userOperator | object | `{}` |  |
-| strimzi.kafka.image | string | `""` | Container image for Kafka image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0" |
+| strimzi.kafka.image | object | `{"repository":"quay.io/strimzi/kafka","tag":"0.47.0-kafka-4.0.0"}` | Container image for Kafka image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0" |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.kafka.resources | object | `{}` | Resource limits and requests for Kafka brokers Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "100m"     memory: "512Mi" |

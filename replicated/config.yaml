@@ -193,7 +193,7 @@ spec:
           type: text
           title: Database Host
           required: true
-          default: op-kits-pg-rw.studio.svc.cluster.local
+          default: postgresql.postgresql.svc.cluster.local
           help_text: The database host name
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
         - name: database_username
@@ -261,23 +261,22 @@ spec:
           default: "0"
           when: '{{repl ConfigOptionEquals "kafka_type" "embedded_kafka"}}'
           help_text: Enable this if you want to expose Kafka externally through DNS. Use `<ingress dns hostname>:30002` to connect to it.
-          hidden: true
         - name: kafka_broker
           type: text
           title: Kafka Broker Address
-          default: "op-kits-kafka-kafka-bootstrap.studio.svc:9092"
+          default: "kafka.kafka.svc.cluster.local:9092"
           help_text: The URL and port for your external Kafka deployment.
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
         - name: kafka_sasl_mechanism
           type: text
           title: Kafka SASL Mechanism
-          default: SCRAM-SHA-512
+          default: PLAIN
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Supported values are `plain`, `SCRAM-SHA-256` or `SCRAM-SHA-512`. You can leave it empty if you are not using SASL.
         - name: kafka_username
           type: text
           title: Kafka SASL Username
-          default: "studio-app"
+          default: "kafka"
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
           help_text: Kafka SASL username
         - name: kafka_password

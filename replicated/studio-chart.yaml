@@ -78,8 +78,8 @@ spec:
       environmentVariables:
         DATABASE_URL:
           secret:
-            name: "op-kits-pg-superuser"
-            key: "uri"
+            name: "studio-secrets"
+            key: "DATABASE_URL"
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
@@ -99,8 +99,8 @@ spec:
       environmentVariables:
         DATABASE_URL:
           secret:
-            name: "op-kits-pg-superuser"
-            key: "uri"
+            name: "studio-secrets"
+            key: "DATABASE_URL"
         KAFKA_SASL_MECHANISM:
           value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
         KAFKA_SASL_USERNAME:

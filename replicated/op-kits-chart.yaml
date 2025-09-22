@@ -38,8 +38,12 @@ spec:
             size: 10Gi
         brokers:
           storage:
-            class: openebs-hostpath
-            size: 10Gi
+            volumes:
+              - id: 0
+                type: "persistent-claim"
+                size: "20Gi"
+                class: "openebs-hostpath"
+                deleteClaim: true
       topics:
         rasaEvents:
           enabled: true

@@ -111,7 +111,9 @@ spec:
         KAFKA_SASL_USERNAME:
           value: '{{repl ConfigOption "kafka_username" }}'
         KAFKA_SASL_PASSWORD:
-          value: '{{repl ConfigOption "kafka_password" }}'
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         KAFKA_BROKER_ADDRESS:
           value: '{{repl ConfigOption "kafka_broker" }}'
         KAFKA_GROUP_ID:

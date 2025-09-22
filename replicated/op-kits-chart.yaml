@@ -80,14 +80,14 @@ spec:
           config:
             retention.ms: 604800000  # 7 days
             cleanup.policy: "delete"
-    users:
-      app:
-        enabled: true
-        name: "studio-app"
-        authentication:
-          type: "scram-sha-512"
-          password:
-            secretName: "studio-secrets"
-            secretKey: "KAFKA_SASL_PASSWORD"
+      users:
+        app:
+          enabled: true
+          name: "studio-app"
+          authentication:
+            type: "scram-sha-512"
+            password:
+              secretName: "studio-secrets"
+              secretKey: "KAFKA_SASL_PASSWORD"
     valkey:
       enabled: false

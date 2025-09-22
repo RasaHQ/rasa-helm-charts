@@ -6,7 +6,7 @@ spec:
   # chart identifies a matching chart from a .tgz
   chart:
     name: op-kits
-    chartVersion: 0.1.2
+    chartVersion: 0.1.3
 
   releaseName: op-kits
   namespace: studio
@@ -18,7 +18,9 @@ spec:
     cloudnativepg:
       enabled: true
       cluster:
-        imageName: "ghcr.io/cloudnative-pg/postgresql:16"
+        image:
+          repository: "ghcr.io/cloudnative-pg/postgresql"
+          tag: "16"
         instances: 1
         storage:
           size: 10Gi
@@ -30,7 +32,9 @@ spec:
     strimzi:
       enabled: true
       kafka:
-        image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0"
+        image:
+          repository: "quay.io/strimzi/kafka"
+          tag: "0.47.0-kafka-4.0.0"
       nodePools:
         controllers:
           storage:

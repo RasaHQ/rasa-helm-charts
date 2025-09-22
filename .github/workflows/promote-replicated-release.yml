@@ -45,7 +45,7 @@ on:
         type: string
       op-kits-version:
         description: The version of the op-kits chart to pull from the private registry
-        default: '0.1.2'
+        default: '0.1.3'
         type: string
       gcp-project-id:
         description: Your Google Cloud project ID

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.1.9-rc.1](https://img.shields.io/badge/Version-2.1.9--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.1.9-rc.2](https://img.shields.io/badge/Version-2.1.9--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9-rc.2
 ```
 
 ## General Configuration
@@ -281,7 +281,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
-| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.13.2-latest"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
+| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.13.7-latest"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
 | rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.persistence.storageClassName | string | `nil` | Make sure to set the correct storage class name based on your cluster configuration |
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
@@ -289,7 +289,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | replicated.enabled | bool | `false` |  |
 | replicated.sdkVersion | string | `"1.7.1"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| tag | string | `"1.13.0"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.14.0.edge2-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | webClient.affinity | object | `{}` | webClient.affinity defines affinity rules for the web client pods. |
 | webClient.envFrom | list | `[]` | webClient.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret |

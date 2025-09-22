@@ -117,3 +117,20 @@ spec:
       enabled: true
     zookeeper:
       enabled: false
+  builder:
+    global:
+      security: 
+        allowInsecureImages: true
+    image:
+      registry: europe-west3-docker.pkg.dev/rasa-releases
+      repository: dependencies/kafka
+      tag: 3.9.0-debian-12-r1
+      digest: ""
+      pullPolicy: IfNotPresent
+    externalAccess:
+      image:
+        registry: europe-west3-docker.pkg.dev/rasa-releases
+        repository: dependencies/kubectl
+        tag: 1.31.2-debian-12-r6 #1.31.0-debian-12-r0
+        digest: ""
+        pullPolicy: IfNotPresent

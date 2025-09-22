@@ -17,7 +17,7 @@ metadata:
   {{- end }}
 spec:
   instances: {{ .Values.cloudnativepg.cluster.instances }}
-  imageName: {{ .Values.cloudnativepg.cluster.imageName }}
+  imageName: "{{ .Values.cloudnativepg.cluster.image.repository }}:{{ .Values.cloudnativepg.cluster.image.tag }}"
   storage:
     size: {{ .Values.cloudnativepg.cluster.storage.size }}
     storageClass: {{ .Values.cloudnativepg.cluster.storage.storageClass }}

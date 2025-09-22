@@ -26,7 +26,9 @@ cloudnativepg:
     # -- Number of PostgreSQL instances in the cluster
     instances: 1
     # -- PostgreSQL container image to use
-    imageName: "ghcr.io/cloudnative-pg/postgresql:16"
+    image:
+      repository: "ghcr.io/cloudnative-pg/postgresql"
+      tag: "16"
 
     # -- Additional annotations to apply to the PostgreSQL Cluster resource
     # Example:
@@ -91,7 +93,9 @@ strimzi:
     nameOverride: ""
     # -- Container image for Kafka
     # image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0"
-    image: ""
+    image:
+      repository: "quay.io/strimzi/kafka"
+      tag: "0.47.0-kafka-4.0.0"
 
     # -- Annotations to apply to the Kafka Cluster resource
     # Includes both operator configuration and custom annotations

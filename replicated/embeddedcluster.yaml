@@ -45,7 +45,7 @@ spec:
                 image:
                   digest: ""
       - name: cnpg-operator
-        chartname: cnpg/cloudnative-pg
+        chartname: cnpg
         namespace: cnpg-system
         version: "1.10.0"
       - name: strimzi-operator

@@ -37,5 +37,3 @@ spec:
       tag: 17.2.0-debian-12-r2 #16.4.0-debian-12-r8
       digest: ""
       pullPolicy: IfNotPresent
-      pullSecrets:
-        - '{{repl ImagePullSecretName }}'

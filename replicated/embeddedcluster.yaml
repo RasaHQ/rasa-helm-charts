@@ -21,7 +21,7 @@ spec:
       repositories:
       - name: ingress-nginx
         url: https://kubernetes.github.io/ingress-nginx
-      - name: cnpg
+      - name: cloudnative-pg
         url: https://cloudnative-pg.github.io/charts
       - name: strimzi
         url: https://strimzi.io/charts/
@@ -44,8 +44,8 @@ spec:
               patch:
                 image:
                   digest: ""
-      - name: cnpg
-        chartname: cnpg/cloudnative-pg
+      - name: cloudnative-pg
+        chartname: cloudnative-pg/cloudnative-pg
         namespace: cnpg-system
         version: "0.26.0"
         values: |

@@ -10,8 +10,8 @@ spec:
 
   releaseName: studio
   namespace: studio
-  # NOTE: little bit room so kafka can go first
-  weight: 15
+  # NOTE: little bit room so op-kits can go first
+  weight: 30
 
   # values are used in the customer environment, as a pre-render step
   # these values will be supplied to helm template
@@ -61,25 +61,25 @@ spec:
         adminPassword:
           secretName: "studio-secrets"
           secretKey: "KEYCLOAK_ADMIN_PASSWORD"
+        # -- The realm name for Keycloak. This realm is used by Studio to manage users and clients.
+        realm: '{{repl ConfigOption "keycloak_realm" }}'
+        # -- The client ID for Keycloak. This client is used by Studio to authenticate with Keycloak.
+        clientId: '{{repl ConfigOption "keycloak_client_id" }}'
+        # -- The API client ID for Keycloak. This client is used by Studio Backend to authenticate with Keycloak.
+        apiClientId: '{{repl ConfigOption "keycloak_api_client_id" }}'
+        # -- The API username for Keycloak. This username is used by Studio Backend to authenticate with Keycloak.
+        apiUsername: '{{repl ConfigOption "keycloak_api_username" }}'
+        # -- The API password for Keycloak. This password is used by Studio Backend to authenticate with Keycloak.
+        apiPassword:
+          secretName: "studio-secrets"
+          secretKey: "KEYCLOAK_API_PASSWORD"
 
     backend:
       environmentVariables:
         DATABASE_URL:
           secret:
             name: "studio-secrets"
-            value: "DATABASE_URL"
-        KEYCLOAK_REALM:
-          value: '{{repl ConfigOption "keycloak_realm" }}'
-        KEYCLOAK_API_CLIENT_ID:
-          value: '{{repl ConfigOption "keycloak_api_client_id" }}'
-        KEYCLOAK_API_USERNAME:
-          value: '{{repl ConfigOption "keycloak_api_username" }}'
-        KEYCLOAK_API_PASSWORD:
-          secret:
-            name: "studio-secrets"
-            key: "KEYCLOAK_API_PASSWORD"
-        KEYCLOAK_CLIENT_ID:
-          value: '{{repl ConfigOption "keycloak_client_id" }}'
+            key: "DATABASE_URL"
       migration:
         waitForIt: repl{{ eq (ConfigOption "wait_for_it") "1"}}
         waitFotItContainer:
@@ -90,11 +90,6 @@ spec:
             repl{{ if ConfigOptionNotEquals "annotations" ""}}repl{{ ConfigOption "annotations" | nindent 10 }}repl{{ end }}
 
     webClient:
-      environmentVariables:
-        # -- Keycloak realm name
-        KEYCLOAK_REALM: '{{repl ConfigOption "keycloak_realm" }}'
-        # -- Keycloak client id
-        KEYCLOAK_CLIENT_ID: '{{repl ConfigOption "keycloak_client_id" }}'
       ingress:
         additionalAnnotations:
           kots.io/placeholder: |-
@@ -105,13 +100,15 @@ spec:
         DATABASE_URL:
           secret:
             name: "studio-secrets"
-            value: "DATABASE_URL"
+            key: "DATABASE_URL"
         KAFKA_SASL_MECHANISM:
           value: '{{repl ConfigOption "kafka_sasl_mechanism" }}'
         KAFKA_SASL_USERNAME:
           value: '{{repl ConfigOption "kafka_username" }}'
         KAFKA_SASL_PASSWORD:
-          value: '{{repl ConfigOption "kafka_password" }}'
+          secret:
+            name: "studio-secrets"
+            key: "KAFKA_SASL_PASSWORD"
         KAFKA_BROKER_ADDRESS:
           value: '{{repl ConfigOption "kafka_broker" }}'
         KAFKA_GROUP_ID:
@@ -332,3 +329,5 @@ spec:
   builder:
     replicated:
       enabled: true
+      images:
+        replicated-sdk: europe-west3-docker.pkg.dev/rasa-releases/dependencies/replicated-sdk:1.7.1

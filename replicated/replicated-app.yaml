@@ -10,9 +10,9 @@ spec:
   minKotsVersion: 1.119.0
   additionalNamespaces:
     - "ingress-nginx"
+    - "studio"
     - "postgresql"
     - "kafka"
-    - "studio"
   statusInformers:
     - studio/deployment/studio-backend
     - studio/deployment/studio-keycloak

@@ -20,7 +20,7 @@ imagePullSecrets:
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
-tag: "1.13.0"
+tag: "1.14.0.edge2-latest"
 
 config:
   # -- Defines the host name for all Studio ingress resources.
@@ -89,6 +89,23 @@ config:
     adminPassword:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_ADMIN_PASSWORD"
+    # -- config.keycloak.realm is the realm name for Keycloak.
+    # This realm is used by Studio to manage users and clients.
+    realm: "rasa-studio"
+    # -- config.keycloak.clientId is the client ID for Keycloak.
+    # This client is used by Studio to authenticate with Keycloak.
+    clientId: "rasa-studio-backend"
+    # -- config.keycloak.apiClientId is the client ID for Keycloak API.
+    # This client is used by Studio Backend to authenticate with Keycloak.
+    apiClientId: "admin-cli"
+    # -- config.keycloak.apiUsername is the username for Keycloak API.
+    # This username is used by Studio Backend to authenticate with Keycloak.
+    apiUsername: "realmadmin"
+    # -- config.keycloak.apiPassword is the password for Keycloak API.
+    # This password is used by Studio Backend to authenticate with Keycloak.
+    apiPassword:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_API_PASSWORD"
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
@@ -179,25 +196,6 @@ backend:
       secret:
         name: "studio-secrets"
         key: "DATABASE_URL"
-    # -- backend.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
-    # This defines the authentication realm where Studio users will be managed.
-    KEYCLOAK_REALM:
-      value: "rasa-studio"
-    # -- backend.environmentVariables.KEYCLOAK_API_CLIENT_ID is the Keycloak client ID for API access.
-    # This client is used by Studio Backend to authenticate with Keycloak.
-    KEYCLOAK_API_CLIENT_ID:
-      value: "admin-cli"
-    # -- backend.environmentVariables.KEYCLOAK_API_USERNAME is the username for Studio Backend to communicate with Keycloak.
-    # This account needs appropriate permissions in Keycloak to manage users.
-    KEYCLOAK_API_USERNAME:
-      value: "realmadmin"
-    # -- backend.environmentVariables.KEYCLOAK_API_PASSWORD is the password for Studio Backend to communicate with Keycloak.
-    # This should be stored in a Kubernetes secret for security.
-    # Ref: https://kubernetes.io/docs/concepts/configuration/secret/
-    KEYCLOAK_API_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_API_PASSWORD"
     # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
     # Conversations older than this value will be deleted by the cleanup cron job.
     # Leave empty to disable automatic conversation cleanup.
@@ -492,16 +490,8 @@ webClient:
   # -- webClient.environmentVariables defines the environment variables for the Web Client deployment.
   # Example: Specify the string value for variables
   #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  environmentVariables:
-    # -- webClient.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
-    KEYCLOAK_REALM: "rasa-studio"
-    # -- webClient.environmentVariables.KEYCLOAK_CLIENT_ID is the Keycloak client ID for the web client.
-    KEYCLOAK_CLIENT_ID: "rasa-studio-backend"
+  # These environment variables are only being passed to the `configmap`, not to the container, therefore they cannot be a secret!
+  environmentVariables: {}
 
   # -- webClient.envFrom defines additional environment variables from ConfigMap or Secret.
   # Example:
@@ -1085,7 +1075,7 @@ rasa:
     replicaCount: 1
     image:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-      tag: "3.13.2-latest"
+      tag: "3.13.7-latest"
 
     strategy:
       type: Recreate

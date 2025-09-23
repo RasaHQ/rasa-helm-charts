@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.13.0"
+          default: "1.14.0.edge2-latest"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.13.2"
+          default: "3.13.7-latest"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/reference/changelogs/compatibility-matrix/#studiopro-versions-compatibility)
         - name: openai_api_key
           type: text
@@ -86,7 +86,7 @@ spec:
         - name: connection_type
           type: dropdown
           title: Connection Type
-          default: http
+          default: https
           items:
             - name: http
               title: http
@@ -187,7 +187,7 @@ spec:
           title: Wait for PostgreSQL to be ready
           default: '{{repl (ConfigOptionEquals "postgres_type" "embedded_postgres") | ternary "1" "0"}}'
           when: '{{repl ConfigOptionEquals "postgres_type" "embedded_postgres"}}'
-          hidden: false
+          hidden: true
           help_text: Enable this if you are using Embedded PostgreSQL
         - name: database_host
           type: text

@@ -64,7 +64,6 @@ spec:
             {{- toYaml .Values.eventIngestion.volumeMounts | nindent 12 }}
           {{- end }}
           env:
-            {{- include "studio.backend.env" . | nindent 12 }}
             - name: DATABASE_URL
               value: "postgres://{{ .Values.config.database.username }}:{{ .Values.config.database.password }}@{{ .Values.config.database.host }}:{{ .Values.config.database.port | default 5432 }}/{{ .Values.config.database.backendDatabaseName }}?{{ .Values.config.database.queryParams }}"
             - name: KAFKA_CLIENT_ID

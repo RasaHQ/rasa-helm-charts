@@ -64,7 +64,7 @@ Backend Keycloak env
 {{- end -}}
 
 {{- define "studio.backend.env" -}}
-- name: DB_USERNAME
+- name: DB_USER
   value: {{ .Values.config.database.username | quote }}
 - name: DB_PASS
   valueFrom:

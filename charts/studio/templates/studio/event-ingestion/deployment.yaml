@@ -65,7 +65,7 @@ spec:
           {{- end }}
           env:
             - name: DATABASE_URL
-              value: "postgres://{{ .Values.config.database.username }}:{{ .Values.config.database.password.secretKey }}@{{ .Values.config.database.host }}:{{ .Values.config.database.port | default 5432 }}/{{ .Values.config.database.backendDatabaseName }}?{{ .Values.config.database.queryParams }}"
+              value: "postgres://{{ .Values.config.database.username }}:$(DB_PASSWORD)@{{ .Values.config.database.host }}:{{ .Values.config.database.port | default 5432 }}/{{ .Values.config.database.backendDatabaseName }}?{{ .Values.config.database.queryParams }}"
             - name: KAFKA_CLIENT_ID
               {{- if .Values.eventIngestion.kafkaClientId }}
               value: {{ .Values.eventIngestion.kafkaClientId | quote }}

@@ -465,6 +465,24 @@ rasaProServices:
     # - configMapRef:
     #     name: my-configmap
 
+  # -- rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container
+  # These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration
+  # Example:
+  #   additionalEnv:
+  #     - name: MY_CUSTOM_VAR
+  #       value: "some-value"
+  #     - name: SECRET_VAR
+  #       valueFrom:
+  #         secretKeyRef:
+  #           name: my-secret
+  #           key: secret-key
+  #     - name: CONFIGMAP_VAR
+  #       valueFrom:
+  #         configMapKeyRef:
+  #           name: my-configmap
+  #           key: config-key
+  additionalEnv: []
+
   # -- rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment
   additionalContainers: []
   #  - name: extra

@@ -64,6 +64,7 @@ spec:
             {{- toYaml .Values.eventIngestion.volumeMounts | nindent 12 }}
           {{- end }}
           env:
+            {{- include "studio.backend.env" . | nindent 12 }}
             - name: KAFKA_CLIENT_ID
               {{- if .Values.eventIngestion.kafkaClientId }}
               value: {{ .Values.eventIngestion.kafkaClientId | quote }}

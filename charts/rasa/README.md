@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.2.8-rc.1](https://img.shields.io/badge/Version-1.2.8--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.8-rc.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.8-rc.1
 ```
 
 ## General Configuration
@@ -327,8 +327,6 @@ rasa:
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasaProServices.environmentVariables.KAFKA_BROKER_ADDRESS.value | string | `""` |  |
 | rasaProServices.environmentVariables.KAFKA_SASL_MECHANISM.value | string | `"PLAIN"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.key | string | `"kafkaSslPassword"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.name | string | `"rasa-secrets"` |  |
 | rasaProServices.environmentVariables.KAFKA_SASL_USERNAME.value | string | `""` |  |
 | rasaProServices.environmentVariables.KAFKA_SECURITY_PROTOCOL.value | string | `"PLAINTEXT"` |  |
 | rasaProServices.environmentVariables.KAFKA_SSL_CA_LOCATION.value | string | `""` |  |

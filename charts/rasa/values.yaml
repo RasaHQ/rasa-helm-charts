@@ -445,11 +445,6 @@ rasaProServices:
     # Username for SASL authentication.
     KAFKA_SASL_USERNAME:
       value: ""
-    # Password for SASL authentication
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: "rasa-secrets"
-        key: "kafkaSslPassword"
     # Security protocol to use for communication with Kafka
     KAFKA_SECURITY_PROTOCOL:
       value: "PLAINTEXT"
@@ -459,6 +454,11 @@ rasaProServices:
     # Consumer group name used when registering the consumers with Kafka.
     RASA_ANALYTICS_CONSUMER_ID:
       value: "rasa-analytics-group"
+    # Password for SASL authentication
+    # KAFKA_SASL_PASSWORD:
+    #   secret:
+    #     name: "rasa-secrets"
+    #     key: "kafkaSslPassword"
 
   # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []

@@ -52,3 +52,68 @@ Environment Variables for Rasa Containers
 {{ toYaml .Values.rasa.additionalEnv }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Environment Variables for Rasa Analytics
+*/}}
+{{- define "analytics.env" -}}
+- name: "LOGGING_LEVEL"
+  value: {{ .Values.rasaProServices.loggingLevel | quote }}
+{{- with .Values.rasaProServices.useCloudProviderIam }}
+{{- if .enabled }}
+- name: "IAM_CLOUD_PROVIDER"
+  value: {{ .provider | quote }}
+- name: "AWS_DEFAULT_REGION"
+  value: {{ .region | quote }}
+{{- end }}
+{{- end }}
+{{- with .Values.rasaProServices.database }}
+{{- if .enableAwsRdsIam }}
+- name: "RDS_SQL_DB_AWS_IAM_ENABLED"
+  value: "true"
+- name: "RASA_ANALYTICS_DB_HOST_NAME"
+  value: {{ .hostname | quote }}
+- name: "RASA_ANALYTICS_DB_NAME"
+  value: {{ .databaseName | quote }}
+- name: "RASA_ANALYTICS_DB_USERNAME"
+  value: {{ .username | quote }}
+- name: "RASA_ANALYTICS_DB_PORT"
+  value: {{ .port | quote }}
+- name: "RASA_ANALYTICS_DB_SSL_MODE"
+  value: {{ .sslMode | quote }}
+- name: "RASA_ANALYTICS_DB_SSL_CA_LOCATION"
+  value: {{ .sslCaLocation | quote }}
+{{- else }}
+- name: "RASA_ANALYTICS_DB_URL"
+  value: {{ .url | quote }}
+{{- end }}
+{{- end }}
+
+{{- with .Values.rasaProServices.kafka }}
+{{- if .enableAwsMskIam }}
+- name: "KAFKA_MSK_AWS_IAM_ENABLED"
+  value: "true"
+{{- end }}
+- name: "KAFKA_BROKER_ADDRESS"
+  value: {{ .brokerAddress | quote }}
+- name: "KAFKA_TOPIC"
+  value: {{ .topic | quote }}
+- name: "KAFKA_SASL_MECHANISM"
+  value: {{ .saslMechanism | quote }}
+- name: "KAFKA_SECURITY_PROTOCOL"
+  value: {{ .securityProtocol | quote }}
+- name: "KAFKA_SSL_CA_LOCATION"
+  value: {{ .sslCaLocation | quote }}
+- name: "RASA_ANALYTICS_CONSUMER_ID"
+  value: {{ .consumerId | quote }}
+{{- if not .enableAwsMskIam }}
+- name: "KAFKA_SASL_USERNAME"
+  value: {{ .saslUsername | quote }}
+- name: "KAFKA_SASL_PASSWORD"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .saslPassword.secretName }}
+      key: {{ .saslPassword.secretKey }}
+{{- end }}
+{{- end }}
+{{- end -}}

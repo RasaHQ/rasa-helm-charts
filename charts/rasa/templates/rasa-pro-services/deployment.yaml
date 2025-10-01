@@ -70,20 +70,10 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.rasaProLicense.secretName }}
                   key: {{ .Values.rasaProLicense.secretKey }}
-            {{- range $key, $value := .Values.rasaProServices.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- if .Values.rasaProServices.environmentVariables }}
+            {{- toYaml .Values.rasaProServices.environmentVariables | nindent 12 }}
             {{- end }}
-            {{- if .Values.rasaProServices.additionalEnv }}
-            {{- toYaml .Values.rasaProServices.additionalEnv | nindent 12 }}
-            {{- end }}
+            {{- include "analytics.env" . | nindent 12 }}
           {{- if .Values.rasaProServices.envFrom }}
           envFrom:
             {{- toYaml .Values.rasaProServices.envFrom | nindent 12 }}

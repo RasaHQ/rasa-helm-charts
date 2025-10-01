@@ -414,61 +414,61 @@ rasaProServices:
     #   maxSurge: 1
     #   maxUnavailable: 0
 
-  # rasaProServices.environmentVariables define environment variables to be passed to the Rasa Pro Services deployment
-  # See: https://rasa.com/docs/rasa/deploy/deploy-rasa-pro-services#docker-container-configuration-reference
-  # Example: Specify the string value for variables
-  #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  environmentVariables:
-    # Address of the Kafka broker.
-    KAFKA_BROKER_ADDRESS:
-      value: ""
-    # Topic Rasa Plus publishes events to and Rasa Pro consumes from
-    KAFKA_TOPIC:
-      value: "rasa-core-events"
-    # Set the log level of the application
-    LOGGING_LEVEL:
-      value: "INFO"
-    # URL of the data lake to store analytics data in
-    RASA_ANALYTICS_DB_URL:
-      value: ""
-      # secret:
-      #   name:
-      #   key:
-    # SASL mechanism to use for authentication.
-    KAFKA_SASL_MECHANISM:
-      value: "PLAIN"
-    # Username for SASL authentication.
-    KAFKA_SASL_USERNAME:
-      value: ""
-    # Security protocol to use for communication with Kafka
-    KAFKA_SECURITY_PROTOCOL:
-      value: "PLAINTEXT"
-    # Filepath for SSL CA Certificate that will be used to connect with Kafka
-    KAFKA_SSL_CA_LOCATION:
-      value: ""
-    # Consumer group name used when registering the consumers with Kafka.
-    RASA_ANALYTICS_CONSUMER_ID:
-      value: "rasa-analytics-group"
-    # Password for SASL authentication
-    # KAFKA_SASL_PASSWORD:
-    #   secret:
-    #     name: "rasa-secrets"
-    #     key: "kafkaSslPassword"
+  # -- rasaProServices.loggingLevel specifies the logging level for the Rasa Pro Services container. Valid levels are DEBUG, INFO, WARNING, ERROR, CRITICAL.
+  loggingLevel: "INFO"
 
-  # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
-    # - configMapRef:
-    #     name: my-configmap
+  useCloudProviderIam:
+    # -- useCloudProviderIam.enabled specifies whether to use cloud provider IAM for the Rasa Pro Services container.
+    enabled: false
+    # -- useCloudProviderIam.provider specifies the cloud provider for the Rasa Pro Services container. Supported value is aws
+    provider: "aws"
+    # -- useCloudProviderIam.region specifies the region for IAM authentication. Required if IAM_CLOUD_PROVIDER is set to aws.
+    region: "us-east-1"
 
-  # -- rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container
+  database:
+    # -- database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container.
+    enableAwsRdsIam: false
+    # -- database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication.
+    url: ""
+    # -- database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    hostname: ""
+    # -- database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    port: "5432"
+    # -- database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    username: ""
+    # -- database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    databaseName: ""
+    # -- database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    sslMode: ""
+    # -- database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    sslCaLocation: ""
+
+  kafka:
+    # -- kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container.
+    enableAwsMskIam: false
+    # -- kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true.
+    brokerAddress: ""
+    # -- kafka.topic specifies the topic for the Rasa Pro Services container.
+    topic: ""
+    # -- kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container.
+    saslMechanism: ""
+    # -- kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container.
+    securityProtocol: ""
+    # -- kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container.
+    sslCaLocation: ""
+    # -- kafka.consumerId specifies the consumer ID for the Rasa Pro Services container.
+    consumerId: ""
+    # -- kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.
+    saslUsername: ""
+    # -- kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.
+    saslPassword:
+      secretName: "rasa-secrets"
+      secretKey: "kafkaSslPassword"
+
+  # -- rasaProServices.environmentVariables allows you to specify additional environment variables for the Rasa Pro Services container
   # These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration
   # Example:
-  #   additionalEnv:
+  #   environmentVariables:
   #     - name: MY_CUSTOM_VAR
   #       value: "some-value"
   #     - name: SECRET_VAR
@@ -481,7 +481,12 @@ rasaProServices:
   #         configMapKeyRef:
   #           name: my-configmap
   #           key: config-key
-  additionalEnv: []
+  environmentVariables: []
+
+  # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
+  envFrom: []
+    # - configMapRef:
+    #     name: my-configmap
 
   # -- rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment
   additionalContainers: []

@@ -317,6 +317,7 @@ rasa:
 | rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | rasaProLicense | object | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` | rasaProLicense is license key for Rasa Pro Services. |
 | rasaProServices.additionalContainers | list | `[]` | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
+| rasaProServices.additionalEnv | list | `[]` | rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration Example:   additionalEnv:     - name: MY_CUSTOM_VAR       value: "some-value"     - name: SECRET_VAR       valueFrom:         secretKeyRef:           name: my-secret           key: secret-key     - name: CONFIGMAP_VAR       valueFrom:         configMapKeyRef:           name: my-configmap           key: config-key |
 | rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
 | rasaProServices.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
@@ -333,7 +334,6 @@ rasa:
 | rasaProServices.database.username | string | `""` | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
 | rasaProServices.enabled | bool | `true` | rasaProServices.enabled enables Rasa Pro Services deployment |
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
-| rasaProServices.environmentVariables | list | `[]` | rasaProServices.environmentVariables allows you to specify additional environment variables for the Rasa Pro Services container These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration Example:   environmentVariables:     - name: MY_CUSTOM_VAR       value: "some-value"     - name: SECRET_VAR       valueFrom:         secretKeyRef:           name: my-secret           key: secret-key     - name: CONFIGMAP_VAR       valueFrom:         configMapKeyRef:           name: my-configmap           key: config-key |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
 | rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |

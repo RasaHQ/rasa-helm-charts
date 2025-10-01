@@ -70,8 +70,8 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.rasaProLicense.secretName }}
                   key: {{ .Values.rasaProLicense.secretKey }}
-            {{- if .Values.rasaProServices.environmentVariables }}
-            {{- toYaml .Values.rasaProServices.environmentVariables | nindent 12 }}
+            {{- if .Values.rasaProServices.additionalEnv }}
+            {{- toYaml .Values.rasaProServices.additionalEnv | nindent 12 }}
             {{- end }}
             {{- include "analytics.env" . | nindent 12 }}
           {{- if .Values.rasaProServices.envFrom }}

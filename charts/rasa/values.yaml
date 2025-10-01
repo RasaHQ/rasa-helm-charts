@@ -465,10 +465,10 @@ rasaProServices:
       secretName: "rasa-secrets"
       secretKey: "kafkaSslPassword"
 
-  # -- rasaProServices.environmentVariables allows you to specify additional environment variables for the Rasa Pro Services container
+  # -- rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container
   # These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration
   # Example:
-  #   environmentVariables:
+  #   additionalEnv:
   #     - name: MY_CUSTOM_VAR
   #       value: "some-value"
   #     - name: SECRET_VAR
@@ -481,7 +481,7 @@ rasaProServices:
   #         configMapKeyRef:
   #           name: my-configmap
   #           key: config-key
-  environmentVariables: []
+  additionalEnv: []
 
   # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []

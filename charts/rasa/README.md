@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.8-rc.3](https://img.shields.io/badge/Version-1.2.8--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.3.0-rc.1](https://img.shields.io/badge/Version-1.3.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ A Rasa Pro Helm chart for Kubernetes
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.8-rc.3
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.0-rc.1
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.8-rc.3
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.0-rc.1
 ```
 
 ## General Configuration
@@ -328,7 +328,7 @@ rasa:
 | rasaProServices.database.enableAwsRdsIam | bool | `false` | database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container. |
 | rasaProServices.database.hostname | string | `""` | database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
 | rasaProServices.database.port | string | `"5432"` | database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.database.sslCaLocation | string | `""` | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
+| rasaProServices.database.sslCaLocation | string | `""` | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full. |
 | rasaProServices.database.sslMode | string | `""` | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
 | rasaProServices.database.url | string | `""` | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. |
 | rasaProServices.database.username | string | `""` | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
@@ -341,11 +341,13 @@ rasa:
 | rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
 | rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
 | rasaProServices.kafka.enableAwsMskIam | bool | `false` | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. |
-| rasaProServices.kafka.saslMechanism | string | `"PLAIN"` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. |
+| rasaProServices.kafka.saslMechanism | string | `"PLAIN"` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. |
 | rasaProServices.kafka.saslPassword | object | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
 | rasaProServices.kafka.saslUsername | string | `""` | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
-| rasaProServices.kafka.securityProtocol | string | `"PLAINTEXT"` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. |
+| rasaProServices.kafka.securityProtocol | string | `"PLAINTEXT"` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL |
 | rasaProServices.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. |
+| rasaProServices.kafka.sslCertFileLocation | string | `""` | kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL. |
+| rasaProServices.kafka.sslKeyFileLocation | string | `""` | kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL. |
 | rasaProServices.kafka.topic | string | `"rasa-core-events"` | kafka.topic specifies the topic for the Rasa Pro Services container. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |

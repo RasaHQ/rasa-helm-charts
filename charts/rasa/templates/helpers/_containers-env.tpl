@@ -98,15 +98,27 @@ Environment Variables for Rasa Analytics
   value: {{ .brokerAddress | quote }}
 - name: "KAFKA_TOPIC"
   value: {{ .topic | quote }}
+{{- if .saslMechanism }}
 - name: "KAFKA_SASL_MECHANISM"
   value: {{ .saslMechanism | quote }}
+{{- end }}
 - name: "KAFKA_SECURITY_PROTOCOL"
   value: {{ .securityProtocol | quote }}
+{{- if .sslCaLocation }}
 - name: "KAFKA_SSL_CA_LOCATION"
   value: {{ .sslCaLocation | quote }}
+{{- end }}
+{{- if .sslCertFileLocation }}
+- name: "KAFKA_SSL_CERTFILE_LOCATION"
+  value: {{ .sslCertFileLocation | quote }}
+{{- end }}
+{{- if .sslKeyFileLocation }}
+- name: "KAFKA_SSL_KEYFILE_LOCATION"
+  value: {{ .sslKeyFileLocation | quote }}
+{{- end }}
 - name: "RASA_ANALYTICS_CONSUMER_ID"
   value: {{ .consumerId | quote }}
-{{- if not .enableAwsMskIam }}
+{{- if and (not .enableAwsMskIam) .saslMechanism }}
 - name: "KAFKA_SASL_USERNAME"
   value: {{ .saslUsername | quote }}
 - name: "KAFKA_SASL_PASSWORD"

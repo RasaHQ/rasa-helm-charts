@@ -339,14 +339,14 @@ rasa:
 | rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
 | rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
-| rasaProServices.kafka.consumerId | string | `""` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
+| rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
 | rasaProServices.kafka.enableAwsMskIam | bool | `false` | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. |
-| rasaProServices.kafka.saslMechanism | string | `""` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. |
+| rasaProServices.kafka.saslMechanism | string | `"PLAIN"` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. |
 | rasaProServices.kafka.saslPassword | object | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
 | rasaProServices.kafka.saslUsername | string | `""` | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
-| rasaProServices.kafka.securityProtocol | string | `""` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. |
+| rasaProServices.kafka.securityProtocol | string | `"PLAINTEXT"` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. |
 | rasaProServices.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. |
-| rasaProServices.kafka.topic | string | `""` | kafka.topic specifies the topic for the Rasa Pro Services container. |
+| rasaProServices.kafka.topic | string | `"rasa-core-events"` | kafka.topic specifies the topic for the Rasa Pro Services container. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasaProServices.livenessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |

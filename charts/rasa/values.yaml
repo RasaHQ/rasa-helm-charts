@@ -449,15 +449,15 @@ rasaProServices:
     # -- kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true.
     brokerAddress: ""
     # -- kafka.topic specifies the topic for the Rasa Pro Services container.
-    topic: ""
+    topic: "rasa-core-events"
     # -- kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container.
-    saslMechanism: ""
+    saslMechanism: "PLAIN"
     # -- kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container.
-    securityProtocol: ""
+    securityProtocol: "PLAINTEXT"
     # -- kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container.
     sslCaLocation: ""
     # -- kafka.consumerId specifies the consumer ID for the Rasa Pro Services container.
-    consumerId: ""
+    consumerId: "rasa-analytics-group"
     # -- kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.
     saslUsername: ""
     # -- kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.

@@ -341,10 +341,10 @@ rasa:
 | rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
 | rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
 | rasaProServices.kafka.enableAwsMskIam | bool | `false` | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. |
-| rasaProServices.kafka.saslMechanism | string | `"PLAIN"` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. |
+| rasaProServices.kafka.saslMechanism | string | `""` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. |
 | rasaProServices.kafka.saslPassword | object | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
 | rasaProServices.kafka.saslUsername | string | `""` | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
-| rasaProServices.kafka.securityProtocol | string | `"PLAINTEXT"` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL |
+| rasaProServices.kafka.securityProtocol | string | `""` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL |
 | rasaProServices.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. |
 | rasaProServices.kafka.sslCertFileLocation | string | `""` | kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL. |
 | rasaProServices.kafka.sslKeyFileLocation | string | `""` | kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL. |

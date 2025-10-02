@@ -451,9 +451,9 @@ rasaProServices:
     # -- kafka.topic specifies the topic for the Rasa Pro Services container.
     topic: "rasa-core-events"
     # -- kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL.
-    saslMechanism: "PLAIN"
+    saslMechanism: ""
     # -- kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL
-    securityProtocol: "PLAINTEXT"
+    securityProtocol: ""
     # -- kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container.
     sslCaLocation: ""
     # -- kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL.

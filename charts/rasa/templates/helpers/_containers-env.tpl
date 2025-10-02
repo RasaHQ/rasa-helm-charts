@@ -98,6 +98,8 @@ Environment Variables for Rasa Analytics
   value: {{ .brokerAddress | quote }}
 - name: "KAFKA_TOPIC"
   value: {{ .topic | quote }}
+- name: "RASA_ANALYTICS_DLQ"
+  value: {{ .dlqTopic | quote }}
 {{- if .saslMechanism }}
 - name: "KAFKA_SASL_MECHANISM"
   value: {{ .saslMechanism | quote }}

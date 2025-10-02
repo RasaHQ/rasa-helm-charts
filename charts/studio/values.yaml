@@ -195,25 +195,6 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
-    # -- backend.environmentVariables.KEYCLOAK_REALM is the Keycloak realm name for Studio.
-    # This defines the authentication realm where Studio users will be managed.
-    KEYCLOAK_REALM:
-      value: "rasa-studio"
-    # -- backend.environmentVariables.KEYCLOAK_API_CLIENT_ID is the Keycloak client ID for API access.
-    # This client is used by Studio Backend to authenticate with Keycloak.
-    KEYCLOAK_API_CLIENT_ID:
-      value: "admin-cli"
-    # -- backend.environmentVariables.KEYCLOAK_API_USERNAME is the username for Studio Backend to communicate with Keycloak.
-    # This account needs appropriate permissions in Keycloak to manage users.
-    KEYCLOAK_API_USERNAME:
-      value: "realmadmin"
-    # -- backend.environmentVariables.KEYCLOAK_API_PASSWORD is the password for Studio Backend to communicate with Keycloak.
-    # This should be stored in a Kubernetes secret for security.
-    # Ref: https://kubernetes.io/docs/concepts/configuration/secret/
-    KEYCLOAK_API_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KEYCLOAK_API_PASSWORD"
     # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
     # Conversations older than this value will be deleted by the cleanup cron job.
     # Leave empty to disable automatic conversation cleanup.
@@ -236,8 +217,7 @@ backend:
   # - secretRef:
   #     name: my-secret
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables
-  envFrom:
-    []
+  envFrom: []
 
   # -- backend.additionalContainers defines additional containers to run alongside the main Studio Backend container.
   # These containers will be part of the same pod and share the pod's network namespace.
@@ -264,8 +244,7 @@ backend:
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default
   # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  podAnnotations:
-    {}
+  podAnnotations: {}
 
   # -- backend.podSecurityContext defines the security settings for the entire pod.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
@@ -517,8 +496,7 @@ webClient:
   #     name: my-configmap
   # - secretRef:
   #     name: my-secret
-  envFrom:
-    []
+  envFrom: []
 
   # -- webClient.additionalContainers defines additional containers to run alongside the main Web Client container.
   # Example:
@@ -539,8 +517,7 @@ webClient:
   # -- webClient.podAnnotations defines annotations to add to the web client pod.
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default
-  podAnnotations:
-    {}
+  podAnnotations: {}
 
   # -- webClient.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:
@@ -737,8 +714,7 @@ eventIngestion:
   #     name: my-configmap
   # - secretRef:
   #     name: my-secret
-  envFrom:
-    []
+  envFrom: []
 
   # -- eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container.
   # Example:
@@ -752,16 +728,14 @@ eventIngestion:
   # - name: config-volume
   #   configMap:
   #     name: special-config
-  volumes:
-    []
+  volumes: []
 
   # -- eventIngestion.volumeMounts defines where to mount the volumes in the Event Ingestion container.
   # Example:
   # - name: config-volume
   #   mountPath: /etc/config
   #   readOnly: true
-  volumeMounts:
-    []
+  volumeMounts: []
 
   # -- eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod.
   serviceAccount:
@@ -775,8 +749,7 @@ eventIngestion:
   # -- eventIngestion.podAnnotations defines annotations to add to the event ingestion pod.
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default
-  podAnnotations:
-    {}
+  podAnnotations: {}
 
   # -- eventIngestion.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:
@@ -886,8 +859,7 @@ keycloak:
   #     name: my-configmap
   # - secretRef:
   #     name: my-secret
-  envFrom:
-    []
+  envFrom: []
 
   # -- keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container.
   # Example:
@@ -908,8 +880,7 @@ keycloak:
   # -- keycloak.podAnnotations defines annotations to add to the Keycloak pod.
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
-  podAnnotations:
-    {}
+  podAnnotations: {}
 
   # -- keycloak.podSecurityContext defines the security settings for the entire pod.
   podSecurityContext:

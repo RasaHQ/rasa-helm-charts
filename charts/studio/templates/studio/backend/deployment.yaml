@@ -74,6 +74,7 @@ spec:
             {{- include "studio.backend.env" . | nindent 12 }}
             {{- include "studio.shared.env" . | nindent 12 }}
             {{- include "studio.keycloak.url" . | nindent 12 }}
+            {{- include "studio.backend.keycloak" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
             - name: API_URL

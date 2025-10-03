@@ -81,8 +81,8 @@ jobs:
           CR_PAGES_INDEX_PATH: charts/index.yaml
           # GitHub auto-generated release notes
           CR_GENERATE_RELEASE_NOTES: "true"
-          # Skip existing releases
-          CR_SKIP_EXISTING: "true"
+          # Don't skip existing - we want to force release of RC versions
+          CR_SKIP_EXISTING: "false"
 
     #   - name: Notify Slack of successful release 💬
     #     if: success()

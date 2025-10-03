@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.1.15-rc.2](https://img.shields.io/badge/Version-2.1.15--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.1.9](https://img.shields.io/badge/Version-2.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -14,7 +14,7 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.15-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9
 ```
 
 ## Uninstalling the Chart
@@ -32,7 +32,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.15-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9
 ```
 
 ## General Configuration
@@ -147,7 +147,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.database.rejectUnauthorized | string | `""` | If true, the server will reject database connections which are not present in the list of supplied CAs. This provides additional security by ensuring only trusted certificates are accepted. |
 | config.database.username | string | `""` | The database username for Studio to connect with. This user should have appropriate permissions on the database. |
 | config.ingressAnnotations | object | `{}` | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod |
-| config.ingressClassName | string | `"nginx"` | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class |
+| config.ingressClassName | string | `""` | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class |
 | config.ingressHost | string | `"INGRESS.HOST.NAME"` | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. |
 | config.keycloak | object | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. |

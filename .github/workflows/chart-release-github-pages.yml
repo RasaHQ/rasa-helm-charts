@@ -10,12 +10,11 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write       # needed for releases + committing index.yaml
-  pull-requests: write  # needed to open PRs
+  contents: write
+  pull-requests: write
 
 jobs:
   release-charts:
-    name: Release Helm Charts to GitHub Pages
     runs-on: ubuntu-latest
     steps:
       - name: Checkout (full history)
@@ -23,36 +22,36 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Configure git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Set up Helm
         uses: azure/setup-helm@v4
         with:
           version: v3.15.2
 
-      - name: Configure Git identity
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      # 1) Run chart-releaser: upload packages to GitHub Releases,
-      #    generate index.yaml into a temp branch (not main)
-      - name: Package & upload charts
+      # 1) Package charts, upload as GitHub Release assets,
+      #    and commit index.yaml into a temp branch (ci/helm-index)
+      - name: Run chart-releaser (packages + index to temp branch)
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          CR_SKIP_PAGES: "true"               # don't try to commit index.yaml
+          CR_PAGES_BRANCH: ci/helm-index
+          CR_PAGES_INDEX_PATH: charts/index.yaml
           CR_GENERATE_RELEASE_NOTES: "true"
           CR_SKIP_EXISTING: "true"
 
-      # 2) Generate a new index.yaml locally from all releases
-      - name: Generate updated index.yaml
+      # 2) Fetch the temp branch with index.yaml
+      - name: Fetch updated index.yaml from ci/helm-index
         run: |
-          mkdir -p charts
-          helm repo index charts \
-            --url "https://github.com/${{ github.repository }}/releases/download"
+          git fetch origin ci/helm-index:ci/helm-index
+          git checkout ci/helm-index -- charts/index.yaml
 
-      # 3) Open a PR with the updated index.yaml
+      # 3) Open a PR with just charts/index.yaml into main
       - name: Create PR for index.yaml
         uses: peter-evans/create-pull-request@v6
         with:
@@ -64,8 +63,8 @@ jobs:
             ## 📦 Helm Repository Index Update
 
             This PR updates the Helm repository index with newly released charts.
-            Charts are available from GitHub Releases.
+            Charts are available as GitHub Release assets.
 
-            Once merged, `https://<your-domain>/charts` will include the latest versions.
+            Once merged, https://<your-domain>/charts will serve the updated index.
           add-paths: |
             charts/index.yaml

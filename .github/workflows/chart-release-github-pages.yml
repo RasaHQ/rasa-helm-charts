@@ -30,6 +30,11 @@ jobs:
         with:
           version: v3.15.2
 
+      - name: Configure Git
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       - name: Release charts (GitHub Releases + index.yaml)
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
         with:

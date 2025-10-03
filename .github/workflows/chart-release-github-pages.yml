@@ -32,9 +32,8 @@ jobs:
         with:
           version: v3.15.2
 
-      # 1) Package charts, upload as GitHub Release assets,
-      #    and commit index.yaml into a temp branch (ci/helm-index)
-      - name: Run chart-releaser (packages + index to temp branch)
+      # 1) Run chart-releaser: packages + GitHub Releases + index.yaml → ci/helm-index branch
+      - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
@@ -45,13 +44,13 @@ jobs:
           CR_GENERATE_RELEASE_NOTES: "true"
           CR_SKIP_EXISTING: "true"
 
-      # 2) Fetch the temp branch with index.yaml
-      - name: Fetch updated index.yaml from ci/helm-index
+      # 2) Fetch the generated index.yaml from ci/helm-index
+      - name: Fetch updated index.yaml
         run: |
           git fetch origin ci/helm-index:ci/helm-index
           git checkout ci/helm-index -- charts/index.yaml
 
-      # 3) Open a PR with just charts/index.yaml into main
+      # 3) Open a PR with index.yaml into main, auto-delete branch when merged
       - name: Create PR for index.yaml
         uses: peter-evans/create-pull-request@v6
         with:
@@ -59,12 +58,13 @@ jobs:
           title: "chore(helm): update Helm index"
           branch: ci/update-helm-index
           base: main
+          delete-branch: true   # 👈 clean up branch after merge
           body: |
             ## 📦 Helm Repository Index Update
 
             This PR updates the Helm repository index with newly released charts.
             Charts are available as GitHub Release assets.
 
-            Once merged, https://<your-domain>/charts will serve the updated index.
+            Once merged, https://helm.rasa.com/charts will serve the updated index.
           add-paths: |
             charts/index.yaml

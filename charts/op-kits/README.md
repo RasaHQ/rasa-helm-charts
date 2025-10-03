@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.6
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.4
 ```
 
 ## Uninstalling the Chart
@@ -37,7 +37,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.6
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.4
 ```
 
 ## Operator Installation
@@ -114,7 +114,7 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.6 \
+    --version 0.1.4 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -226,7 +226,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | cloudnativepg.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-pg" |
 | cloudnativepg.cluster.postgresql | object | `{"parameters":{}}` | Additional PostgreSQL configuration parameters Example: postgresql:   parameters:     max_connections: "200"     shared_buffers: "256MB" |
 | cloudnativepg.cluster.resources | object | `{}` | Resource limits and requests for PostgreSQL containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
-| cloudnativepg.cluster.storage.size | string | `"10Gi"` | Storage size for PostgreSQL data |
+| cloudnativepg.cluster.storage.size | string | `"20Gi"` | Storage size for PostgreSQL data |
 | cloudnativepg.cluster.storage.storageClass | string | `"gp2"` | Storage class name. Change to your storage class |
 | cloudnativepg.enabled | bool | `true` | Enable CloudNativePG cluster deployment |
 | commonAnnotations | object | `{}` | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" |

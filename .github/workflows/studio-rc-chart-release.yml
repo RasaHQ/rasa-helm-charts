@@ -84,20 +84,20 @@ jobs:
           # Skip existing releases
           CR_SKIP_EXISTING: "true"
 
-      - name: Notify Slack of successful release 💬
-        if: success()
-        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
-        with:
-          channel-id: 'C0351QXJ5CP'
-          slack-message: "🚀 New *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` has been released to GitHub Pages!"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    #   - name: Notify Slack of successful release 💬
+    #     if: success()
+    #     uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+    #     with:
+    #       channel-id: 'C0351QXJ5CP'
+    #       slack-message: "🚀 New *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` has been released to GitHub Pages!"
+    #     env:
+    #       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-      - name: Notify Slack of unsuccessful release ⛔️
-        if: failure()
-        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
-        with:
-          channel-id: 'C0351QXJ5CP'
-          slack-message: "⛔️ *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+    #   - name: Notify Slack of unsuccessful release ⛔️
+    #     if: failure()
+    #     uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+    #     with:
+    #       channel-id: 'C0351QXJ5CP'
+    #       slack-message: "⛔️ *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
+    #     env:
+    #       SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

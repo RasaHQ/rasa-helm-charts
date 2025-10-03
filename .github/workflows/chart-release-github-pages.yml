@@ -103,12 +103,13 @@ jobs:
           delete-branch: true
           labels: |
             automated
-            helm
           body: |
             ## 📦 Helm Repository Index Update
 
             This PR updates the Helm repository index with newly released charts.
             Packages are stored as GitHub Release assets. Once merged, Pages will serve the updated index.
+
+            Once merged, https://helm.rasa.com/charts will serve the updated index.
 
           add-paths: |
             charts/index.yaml

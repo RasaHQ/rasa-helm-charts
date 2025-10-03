@@ -1,13 +1,11 @@
-name: Release Op-Kits Helm Charts to GitHub Pages
+name: Release Helm Charts to GitHub Pages
 
 on:
   push:
     branches:
       - main
     paths:
-      - charts/op-kits/**
-      - '!charts/rasa/**'
-      - '!charts/studio/**'
+      - charts/**
       - '!replicated/**'
   workflow_dispatch: {}
 
@@ -19,7 +17,7 @@ permissions:
 
 jobs:
   release-charts:
-    name: Release Op-Kits Charts to GitHub Pages
+    name: Release Helm Charts to GitHub Pages
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout (full history)
@@ -32,18 +30,10 @@ jobs:
         with:
           version: v3.15.2
 
-      - name: Prepare charts directory for Op-Kits-only release
-        run: |
-          # Create a temporary charts directory with only Op-Kits chart
-          mkdir -p temp-charts-dir
-          cp -r charts/op-kits temp-charts-dir/
-          
-          echo "Op-Kits chart version: $(grep '^version:' charts/op-kits/Chart.yaml)"
-          
       - name: Release charts (GitHub Releases + index.yaml)
         uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
         with:
-          charts_dir: temp-charts-dir
+          charts_dir: charts
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Keep Pages on 'main' and commit ONLY the index file to a subpath
@@ -59,7 +49,7 @@ jobs:
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
           channel-id: 'C0351QXJ5CP'
-          slack-message: "🚀 New *Op-Kits* Helm Chart has been released to GitHub Pages!"
+          slack-message: "🚀 New Helm Charts have been released to GitHub Pages!"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
@@ -68,6 +58,6 @@ jobs:
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
           channel-id: 'C0351QXJ5CP'
-          slack-message: "⛔️ *Op-Kits* Helm Chart could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
+          slack-message: "⛔️ Helm Charts could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

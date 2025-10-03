@@ -68,3 +68,5 @@ jobs:
             Once merged, https://helm.rasa.com/charts will serve the updated index.
           add-paths: |
             charts/index.yaml
+          labels: |
+            automated

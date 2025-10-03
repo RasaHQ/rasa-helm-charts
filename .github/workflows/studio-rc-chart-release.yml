@@ -1,0 +1,103 @@
+name: Release Studio RC Helm Charts
+
+on:
+  push:
+    branches:
+      - release/*
+    paths:
+      - charts/studio/**
+      - '!charts/rasa/**'
+      - '!charts/op-kits/**'
+      - '!replicated/**'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write                  # needed for releases + committing index.yaml
+  id-token: write
+  pull-requests: read
+  issues: read
+
+jobs:
+  check-rc-version:
+    name: Check if Studio chart is RC version
+    runs-on: ubuntu-24.04
+    outputs:
+      studio-version: ${{ steps.studio-chart-info.outputs.version }}
+      studio-name: ${{ steps.studio-chart-info.outputs.name }}
+      is-rc: ${{ steps.check-rc.outputs.rc }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+      
+      - name: Read Studio chart info
+        id: studio-chart-info
+        uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+        with:
+          path: charts/studio/
+      
+      - name: Check if Studio chart version is RC
+        id: check-rc
+        env:
+          VERSION: ${{ steps.studio-chart-info.outputs.name }}-${{ steps.studio-chart-info.outputs.version }}
+        run: |
+          if [[ $VERSION == *-rc* ]]; then
+            echo "The Studio Helm chart version is a release candidate: $VERSION"
+            echo "rc=true" >> $GITHUB_OUTPUT
+          else
+            echo "The Studio Helm chart version is not a release candidate: $VERSION"
+            echo "rc=false" >> $GITHUB_OUTPUT
+          fi
+
+  release-charts:
+    name: Release Studio RC Charts to GitHub
+    needs: [check-rc-version]
+    if: needs.check-rc-version.outputs.is-rc == 'true'
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout (full history)
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          fetch-depth: 0
+
+      - name: Set up Helm
+        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        with:
+          version: v3.15.2
+
+      - name: Prepare charts directory for Studio-only release
+        run: |
+          # Create a temporary charts directory with only Studio chart
+          mkdir -p temp-charts-dir
+          cp -r charts/studio temp-charts-dir/
+          
+      - name: Release charts (GitHub Releases + index.yaml)
+        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
+        with:
+          charts_dir: temp-charts-dir
+        env:
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # Keep Pages on 'main' and commit ONLY the index file to a subpath
+          CR_PAGES_BRANCH: main
+          CR_PAGES_INDEX_PATH: charts/index.yaml
+          # GitHub auto-generated release notes
+          CR_GENERATE_RELEASE_NOTES: "true"
+          # Skip existing releases
+          CR_SKIP_EXISTING: "true"
+
+      - name: Notify Slack of successful release 💬
+        if: success()
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+        with:
+          channel-id: 'C0351QXJ5CP'
+          slack-message: "🚀 New *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` has been released to GitHub Pages!"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+
+      - name: Notify Slack of unsuccessful release ⛔️
+        if: failure()
+        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+        with:
+          channel-id: 'C0351QXJ5CP'
+          slack-message: "⛔️ *Studio RC* Helm Chart version `${{ needs.check-rc-version.outputs.studio-name }}-${{ needs.check-rc-version.outputs.studio-version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}

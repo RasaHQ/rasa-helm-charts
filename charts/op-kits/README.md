@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.3](https://img.shields.io/badge/Version-0.1.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.4](https://img.shields.io/badge/Version-0.1.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -17,7 +17,7 @@ Operator Kits Helm Chart
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.4
 ```
 
 ## Uninstalling the Chart
@@ -37,7 +37,7 @@ The command removes all the Kubernetes components associated with the chart and 
 To pull chart contents for your own convenience:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.4
 ```
 
 ## Operator Installation
@@ -114,7 +114,7 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Install the op-kits chart in your application namespace
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.3 \
+    --version 0.1.4 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -249,14 +249,14 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | strimzi.nodePools.brokers.resources | object | `{}` | Resource limits and requests for broker nodes Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "200m"     memory: "512Mi" |
 | strimzi.nodePools.brokers.roles | list | `["broker"]` | Node pool roles for brokers |
 | strimzi.nodePools.brokers.storage.type | string | `"jbod"` | Storage type for broker nodes (JBOD allows multiple volumes) |
-| strimzi.nodePools.brokers.storage.volumes | list | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"20Gi","type":"persistent-claim"}]` | Storage volumes configuration for brokers |
+| strimzi.nodePools.brokers.storage.volumes | list | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"10Gi","type":"persistent-claim"}]` | Storage volumes configuration for brokers |
 | strimzi.nodePools.controllers.enabled | bool | `true` | Enable controller node pool deployment |
 | strimzi.nodePools.controllers.replicas | int | `1` | Number of controller replicas |
 | strimzi.nodePools.controllers.resources | object | `{}` | Resource limits and requests for controller nodes Example: resources:   limits:     cpu: "500m"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
 | strimzi.nodePools.controllers.roles | list | `["controller"]` | Node pool roles for controllers |
 | strimzi.nodePools.controllers.storage.class | string | `"gp2"` | Storage class for controller nodes |
 | strimzi.nodePools.controllers.storage.deleteClaim | bool | `true` | Whether to delete PVC when node pool is deleted |
-| strimzi.nodePools.controllers.storage.size | string | `"20Gi"` | Storage size for controller nodes |
+| strimzi.nodePools.controllers.storage.size | string | `"10Gi"` | Storage size for controller nodes |
 | strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
 | strimzi.topics | object | `{}` |  |
 | strimzi.users.app.authentication.password | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"app-secrets"}` | Password configuration sourced from Kubernetes secret |

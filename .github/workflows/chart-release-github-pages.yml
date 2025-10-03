@@ -31,6 +31,24 @@ jobs:
           git config user.name "rasabot"
           git config user.email "rasabot@rasa.com"
 
+      # 0) Ensure ci/helm-index exists so chart-releaser has somewhere to push
+      - name: Ensure ci/helm-index branch exists
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code --heads origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
+            echo "${PAGES_BRANCH} already exists."
+          else
+            echo "Creating ${PAGES_BRANCH}…"
+            git checkout --orphan "${PAGES_BRANCH}"
+            git reset --hard
+            echo "# Helm index branch" > README.md
+            git add README.md
+            git commit -m "chore: init ${PAGES_BRANCH}"
+            git remote set-url origin https://${{ secrets.CHART_RELEASER_PAT }}@github.com/${{ github.repository }}.git
+            git push origin "${PAGES_BRANCH}"
+            git checkout -f main
+          fi
+
       - name: Set up Helm
         uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
         with:
@@ -50,11 +68,11 @@ jobs:
           CR_SKIP_EXISTING: "true"
 
       # 2) Pull the generated index.yaml from the temp branch (skip if branch doesn't exist yet)
-      - name: Fetch updated index.yaml from temp branch
+      - name: Fetch updated index.yaml
         id: fetch_index
         run: |
           set -euo pipefail
-          if git ls-remote --exit-code origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
+          if git ls-remote --exit-code --heads origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
             git fetch origin "${PAGES_BRANCH}:${PAGES_BRANCH}"
             git checkout "${PAGES_BRANCH}" -- "${INDEX_PATH}"
           else

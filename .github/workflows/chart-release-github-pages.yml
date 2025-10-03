@@ -10,59 +10,57 @@ on:
   workflow_dispatch: {}
 
 permissions:
-  contents: write                  # needed for releases + committing index.yaml
-  id-token: write
-  pull-requests: read
-  issues: read
+  contents: write       # needed for releases + committing index.yaml
+  pull-requests: write  # needed to open PRs
 
 jobs:
   release-charts:
     name: Release Helm Charts to GitHub Pages
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout (full history)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
       - name: Set up Helm
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        uses: azure/setup-helm@v4
         with:
           version: v3.15.2
 
-      - name: Configure Git
-        run: |
-          git config --global user.name "github-actions[bot]"
-          git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      - name: Release charts (GitHub Releases + index.yaml)
-        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
+      # 1) Run chart-releaser: upload packages to GitHub Releases,
+      #    generate index.yaml into a temp branch (not main)
+      - name: Package & upload charts
+        uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
         env:
           CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          # Keep Pages on 'main' and commit ONLY the index file to a subpath
-          CR_PAGES_BRANCH: main
-          CR_PAGES_INDEX_PATH: charts/index.yaml
-          # GitHub auto-generated release notes
+          CR_SKIP_PAGES: "true"               # don't try to commit index.yaml
           CR_GENERATE_RELEASE_NOTES: "true"
-          # Skip existing releases (normal behavior)
           CR_SKIP_EXISTING: "true"
 
-      - name: Notify Slack of successful release 💬
-        if: success()
-        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
-        with:
-          channel-id: 'C0351QXJ5CP'
-          slack-message: "🚀 New Helm Charts have been released to GitHub Pages!"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      # 2) Generate a new index.yaml locally from all releases
+      - name: Generate updated index.yaml
+        run: |
+          mkdir -p charts
+          helm repo index charts \
+            --url "https://github.com/${{ github.repository }}/releases/download"
 
-      - name: Notify Slack of unsuccessful release ⛔️
-        if: failure()
-        uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
+      # 3) Open a PR with the updated index.yaml
+      - name: Create PR for index.yaml
+        uses: peter-evans/create-pull-request@v6
         with:
-          channel-id: 'C0351QXJ5CP'
-          slack-message: "⛔️ Helm Charts could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          commit-message: "chore(helm): update charts/index.yaml"
+          title: "chore(helm): update Helm index"
+          branch: ci/update-helm-index
+          base: main
+          body: |
+            ## 📦 Helm Repository Index Update
+
+            This PR updates the Helm repository index with newly released charts.
+            Charts are available from GitHub Releases.
+
+            Once merged, `https://<your-domain>/charts` will include the latest versions.
+          add-paths: |
+            charts/index.yaml

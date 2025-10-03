@@ -40,7 +40,7 @@ cloudnativepg:
     # Storage configuration for PostgreSQL
     storage:
       # -- Storage size for PostgreSQL data
-      size: "10Gi"
+      size: "20Gi"
       # -- Storage class name. Change to your storage class
       storageClass: "gp2"
 

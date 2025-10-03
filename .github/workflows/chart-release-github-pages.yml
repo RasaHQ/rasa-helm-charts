@@ -11,6 +11,11 @@ on:
 
 permissions:
   contents: write
+  pull-requests: write
+
+env:
+  PAGES_BRANCH: ci/helm-index
+  INDEX_PATH: charts/index.yaml
 
 jobs:
   release-charts:
@@ -31,13 +36,77 @@ jobs:
         with:
           version: v3.15.2
 
-      - name: Release charts (GitHub Releases + index.yaml to main)
-        uses: helm/chart-releaser-action@a917fd15b20e8b64b94d9158ad54cd6345335584
+      # 1) Package charts, upload to Releases, and write index.yaml to a temp branch
+      - name: Run chart-releaser (packages + index → temp branch)
+        uses: helm/chart-releaser-action@v1.7.0
         with:
           charts_dir: charts
         env:
+          # Use your PAT for all GitHub API calls
           CR_TOKEN: ${{ secrets.CHART_RELEASER_PAT }}
-          CR_PAGES_BRANCH: main
-          CR_PAGES_INDEX_PATH: charts/index.yaml
+          CR_PAGES_BRANCH: ${{ env.PAGES_BRANCH }}
+          CR_PAGES_INDEX_PATH: ${{ env.INDEX_PATH }}
           CR_GENERATE_RELEASE_NOTES: "true"
           CR_SKIP_EXISTING: "true"
+
+      # 2) Pull the generated index.yaml from the temp branch (skip if branch doesn't exist yet)
+      - name: Fetch updated index.yaml from temp branch
+        id: fetch_index
+        run: |
+          set -euo pipefail
+          if git ls-remote --exit-code origin "${PAGES_BRANCH}" >/dev/null 2>&1; then
+            git fetch origin "${PAGES_BRANCH}:${PAGES_BRANCH}"
+            git checkout "${PAGES_BRANCH}" -- "${INDEX_PATH}"
+          else
+            echo "no_index=true" >> $GITHUB_OUTPUT
+          fi
+
+      # 3) Create a PR to main with only charts/index.yaml (uses your PAT), auto-delete branch on merge
+      - name: Create PR for index.yaml
+        if: steps.fetch_index.outputs.no_index != 'true'
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.CHART_RELEASER_PAT }}
+          commit-message: "chore(helm): update ${INDEX_PATH}"
+          title: "chore(helm): update Helm index"
+          branch: ci/update-helm-index
+          base: main
+          delete-branch: true
+          labels: |
+            automated
+            helm
+          body: |
+            ## 📦 Helm Repository Index Update
+
+            This PR updates the Helm repository index with newly released charts.
+            Packages are stored as GitHub Release assets. Once merged, Pages will serve the updated index.
+
+          add-paths: |
+            charts/index.yaml
+
+      # 2) Fetch the generated index.yaml from ci/helm-index
+      - name: Fetch updated index.yaml
+        run: |
+          git fetch origin ci/helm-index:ci/helm-index
+          git checkout ci/helm-index -- charts/index.yaml
+
+      # 3) Open a PR with index.yaml into main, auto-delete branch when merged
+      - name: Create PR for index.yaml
+        uses: peter-evans/create-pull-request@v6
+        with:
+          commit-message: "chore(helm): update charts/index.yaml"
+          title: "chore(helm): update Helm index"
+          branch: ci/update-helm-index
+          base: main
+          delete-branch: true
+          body: |
+            ## 📦 Helm Repository Index Update
+
+            This PR updates the Helm repository index with newly released charts.
+            Charts are available as GitHub Release assets.
+
+            Once merged, https://helm.rasa.com/charts will serve the updated index.
+          add-paths: |
+            charts/index.yaml
+          labels: |
+            automated

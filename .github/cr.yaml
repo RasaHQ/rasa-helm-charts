@@ -1,0 +1,21 @@
+# Configuration for chart-releaser-action
+# This ensures proper handling of Studio RC chart releases
+
+# Only release charts that have changed
+skip-existing: true
+
+# Generate release notes automatically
+generate-release-notes: true
+
+# Mark releases as pre-release for RC versions
+mark-as-latest: false
+
+# Package path for charts
+package-path: .cr-release-packages
+
+# Pages configuration
+pages-branch: main
+pages-index-path: charts/index.yaml
+
+# Release configuration
+release-name-template: "{{ .Name }}-{{ .Version }}"

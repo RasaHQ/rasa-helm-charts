@@ -40,7 +40,7 @@ config:
   # This value will be applied to all ingress resources created by this chart.
   # Example: "nginx", "istio", "traefik"
   # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
-  ingressClassName: "nginx"
+  ingressClassName: ""
 
   # -- Define if you will be using https or http with the ingressHost.
   # Valid values are "http" or "https". This setting affects how services communicate with each other.

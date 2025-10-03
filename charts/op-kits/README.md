@@ -226,7 +226,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | cloudnativepg.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-pg" |
 | cloudnativepg.cluster.postgresql | object | `{"parameters":{}}` | Additional PostgreSQL configuration parameters Example: postgresql:   parameters:     max_connections: "200"     shared_buffers: "256MB" |
 | cloudnativepg.cluster.resources | object | `{}` | Resource limits and requests for PostgreSQL containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
-| cloudnativepg.cluster.storage.size | string | `"10Gi"` | Storage size for PostgreSQL data |
+| cloudnativepg.cluster.storage.size | string | `"20Gi"` | Storage size for PostgreSQL data |
 | cloudnativepg.cluster.storage.storageClass | string | `"gp2"` | Storage class name. Change to your storage class |
 | cloudnativepg.enabled | bool | `true` | Enable CloudNativePG cluster deployment |
 | commonAnnotations | object | `{}` | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" |

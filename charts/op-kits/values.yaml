@@ -162,7 +162,7 @@ strimzi:
         # -- Storage type for controller nodes
         type: "persistent-claim"
         # -- Storage size for controller nodes
-        size: "20Gi"
+        size: "10Gi"
         # -- Storage class for controller nodes
         class: "gp2"
         # -- Whether to delete PVC when node pool is deleted
@@ -196,7 +196,7 @@ strimzi:
         volumes:
           - id: 0
             type: "persistent-claim"
-            size: "20Gi"
+            size: "10Gi"
             class: "gp2"
             deleteClaim: true
 

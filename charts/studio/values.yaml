@@ -16,8 +16,6 @@ imagePullSecrets:
   []
   # - name: regcred
 
-# -- adding some docs just to see if the releases will work
-
 # -- repository specifies image repository for Studio
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
@@ -42,7 +40,7 @@ config:
   # This value will be applied to all ingress resources created by this chart.
   # Example: "nginx", "istio", "traefik"
   # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
-  ingressClassName: ""
+  ingressClassName: "nginx"
 
   # -- Define if you will be using https or http with the ingressHost.
   # Valid values are "http" or "https". This setting affects how services communicate with each other.

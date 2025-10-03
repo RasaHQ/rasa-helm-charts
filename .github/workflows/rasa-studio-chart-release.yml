@@ -86,40 +86,7 @@ jobs:
           slack-message: "⛔️ *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-          
-      - name: Get previous release tag
-        id: previous-release
-        uses: JinoArch/get-latest-tag@4a55da58d123a16b749c152b45c15f1ead139d42
 
-      - name: Create Studio Release Tag
-        uses: rickstaa/action-create-tag@55450aa830ede05bcbb37fbdad678e36c73e9d15
-        with:
-          tag: "${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}"
-          tag_exists_error: false
-
-      - name: Build Studio changelog
-        id: changelog
-        uses: mikepenz/release-changelog-builder-action@6fd5cc6eaf7567dbd0f9666061215bb476f012fc
-        with:
-          configurationJson: |
-            {
-              "categories": [
-                {
-                    "title": "## 🚀 Studio Helm Chart",
-                    "labels": ["studio"]
-                }
-              ]
-            }
-          fromTag: "${{ steps.previous-release.outputs.latestTag }}"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Create Studio Release
-        uses: mikepenz/action-gh-release@ac23f2c4388204c6081863ead928a6f05fd7838a
-        with:
-          tag_name: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}
-          body: ${{ steps.changelog.outputs.changelog }}
-      
   replicated-release:
     name: Promote Replicated release
     needs: [release]

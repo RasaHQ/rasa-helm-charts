@@ -12,6 +12,7 @@ on:
 
 jobs:
   check-rc:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-24.04
 
     steps:

@@ -6,6 +6,7 @@ on:
 
 jobs:
   lint:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-24.04
 
     steps:
@@ -51,6 +52,7 @@ jobs:
     #   run: ct install --config ct.yaml
 
   snyk:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-24.04
 
     strategy:

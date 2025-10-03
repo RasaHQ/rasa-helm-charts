@@ -28,6 +28,11 @@ jobs:
         with:
           version: v3.15.2
 
+      - name: Configure Git identity
+        run: |
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+
       # 1) Run chart-releaser: upload packages to GitHub Releases,
       #    generate index.yaml into a temp branch (not main)
       - name: Package & upload charts

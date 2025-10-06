@@ -11,10 +11,29 @@ This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm p
 
 ## Installing the Chart
 
+You can install the chart from either the OCI registry or the GitHub Helm repository.
+
+### Option 1: Install from OCI Registry
+
 To install the chart with the release name `my-release`:
 
 ```console
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9
+```
+
+### Option 2: Install from GitHub Helm Repository
+
+First, add the Rasa Helm repository:
+
+```console
+$ helm repo add rasa https://helm.rasa.com/charts
+$ helm repo update
+```
+
+Then install the chart:
+
+```console
+$ helm install my-release rasa/studio --version 2.1.9
 ```
 
 ## Uninstalling the Chart
@@ -29,10 +48,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Pull the Chart
 
-To pull chart contents for your own convenience:
+You can pull the chart from either source:
+
+### From OCI Registry:
 
 ```console
 $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.1.9
+```
+
+### From GitHub Helm Repository:
+
+```console
+$ helm pull rasa/studio --version 2.1.9
 ```
 
 ## General Configuration

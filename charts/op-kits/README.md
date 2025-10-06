@@ -14,10 +14,29 @@ Operator Kits Helm Chart
 
 ## Installing the Chart
 
+You can install the chart from either the OCI registry or the GitHub Helm repository.
+
+### Option 1: Install from OCI Registry
+
 To install the chart with the release name `my-release`:
 
 ```console
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.5
+```
+
+### Option 2: Install from GitHub Helm Repository
+
+First, add the Rasa Helm repository:
+
+```console
+$ helm repo add rasa https://helm.rasa.com/charts
+$ helm repo update
+```
+
+Then install the chart:
+
+```console
+$ helm install my-release rasa/op-kits --version 0.1.5
 ```
 
 ## Uninstalling the Chart
@@ -34,10 +53,18 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## Pull the Chart
 
-To pull chart contents for your own convenience:
+You can pull the chart from either source:
+
+### From OCI Registry:
 
 ```console
 $ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.5
+```
+
+### From GitHub Helm Repository:
+
+```console
+$ helm pull rasa/op-kits --version 0.1.5
 ```
 
 ## Operator Installation
@@ -109,11 +136,17 @@ $ kubectl get pods -n valkey-system
 
 ### 5. Install Application Resources
 
-Once operators are installed and running, you can deploy your application resources:
+Once operators are installed and running, you can deploy your application resources using either installation method:
 
 ```console
-# Install the op-kits chart in your application namespace
+# Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
+    --version 0.1.5 \
+    --namespace my-app-namespace \
+    --create-namespace
+
+# Option 2: Install from GitHub Helm Repository (after adding the repo)
+$ helm install my-release rasa/op-kits \
     --version 0.1.5 \
     --namespace my-app-namespace \
     --create-namespace

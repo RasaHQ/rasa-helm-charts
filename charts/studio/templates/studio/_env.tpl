@@ -63,6 +63,9 @@ Backend Keycloak env
       key: {{ .Values.config.keycloak.apiPassword.secretKey | quote }}
 {{- end -}}
 
+{{/*
+Backend Database Environment Variables
+*/}}
 {{- define "studio.backend.env" -}}
 - name: DB_USER
   value: {{ .Values.config.database.username | quote }}

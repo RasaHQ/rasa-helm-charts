@@ -25,4 +25,56 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/op-kits-0.1.5/op-kits-0.1.5.tgz
     version: 0.1.5
-generated: "2025-10-03T13:27:32.886458686Z"
+  rasa:
+  - apiVersion: v2
+    created: "2025-10-09T13:15:14.689519547Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: 5079054ef842d6d4f0ef214c57821652684a3132b04c0525f801ef4ba51f08a6
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-1.2.7/rasa-1.2.7.tgz
+    version: 1.2.7
+  studio:
+  - apiVersion: v2
+    created: "2025-10-09T13:17:48.554276319Z"
+    dependencies:
+    - condition: replicated.enabled
+      name: replicated
+      repository: oci://registry.replicated.com/library
+      version: 1.7.1
+    - condition: rasa.enabled
+      name: rasa
+      repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
+      version: 1.2.7
+    description: This chart bootstraps Studio deployment on a Kubernetes cluster using
+      the Helm package manager.
+    digest: 29eba68383b416ec6c1faee6048edf9d41fadbf001ddc91874c8944501bb568f
+    home: https://helm.rasa.com
+    keywords:
+    - Kubernetes
+    - Studio
+    - CALM
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: studio
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
+    version: 2.1.9
+generated: "2025-10-09T13:17:48.554285506Z"

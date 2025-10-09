@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 1.2.7
+helm install my-release rasa/rasa --version 1.3.0-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -59,7 +59,7 @@ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --ver
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 1.2.7
+helm pull rasa/rasa --version 1.3.0-rc.2
 ```
 
 ## General Configuration
@@ -130,7 +130,7 @@ rasa:
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"3.13.0-latest"` | image.tag specifies image tag |
+| actionServer.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
 | actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -266,7 +266,7 @@ rasa:
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.13.2-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -362,7 +362,7 @@ rasa:
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.image.tag | string | `"3.6.0-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
 | rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
 | rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |

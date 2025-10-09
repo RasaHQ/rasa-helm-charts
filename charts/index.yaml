@@ -25,4 +25,25 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/op-kits-0.1.5/op-kits-0.1.5.tgz
     version: 0.1.5
-generated: "2025-10-03T13:27:32.886458686Z"
+  rasa:
+  - apiVersion: v2
+    created: "2025-10-09T13:15:14.689519547Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: 5079054ef842d6d4f0ef214c57821652684a3132b04c0525f801ef4ba51f08a6
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-1.2.7/rasa-1.2.7.tgz
+    version: 1.2.7
+generated: "2025-10-09T13:15:14.994592878Z"

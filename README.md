@@ -4,7 +4,7 @@
 
 Rasa Studio and Rasa Pro, ready to launch on Kubernetes using [Kubernetes Helm](https://github.com/helm/helm).
 
-Chart usage can be found:
+Chart documentation per chart:
 
 - [Rasa Studio](https://helm.rasa.com/charts/studio/)
 - [Rasa Pro](https://helm.rasa.com/charts/rasa/)
@@ -16,7 +16,15 @@ By installing and using this software, you agree to be bound by the terms and co
 
 ## TL;DR
 
+You can install charts from either the GitHub Helm repository or the OCI registry.
+
 ```bash
+# From GitHub Helm repository
+helm repo add rasa https://helm.rasa.com/charts && helm repo update
+helm install <your release name> rasa/studio
+helm install <your release name> rasa/rasa
+
+# From OCI registry
 helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
 helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa
 ```
@@ -40,28 +48,35 @@ To install Helm, refer to the [Helm install guide](https://github.com/helm/helm#
 
 ### Using Helm
 
-Once you have installed the Helm client, you can deploy a Studio Helm Chart into a Kubernetes cluster.
+Once Helm is installed, you can deploy Rasa charts into a Kubernetes cluster.
 
-Please refer to the [Quick Start guide](https://helm.sh/docs/intro/quickstart/) if you wish to get running in just a few commands, otherwise the [Using Helm Guide](https://helm.sh/docs/intro/using_helm/) provides detailed instructions on how to use the Helm client to manage packages on your Kubernetes cluster.
+Please refer to the [Quick Start guide](https://helm.sh/docs/intro/quickstart/) for a quick start, or the [Using Helm Guide](https://helm.sh/docs/intro/using_helm/) for detailed instructions.
 
-#### Useful Helm Client Commands:
+#### Install from GitHub Helm repository
 
-Rasa Studio:
+```bash
+helm repo add rasa https://helm.rasa.com/charts
+helm repo update
 
-```yaml
-- Install a chart: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
-- Upgrade your application: helm upgrade <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
-- Install specific version: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version <desired version>
-- Delete the release: helm delete <your release name>
+# Latest version
+helm install <your release name> rasa/studio
+helm install <your release name> rasa/rasa
+
+# Specific version
+helm install <your release name> rasa/studio --version <desired version>
+helm install <your release name> rasa/rasa --version <desired version>
 ```
 
-Rasa Pro:
+#### Install from OCI registry
 
-```yaml
-- Install a chart: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa
-- Upgrade your application: helm upgrade <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa
-- Install specific version: helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version <desired version>
-- Delete the release: helm delete <your release name>
+```bash
+# Latest version
+helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio
+helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa
+
+# Specific version
+helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version <desired version>
+helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version <desired version>
 ```
 
 ## Contributing

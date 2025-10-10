@@ -30,7 +30,7 @@ rasa:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.13.2-latest"
+    tag: "3.14.0-latest"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -404,7 +404,7 @@ rasaProServices:
     pullPolicy: IfNotPresent
     # -- Specifies image tag
     # image.tag specifies image tag
-    tag: "3.5.1-latest"
+    tag: "3.6.0-latest"
 
   # -- rasaProServices.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -414,51 +414,80 @@ rasaProServices:
     #   maxSurge: 1
     #   maxUnavailable: 0
 
-  # rasaProServices.environmentVariables define environment variables to be passed to the Rasa Pro Services deployment
-  # See: https://rasa.com/docs/rasa/deploy/deploy-rasa-pro-services#docker-container-configuration-reference
-  # Example: Specify the string value for variables
-  #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  environmentVariables:
-    # Address of the Kafka broker.
-    KAFKA_BROKER_ADDRESS:
-      value: ""
-    # Topic Rasa Plus publishes events to and Rasa Pro consumes from
-    KAFKA_TOPIC:
-      value: "rasa-core-events"
-    # Set the log level of the application
-    LOGGING_LEVEL:
-      value: "INFO"
-    # URL of the data lake to store analytics data in
-    RASA_ANALYTICS_DB_URL:
-      value: ""
-      # secret:
-      #   name:
-      #   key:
-    # SASL mechanism to use for authentication.
-    KAFKA_SASL_MECHANISM:
-      value: "PLAIN"
-    # Username for SASL authentication.
-    KAFKA_SASL_USERNAME:
-      value: ""
-    # Password for SASL authentication
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: "rasa-secrets"
-        key: "kafkaSslPassword"
-    # Security protocol to use for communication with Kafka
-    KAFKA_SECURITY_PROTOCOL:
-      value: "PLAINTEXT"
-    # Filepath for SSL CA Certificate that will be used to connect with Kafka
-    KAFKA_SSL_CA_LOCATION:
-      value: ""
-    # Consumer group name used when registering the consumers with Kafka.
-    RASA_ANALYTICS_CONSUMER_ID:
-      value: "rasa-analytics-group"
+  # -- rasaProServices.loggingLevel specifies the logging level for the Rasa Pro Services container. Valid levels are DEBUG, INFO, WARNING, ERROR, CRITICAL.
+  loggingLevel: "INFO"
+
+  useCloudProviderIam:
+    # -- useCloudProviderIam.enabled specifies whether to use cloud provider IAM for the Rasa Pro Services container.
+    enabled: false
+    # -- useCloudProviderIam.provider specifies the cloud provider for the Rasa Pro Services container. Supported value is aws
+    provider: "aws"
+    # -- useCloudProviderIam.region specifies the region for IAM authentication. Required if IAM_CLOUD_PROVIDER is set to aws.
+    region: "us-east-1"
+
+  database:
+    # -- database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container.
+    enableAwsRdsIam: false
+    # -- database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication.
+    url: ""
+    # -- database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    username: ""
+    # -- database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    hostname: ""
+    # -- database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    port: "5432"
+    # -- database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    databaseName: ""
+    # -- database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    sslMode: ""
+    # -- database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full.
+    sslCaLocation: ""
+
+  kafka:
+    # -- kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container.
+    enableAwsMskIam: false
+    # -- kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true.
+    brokerAddress: ""
+    # -- kafka.topic specifies the topic for the Rasa Pro Services container.
+    topic: "rasa-core-events"
+    # -- kafka.dlqTopic specifies the DLQ topic fused to publish events that resulted in a processing failure.
+    dlqTopic: "rasa-analytics-dlq"
+    # -- kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL.
+    saslMechanism: ""
+    # -- kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL
+    securityProtocol: ""
+    # -- kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container.
+    sslCaLocation: ""
+    # -- kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL.
+    sslCertFileLocation: ""
+    # -- kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL.
+    sslKeyFileLocation: ""
+    # -- kafka.consumerId specifies the consumer ID for the Rasa Pro Services container.
+    consumerId: "rasa-analytics-group"
+    # -- kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.
+    saslUsername: ""
+    # -- kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true.
+    saslPassword:
+      secretName: "rasa-secrets"
+      secretKey: "kafkaSslPassword"
+
+  # -- rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container
+  # These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration
+  # Example:
+  #   additionalEnv:
+  #     - name: MY_CUSTOM_VAR
+  #       value: "some-value"
+  #     - name: SECRET_VAR
+  #       valueFrom:
+  #         secretKeyRef:
+  #           name: my-secret
+  #           key: secret-key
+  #     - name: CONFIGMAP_VAR
+  #       valueFrom:
+  #         configMapKeyRef:
+  #           name: my-configmap
+  #           key: config-key
+  additionalEnv: []
 
   # -- rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret
   envFrom: []
@@ -901,7 +930,7 @@ actionServer:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.13.0-latest"
+    tag: "3.14.0-latest"
 
   # -- actionServer.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

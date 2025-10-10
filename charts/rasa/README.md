@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.2.7](https://img.shields.io/badge/Version-1.2.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.3.0](https://img.shields.io/badge/Version-1.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 1.2.7
+helm install my-release rasa/rasa --version 1.3.0
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.2.7
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 1.2.7
+helm pull rasa/rasa --version 1.3.0
 ```
 
 ## General Configuration
@@ -99,18 +99,17 @@ To use MiniO instead of S3, set `AWS_ENDPOINT_URL` environment variable to the U
 
 ```yaml
 rasa:
-  settings:
-    additionalEnv:
-      - name: AWS_ENDPOINT_URL
-        value: "http://minio.example.com"
-      - name: AWS_ACCESS_KEY_ID
-        value: "minio"
-      - name: AWS_SECRET_ACCESS_KEY
-        value: "minio123"
-      - name: AWS_REGION
-        value: "us-east-1"
-      - name: BUCKET_NAME
-        value: "rasa-models"
+  additionalEnv:
+    - name: AWS_ENDPOINT_URL
+      value: "http://minio.example.com"
+    - name: AWS_ACCESS_KEY_ID
+      value: "minio"
+    - name: AWS_SECRET_ACCESS_KEY
+      value: "minio123"
+    - name: AWS_REGION
+      value: "us-east-1"
+    - name: BUCKET_NAME
+      value: "rasa-models"
 ```
 
 ## Values
@@ -131,7 +130,7 @@ rasa:
 | actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
 | actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"3.13.0-latest"` | image.tag specifies image tag |
+| actionServer.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
 | actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -267,7 +266,7 @@ rasa:
 | rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
 | rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.13.2-latest"` | image.tag specifies image tag |
+| rasa.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
 | rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
 | rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
 | rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
@@ -344,29 +343,39 @@ rasa:
 | rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
 | rasaProLicense | object | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` | rasaProLicense is license key for Rasa Pro Services. |
 | rasaProServices.additionalContainers | list | `[]` | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
+| rasaProServices.additionalEnv | list | `[]` | rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration Example:   additionalEnv:     - name: MY_CUSTOM_VAR       value: "some-value"     - name: SECRET_VAR       valueFrom:         secretKeyRef:           name: my-secret           key: secret-key     - name: CONFIGMAP_VAR       valueFrom:         configMapKeyRef:           name: my-configmap           key: config-key |
 | rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
 | rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
 | rasaProServices.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
 | rasaProServices.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
 | rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
 | rasaProServices.containerSecurityContext | object | `{"enabled":true}` | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
+| rasaProServices.database.databaseName | string | `""` | database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
+| rasaProServices.database.enableAwsRdsIam | bool | `false` | database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container. |
+| rasaProServices.database.hostname | string | `""` | database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
+| rasaProServices.database.port | string | `"5432"` | database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
+| rasaProServices.database.sslCaLocation | string | `""` | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full. |
+| rasaProServices.database.sslMode | string | `""` | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
+| rasaProServices.database.url | string | `""` | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. |
+| rasaProServices.database.username | string | `""` | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
 | rasaProServices.enabled | bool | `true` | rasaProServices.enabled enables Rasa Pro Services deployment |
 | rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
-| rasaProServices.environmentVariables.KAFKA_BROKER_ADDRESS.value | string | `""` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_MECHANISM.value | string | `"PLAIN"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.key | string | `"kafkaSslPassword"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_PASSWORD.secret.name | string | `"rasa-secrets"` |  |
-| rasaProServices.environmentVariables.KAFKA_SASL_USERNAME.value | string | `""` |  |
-| rasaProServices.environmentVariables.KAFKA_SECURITY_PROTOCOL.value | string | `"PLAINTEXT"` |  |
-| rasaProServices.environmentVariables.KAFKA_SSL_CA_LOCATION.value | string | `""` |  |
-| rasaProServices.environmentVariables.KAFKA_TOPIC.value | string | `"rasa-core-events"` |  |
-| rasaProServices.environmentVariables.LOGGING_LEVEL.value | string | `"INFO"` |  |
-| rasaProServices.environmentVariables.RASA_ANALYTICS_CONSUMER_ID.value | string | `"rasa-analytics-group"` |  |
-| rasaProServices.environmentVariables.RASA_ANALYTICS_DB_URL.value | string | `""` |  |
 | rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
 | rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `"3.5.1-latest"` | Specifies image tag image.tag specifies image tag |
+| rasaProServices.image.tag | string | `"3.6.0-latest"` | Specifies image tag image.tag specifies image tag |
 | rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
+| rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
+| rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
+| rasaProServices.kafka.dlqTopic | string | `"rasa-analytics-dlq"` | kafka.dlqTopic specifies the DLQ topic fused to publish events that resulted in a processing failure. |
+| rasaProServices.kafka.enableAwsMskIam | bool | `false` | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. |
+| rasaProServices.kafka.saslMechanism | string | `""` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. |
+| rasaProServices.kafka.saslPassword | object | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
+| rasaProServices.kafka.saslUsername | string | `""` | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
+| rasaProServices.kafka.securityProtocol | string | `""` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL |
+| rasaProServices.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. |
+| rasaProServices.kafka.sslCertFileLocation | string | `""` | kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL. |
+| rasaProServices.kafka.sslKeyFileLocation | string | `""` | kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL. |
+| rasaProServices.kafka.topic | string | `"rasa-core-events"` | kafka.topic specifies the topic for the Rasa Pro Services container. |
 | rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
 | rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
 | rasaProServices.livenessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
@@ -375,6 +384,7 @@ rasa:
 | rasaProServices.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
 | rasaProServices.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
 | rasaProServices.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
+| rasaProServices.loggingLevel | string | `"INFO"` | rasaProServices.loggingLevel specifies the logging level for the Rasa Pro Services container. Valid levels are DEBUG, INFO, WARNING, ERROR, CRITICAL. |
 | rasaProServices.nodeSelector | object | `{}` | rasaProServices.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
 | rasaProServices.podAnnotations | object | `{}` | rasaProServices.podAnnotations defines annotations to add to the pod |
 | rasaProServices.podSecurityContext | object | `{"enabled":true}` | rasaProServices.podSecurityContext defines pod security context |
@@ -398,5 +408,8 @@ rasa:
 | rasaProServices.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasaProServices.strategy | object | `{}` | rasaProServices.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
 | rasaProServices.tolerations | list | `[]` | rasaProServices.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
+| rasaProServices.useCloudProviderIam.enabled | bool | `false` | useCloudProviderIam.enabled specifies whether to use cloud provider IAM for the Rasa Pro Services container. |
+| rasaProServices.useCloudProviderIam.provider | string | `"aws"` | useCloudProviderIam.provider specifies the cloud provider for the Rasa Pro Services container. Supported value is aws |
+| rasaProServices.useCloudProviderIam.region | string | `"us-east-1"` | useCloudProviderIam.region specifies the region for IAM authentication. Required if IAM_CLOUD_PROVIDER is set to aws. |
 | rasaProServices.volumeMounts | list | `[]` | rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container |
 | rasaProServices.volumes | list | `[]` | rasaProServices.volumes specify additional volumes for the Rasa Pro Services container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |

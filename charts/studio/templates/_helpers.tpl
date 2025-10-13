@@ -84,6 +84,17 @@ Create the name of the eventIngestion service account to use for Event Ingestion
 {{- end }}
 
 {{/*
+Create the name of the backend migration service account to use for Database Migration Job
+*/}}
+{{- define "studio.backend.migration.serviceAccountName" -}}
+{{- if .Values.backend.migration.serviceAccount.create }}
+{{- default (printf "%s-db-migration" (include "studio.fullname" .)) .Values.backend.migration.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.backend.migration.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
 Create the name of the keycloak service account to use for Keycloak
 */}}
 {{- define "studio.keycloak.serviceAccountName" -}}

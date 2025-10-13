@@ -402,6 +402,16 @@ backend:
     # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
     affinity: {}
 
+    # -- backend.migration.serviceAccount defines the Kubernetes service account used by the migration job pod.
+    serviceAccount:
+      # -- backend.migration.serviceAccount.create determines whether to create a new service account.
+      create: false
+      # -- backend.migration.serviceAccount.annotations defines annotations to add to the service account.
+      annotations: {}
+      # -- backend.migration.serviceAccount.name is the name of the service account to use.
+      # If not set and create is true, a name is generated using the fullname + "-db-migration" suffix.
+      name: ""
+
   # -- backend.ingress defines how the backend service is exposed externally.
   # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ingress:

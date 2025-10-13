@@ -25,7 +25,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "studio.backend.serviceAccountName" . }}
+      serviceAccountName: {{ include "studio.backend.migration.serviceAccountName" . }}
       restartPolicy: Never
       {{- include "studio.backend.migration.scheduling" . | nindent 6 }}
       {{- if .Values.backend.migration.waitForIt }}

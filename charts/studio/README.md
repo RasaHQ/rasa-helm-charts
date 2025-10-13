@@ -161,9 +161,9 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.service.port | int | `80` | backend.service.port is the port number for the service. |
 | backend.service.targetPort | int | `4000` | backend.service.targetPort is the target port in the container. This should match the port your application listens on. |
 | backend.service.type | string | `"ClusterIP"` | backend.service.type is the type of Kubernetes service. Valid values: ClusterIP, NodePort, LoadBalancer, ExternalName Ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types |
-| backend.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | backend.serviceAccount defines the Kubernetes service account used by the backend pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ |
+| backend.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | backend.serviceAccount defines the Kubernetes service account used by the backend pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ |
 | backend.serviceAccount.annotations | object | `{}` | backend.serviceAccount.annotations defines annotations to add to the service account. Useful for cloud provider specific configurations. |
-| backend.serviceAccount.create | bool | `true` | backend.serviceAccount.create determines whether to create a new service account. |
+| backend.serviceAccount.create | bool | `false` | backend.serviceAccount.create determines whether to create a new service account. |
 | backend.serviceAccount.name | string | `""` | backend.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template. |
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for the backend pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ |
 | config.affinity | object | `{}` | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. |

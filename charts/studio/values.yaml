@@ -232,7 +232,7 @@ backend:
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   serviceAccount:
     # -- backend.serviceAccount.create determines whether to create a new service account.
-    create: false
+    create: true
     # -- backend.serviceAccount.annotations defines annotations to add to the service account.
     # Useful for cloud provider specific configurations.
     annotations: {}

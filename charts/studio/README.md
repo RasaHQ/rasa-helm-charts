@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.0-rc.1](https://img.shields.io/badge/Version-2.2.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0-rc.2](https://img.shields.io/badge/Version-2.2.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.2
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.1.9
+$ helm install my-release rasa/studio --version 2.2.0-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.2
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.1.9
+$ helm pull rasa/studio --version 2.2.0-rc.2
 ```
 
 ## General Configuration
@@ -118,7 +118,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.livenessProbe.periodSeconds | int | `15` | backend.livenessProbe.periodSeconds is how often to perform the probe. |
 | backend.livenessProbe.successThreshold | int | `1` | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. |
 | backend.livenessProbe.timeoutSeconds | int | `5` | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. |
-| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
+| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
 | backend.migration.affinity | object | `{}` | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | backend.migration.enabled | bool | `true` | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. |
 | backend.migration.environmentVariables | object | `{"SKIP_KEYCLOAK":{"value":"false"}}` | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
@@ -127,6 +127,10 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.migration.image.name | string | `"studio-database-migration"` | backend.migration.image.name is the name of the migration container image. |
 | backend.migration.image.pullPolicy | string | `"IfNotPresent"` | backend.migration.image.pullPolicy is the container image pull policy. |
 | backend.migration.nodeSelector | object | `{}` | backend.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
+| backend.migration.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | backend.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. |
+| backend.migration.serviceAccount.annotations | object | `{}` | backend.migration.serviceAccount.annotations defines annotations to add to the service account. |
+| backend.migration.serviceAccount.create | bool | `false` | backend.migration.serviceAccount.create determines whether to create a new service account. |
+| backend.migration.serviceAccount.name | string | `""` | backend.migration.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname + "-db-migration" suffix. |
 | backend.migration.tolerations | list | `[]` | backend.migration.tolerations defines tolerations for the migration job. This allows the job to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ |
 | backend.migration.waitForIt | bool | `false` | backend.migration.waitForIt determines whether to wait for the database to be ready before running migrations. |
 | backend.migration.waitFotItContainer | object | `{"image":"postgres:17.2"}` | backend.migration.waitFotItContainer defines the configuration for the wait-for-it container. |

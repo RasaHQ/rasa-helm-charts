@@ -113,6 +113,28 @@ config:
     apiPassword:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_API_PASSWORD"
+    # -- The postgres database instance details for Keycloak to connect to.
+    # This section configures the database connection parameters for Keycloak.
+    # If not all fields are provided, the same values in the database section will be
+    # used, including the keycloakDatabaseName for the database name.
+    database: {}
+    #   # -- The database host name or IP address where PostgreSQL is running.
+    #   # Example: "postgres.example.com" or "10.0.0.1"
+    #   host: ""
+    #   # -- The database port number for PostgreSQL.
+    #   # Default PostgreSQL port is 5432
+    #   port: "5432"
+    #   # -- The database name for Keycloak user management service.
+    #   # This is used by Keycloak to store its user management data.
+    #   databaseName: "keycloak"
+    #   # -- The database username for Keycloak to connect with.
+    #   # This user should have appropriate permissions on the database.
+    #   username: ""
+    #   # -- The database password configuration.
+    #   # This references a Kubernetes secret containing the database password.
+    #   password:
+    #     secretName: "studio-secrets"
+    #     secretKey: "KEYCLOAK_DATABASE_PASSWORD"
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
@@ -387,6 +409,10 @@ backend:
       # Set to "true" if you have already created the Keycloak database manually.
       SKIP_KEYCLOAK:
         value: "false"
+      # -- backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database.
+      # if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database.
+      KC_DEFAULT_DATABASE_CONNECTION_NAME:
+        value: "postgres"
 
     # -- backend.migration.nodeSelector defines which nodes the migration job can run on.
     # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector

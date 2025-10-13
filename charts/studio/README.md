@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.0-rc.2](https://img.shields.io/badge/Version-2.2.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0-rc.3](https://img.shields.io/badge/Version-2.2.0--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.0-rc.2
+$ helm install my-release rasa/studio --version 2.2.0-rc.3
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.3
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.0-rc.2
+$ helm pull rasa/studio --version 2.2.0-rc.3
 ```
 
 ## General Configuration
@@ -118,10 +118,11 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.livenessProbe.periodSeconds | int | `15` | backend.livenessProbe.periodSeconds is how often to perform the probe. |
 | backend.livenessProbe.successThreshold | int | `1` | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. |
 | backend.livenessProbe.timeoutSeconds | int | `5` | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. |
-| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
+| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
 | backend.migration.affinity | object | `{}` | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
 | backend.migration.enabled | bool | `true` | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. |
-| backend.migration.environmentVariables | object | `{"SKIP_KEYCLOAK":{"value":"false"}}` | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.migration.environmentVariables | object | `{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}}` | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
+| backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME | object | `{"value":"postgres"}` | backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database. if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database. |
 | backend.migration.environmentVariables.SKIP_KEYCLOAK | object | `{"value":"false"}` | backend.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation. Set to "true" if you have already created the Keycloak database manually. |
 | backend.migration.image | object | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` | backend.migration.image defines the image configuration for the migration job. |
 | backend.migration.image.name | string | `"studio-database-migration"` | backend.migration.image.name is the name of the migration container image. |
@@ -181,13 +182,14 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.ingressAnnotations | object | `{}` | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod |
 | config.ingressClassName | string | `""` | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class |
 | config.ingressHost | string | `"INGRESS.HOST.NAME"` | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. |
-| config.keycloak | object | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. |
+| config.keycloak | object | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","database":{},"realm":"rasa-studio","url":""}` | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. |
 | config.keycloak.adminPassword | object | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. |
 | config.keycloak.adminUsername | string | `"kcadmin"` | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. |
 | config.keycloak.apiClientId | string | `"admin-cli"` | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio Backend to authenticate with Keycloak. |
 | config.keycloak.apiPassword | object | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. |
 | config.keycloak.apiUsername | string | `"realmadmin"` | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. |
 | config.keycloak.clientId | string | `"rasa-studio-backend"` | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. |
+| config.keycloak.database | object | `{}` | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. |
 | config.keycloak.realm | string | `"rasa-studio"` | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. |
 | config.keycloak.url | string | `""` | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. |
 | config.nodeSelector | object | `{}` | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. |

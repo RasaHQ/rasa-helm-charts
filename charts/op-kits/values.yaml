@@ -275,7 +275,7 @@ strimzi:
         # -- Optional: use a pre-existing secret for the password
         # When omitted, Strimzi will generate a password and store it in a Secret
         # named after the KafkaUser (e.g. <release-name>-user) with key "password".
-        #password:
+        # password:
         #  secretName: "app-secrets"
         #  secretKey: "KAFKA_SASL_PASSWORD"
 

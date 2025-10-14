@@ -113,29 +113,6 @@ config:
     apiPassword:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_API_PASSWORD"
-    # -- The postgres database instance details for Keycloak to connect to.
-    # This section configures the database connection parameters for Keycloak.
-    # If not all fields are provided, the same values in the database section will be
-    # used, including the keycloakDatabaseName for the database name.
-    # TODO: This should be under root `keycloak`. We should keep config for global configuration only.
-    database: {}
-    #   # -- The database host name or IP address where PostgreSQL is running.
-    #   # Example: "postgres.example.com" or "10.0.0.1"
-    #   host: ""
-    #   # -- The database port number for PostgreSQL.
-    #   # Default PostgreSQL port is 5432
-    #   port: "5432"
-    #   # -- The database name for Keycloak user management service.
-    #   # This is used by Keycloak to store its user management data.
-    #   databaseName: "keycloak"
-    #   # -- The database username for Keycloak to connect with.
-    #   # This user should have appropriate permissions on the database.
-    #   username: ""
-    #   # -- The database password configuration.
-    #   # This references a Kubernetes secret containing the database password.
-    #   password:
-    #     secretName: "studio-secrets"
-    #     secretKey: "KEYCLOAK_DATABASE_PASSWORD"
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
@@ -865,6 +842,29 @@ keycloak:
     name: "studio-keycloak"
     # -- keycloak.image.pullPolicy is the container image pull policy.
     pullPolicy: IfNotPresent
+
+  # -- The postgres database instance details for Keycloak to connect to.
+  # This section configures the database connection parameters for Keycloak.
+  # If not all fields are provided, the same values in the database section will be
+  # used, including the keycloakDatabaseName for the database name.
+  database: {}
+  #   # -- The database host name or IP address where PostgreSQL is running.
+  #   # Example: "postgres.example.com" or "10.0.0.1"
+  #   host: ""
+  #   # -- The database port number for PostgreSQL.
+  #   # Default PostgreSQL port is 5432
+  #   port: "5432"
+  #   # -- The database name for Keycloak user management service.
+  #   # This is used by Keycloak to store its user management data.
+  #   databaseName: "keycloak"
+  #   # -- The database username for Keycloak to connect with.
+  #   # This user should have appropriate permissions on the database.
+  #   username: ""
+  #   # -- The database password configuration.
+  #   # This references a Kubernetes secret containing the database password.
+  #   password:
+  #     secretName: "studio-secrets"
+  #     secretKey: "KEYCLOAK_DATABASE_PASSWORD"
 
   # -- keycloak.environmentVariables defines the environment variables for the Keycloak deployment.
   # Example: Specify the string value for variables

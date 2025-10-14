@@ -19,17 +19,17 @@ Environment Variables for Keycloak Containers
 */}}
 {{- define "studio.keycloak.env" -}}
 - name: KC_DB_USERNAME
-  {{- if and .Values.config.keycloak.database .Values.config.keycloak.database.username }}
-  value: {{ .Values.config.keycloak.database.username | quote }}
+  {{- if and .Values.keycloak.database .Values.keycloak.database.username }}
+  value: {{ .Values.keycloak.database.username | quote }}
   {{- else }}
   value: {{ .Values.config.database.username | quote }}
   {{- end }}
 - name: KC_DB_PASSWORD
-  {{- if and .Values.config.keycloak.database .Values.config.keycloak.database.password }}
+  {{- if and .Values.keycloak.database .Values.keycloak.database.password }}
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.keycloak.database.password.secretName | quote }}
-      key: {{ .Values.config.keycloak.database.password.secretKey | quote }}  
+      name: {{ .Values.keycloak.database.password.secretName | quote }}
+      key: {{ .Values.keycloak.database.password.secretKey | quote }}  
   {{- else }}
   valueFrom:
     secretKeyRef:
@@ -38,8 +38,8 @@ Environment Variables for Keycloak Containers
   {{- end }}
 - name: KC_DB_URL
   # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-  {{- if and .Values.config.keycloak.database .Values.config.keycloak.database.host .Values.config.keycloak.database.port .Values.config.keycloak.database.databaseName }}
-  value: "jdbc:postgresql://{{ .Values.config.keycloak.database.host }}:{{ .Values.config.keycloak.database.port }}/{{ .Values.config.keycloak.database.databaseName }}"
+  {{- if and .Values.keycloak.database .Values.keycloak.database.host .Values.keycloak.database.port .Values.keycloak.database.databaseName }}
+  value: "jdbc:postgresql://{{ .Values.keycloak.database.host }}:{{ .Values.keycloak.database.port }}/{{ .Values.keycloak.database.databaseName }}"
   {{- else }}
   value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
   {{- end }}

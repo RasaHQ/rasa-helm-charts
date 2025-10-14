@@ -92,10 +92,9 @@ strimzi:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
     nameOverride: ""
     # -- Container image for Kafka
-    # image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0"
     image:
       repository: "quay.io/strimzi/kafka"
-      tag: "0.47.0-kafka-4.0.0"
+      tag: "0.48.0-kafka-4.1.0"
 
     # -- Annotations to apply to the Kafka Cluster resource
     # Includes both operator configuration and custom annotations
@@ -262,7 +261,7 @@ strimzi:
   # Kafka Users Configuration
   users:
     # Main application user configuration
-    app:
+    root:
       # -- Enable main application user creation
       enabled: true
       # -- Kafka user name. If empty, defaults to "<release-name>-user"
@@ -361,7 +360,7 @@ valkey:
     #   requests:
     #     cpu: "100m"
     #     memory: "256Mi"
-    resources: []
+    resources: {}
       # requests:
       #   cpu: "100m"
       #   memory: "128Mi"

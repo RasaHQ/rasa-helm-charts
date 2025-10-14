@@ -117,6 +117,7 @@ config:
     # This section configures the database connection parameters for Keycloak.
     # If not all fields are provided, the same values in the database section will be
     # used, including the keycloakDatabaseName for the database name.
+    # TODO: This should be under root `keycloak`. We should keep config for global configuration only.
     database: {}
     #   # -- The database host name or IP address where PostgreSQL is running.
     #   # Example: "postgres.example.com" or "10.0.0.1"

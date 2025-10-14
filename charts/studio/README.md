@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.0-rc.3](https://img.shields.io/badge/Version-2.2.0--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0-rc.4](https://img.shields.io/badge/Version-2.2.0--rc.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.3
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.4
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.0-rc.3
+$ helm install my-release rasa/studio --version 2.2.0-rc.4
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.3
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.4
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.0-rc.3
+$ helm pull rasa/studio --version 2.2.0-rc.4
 ```
 
 ## General Configuration
@@ -189,7 +189,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.keycloak.apiPassword | object | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. |
 | config.keycloak.apiUsername | string | `"realmadmin"` | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. |
 | config.keycloak.clientId | string | `"rasa-studio-backend"` | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. |
-| config.keycloak.database | object | `{}` | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. |
+| config.keycloak.database | object | `{}` | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. TODO: This should be under root `keycloak`. We should keep config for global configuration only. |
 | config.keycloak.realm | string | `"rasa-studio"` | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. |
 | config.keycloak.url | string | `""` | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. |
 | config.nodeSelector | object | `{}` | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. |

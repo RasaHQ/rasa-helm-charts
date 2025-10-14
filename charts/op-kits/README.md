@@ -96,7 +96,7 @@ $ helm repo add strimzi https://strimzi.io/charts/
 $ helm repo update
 
 # Install Strimzi operator in strimzi-system namespace
-$ helm install strimzi-operator strimzi/strimzi-kafka-operator \
+$ helm install strimzi-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator \
     --namespace strimzi-system \
     --create-namespace \
     --set watchAnyNamespace=true

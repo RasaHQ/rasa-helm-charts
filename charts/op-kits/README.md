@@ -244,6 +244,33 @@ $ helm install prod-app . --namespace production
 
 Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all managed by the same operators.
 
+### Kafka Users and Passwords
+
+- If you do not specify a password under `strimzi.users.<user>.authentication.password`, Strimzi will generate one automatically and store it in a Secret named exactly as the KafkaUser. The password is stored under the key `password`.
+- If you want to use your own password, reference an existing Secret via:
+
+```yaml
+strimzi:
+  users:
+    app:
+      enabled: true
+      authentication:
+        type: scram-sha-512
+        password:
+          secretName: app-secrets
+          secretKey: KAFKA_SASL_PASSWORD
+```
+
+To read the password:
+
+```console
+# Operator-generated password (Secret name equals KafkaUser name)
+$ kubectl get secret -n <namespace> <kafka-user-name> -o jsonpath='{.data.password}' | base64 -d
+
+# User-provided secret
+$ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>}' | base64 -d
+```
+
 ## Values
 
 | Key | Type | Default | Description |

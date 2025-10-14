@@ -86,7 +86,7 @@ This chart deploys the following resources:
 👤 Kafka Users:
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if and $user.enabled (ne $name "enabled") }}
-  - {{ $user.name }}
+  - {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }}
 {{- end }}
 {{- end }}
 
@@ -100,8 +100,12 @@ This chart deploys the following resources:
     KAFKA_SASL_MECHANISM=SCRAM-SHA-512
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if and $user.enabled (ne $name "enabled") }}
-    KAFKA_SASL_USERNAME={{ $user.name }}
-    KAFKA_SASL_PASSWORD=[from secret: {{ $user.name }}]
+    KAFKA_SASL_USERNAME={{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }}
+    {{- if and $user.authentication $user.authentication.password }}
+    KAFKA_SASL_PASSWORD=[from secret: {{ $user.authentication.password.secretName }} key {{ $user.authentication.password.secretKey }}]
+    {{- else }}
+    KAFKA_SASL_PASSWORD=[from secret: {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }} key password]
+    {{- end }}
 {{- break }}
 {{- end }}
 {{- end }}
@@ -109,7 +113,11 @@ This chart deploys the following resources:
   Get Kafka credentials:
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if and $user.enabled (ne $name "enabled") }}
-    kubectl get secret -n {{ include "op-kits.namespace" $ }} {{ $user.name }} -o jsonpath='{.data.password}' | base64 -d
+    {{- if and $user.authentication $user.authentication.password }}
+    kubectl get secret -n {{ include "op-kits.namespace" $ }} {{ $user.authentication.password.secretName }} -o jsonpath='{.data.{{ $user.authentication.password.secretKey }}}' | base64 -d
+    {{- else }}
+    kubectl get secret -n {{ include "op-kits.namespace" $ }} {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }} -o jsonpath='{.data.password}' | base64 -d
+    {{- end }}
 {{- break }}
 {{- end }}
 {{- end }}

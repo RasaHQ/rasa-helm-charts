@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.5](https://img.shields.io/badge/Version-0.1.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.6](https://img.shields.io/badge/Version-0.1.6-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.5
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.6
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.1.5
+$ helm install my-release rasa/op-kits --version 0.1.6
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.5
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.6
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.1.5
+$ helm pull rasa/op-kits --version 0.1.6
 ```
 
 ## Operator Installation
@@ -96,7 +96,7 @@ $ helm repo add strimzi https://strimzi.io/charts/
 $ helm repo update
 
 # Install Strimzi operator in strimzi-system namespace
-$ helm install strimzi-operator strimzi/strimzi-kafka-operator \
+$ helm install strimzi-operator oci://quay.io/strimzi-helm/strimzi-kafka-operator \
     --namespace strimzi-system \
     --create-namespace \
     --set watchAnyNamespace=true
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.5 \
+    --version 0.1.6 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.1.5 \
+    --version 0.1.6 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -244,6 +244,33 @@ $ helm install prod-app . --namespace production
 
 Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all managed by the same operators.
 
+### Kafka Users and Passwords
+
+- If you do not specify a password under `strimzi.users.<user>.authentication.password`, Strimzi will generate one automatically and store it in a Secret named exactly as the KafkaUser. The password is stored under the key `password`.
+- If you want to use your own password, reference an existing Secret via:
+
+```yaml
+strimzi:
+  users:
+    app:
+      enabled: true
+      authentication:
+        type: scram-sha-512
+        password:
+          secretName: app-secrets
+          secretKey: KAFKA_SASL_PASSWORD
+```
+
+To read the password:
+
+```console
+# Operator-generated password (Secret name equals KafkaUser name)
+$ kubectl get secret -n <namespace> <kafka-user-name> -o jsonpath='{.data.password}' | base64 -d
+
+# User-provided secret
+$ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>}' | base64 -d
+```
+
 ## Values
 
 | Key | Type | Default | Description |
@@ -273,7 +300,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | strimzi.kafka.config | object | `{"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
 | strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
 | strimzi.kafka.entityOperator.userOperator | object | `{}` |  |
-| strimzi.kafka.image | object | `{"repository":"quay.io/strimzi/kafka","tag":"0.47.0-kafka-4.0.0"}` | Container image for Kafka image: "quay.io/strimzi/kafka:0.47.0-kafka-4.0.0" |
+| strimzi.kafka.image | object | `{"repository":"quay.io/strimzi/kafka","tag":"0.48.0-kafka-4.1.0"}` | Container image for Kafka |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.kafka.resources | object | `{}` | Resource limits and requests for Kafka brokers Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "100m"     memory: "512Mi" |
@@ -292,10 +319,9 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | strimzi.nodePools.controllers.storage.size | string | `"10Gi"` | Storage size for controller nodes |
 | strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
 | strimzi.topics | object | `{}` |  |
-| strimzi.users.app.authentication.password | object | `{"secretKey":"KAFKA_SASL_PASSWORD","secretName":"app-secrets"}` | Password configuration sourced from Kubernetes secret |
-| strimzi.users.app.authentication.type | string | `"scram-sha-512"` | Authentication type for Kafka user |
-| strimzi.users.app.enabled | bool | `true` | Enable main application user creation |
-| strimzi.users.app.name | string | `"app-user"` | Kafka user name for main application |
+| strimzi.users.root.authentication.type | string | `"scram-sha-512"` | Authentication type for Kafka user |
+| strimzi.users.root.enabled | bool | `true` | Enable main application user creation |
+| strimzi.users.root.name | string | `""` | Kafka user name. If empty, defaults to "<release-name>-user" |
 | tolerations | list | `[]` | Tolerations for all pods Example: tolerations: - key: "key1"   operator: "Equal"   value: "value1"   effect: "NoSchedule" - key: "key2"   operator: "Exists"   effect: "NoExecute" |
 | valkey.cluster.annotations | object | `{}` | Additional annotations to apply to the Valkey Cluster resource Example: annotations:   valkey.hyperspike.io/monitoring: "enabled"   valkey.hyperspike.io/backup: "enabled" |
 | valkey.cluster.certIssuer | string | `"selfsigned"` | Certificate issuer name |
@@ -306,7 +332,7 @@ Each deployment will create its own PostgreSQL, Kafka, and Valkey clusters, all 
 | valkey.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-valkey" |
 | valkey.cluster.nodes | int | `1` | Number of primary nodes; set >1 only if you intend to run Valkey Cluster |
 | valkey.cluster.replicas | int | `0` | Replicas per primary (0 = standalone, >0 = primary + replicas) |
-| valkey.cluster.resources | list | `[]` | Resource limits and requests for Valkey containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
+| valkey.cluster.resources | object | `{}` | Resource limits and requests for Valkey containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
 | valkey.cluster.servicePassword.key | string | `"VALKEY_PASSWORD"` | Secret key for the Valkey password |
 | valkey.cluster.servicePassword.name | string | `"app-secrets"` | Secret name containing the Valkey password |
 | valkey.cluster.servicePassword.optional | bool | `false` | Whether the service password is optional |

@@ -73,6 +73,19 @@ Strimzi Kafka cluster name
 {{- end }}
 
 {{/*
+Strimzi Kafka user name
+*/}}
+{{- define "op-kits.strimzi.kafkaUserName" -}}
+{{- $user := .user -}}
+{{- $root := .root -}}
+{{- if $user.name }}
+{{- $user.name | trunc 63 | trimSuffix "-" }}
+{{- else }}
+{{- printf "%s-user" $root.Release.Name | trunc 63 | trimSuffix "-" }}
+{{- end }}
+{{- end }}
+
+{{/*
 Valkey cluster name
 */}}
 {{- define "op-kits.valkey.clusterName" -}}

@@ -265,17 +265,19 @@ strimzi:
     app:
       # -- Enable main application user creation
       enabled: true
-      # -- Kafka user name for main application
-      name: "app-user"
+      # -- Kafka user name. If empty, defaults to "<release-name>-user"
+      name: ""
 
       # Authentication configuration
       authentication:
         # -- Authentication type for Kafka user
         type: "scram-sha-512"
-        # -- Password configuration sourced from Kubernetes secret
-        password:
-          secretName: "app-secrets"
-          secretKey: "KAFKA_SASL_PASSWORD"
+        # -- Optional: use a pre-existing secret for the password
+        # When omitted, Strimzi will generate a password and store it in a Secret
+        # named after the KafkaUser (e.g. <release-name>-user) with key "password".
+        #password:
+        #  secretName: "app-secrets"
+        #  secretKey: "KAFKA_SASL_PASSWORD"
 
       # Authorization can be added here
       # Example:
@@ -294,6 +296,10 @@ strimzi:
     #   name: "custom-user"
     #   authentication:
     #     type: "scram-sha-512"
+    #     # Optional: reference an existing secret with password
+    #     #password:
+    #     #  secretName: "analytics-secrets"
+    #     #  secretKey: "KAFKA_SASL_PASSWORD"
 
 # Valkey Configuration
 valkey:

@@ -79,6 +79,12 @@ config:
     # -- If true, the server will reject database connections which are not present in the list of supplied CAs.
     # This provides additional security by ensuring only trusted certificates are accepted.
     rejectUnauthorized: ""
+    # -- Set to true if you want to use AWS IAM authentication for the database.
+    useAwsIamAuth: ""
+    # -- The AWS region for the database. Needed if you want to use AWS IAM authentication for the database.
+    awsRegion: ""
+    # -- The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database.
+    iamDbUsername: ""
 
   # -- config.keycloak defines the Keycloak configuration settings.
   # This section configures the authentication and authorization service.

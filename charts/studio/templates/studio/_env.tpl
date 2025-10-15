@@ -96,4 +96,10 @@ Backend Database Environment Variables
   value: {{ .Values.config.database.backendDatabaseName | quote }}
 - name: DB_QUERY
   value: {{ .Values.config.database.queryParams | quote }}
+- name: AWS_REGION
+  value: {{ .Values.config.database.awsRegion | quote }}
+- name: IAM_DB_USERNAME
+  value: {{ .Values.config.database.iamDbUsername | quote }}
+- name: USE_AWS_IAM_AUTH
+  value: {{ .Values.config.database.useAwsIamAuth | quote }}
 {{- end -}}

@@ -83,11 +83,13 @@ Backend Database Environment Variables
 {{- define "studio.backend.env" -}}
 - name: DB_USER
   value: {{ .Values.config.database.username | quote }}
+{{- if ne (.Values.config.database.useAwsIamAuth | toString) "true" }}
 - name: DB_PASS
   valueFrom:
     secretKeyRef:
       name: {{ .Values.config.database.password.secretName | quote }}
       key: {{ .Values.config.database.password.secretKey | quote }}
+{{- end }}
 - name: DB_HOST
   value: {{ .Values.config.database.host | quote }}
 - name: DB_PORT

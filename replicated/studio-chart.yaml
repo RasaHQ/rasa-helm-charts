@@ -322,4 +322,4 @@ spec:
     replicated:
       enabled: true
       images:
-        replicated-sdk: europe-west3-docker.pkg.dev/rasa-releases/dependencies/replicated-sdk:1.7.1
+        replicated-sdk: europe-west3-docker.pkg.dev/rasa-releases/dependencies/replicated-sdk:1.8.1

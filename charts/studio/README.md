@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.0-rc.4](https://img.shields.io/badge/Version-2.2.0--rc.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0-rc.5](https://img.shields.io/badge/Version-2.2.0--rc.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.5
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.0-rc.4
+$ helm install my-release rasa/studio --version 2.2.0-rc.5
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.5
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.0-rc.4
+$ helm pull rasa/studio --version 2.2.0-rc.5
 ```
 
 ## General Configuration
@@ -320,7 +320,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
 | rasa.rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
 | replicated.enabled | bool | `false` |  |
-| replicated.sdkVersion | string | `"1.7.1"` |  |
+| replicated.sdkVersion | string | `"1.8.1"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
 | tag | string | `"1.14.0.edge2-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |

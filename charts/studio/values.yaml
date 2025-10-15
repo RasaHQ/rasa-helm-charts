@@ -1095,7 +1095,7 @@ rasa:
     replicaCount: 1
     image:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-      tag: "3.13.7-latest"
+      tag: "3.14.1-latest"
 
     strategy:
       type: Recreate

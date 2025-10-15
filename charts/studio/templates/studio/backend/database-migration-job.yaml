@@ -47,14 +47,6 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          - name: AWS_REGION
-            value: {{ .Values.config.database.awsRegion | quote }}
-          - name: IAM_DB_USERNAME
-            value: {{ .Values.config.database.iamDbUsername | quote }}
-          - name: USE_AWS_IAM_AUTH
-            value: {{ .Values.config.database.useAwsIamAuth | quote }}
-          - name: DB_QUERY
-            value: {{ .Values.config.database.queryParams | quote }}
           {{- if not .Values.keycloak.enabled }}
           - name: SKIP_KEYCLOAK
             value: "true"

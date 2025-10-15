@@ -19,16 +19,30 @@ Environment Variables for Keycloak Containers
 */}}
 {{- define "studio.keycloak.env" -}}
 - name: KC_DB_USERNAME
+  {{- if and .Values.keycloak.database .Values.keycloak.database.username }}
+  value: {{ .Values.keycloak.database.username | quote }}
+  {{- else }}
   value: {{ .Values.config.database.username | quote }}
-# -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.
+  {{- end }}
 - name: KC_DB_PASSWORD
+  {{- if and .Values.keycloak.database .Values.keycloak.database.password }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.keycloak.database.password.secretName | quote }}
+      key: {{ .Values.keycloak.database.password.secretKey | quote }}  
+  {{- else }}
   valueFrom:
     secretKeyRef:
       name: {{ .Values.config.database.password.secretName | quote }}
       key: {{ .Values.config.database.password.secretKey | quote }}
+  {{- end }}
 - name: KC_DB_URL
   # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
+  {{- if and .Values.keycloak.database .Values.keycloak.database.host .Values.keycloak.database.port .Values.keycloak.database.databaseName }}
+  value: "jdbc:postgresql://{{ .Values.keycloak.database.host }}:{{ .Values.keycloak.database.port }}/{{ .Values.keycloak.database.databaseName }}"
+  {{- else }}
   value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
+  {{- end }}
 {{- end -}}
 
 {{/*

@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.0-rc.5](https://img.shields.io/badge/Version-2.2.0--rc.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0-rc.7](https://img.shields.io/badge/Version-2.2.0--rc.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.5
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.7
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.0-rc.5
+$ helm install my-release rasa/studio --version 2.2.0-rc.7
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.5
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.0-rc.7
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.0-rc.5
+$ helm pull rasa/studio --version 2.2.0-rc.7
 ```
 
 ## General Configuration
@@ -169,15 +169,18 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.tolerations | list | `[]` | backend.tolerations defines tolerations for the backend pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ |
 | config.affinity | object | `{}` | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. |
 | config.connectionType | string | `"http"` | Define if you will be using https or http with the ingressHost. Valid values are "http" or "https". This setting affects how services communicate with each other. |
-| config.database | object | `{"backendDatabaseName":"studio","host":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","username":""}` | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. |
+| config.database | object | `{"awsRegion":"","backendDatabaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. |
+| config.database.awsRegion | string | `""` | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. |
 | config.database.backendDatabaseName | string | `"studio"` | The database name for Studio backend services. This is used by Studio to store its data. |
 | config.database.host | string | `""` | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" |
+| config.database.iamDbUsername | string | `""` | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. |
 | config.database.keycloakDatabaseName | string | `"keycloak"` | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. |
 | config.database.password | object | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` | The database password configuration. This references a Kubernetes secret containing the database password. |
 | config.database.port | string | `"5432"` | The database port number for PostgreSQL. Default PostgreSQL port is 5432 |
 | config.database.preferSSL | string | `"true"` | Set to true if you want to use SSL for database connection. When enabled, Studio will attempt to establish an encrypted connection to the database. |
 | config.database.queryParams | string | `""` | The database connection URL query parameters. These parameters are used to configure the database connection. Example: "sslmode=require&connect_timeout=30" |
 | config.database.rejectUnauthorized | string | `""` | If true, the server will reject database connections which are not present in the list of supplied CAs. This provides additional security by ensuring only trusted certificates are accepted. |
+| config.database.useAwsIamAuth | string | `""` | Set to true if you want to use AWS IAM authentication for the database. |
 | config.database.username | string | `""` | The database username for Studio to connect with. This user should have appropriate permissions on the database. |
 | config.ingressAnnotations | object | `{}` | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod |
 | config.ingressClassName | string | `""` | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class |

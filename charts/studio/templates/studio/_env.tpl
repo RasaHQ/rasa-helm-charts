@@ -19,13 +19,13 @@ Environment Variables for Keycloak Containers
 */}}
 {{- define "studio.keycloak.env" -}}
 - name: KC_DB_USERNAME
-  {{- if and .Values.keycloak.database .Values.keycloak.database.username }}
+  {{- if not (empty .Values.keycloak.database.username) }}
   value: {{ .Values.keycloak.database.username | quote }}
   {{- else }}
   value: {{ .Values.config.database.username | quote }}
   {{- end }}
 - name: KC_DB_PASSWORD
-  {{- if and .Values.keycloak.database .Values.keycloak.database.password }}
+  {{- if not (empty .Values.keycloak.database.password) }}
   valueFrom:
     secretKeyRef:
       name: {{ .Values.keycloak.database.password.secretName | quote }}
@@ -37,12 +37,7 @@ Environment Variables for Keycloak Containers
       key: {{ .Values.config.database.password.secretKey | quote }}
   {{- end }}
 - name: KC_DB_URL
-  # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-  {{- if and .Values.keycloak.database .Values.keycloak.database.host .Values.keycloak.database.port .Values.keycloak.database.databaseName }}
-  value: "jdbc:postgresql://{{ .Values.keycloak.database.host }}:{{ .Values.keycloak.database.port }}/{{ .Values.keycloak.database.databaseName }}"
-  {{- else }}
-  value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
-  {{- end }}
+  value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
 {{- end -}}
 
 {{/*
@@ -62,38 +57,56 @@ Keycloak URL
 Backend Keycloak env
 */}}
 {{- define "studio.backend.keycloak" -}}
+{{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
-  value: {{ .Values.config.keycloak.realm | quote }}
+  value: {{ .realm | quote }}
 - name: KEYCLOAK_CLIENT_ID
-  value: {{ .Values.config.keycloak.clientId | quote }}
+  value: {{ .clientId | quote }}
 - name: KEYCLOAK_API_CLIENT_ID
-  value: {{ .Values.config.keycloak.apiClientId | quote }}
+  value: {{ .apiClientId | quote }}
 - name: KEYCLOAK_API_USERNAME
-  value: {{ .Values.config.keycloak.apiUsername | quote }}
+  value: {{ .apiUsername | quote }}
 - name: KEYCLOAK_API_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.keycloak.apiPassword.secretName | quote }}
-      key: {{ .Values.config.keycloak.apiPassword.secretKey | quote }}
+      name: {{ .apiPassword.secretName | quote }}
+      key: {{ .apiPassword.secretKey | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
 Backend Database Environment Variables
 */}}
 {{- define "studio.backend.env" -}}
+{{- with .Values.config.database }}
 - name: DB_USER
-  value: {{ .Values.config.database.username | quote }}
+  value: {{ .username | quote }}
+{{- if ne (.useAwsIamAuth | toString) "true" }}
 - name: DB_PASS
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.database.password.secretName | quote }}
-      key: {{ .Values.config.database.password.secretKey | quote }}
+      name: {{ .password.secretName | quote }}
+      key: {{ .password.secretKey | quote }}
+{{- end }}
 - name: DB_HOST
-  value: {{ .Values.config.database.host | quote }}
+  value: {{ .host | quote }}
 - name: DB_PORT
-  value: {{ .Values.config.database.port | quote }}
+  value: {{ .port | quote }}
 - name: DB_NAME
-  value: {{ .Values.config.database.backendDatabaseName | quote }}
+  value: {{ .backendDatabaseName | quote }}
 - name: DB_QUERY
-  value: {{ .Values.config.database.queryParams | quote }}
+  value: {{ .queryParams | quote }}
+{{- if and (not (empty .awsRegion)) (eq (.useAwsIamAuth | toString) "true") }}
+- name: AWS_REGION
+  value: {{ .awsRegion | quote }}
+{{- end }}
+{{- if and (not (empty .iamDbUsername)) (eq (.useAwsIamAuth | toString) "true") }}
+- name: IAM_DB_USERNAME
+  value: {{ .iamDbUsername | quote }}
+{{- end }}
+{{- if eq (.useAwsIamAuth | toString) "true" }}
+- name: USE_AWS_IAM_AUTH
+  value: "true"
+{{- end }}
+{{- end }}
 {{- end -}}

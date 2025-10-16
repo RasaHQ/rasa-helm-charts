@@ -38,7 +38,7 @@ Environment Variables for Keycloak Containers
   {{- end }}
 - name: KC_DB_URL
   # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-  {{- if and .Values.keycloak.database .Values.keycloak.database.host .Values.keycloak.database.port .Values.keycloak.database.databaseName }}
+  {{- if and .Values.keycloak.database (not (empty .Values.keycloak.database.host)) (not (empty .Values.keycloak.database.port)) (not (empty .Values.keycloak.database.databaseName)) }}
   value: "jdbc:postgresql://{{ .Values.keycloak.database.host }}:{{ .Values.keycloak.database.port }}/{{ .Values.keycloak.database.databaseName }}"
   {{- else }}
   value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"

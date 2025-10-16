@@ -57,46 +57,56 @@ Keycloak URL
 Backend Keycloak env
 */}}
 {{- define "studio.backend.keycloak" -}}
+{{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
-  value: {{ .Values.config.keycloak.realm | quote }}
+  value: {{ .realm | quote }}
 - name: KEYCLOAK_CLIENT_ID
-  value: {{ .Values.config.keycloak.clientId | quote }}
+  value: {{ .clientId | quote }}
 - name: KEYCLOAK_API_CLIENT_ID
-  value: {{ .Values.config.keycloak.apiClientId | quote }}
+  value: {{ .apiClientId | quote }}
 - name: KEYCLOAK_API_USERNAME
-  value: {{ .Values.config.keycloak.apiUsername | quote }}
+  value: {{ .apiUsername | quote }}
 - name: KEYCLOAK_API_PASSWORD
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.keycloak.apiPassword.secretName | quote }}
-      key: {{ .Values.config.keycloak.apiPassword.secretKey | quote }}
+      name: {{ .apiPassword.secretName | quote }}
+      key: {{ .apiPassword.secretKey | quote }}
+{{- end }}
 {{- end -}}
 
 {{/*
 Backend Database Environment Variables
 */}}
 {{- define "studio.backend.env" -}}
+{{- with .Values.config.database }}
 - name: DB_USER
-  value: {{ .Values.config.database.username | quote }}
-{{- if ne (.Values.config.database.useAwsIamAuth | toString) "true" }}
+  value: {{ .username | quote }}
+{{- if ne (.useAwsIamAuth | toString) "true" }}
 - name: DB_PASS
   valueFrom:
     secretKeyRef:
-      name: {{ .Values.config.database.password.secretName | quote }}
-      key: {{ .Values.config.database.password.secretKey | quote }}
+      name: {{ .password.secretName | quote }}
+      key: {{ .password.secretKey | quote }}
 {{- end }}
 - name: DB_HOST
-  value: {{ .Values.config.database.host | quote }}
+  value: {{ .host | quote }}
 - name: DB_PORT
-  value: {{ .Values.config.database.port | quote }}
+  value: {{ .port | quote }}
 - name: DB_NAME
-  value: {{ .Values.config.database.backendDatabaseName | quote }}
+  value: {{ .backendDatabaseName | quote }}
 - name: DB_QUERY
-  value: {{ .Values.config.database.queryParams | quote }}
+  value: {{ .queryParams | quote }}
+{{- if and (not (empty .awsRegion)) (eq (.useAwsIamAuth | toString) "true") }}
 - name: AWS_REGION
-  value: {{ .Values.config.database.awsRegion | quote }}
+  value: {{ .awsRegion | quote }}
+{{- end }}
+{{- if and (not (empty .iamDbUsername)) (eq (.useAwsIamAuth | toString) "true") }}
 - name: IAM_DB_USERNAME
-  value: {{ .Values.config.database.iamDbUsername | quote }}
+  value: {{ .iamDbUsername | quote }}
+{{- end }}
+{{- if eq (.useAwsIamAuth | toString) "true" }}
 - name: USE_AWS_IAM_AUTH
-  value: {{ .Values.config.database.useAwsIamAuth | quote }}
+  value: "true"
+{{- end }}
+{{- end }}
 {{- end -}}

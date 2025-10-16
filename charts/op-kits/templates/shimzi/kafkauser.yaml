@@ -5,7 +5,7 @@
 apiVersion: kafka.strimzi.io/v1beta2
 kind: KafkaUser
 metadata:
-  name: {{ $user.name }}
+  name: {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }}
   namespace: {{ include "op-kits.namespace" $ }}
   labels:
     {{- include "op-kits.strimzi.labels" $ | nindent 4 }}

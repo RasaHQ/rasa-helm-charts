@@ -65,7 +65,7 @@ config:
       secretKey: "DATABASE_PASSWORD"
     # -- The database name for Keycloak user management service.
     # This is used by Keycloak to store its user management data.
-    keycloakDatabaseName: ""
+    keycloakDatabaseName: "keycloak"
     # -- The database name for Studio backend services.
     # This is used by Studio to store its data.
     backendDatabaseName: "studio"

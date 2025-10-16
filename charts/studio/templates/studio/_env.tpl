@@ -19,13 +19,13 @@ Environment Variables for Keycloak Containers
 */}}
 {{- define "studio.keycloak.env" -}}
 - name: KC_DB_USERNAME
-  {{- if and .Values.keycloak.database .Values.keycloak.database.username }}
+  {{- if not (empty .Values.keycloak.database.username) }}
   value: {{ .Values.keycloak.database.username | quote }}
   {{- else }}
   value: {{ .Values.config.database.username | quote }}
   {{- end }}
 - name: KC_DB_PASSWORD
-  {{- if and .Values.keycloak.database .Values.keycloak.database.password }}
+  {{- if not (empty .Values.keycloak.database.password) }}
   valueFrom:
     secretKeyRef:
       name: {{ .Values.keycloak.database.password.secretName | quote }}
@@ -37,12 +37,7 @@ Environment Variables for Keycloak Containers
       key: {{ .Values.config.database.password.secretKey | quote }}
   {{- end }}
 - name: KC_DB_URL
-  # jdbc:postgresql://${DB_HOST}:${DB_PORT}/${DB_NAME}
-  {{- if and .Values.keycloak.database.host .Values.keycloak.database.port .Values.keycloak.database.databaseName }}
-  value: "jdbc:postgresql://{{ .Values.keycloak.database.host }}:{{ .Values.keycloak.database.port }}/{{ .Values.keycloak.database.databaseName }}"
-  {{- else }}
-  value: "jdbc:postgresql://{{ .Values.config.database.host }}:{{ .Values.config.database.port }}/{{ .Values.config.database.keycloakDatabaseName }}"
-  {{- end }}
+  value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
 {{- end -}}
 
 {{/*

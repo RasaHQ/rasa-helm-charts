@@ -101,7 +101,7 @@ Backend Database Environment Variables
   value: {{ .awsRegion | quote }}
 {{- end }}
 {{- if and (not (empty .iamDbUsername)) (eq (.useAwsIamAuth | toString) "true") }}
-- name: IAM_DB_USERNAME
+- name: IAM_DB_USER
   value: {{ .iamDbUsername | quote }}
 {{- end }}
 {{- if eq (.useAwsIamAuth | toString) "true" }}

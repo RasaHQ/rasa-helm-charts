@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.14.0rc0-latest"
+          default: "1.14.0-latest"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -128,7 +128,7 @@ spec:
         - name: keycloak_admin_password
           type: text
           title: Keycloak Admin Password
-          value: '{{repl RandomString 32}}'
+          value: "{{repl RandomString 32}}"
           required: true
           help_text: The admin password for Keycloak. This password is used to login to Keycloak admin console. *DO NOT CHANGE* the password after installation.
         - name: keycloak_realm
@@ -147,7 +147,7 @@ spec:
         - name: keycloak_api_password
           type: password
           title: Keycloak API password
-          value: '{{repl RandomString 32}}'
+          value: "{{repl RandomString 32}}"
           required: true
           hidden: true
           help_text: These credentials are used by Studio Backend Server to communicate with Keycloak's user management module
@@ -206,7 +206,7 @@ spec:
         - name: database_password
           type: password
           title: Database Password
-          value: '{{repl RandomString 32}}'
+          value: "{{repl RandomString 32}}"
           required: true
           help_text: The password to connect to your existing database.
           when: '{{repl ConfigOptionEquals "postgres_type" "external_postgres"}}'
@@ -283,7 +283,7 @@ spec:
           type: password
           title: Kafka SASL password
           when: '{{repl ConfigOptionEquals "kafka_type" "external_kafka"}}'
-          value: '{{repl RandomString 32}}'
+          value: "{{repl RandomString 32}}"
           help_text: Kafka SASL password
         - name: kafka_group_id
           type: text

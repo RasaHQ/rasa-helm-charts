@@ -3,7 +3,7 @@ kind: Config
 metadata:
   name: embedded-cluster-config
 spec:
-  version: 2.7.1+k8s-1.31
+  version: 2.11.3+k8s-1.32
   domains:
     # Your proxy registry custom domain
     proxyRegistryDomain: registry.rasa.com

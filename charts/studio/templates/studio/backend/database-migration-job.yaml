@@ -25,6 +25,9 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- if .Values.backend.migration.serviceAccount.create }}
+      serviceAccountName: {{ include "studio.backend.migration.serviceAccountName" . }}
+      {{- end }}
       restartPolicy: Never
       {{- include "studio.backend.migration.scheduling" . | nindent 6 }}
       {{- if .Values.backend.migration.waitForIt }}
@@ -38,17 +41,8 @@ spec:
         image: {{ include "studio.migration.image" . }}
         imagePullPolicy: {{ .Values.backend.migration.image.pullPolicy }}
         env:
+          {{- include "studio.backend.env" . | nindent 10 }}
           {{- include "studio.keycloak.env" . | nindent 10 }}
-          {{- if .Values.backend.environmentVariables.DATABASE_URL.value }}
-          - name: DATABASE_URL
-            value: {{ .Values.backend.environmentVariables.DATABASE_URL.value | quote }}
-          {{- else if .Values.backend.environmentVariables.DATABASE_URL.secret }}
-          - name: DATABASE_URL
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.name }}
-                key: {{ .Values.backend.environmentVariables.DATABASE_URL.secret.key }}
-          {{- end }}
           - name: DB_SSL
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED

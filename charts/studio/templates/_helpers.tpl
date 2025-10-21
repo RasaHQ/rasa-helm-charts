@@ -66,7 +66,7 @@ Create the name of the backend service account to use for Backend
 */}}
 {{- define "studio.backend.serviceAccountName" -}}
 {{- if .Values.backend.serviceAccount.create }}
-{{- default (include "studio.fullname" .) .Values.backend.serviceAccount.name }}
+{{- default (printf "%s-backend" (include "studio.fullname" .)) .Values.backend.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.backend.serviceAccount.name }}
 {{- end }}
@@ -77,9 +77,20 @@ Create the name of the eventIngestion service account to use for Event Ingestion
 */}}
 {{- define "studio.eventIngestion.serviceAccountName" -}}
 {{- if .Values.eventIngestion.serviceAccount.create }}
-{{- default (include "studio.fullname" .) .Values.eventIngestion.serviceAccount.name }}
+{{- default (printf "%s-event-ingestion" (include "studio.fullname" .)) .Values.eventIngestion.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.eventIngestion.serviceAccount.name }}
+{{- end }}
+{{- end }}
+
+{{/*
+Create the name of the backend migration service account to use for Database Migration Job
+*/}}
+{{- define "studio.backend.migration.serviceAccountName" -}}
+{{- if .Values.backend.migration.serviceAccount.create }}
+{{- default (printf "%s-db-migration" (include "studio.fullname" .)) .Values.backend.migration.serviceAccount.name }}
+{{- else }}
+{{- default "default" .Values.backend.migration.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -88,7 +99,7 @@ Create the name of the keycloak service account to use for Keycloak
 */}}
 {{- define "studio.keycloak.serviceAccountName" -}}
 {{- if .Values.keycloak.serviceAccount.create }}
-{{- default (include "studio.fullname" .) .Values.keycloak.serviceAccount.name }}
+{{- default (printf "%s-keycloak" (include "studio.fullname" .)) .Values.keycloak.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.keycloak.serviceAccount.name }}
 {{- end }}
@@ -99,7 +110,7 @@ Create the name of the frontend service account to use for Web Client
 */}}
 {{- define "studio.webClient.serviceAccountName" -}}
 {{- if .Values.webClient.serviceAccount.create }}
-{{- default (include "studio.fullname" .) .Values.webClient.serviceAccount.name }}
+{{- default (printf "%s-web-client" (include "studio.fullname" .)) .Values.webClient.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.webClient.serviceAccount.name }}
 {{- end }}

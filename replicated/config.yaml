@@ -35,7 +35,7 @@ spec:
         - name: studio_image_tag
           type: text
           title: Studio Version
-          default: "1.14.0.edge2-latest"
+          default: "1.14.0-latest"
           help_text: The version of Rasa Studio you wish to use, which is used as the tag for the container image.
         - name: rasa_pro_repository
           type: text
@@ -50,7 +50,7 @@ spec:
         - name: rasa_pro_image_tag
           type: text
           title: Rasa Pro Version
-          default: "3.13.7-latest"
+          default: "3.14.1-latest"
           help_text: The version of Rasa Pro you wish to use, which is used as the tag for the container image. To check what version of Rasa Pro you should use with your version of Rasa Studio, check [here](https://rasa.com/docs/reference/changelogs/compatibility-matrix/#studiopro-versions-compatibility)
         - name: openai_api_key
           type: text
@@ -66,7 +66,7 @@ spec:
         - name: replicated_sdk_image_tag
           type: text
           hidden: true
-          default: 1.7.1
+          default: 1.8.1
           help_text: Replicated SDK version
     - name: Accessing Rasa Studio
       description: >

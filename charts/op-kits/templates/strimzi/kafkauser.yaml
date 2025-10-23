@@ -1,3 +1,4 @@
+{{- if .Values.strimzi.enabled }}
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if $user.enabled }}
 {{- if not (eq $name "enabled") }}
@@ -30,6 +31,7 @@ spec:
   authorization:
     {{- toYaml . | nindent 4 }}
   {{- end }}
+{{- end }}
 {{- end }}
 {{- end }}
 {{- end }}

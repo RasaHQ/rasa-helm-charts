@@ -113,6 +113,7 @@ strimzi:
     entityOperator:
       topicOperator: {}
       userOperator: {}
+      disableTopicFinalizer: true
 
     # Kafka listeners configuration
     # -- Kafka listeners define how clients connect to the cluster

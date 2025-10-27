@@ -21,6 +21,19 @@ spec:
       {{- toYaml .Values.strimzi.kafka.entityOperator.topicOperator | nindent 6 }}
     userOperator:
       {{- toYaml .Values.strimzi.kafka.entityOperator.userOperator | nindent 6 }}
+    {{- if not .Values.strimzi.kafka.entityOperator.disableTopicFinalizer }}
+    template:
+      topicOperatorContainer:
+        env:
+          - name: STRIMZI_USE_FINALIZERS
+            value: "true"
+    {{- else }}
+    template:
+      topicOperatorContainer:
+        env:
+          - name: STRIMZI_USE_FINALIZERS
+            value: "false"
+    {{- end }}
   kafka:
     {{- with .Values.strimzi.kafka.image }}
     # Container image

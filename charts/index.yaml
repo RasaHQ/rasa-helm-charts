@@ -199,6 +199,9 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.2.0/studio-2.2.0.tgz
     version: 2.2.0
+    deprecated: true
+    annotations:
+      note: "🚨 This chart version is yanked due to a critical bug. Please use 2.2.1 or newer."
   - apiVersion: v2
     created: "2025-10-09T13:17:48.554276319Z"
     dependencies:

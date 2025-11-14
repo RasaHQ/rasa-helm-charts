@@ -8,10 +8,7 @@ metadata:
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
-  {{- with .Values.deploymentAnnotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "webclient.deployment.annotations" . | nindent 2 }}
 spec:
   replicas: {{ .Values.webClient.replicaCount }}
   selector:

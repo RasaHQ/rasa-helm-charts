@@ -11,10 +11,13 @@ metadata:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": hook-succeeded
+    {{- with .Values.backend.migration.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   template:
     metadata:
-      {{- with .Values.backend.podAnnotations }}
+      {{- with .Values.backend.migration.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}

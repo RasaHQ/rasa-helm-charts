@@ -9,10 +9,7 @@ metadata:
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
-  {{- with .Values.deploymentAnnotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "eventingestion.deployment.annotations" . | nindent 2 }}
 spec:
   {{- if not .Values.eventIngestion.autoscaling.enabled }}
   replicas: {{ .Values.eventIngestion.replicaCount }}

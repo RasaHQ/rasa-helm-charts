@@ -189,6 +189,13 @@ backend:
     # Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
     pullPolicy: IfNotPresent
 
+  # -- backend.annotations defines annotations to add to all Studio Backend resources.
+  # These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict).
+  # Example:
+  #   custom.annotation/key: value
+  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+
   # -- backend.environmentVariables defines the environment variables for the Studio Backend deployment.
   # These variables configure the runtime behavior of the backend service.
   # Each variable can be set either directly with a value or from a Kubernetes secret.
@@ -380,6 +387,19 @@ backend:
     waitFotItContainer:
       image: postgres:17.2
 
+    # -- backend.migration.annotations defines annotations to add to the migration job resource.
+    # These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence).
+    # Example:
+    #   custom.annotation/key: value
+    # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+    annotations: {}
+
+    # -- backend.migration.podAnnotations defines annotations to add to the migration job pod.
+    # Example:
+    #   custom.annotation/key: value
+    # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+    podAnnotations: {}
+
     # -- backend.migration.environmentVariables defines the environment variables for the migration job.
     # Example: Specify the string value for variables
     #   value: my-value
@@ -450,8 +470,7 @@ backend:
   # -- backend.resources defines the resource limits and requests for Studio Backend.
   # This controls the compute resources allocated to the backend container.
   # Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-  resources:
-    {}
+  resources: {}
     # Example configuration:
     # limits:
     #   cpu: 100m
@@ -496,6 +515,13 @@ backend:
 webClient:
   # -- webClient.replicaCount is the number of replicas for the Web Client deployment.
   replicaCount: 1
+
+  # -- webClient.annotations defines annotations to add to all Studio Web Client resources.
+  # These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict).
+  # Example:
+  #   custom.annotation/key: value
+  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
 
   # -- webClient.image defines the container image settings for the web client service.
   image:
@@ -640,8 +666,7 @@ webClient:
     tls: []
 
   # -- webClient.resources defines the resource limits and requests for the web client.
-  resources:
-    {}
+  resources: {}
     # Example configuration:
     # limits:
     #   cpu: 100m
@@ -665,6 +690,13 @@ eventIngestion:
   enabled: true
   # -- eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment.
   replicaCount: 1
+
+  # -- eventIngestion.annotations defines annotations to add to all Studio Event Ingestion resources.
+  # These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict).
+  # Example:
+  #   custom.annotation/key: value
+  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
 
   # -- eventIngestion.image defines the container image settings for the event ingestion service.
   image:
@@ -804,8 +836,7 @@ eventIngestion:
     #   type: RuntimeDefault
 
   # -- eventIngestion.resources defines the resource limits and requests for the event ingestion service.
-  resources:
-    {}
+  resources: {}
     # Example configuration:
     # limits:
     #   cpu: 100m
@@ -842,6 +873,14 @@ keycloak:
   enabled: true
   # -- keycloak.replicaCount is the number of replicas for the Keycloak deployment.
   replicaCount: 1
+
+  # -- keycloak.annotations defines annotations to add to all Studio Keycloak resources.
+  # These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict).
+  # Example:
+  #   custom.annotation/key: value
+  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+  annotations: {}
+
   # -- keycloak.image defines the container image settings for the Keycloak service.
   image:
     # -- keycloak.image.name is the name of the Keycloak container image.
@@ -1026,8 +1065,7 @@ keycloak:
     tls: []
 
   # -- keycloak.resources defines the resource limits and requests for the Keycloak service.
-  resources:
-    {}
+  resources: {}
     # Example configuration:
     # limits:
     #   cpu: 500m
@@ -1071,15 +1109,18 @@ dnsPolicy: ""
 
 # -- dnsConfig specifies Pod's DNS condig
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
-dnsConfig:
-  {}
+dnsConfig: {}
   # options:
   # - name: ndots
   #   value: "1"
 
-# -- deploymentAnnotations defines annotations to add to all Studio deployments
-deploymentAnnotations:
-  {}
+# -- deploymentAnnotations defines annotations to add to all Studio resources.
+# These annotations are applied globally to all resources (Deployments, Services, Ingresses, Jobs, HPAs, ConfigMaps, ServiceAccounts).
+# Component-specific annotations can override these values if keys conflict.
+# Example:
+#   key: "value"
+# Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+deploymentAnnotations: {}
   #  key: "value"
 
 # -- deploymentLabels defines labels to add to all Studio deployment

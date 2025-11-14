@@ -141,6 +141,58 @@ Return the appropriate apiVersion for networkpolicy.
 {{- end }}
 
 {{/*
+Return annotations for deployment, combining global and per-deployment annotations for Backend
+*/}}
+{{- define "backend.deployment.annotations" -}}
+{{- $global := .Values.deploymentAnnotations | default dict | toYaml | fromYaml }}
+{{- $additional := .Values.backend.annotations | default dict }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return annotations for deployment, combining global and per-deployment annotations for Event Ingestion
+*/}}
+{{- define "eventingestion.deployment.annotations" -}}
+{{- $global := .Values.deploymentAnnotations | default dict | toYaml | fromYaml }}
+{{- $additional := .Values.eventIngestion.annotations | default dict }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return annotations for deployment, combining global and per-deployment annotations for Keycloak
+*/}}
+{{- define "keycloak.deployment.annotations" -}}
+{{- $global := .Values.deploymentAnnotations | default dict | toYaml | fromYaml }}
+{{- $additional := .Values.keycloak.annotations | default dict }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end -}}
+{{- end }}
+
+{{/*
+Return annotations for deployment, combining global and per-deployment annotations for Web Client
+*/}}
+{{- define "webclient.deployment.annotations" -}}
+{{- $global := .Values.deploymentAnnotations | default dict | toYaml | fromYaml }}
+{{- $additional := .Values.webClient.annotations | default dict }}
+{{- $annotations := merge $global $additional -}}
+{{- if $annotations -}}
+annotations:
+  {{- toYaml $annotations | nindent 2 }}
+{{- end -}}
+{{- end }}
+
+{{/*
 Return annotations for ingress, combining global and per-service annotations for Backend
 */}}
 {{- define "backend.ingress.annotations" -}}

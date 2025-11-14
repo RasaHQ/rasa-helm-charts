@@ -2,7 +2,7 @@
 
 This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
 
-![Version: 2.2.1](https://img.shields.io/badge/Version-2.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.2-rc.1](https://img.shields.io/badge/Version-2.2.2--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.2-rc.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.1
+$ helm install my-release rasa/studio --version 2.2.2-rc.1
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.2-rc.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.1
+$ helm pull rasa/studio --version 2.2.2-rc.1
 ```
 
 ## General Configuration
@@ -89,6 +89,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 |-----|------|---------|-------------|
 | backend.additionalContainers | list | `[]` | backend.additionalContainers defines additional containers to run alongside the main Studio Backend container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers |
 | backend.affinity | object | `{}` | backend.affinity defines affinity rules for the backend pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
+| backend.annotations | object | `{}` | backend.annotations defines annotations to add to all Studio Backend resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | backend.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | backend.autoscaling defines the Horizontal Pod Autoscaling configuration. This enables automatic scaling of the backend deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ |
 | backend.autoscaling.enabled | bool | `false` | backend.autoscaling.enabled determines whether to enable horizontal pod autoscaling. |
 | backend.autoscaling.maxReplicas | int | `100` | backend.autoscaling.maxReplicas is the maximum number of replicas. |
@@ -118,8 +119,9 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.livenessProbe.periodSeconds | int | `15` | backend.livenessProbe.periodSeconds is how often to perform the probe. |
 | backend.livenessProbe.successThreshold | int | `1` | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. |
 | backend.livenessProbe.timeoutSeconds | int | `5` | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. |
-| backend.migration | object | `{"affinity":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
+| backend.migration | object | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ |
 | backend.migration.affinity | object | `{}` | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity |
+| backend.migration.annotations | object | `{}` | backend.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | backend.migration.enabled | bool | `true` | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. |
 | backend.migration.environmentVariables | object | `{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}}` | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. |
 | backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME | object | `{"value":"postgres"}` | backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database. if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database. |
@@ -128,6 +130,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | backend.migration.image.name | string | `"studio-database-migration"` | backend.migration.image.name is the name of the migration container image. |
 | backend.migration.image.pullPolicy | string | `"IfNotPresent"` | backend.migration.image.pullPolicy is the container image pull policy. |
 | backend.migration.nodeSelector | object | `{}` | backend.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector |
+| backend.migration.podAnnotations | object | `{}` | backend.migration.podAnnotations defines annotations to add to the migration job pod. Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | backend.migration.serviceAccount | object | `{"annotations":{},"create":false,"name":""}` | backend.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. |
 | backend.migration.serviceAccount.annotations | object | `{}` | backend.migration.serviceAccount.annotations defines annotations to add to the service account. |
 | backend.migration.serviceAccount.create | bool | `false` | backend.migration.serviceAccount.create determines whether to create a new service account. |
@@ -196,12 +199,13 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.keycloak.url | string | `""` | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. |
 | config.nodeSelector | object | `{}` | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. |
 | config.tolerations | list | `[]` | Pod tolerations for all deployments. These settings can be overridden by component-specific configurations. |
-| deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio deployments |
+| deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Studio resources. These annotations are applied globally to all resources (Deployments, Services, Ingresses, Jobs, HPAs, ConfigMaps, ServiceAccounts). Component-specific annotations can override these values if keys conflict. Example:   key: "value" Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Studio deployment |
 | dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
 | dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
 | eventIngestion.additionalContainers | list | `[]` | eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | eventIngestion.affinity | object | `{}` | eventIngestion.affinity defines affinity rules for the event ingestion pods. |
+| eventIngestion.annotations | object | `{}` | eventIngestion.annotations defines annotations to add to all Studio Event Ingestion resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | eventIngestion.autoscaling | object | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` | eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration. |
 | eventIngestion.autoscaling.enabled | bool | `false` | eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling. |
 | eventIngestion.autoscaling.maxReplicas | int | `100` | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. |
@@ -253,6 +257,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | imagePullSecrets | list | `[]` | imagePullSecret defines repository pull secrets |
 | keycloak.additionalContainers | list | `[]` | keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | keycloak.affinity | object | `{}` | keycloak.affinity defines affinity rules for the Keycloak pods. |
+| keycloak.annotations | object | `{}` | keycloak.annotations defines annotations to add to all Studio Keycloak resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | keycloak.database | object | `{}` | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. |
 | keycloak.enabled | bool | `true` | keycloak.enabled determines whether to deploy the Keycloak authentication service. |
 | keycloak.envFrom | list | `[]` | keycloak.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret |
@@ -328,6 +333,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | tag | string | `"1.14.1-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | webClient.affinity | object | `{}` | webClient.affinity defines affinity rules for the web client pods. |
+| webClient.annotations | object | `{}` | webClient.annotations defines annotations to add to all Studio Web Client resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |
 | webClient.envFrom | list | `[]` | webClient.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret |
 | webClient.environmentVariables | object | `{}` | webClient.environmentVariables defines the environment variables for the Web Client deployment. Example: Specify the string value for variables   value: my-value These environment variables are only being passed to the `configmap`, not to the container, therefore they cannot be a secret! |
 | webClient.image | object | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` | webClient.image defines the container image settings for the web client service. |

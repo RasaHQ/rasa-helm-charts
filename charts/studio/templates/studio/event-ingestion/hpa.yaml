@@ -25,7 +25,7 @@ spec:
     - type: Resource
       resource:
         name: memory
-          target:
+        target:
           type: Utilization
           averageUtilization: {{ .Values.eventIngestion.autoscaling.targetMemoryUtilizationPercentage }}
     {{- end }}

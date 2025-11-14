@@ -2,6 +2,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: studio-web-client-configmap
+  annotations:
+    checksum/config: {{ include (print $.Template.BasePath "/studio/web-client/configmap.yaml") . | sha256sum }}
 data:
   windowVariables: |
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ if .Values.backend.ingress.hostName }}{{ .Values.backend.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/api";

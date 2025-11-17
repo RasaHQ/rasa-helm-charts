@@ -9,10 +9,7 @@ metadata:
   {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
-  {{- with .Values.deploymentAnnotations }}
-  annotations:
-    {{- toYaml . | nindent 4 }}
-  {{- end }}
+  {{- include "keycloak.deployment.annotations" . | nindent 2 }}
 spec:
   replicas: {{ .Values.keycloak.replicaCount }}
   selector:

@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.1.9-rc.2](https://img.shields.io/badge/Version-0.1.9--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.1.9](https://img.shields.io/badge/Version-0.1.9-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.9-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.9
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.1.9-rc.2
+$ helm install my-release rasa/op-kits --version 0.1.9
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.9-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.1.9
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.1.9-rc.2
+$ helm pull rasa/op-kits --version 0.1.9
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.1.9-rc.2 \
+    --version 0.1.9 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.1.9-rc.2 \
+    --version 0.1.9 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -179,6 +179,91 @@ $ kubectl delete namespace cnpg-system strimzi-system valkey-system
 - **Valkey**: Configure Redis-compatible in-memory data store clusters with persistence and replication
 - **Storage Classes**: Make sure to set the correct storage class names based on your cluster configuration
 - **Resource Management**: Configure CPU, memory limits and requests for optimal performance
+
+## Resource Naming
+
+All resource names are generated based on the Helm release name. The chart uses a consistent naming pattern to ensure uniqueness and clarity.
+
+### Base Naming Logic
+
+The chart uses a "fullname" template that combines the release name with the chart name:
+
+- **If `fullnameOverride` is set**: Uses the specified value directly
+- **If release name contains chart name** (e.g., release `my-op-kits`): Uses just the release name
+- **Otherwise**: Combines as `{release-name}-{chart-name}` (e.g., `my-app-op-kits`)
+
+All names are truncated to 63 characters to comply with Kubernetes DNS naming requirements.
+
+### Resource-Specific Names
+
+Based on the fullname, resources are named as follows:
+
+#### PostgreSQL (CloudNativePG)
+- **Cluster name**: `{fullname}-pg`
+  - Override: Set `cloudnativepg.cluster.nameOverride`
+
+#### Kafka (Strimzi)
+- **Kafka cluster**: `{fullname}-kafka`
+  - Override: Set `strimzi.kafka.nameOverride`
+- **Controller node pool**: `{kafka-cluster-name}-controllers`
+- **Broker node pool**: `{kafka-cluster-name}-brokers`
+- **Kafka users**: `{release-name}-user` (default) or `strimzi.users.<user>.name` if specified
+- **Kafka topics**: Uses the topic name directly from `strimzi.topics.<topic>.name`
+
+#### Valkey
+- **Cluster name**: `{fullname}-valkey`
+  - Override: Set `valkey.cluster.nameOverride`
+
+### Examples
+
+For a release named `my-app`:
+
+```yaml
+# Default names (assuming chart name is "op-kits")
+PostgreSQL Cluster: my-app-op-kits-pg
+Kafka Cluster: my-app-op-kits-kafka
+Kafka Controller Node Pool: my-app-op-kits-kafka-controllers
+Kafka Broker Node Pool: my-app-op-kits-kafka-brokers
+Kafka User: my-app-user
+Valkey Cluster: my-app-op-kits-valkey
+```
+
+For a release named `my-op-kits` (contains chart name):
+
+```yaml
+# Names (release name contains chart name)
+PostgreSQL Cluster: my-op-kits-pg
+Kafka Cluster: my-op-kits-kafka
+Kafka Controller Node Pool: my-op-kits-kafka-controllers
+Kafka Broker Node Pool: my-op-kits-kafka-brokers
+Kafka User: my-op-kits-user
+Valkey Cluster: my-op-kits-valkey
+```
+
+### Overriding Names
+
+You can override resource names using the following values:
+
+```yaml
+# Override all resource names
+fullnameOverride: "custom-name"
+
+# Override individual resource names
+cloudnativepg:
+  cluster:
+    nameOverride: "custom-pg-cluster"
+
+strimzi:
+  kafka:
+    nameOverride: "custom-kafka-cluster"
+  users:
+    app:
+      name: "custom-kafka-user"
+
+valkey:
+  cluster:
+    nameOverride: "custom-valkey-cluster"
+```
 
 ## Important Configuration Notes
 

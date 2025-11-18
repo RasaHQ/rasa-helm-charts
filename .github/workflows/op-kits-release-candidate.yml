@@ -19,6 +19,9 @@ jobs:
     outputs:
       op-kits-version: ${{ steps.check-rc.outputs.chart-version }}
       release-candidate: ${{ steps.check-rc.outputs.is-rc }}
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repo

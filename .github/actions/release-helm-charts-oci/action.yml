@@ -3,6 +3,13 @@ description: 'Push a copy of a Helm chart from a public Github repo to a private
 # This composite action pushes a copy of a Helm chart from a public Github repo to a private Artifact Registry repo
 # See https://cloud.google.com/artifact-registry/docs/helm/authentication and https://cloud.google.com/artifact-registry/docs/helm/manage-charts
 # 
+# REQUIRED WORKFLOW PERMISSIONS:
+# The workflow calling this action MUST include the following permissions:
+#
+#   permissions:
+#     contents: read
+#     id-token: write
+#
 # To configure this action:
 #
 # 1. Ensure the required Google Cloud APIs are enabled in your project:

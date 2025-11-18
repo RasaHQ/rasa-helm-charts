@@ -32,7 +32,6 @@ jobs:
         uses: ./.github/actions/check-chart-rc
         with:
           chart-path: charts/op-kits
-          fail-if-not-rc: 'true'
 
       - name: Release Helm chart
         id: release

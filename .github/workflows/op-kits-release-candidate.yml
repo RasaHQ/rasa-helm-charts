@@ -19,6 +19,9 @@ jobs:
     outputs:
       op-kits-version: ${{ steps.check-rc.outputs.chart-version }}
       release-candidate: ${{ steps.check-rc.outputs.is-rc }}
+    permissions:
+      contents: read
+      id-token: write
 
     steps:
       - name: Checkout repo
@@ -29,7 +32,6 @@ jobs:
         uses: ./.github/actions/check-chart-rc
         with:
           chart-path: charts/op-kits
-          fail-if-not-rc: 'true'
 
       - name: Release Helm chart
         id: release

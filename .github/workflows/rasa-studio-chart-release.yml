@@ -10,13 +10,9 @@ on:
       - '!charts/op-kits/**'
       - '!replicated/**'
 
-env:
-  ARTIFACT_REGISTRY: europe-west3-docker.pkg.dev
-  HELM_REPOSITORY: rasa-releases
-  HELM_CHART: helm-charts
-
 jobs:
   release:
+    name: Release Rasa Studio Helm Chart
     runs-on: ubuntu-24.04
     outputs:
       studio-version: ${{ steps.chart-info.outputs.version }}
@@ -33,39 +29,21 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Install Helm 3
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
-        with:
-          version: v3.15.2
-
-      - name: Authenticate to Google Cloud
-        id: google-auth
-        uses: google-github-actions/auth@71fee32a0bb7e97b4d33d548e7d957010649d8fa
-        with:
-          token_format: access_token
-          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
-          service_account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
-
       - name: Read Helm Chart
         id: chart-info
         uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
         with:
           path: charts/studio/
 
-      - name: Package and push chart
+      - name: Release Helm chart
         id: release
-        env:
-          ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
-          CHART_PATH: charts/studio
-          CHART_URI: oci://${{ env.ARTIFACT_REGISTRY }}/${{ env.HELM_REPOSITORY }}/${{ env.HELM_CHART }}
-          CHART_TAR: ${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}.tgz
-          REGISTRY_URL: https://${{ env.ARTIFACT_REGISTRY }}
-        run: |
-          echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
-          helm dependency update "${CHART_PATH}"
-          helm package "${CHART_PATH}"
-          helm push "${CHART_TAR}" "${CHART_URI}"
-          echo "uri=${CHART_URI}" >> $GITHUB_OUTPUT
+        uses: ./.github/actions/release-helm-charts-oci
+        with:
+          gcp-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
+          gcp-service-account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
+          github-repo: '${{ github.repository }}'
+          github-ref: '${{ github.ref }}'
+          chart-path: 'charts/studio'
 
       - name: Notify Slack of successful release 💬
         if: steps.release.outcome == 'success'

@@ -13,8 +13,8 @@ on:
       - '!replicated/**'
 
 jobs:
-  check-chart-versions:
-    name: Check chart versions
+  release-candidate:
+    name: Op-Kits Release Candidate
     runs-on: ubuntu-24.04
     outputs:
       op-kits-version: ${{ steps.check-rc.outputs.chart-version }}

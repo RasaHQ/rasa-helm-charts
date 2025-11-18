@@ -11,44 +11,33 @@ on:
       - '!replicated/**'
 
 jobs:
-  check-chart-versions:
-    name: Check chart versions
+  release-candidate:
+    name: Rasa Pro Release Candidate
     runs-on: ubuntu-24.04
     outputs:
-      pro-version: ${{ steps.pro-chart-info.outputs.version }}
-      release-candidate: ${{ steps.check-rc.outputs.rc }}
+      pro-version: ${{ steps.check-rc.outputs.chart-version }}
+      release-candidate: ${{ steps.check-rc.outputs.is-rc }}
+    permissions:
+      contents: read
+      id-token: write
+
     steps:
-    - name: Checkout repo
-      uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
-    - name: Read Rasa Studio chart
-      id: pro-chart-info
-      uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
-      with:
-        path: charts/rasa/
-    - name: Check Rasa Pro chart version
-      id: check-rc
-      if: github.event_name != 'pull_request' && !startsWith(github.base_ref, 'release/')
-      env:
-        VERSION: ${{ steps.pro-chart-info.outputs.name }}-${{ steps.pro-chart-info.outputs.version }}
-      run: |
-        if [[ $VERSION == *-rc* ]]; then
-          echo "The Helm chart version is a release candidate."
-          echo "rc=true" >> $GITHUB_OUTPUT
-        else
-          echo "The Helm chart version is not a release candidate. Please add `-rc*` after the version in Chart.yaml."
-          echo "rc=false" >> $GITHUB_OUTPUT
-        fi
-  register-helm-chart:
-    name: Register Rasa Pro chart
-    needs: [check-chart-versions]
-    if: needs.check-chart-versions.outputs.release-candidate == 'true'
-    uses: ./.github/workflows/register-private-helm-chart.yml
-    with:
-        github-repo: ${{ github.repository }}
-        github-ref: ${{ github.ref }}
-        chart-path: charts/rasa
-        gcp-project-id: rasa-releases
-        gcp-identity-provider: projects/611793044667/locations/global/workloadIdentityPools/github-actions-pool/providers/oidc-provider
-        gcp-service-account: register-artifacts@rasa-releases.iam.gserviceaccount.com
-        gar-location: europe-west3
-        gar-repository: helm-charts  
+      - name: Checkout repo
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+
+      - name: Check Rasa Pro chart version
+        id: check-rc
+        uses: ./.github/actions/check-chart-rc
+        with:
+          chart-path: charts/rasa
+
+      - name: Release Helm chart
+        id: release
+        if: steps.check-rc.outputs.is-rc == 'true'
+        uses: ./.github/actions/release-helm-charts-oci
+        with:
+          gcp-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
+          gcp-service-account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
+          github-repo: '${{ github.repository }}'
+          github-ref: '${{ github.ref }}'
+          chart-path: 'charts/rasa'  

@@ -11,7 +11,7 @@ on:
       - '!replicated/**'
 
 jobs:
-  releasse-candidate:
+  release-candidate:
     name: Rasa Pro Release Candidate
     runs-on: ubuntu-24.04
     outputs:

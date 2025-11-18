@@ -301,7 +301,7 @@ strimzi:
     #     #  secretName: "analytics-secrets"
     #     #  secretKey: "KAFKA_SASL_PASSWORD"
 
-# Valkey Configuration (Redis replacement)
+# Valkey Configuration
 valkey:
   # -- Enable Valkey cluster deployment
   enabled: true

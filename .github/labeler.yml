@@ -1,11 +1,12 @@
 rasa:
-- charts/rasa/**
-
+  - changed-files:
+      - any-glob-to-any-file: charts/rasa/**
 studio:
-- charts/studio/**
-
-replicated:
-- replicated/**
-
+  - changed-files:
+      - any-glob-to-any-file: charts/studio/**
 op-kits:
-- charts/op-kits/**
+  - changed-files:
+      - any-glob-to-any-file: charts/op-kits/**
+# Add 'release' label to any PR that is opened against the `main` branch
+release:
+ - base-branch: 'main'

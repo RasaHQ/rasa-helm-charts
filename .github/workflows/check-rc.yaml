@@ -1,0 +1,62 @@
+name: Check if RC for Helm Charts
+
+on:
+  pull_request:
+    paths:
+      - 'charts/**'
+      - '!replicated/**'
+      - '!.github/**'
+
+jobs:
+  detect-charts:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
+    runs-on: ubuntu-24.04
+    outputs:
+      charts: ${{ steps.set-charts.outputs.charts }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed charts
+        id: set-charts
+        shell: bash
+        run: |
+          CHART_LIST=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^charts/[^/]+/' | cut -d'/' -f2 | sort -u)
+          if [ -z "$CHART_LIST" ]; then
+            echo "No chart directories changed"
+            echo 'charts=[]' >> $GITHUB_OUTPUT
+          else
+            JSON_CHARTS="["
+            FIRST=true
+            while IFS= read -r chart; do
+              if [ "$FIRST" = true ]; then
+                FIRST=false
+              else
+                JSON_CHARTS="$JSON_CHARTS,"
+              fi
+              JSON_CHARTS="$JSON_CHARTS\"$chart\""
+            done <<< "$CHART_LIST"
+            JSON_CHARTS="$JSON_CHARTS]"
+            echo "Changed charts: $JSON_CHARTS"
+            echo "charts=$JSON_CHARTS" >> $GITHUB_OUTPUT
+          fi
+
+  check-rc:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') && needs.detect-charts.outputs.charts != '[]' }}
+    needs: detect-charts
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        chart: ${{ fromJson(needs.detect-charts.outputs.charts) }}
+      fail-fast: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@ac593985615ec2ede58e132d2e21d2b1cbd6127c
+
+      - name: Check if release candidate
+        uses: ./.github/actions/check-chart-rc
+        with:
+          chart-path: charts/${{ matrix.chart }}
+          fail-if-rc: 'true'

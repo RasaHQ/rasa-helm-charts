@@ -1,0 +1,70 @@
+name: 'Check Chart Release Candidate Version'
+description: 'Check if a Helm chart version is a release candidate (contains -rc)'
+
+inputs:
+  chart-path:
+    description: The relative path to the Helm chart directory (i.e. the directory with Chart.yaml)
+    required: true
+  fail-if-rc:
+    description: If true, fail the action when RC version is detected. If false, only output the result.
+    required: false
+    default: 'false'
+  fail-if-not-rc:
+    description: If true, fail the action when RC version is NOT detected. If false, only output the result.
+    required: false
+    default: 'false'
+
+outputs:
+  chart-name:
+    description: The name of the Helm chart
+    value: ${{ steps.chart-info.outputs.name }}
+  chart-version:
+    description: The version of the Helm chart
+    value: ${{ steps.chart-info.outputs.version }}
+  is-rc:
+    description: 'true if the chart version contains -rc, false otherwise'
+    value: ${{ steps.check-rc.outputs.is-rc }}
+  version-string:
+    description: The combined name-version string
+    value: ${{ steps.check-rc.outputs.version-string }}
+
+runs:
+  using: composite
+  steps:
+    - name: Read Helm Chart
+      id: chart-info
+      uses: miraai/read-helm-chart-yaml@9a798908719da8d062b86097d4ff1ad85abfc7aa
+      with:
+        path: ${{ inputs.chart-path }}
+
+    - name: Check if release candidate
+      id: check-rc
+      shell: bash
+      env:
+        CHART_NAME: ${{ steps.chart-info.outputs.name }}
+        CHART_VERSION: ${{ steps.chart-info.outputs.version }}
+        FAIL_IF_RC: ${{ inputs.fail-if-rc }}
+        FAIL_IF_NOT_RC: ${{ inputs.fail-if-not-rc }}
+      run: |
+        VERSION_STRING="${CHART_NAME}-${CHART_VERSION}"
+        echo "version-string=${VERSION_STRING}" >> $GITHUB_OUTPUT
+
+        if [[ $VERSION_STRING == *-rc* ]]; then
+          echo "The Helm chart version is a release candidate."
+          echo "is-rc=true" >> $GITHUB_OUTPUT
+          
+          if [[ "$FAIL_IF_RC" == "true" ]]; then
+            echo "❌ ERROR: Release candidate versions are not allowed."
+            echo "Please change version in ${{ inputs.chart-path }}/Chart.yaml to match release versioning when you are ready to release."
+            exit 1
+          fi
+        else
+          echo "The Helm chart version is not a release candidate."
+          echo "is-rc=false" >> $GITHUB_OUTPUT
+          
+          if [[ "$FAIL_IF_NOT_RC" == "true" ]]; then
+            echo "❌ ERROR: Release candidate version is required."
+            echo "Please add \`-rc*\` after the version in ${{ inputs.chart-path }}/Chart.yaml."
+            exit 1
+          fi
+        fi

@@ -2,6 +2,8 @@
 Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
+- name: DUMMY_ENV_VAR
+  value: "true"
 - name: RASA_PRO_LICENSE 
   valueFrom:
     secretKeyRef:

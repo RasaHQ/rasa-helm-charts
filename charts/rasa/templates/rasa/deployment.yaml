@@ -90,6 +90,11 @@ spec:
             {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
           {{- else }}
           env:
+            - name: RASA_PRO_LICENSE 
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.rasaProLicense.secretName }}
+                  key: {{ .Values.rasaProLicense.secretKey }}
             {{- include "rasa.containers.env" . | nindent 12 }}
           {{- end }}
           {{- if .Values.rasa.envFrom }}

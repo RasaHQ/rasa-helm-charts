@@ -2,13 +2,6 @@
 Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
-- name: DUMMY_ENV_VAR
-  value: "true"
-- name: RASA_PRO_LICENSE 
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.rasaProLicense.secretName }}
-      key: {{ .Values.rasaProLicense.secretKey }}
 {{- with .Values.rasa.settings }}
 {{- if or $.Values.duckling.enabled (not (empty $.Values.rasa.settings.ducklingHttpUrl)) -}}
 - name: RASA_DUCKLING_HTTP_URL

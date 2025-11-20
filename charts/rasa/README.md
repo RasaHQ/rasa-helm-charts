@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 1.4.0-rc.1](https://img.shields.io/badge/Version-1.4.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.2
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.4.0-rc.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 1.3.2
+helm install my-release rasa/rasa --version 1.4.0-rc.1
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.2
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.4.0-rc.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 1.3.2
+helm pull rasa/rasa --version 1.4.0-rc.1
 ```
 
 ## General Configuration
@@ -314,24 +314,17 @@ rasa:
 | rasa.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasa.settings.authToken | object | `{"secretKey":"authToken","secretName":"rasa-secrets"}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.cors | string | `"*"` | settings.cors is CORS for the passed origin. Default is * to allow all origins |
-| rasa.settings.credentials.additionalChannelCredentials | object | `{}` | credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
-| rasa.settings.credentials.enabled | bool | `false` | credentials.enabled enables credentials configuration for channel connectors |
+| rasa.settings.credentials | string | `nil` | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels |
 | rasa.settings.debugMode | bool | `false` | settings.debugMode enables debug mode |
 | rasa.settings.ducklingHttpUrl | string | `nil` | settings.ducklingHttpUrl is HTTP URL to the duckling service |
 | rasa.settings.enableApi | bool | `true` | settings.enableApi start the web server API in addition to the input channel Rasa API supports two authentication methods, Token based Auth or JWT Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
-| rasa.settings.endpoints.actionEndpoint.url | string | `"/webhook"` |  |
-| rasa.settings.endpoints.additionalEndpoints | object | `{}` | `endpoints.additionalEndpoints` to add more settings to `endpoints.yml` |
-| rasa.settings.endpoints.eventBroker | object | `{"enabled":false}` | endpoints.eventBroker allows you to connect your running assistant to other services that process the data See: https://rasa.com/docs/rasa/event-brokers |
-| rasa.settings.endpoints.lockStore | object | `{"enabled":false,"url":"","useConcurrent":true}` | endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order See: https://rasa.com/docs/rasa/lock-stores |
-| rasa.settings.endpoints.modelGroups | list | `[]` | endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component. See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups |
-| rasa.settings.endpoints.models | object | `{"enabled":false}` | endpoints.models provides loading models from the storage See: https://rasa.com/docs/rasa/model-storage |
-| rasa.settings.endpoints.tracing | object | `{"enabled":false}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
-| rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
+| rasa.settings.endpoints | string | `nil` | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints |
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
 | rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. |
+| rasa.settings.mountModelsVolume | bool | `true` |  |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |

@@ -6,55 +6,12 @@ metadata:
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 data:
+{{- with .Values.rasa.settings.credentials }}
   credentials: |
-{{- if .Values.rasa.settings.credentials.enabled }}
-  {{- with .Values.rasa.settings.credentials.additionalChannelCredentials }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
 {{- end }}
-  endpoints: |
 {{- with .Values.rasa.settings.endpoints }}
-{{- if .models.enabled }}
-    models:
-      {{- omit .models "enabled" | toYaml | nindent 6 }}
-{{- end }}
-{{- if .modelGroups }}
-    model_groups:
-      {{- toYaml .modelGroups | nindent 6 }}
-{{- end }}
-{{- if .trackerStore.enabled }}
-    tracker_store:
-      {{- omit .trackerStore "enabled" | toYaml  | nindent 6 }}
-{{- end }}
-{{- if .lockStore.enabled }}
-    lock_store:
-      {{- if and $.Values.rasa.enabled .lockStore.useConcurrent }}
-      type: "concurrent_redis"
-      host: {{ .lockStore.url }}
-      {{- else }}
-      type: {{ .lockStore.type }}
-      url: {{ .lockStore.url }}
-      {{- end }}
-    {{- range $key, $value := .lockStore }}
-      {{- if and (not (eq $key "enabled")) (not (eq $key "url")) (not (eq $key "useConcurrent")) (not (eq $key "type")) }}
-      {{ $key }}: {{ $value }}
-      {{- end }}
-    {{- end }}
-{{- end }}
-{{- if .eventBroker.enabled }}
-    event_broker:
-      {{- omit .eventBroker "enabled" | toYaml | nindent 6 }}
-{{- end }}
-{{- if and .tracing.enabled $.Values.rasa.enabled }}
-    tracing:
-      {{- omit .tracing "enabled" | toYaml | nindent 6 }}
-{{- end }}
-{{- if .actionEndpoint }}
-    action_endpoint:
-      {{- toYaml .actionEndpoint | nindent 6 }}
-{{- end }}
-{{- with .additionalEndpoints }}
+  endpoints: |
     {{- toYaml . | nindent 4 }}
-{{- end }}
 {{- end }}
 {{- end }}

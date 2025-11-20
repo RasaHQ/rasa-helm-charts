@@ -67,19 +67,15 @@ rasa:
     useDefaultArgs: true
     # -- settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment.
     mountDefaultConfigmap: true
-    # settings.credentials enables credentials configuration for channel connectors
+    mountModelsVolume: true
+    # -- settings.credentials enables credentials configuration for channel connectors
+    ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels
     credentials:
-      # -- credentials.enabled enables credentials configuration for channel connectors
-      enabled: false
-      # -- credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various
-      # input channels
-      ## See: https://rasa.com/docs/rasa/messaging-and-voice-channels
-      additionalChannelCredentials: {}
-      #  rest:
-      #  facebook:
-      #    verify: "rasa"
-      #    secret: "<SECRET>"
-      #    page-access-token: "<PAGE-ACCESS-TOKEN>"
+      # rest:
+      # facebook:
+      #   verify: "rasa"
+      #   secret: "<SECRET>"
+      #   page-access-token: "<PAGE-ACCESS-TOKEN>"
 
     # See: https://rasa.com/docs/rasa/telemetry/telemetry/
     telemetry:
@@ -89,71 +85,57 @@ rasa:
       debug: false
 
     # Not all parameters are mandatory
+    # -- settings.endpoints enables endpoints configuration for the Rasa deployment.
+    # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
     endpoints:
-      # -- endpoints.models provides loading models from the storage
-      # See: https://rasa.com/docs/rasa/model-storage
-      models:
-        enabled: false
-        # url: ""
-        # waitTimeBetweenPulls: 20
-      # -- endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component.
-      # See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups
-      modelGroups: []
-        # - id: openai-direct # Unique identifier for the model group
-        #   models:
-        #     - provider: openai
-        #       model: gpt-4o-2024-11-20
-      # -- endpoints.trackerStore assistant's conversations are stored within a tracker store
-      # See: https://rasa.com/docs/rasa/tracker-stores
-      trackerStore:
-        enabled: false
-        # type: "dynamo"
-        # dialect: ""
-        # url: ""
-        # db: 0
-        # password: ""
-        # username: ""
-        # query: ""
-      # -- endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order
-      # See: https://rasa.com/docs/rasa/lock-stores
-      lockStore:
-        enabled: false
-        useConcurrent: true
-        url: ""
-        # port: ""
-        # password: ""
-        # db: "1"
-        # key_prefix: ""
-        # use_ssl: false
-        # socket_timeout: ""
-      # -- endpoints.eventBroker allows you to connect your running assistant to other services that process the data
-      # See: https://rasa.com/docs/rasa/event-brokers
-      eventBroker:
-        enabled: false
-        # type: ""
-        # url: ""
-        # username: ""
-        # password: ""
-        # port: ""
-        # queues:
-        #   - rasa_production_events
-        # exchangeName: exchange
-      # -- endpoints.tracing tracks requests as they flow through a distributed system
-      # See: https://rasa.com/docs/rasa/monitoring/tracing/
-      tracing:
-        enabled: false
-        # type: jaeger
-        # host: localhost
-        # port: 6831
-        # service_name: rasa
-        # sync_export: ~
-        # endpoint: my-otlp-host:4318
-        # insecure: false
-        # root_certificates: ./tests/unit/tracing/fixtures/ca.pem
-      actionEndpoint:
-        url: /webhook
-      # -- `endpoints.additionalEndpoints` to add more settings to `endpoints.yml`
-      additionalEndpoints: {}
+      # -- endpoints.models is where the models are pulled from.
+      # See: https://rasa.com/docs/reference/integrations/model-storage
+      # models:
+      #   url: http://my-server.com/models/default_core@latest
+        # wait_time_between_pulls:  10   # [optional](default: 100)
+
+      # --endpoints.action_endpoint is a server which runs your custom actions.
+      # See: https://rasa.com/docs/reference/integrations/action-server/actions
+      # action_endpoint:
+      #   actions_module: "actions"
+
+      # -- endpoints.tracker_store is used to store the conversations.
+      # By default the conversations are stored in memory.
+      # See: https://rasa.com/docs/reference/integrations/tracker-stores
+      #tracker_store:
+      #    type: redis
+      #    url: <host of the redis instance, e.g. localhost>
+      #    port: <port of your redis instance, usually 6379>
+      #    db: <number of your database within redis, e.g. 0>
+      #    password: <password used for authentication>
+      #    use_ssl: <whether or not the communication is encrypted, default false>
+
+      # -- endpoints.event_broker allows you to connect your running assistant to other services that process the data which all conversation events should be streamed to
+      # See: https://rasa.com/docs/reference/integrations/event-brokers
+      # event_broker:
+      #   type: kafka
+      #   url: localhost:9095
+      #   sasl_mechanism: SCRAM-SHA-512
+      #   security_protocol: SASL_PLAINTEXT
+      #   sasl_username: testuser
+      #   sasl_password: testpass123
+      #   partition_by_sender: true
+      #   client_id: rasa-broker
+
+      # -- endpoints.model_groups is used to define multiple models under a single ID which can be accessed by any component.
+      # Ensure the OPENAI_API_KEY is set to prevent any missing API key errors.
+      # See: https://rasa.com/docs/reference/config/components/llm-configuration#model-groups
+      # model_groups:
+      #   - id: openai-gpt-4o
+      #     models:
+      #       - provider: openai
+      #         model: gpt-4o-2024-11-20
+      #         request_timeout: 7
+      #         max_tokens: 256
+      #   - id: openai-embeddings
+      #     models:
+      #       - provider: openai
+      #         model: text-embedding-3-large
 
     # -- settings.environment: development or production
     environment: development

@@ -102,7 +102,7 @@ rasa:
       # -- endpoints.tracker_store is used to store the conversations.
       # By default the conversations are stored in memory.
       # See: https://rasa.com/docs/reference/integrations/tracker-stores
-      #tracker_store:
+      # tracker_store:
       #    type: redis
       #    url: <host of the redis instance, e.g. localhost>
       #    port: <port of your redis instance, usually 6379>

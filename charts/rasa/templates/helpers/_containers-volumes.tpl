@@ -10,9 +10,9 @@
         path: "endpoints.yml"
       - key: "credentials"
         path: "credentials.yml"
+{{- end }}
+{{ if .Values.rasa.settings.mountModelsVolume -}}
 - name: models
-  emptyDir: {}
-- name: app-dir
   emptyDir: {}
 {{- end }}
 {{ if .Values.rasa.persistence.create -}}
@@ -26,10 +26,6 @@
 {{- if .Values.rasa.settings.mountDefaultConfigmap -}}
 - name: "config-dir"
   mountPath: "/.config"
-- name: "app-dir"
-  mountPath: "/app"
-- name: "models"
-  mountPath: "/app/models"
 - mountPath: "/app/endpoints.yml"
   subPath: "endpoints.yml"
   name: "rasa-configuration"
@@ -38,6 +34,10 @@
   subPath: "credentials.yml"
   name: "rasa-configuration"
   readOnly: true
+{{- end }}
+{{ if .Values.rasa.settings.mountModelsVolume -}}
+- name: "models"
+  mountPath: "/app/models"
 {{- end }}
 {{ if .Values.rasa.persistence.create -}}
 - mountPath: "/app/working-data"

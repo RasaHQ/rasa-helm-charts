@@ -455,7 +455,7 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
 | rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. In this case it is expected that the credentials and endpoints are mounted to the /.config directory or baked into the image. |
-| rasa.settings.mountModelsVolume | bool | `true` | settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment.  In this case it is expected that the models are mounted to the /app/models directory or baked into the image. |
+| rasa.settings.mountModelsVolume | bool | `true` | settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment. In this case it is expected that the models are mounted to the /app/models directory or baked into the image. |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |

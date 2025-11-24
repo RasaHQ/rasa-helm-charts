@@ -66,7 +66,10 @@ rasa:
     # -- settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case.
     useDefaultArgs: true
     # -- settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment.
+    # In this case it is expected that the credentials and endpoints are mounted to the /.config directory or baked into the image.
     mountDefaultConfigmap: true
+    # -- settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment. 
+    # In this case it is expected that the models are mounted to the /app/models directory or baked into the image.
     mountModelsVolume: true
     # -- settings.credentials enables credentials configuration for channel connectors
     ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels

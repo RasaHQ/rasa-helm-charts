@@ -22,64 +22,31 @@ rasa:
     port: 5005
     scheme: http
     enableApi: true
+    mountDefaultConfigmap: true
+    mountModelsVolume: true
+    credentials:
+      rest:
+    endpoints:
+      action_endpoint:
+        url: "/webhook"
+      tracker_store:
+        type: redis
+        url: redis-lockstore-master
+        port: 6379
+        db: 1
+        password: ${REDIS_PASSWORD}
+      event_broker:
+        type: kafka
+        url: rasa-kafka-bootstrap.example-pro.svc:9092
+        security_protocol: SASL_SSL
+        sasl_mechanism: PLAIN
+        sasl_username: ${KAFKA_USER}
+        sasl_password: ${KAFKA_PASSWORD}
   service:
     type: ClusterIP
     port: 5005
     targetPort: 5005
-  endpoints:
-      models:
-        enabled: false
-      trackerStore:
-        enabled: true
-        type: sql
-        dialect: postgresql
-        url: ${DB_HOST}
-        db: ${DB_DATABASE}
-        username: ${DB_USER}
-        password: ${DB_PASSWORD}
-        port: 5432
-      lockStore:
-        enabled: true
-        db: 1
-        password: ${REDIS_PASSWORD}
-        port: 6379
-        url: redis-lockstore-master
-      eventBroker:
-        enabled: true
-        type: kafka
-        security_protocol: SASL_SSL
-        sasl_mechanism: PLAIN
-        topic: rasa-events
-        url: rasa-kafka-bootstrap.example-pro.svc:9092
-        sasl_username: ${KAFKA_USER}
-        sasl_password: ${KAFKA_PASSWORD}
-        ssl_check_hostname: true
-      tracing:
-        enabled: false
-      actionEndpoint:
-        url: /webhook
-      additionalEndpoints: {}
   additionalEnv:
-    - name: DB_HOST
-      valueFrom:
-        secretKeyRef:
-          name: postgres-db
-          key: dbUrl
-    - name: DB_DATABASE
-      valueFrom:
-        secretKeyRef:
-          name: postgres-db
-          key: database
-    - name: DB_USER
-      valueFrom:
-        secretKeyRef:
-          name: postgres-db
-          key: username
-    - name: DB_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: postgres-db
-          key: password
     - name: KAFKA_PASSWORD
       valueFrom:
         secretKeyRef:
@@ -106,40 +73,19 @@ rasaProServices:
     type: ClusterIP
     port: 8732
     targetPort: 8732
-  environmentVariables:
-    # Address of the Kafka broker.
-    KAFKA_BROKER_ADDRESS:
-      value: ""
-    # Topic Rasa Plus publishes events to and Rasa Pro consumes from
-    KAFKA_TOPIC:
-      value: "rasa_core_events"
-    # Set the log level of the application
-    LOGGING_LEVEL:
-      value: "INFO"
-    # URL of the data lake to store analytics data in
-    RASA_ANALYTICS_DB_URL:
-      value: ""
-      # secret:
-      #   name:
-      #   key:
-    # SASL mechanism to use for authentication.
-    KAFKA_SASL_MECHANISM:
-      value: "PLAIN"
-    # Username for SASL authentication.
-    KAFKA_SASL_USERNAME:
-      value: ""
-    # Password for SASL authentication
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: "rasa-secrets"
-        key: "kafkaSslPassword"
-    # Security protocol to use for communication with Kafka
-    KAFKA_SECURITY_PROTOCOL:
-      value: "PLAINTEXT"
-    # Filepath for SSL CA Certificate that will be used to connect with Kafka
-    KAFKA_SSL_CA_LOCATION:
-      value: ""
-  
+  loggingLevel: "INFO"
+  database:
+    url: ""
+  kafka:
+    brokerAddress: ""
+    topic: "rasa-core-events"
+    securityProtocol: "PLAINTEXT"
+    saslMechanism: "PLAIN"
+    saslUsername: ""
+    saslPassword:
+      secretName: "rasa-secrets"
+      secretKey: "kafkaSslPassword"
+
 
 # Duckling Configuration
 duckling:

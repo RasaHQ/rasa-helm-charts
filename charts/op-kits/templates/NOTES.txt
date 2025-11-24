@@ -96,7 +96,7 @@ This chart deploys the following resources:
   Bootstrap Servers (from within cluster):
 {{- range $listener := .Values.strimzi.kafka.listeners }}
     Listener "{{ $listener.name }}" ({{ $listener.type }}):
-      {{ include "op-kits.strimzi.kafkaName" $ }}-kafka-{{ $listener.name }}-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
+      {{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
 {{- end }}
 {{- else }}
   Internal Bootstrap Servers (from within cluster):
@@ -107,7 +107,7 @@ This chart deploys the following resources:
 {{- if .Values.strimzi.kafka.listeners }}
 {{- range $listener := .Values.strimzi.kafka.listeners }}
     # For listener "{{ $listener.name }}":
-    KAFKA_BROKER_ADDRESS={{ include "op-kits.strimzi.kafkaName" $ }}-kafka-{{ $listener.name }}-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
+    KAFKA_BROKER_ADDRESS={{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
 {{- if $listener.tls }}
     KAFKA_SECURITY_PROTOCOL=SASL_SSL
 {{- else }}
@@ -168,7 +168,7 @@ This chart deploys the following resources:
   For local development (port-forward):
 {{- if .Values.strimzi.kafka.listeners }}
 {{- range $listener := .Values.strimzi.kafka.listeners }}
-    kubectl port-forward -n {{ include "op-kits.namespace" $ }} svc/{{ include "op-kits.strimzi.kafkaName" $ }}-kafka-{{ $listener.name }}-bootstrap {{ $listener.port }}:{{ $listener.port }}
+    kubectl port-forward -n {{ include "op-kits.namespace" $ }} svc/{{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap {{ $listener.port }}:{{ $listener.port }}
     # Then use: localhost:{{ $listener.port }} with appropriate credentials
 {{- end }}
 {{- else }}

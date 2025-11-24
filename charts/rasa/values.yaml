@@ -73,7 +73,7 @@ rasa:
     mountModelsVolume: true
     # -- settings.credentials enables credentials configuration for channel connectors
     ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels
-    credentials:
+    credentials: {}
       # rest:
       # facebook:
       #   verify: "rasa"
@@ -90,7 +90,7 @@ rasa:
     # Not all parameters are mandatory
     # -- settings.endpoints enables endpoints configuration for the Rasa deployment.
     # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
-    endpoints:
+    endpoints: {}
       # -- endpoints.models is where the models are pulled from.
       # See: https://rasa.com/docs/reference/integrations/model-storage
       # models:

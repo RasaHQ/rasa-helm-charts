@@ -122,8 +122,12 @@ strimzi:
         port: 9092
         type: internal
         tls: false
-        # authentication:
-        #   type: scram-sha-512
+        authentication:
+          type: scram-sha-512
+      - name: noauth
+        port: 9093
+        type: internal
+        tls: false
 
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers
@@ -262,16 +266,15 @@ strimzi:
   # Kafka Users Configuration
   users:
     # Main application user configuration
-    # root:
+    root:
     #   # -- Enable main application user creation
-    #   enabled: true
+      enabled: true
     #   # -- Kafka user name. If empty, defaults to "<release-name>-user"
-    #   name: ""
-
+      name: ""
     #   # Authentication configuration
-    #   authentication:
+      authentication:
     #     # -- Authentication type for Kafka user
-    #     type: "scram-sha-512"
+        type: "scram-sha-512"
         # -- Optional: use a pre-existing secret for the password
         # When omitted, Strimzi will generate a password and store it in a Secret
         # named after the KafkaUser (e.g. <release-name>-user) with key "password".

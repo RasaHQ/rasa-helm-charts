@@ -138,6 +138,7 @@ strimzi:
       transaction.state.log.min.isr: 1
       default.replication.factor: 1
       min.insync.replicas: 1
+      auto.create.topics.enable: true
 
     # -- Resource limits and requests for Kafka brokers
     # Example:
@@ -267,13 +268,13 @@ strimzi:
   users:
     # Main application user configuration
     root:
-    #   # -- Enable main application user creation
+      # -- Enable main application user creation
       enabled: true
-    #   # -- Kafka user name. If empty, defaults to "<release-name>-user"
+      # -- Kafka user name. If empty, defaults to "<release-name>-user"
       name: ""
-    #   # Authentication configuration
+      # Authentication configuration
       authentication:
-    #     # -- Authentication type for Kafka user
+        # -- Authentication type for Kafka user
         type: "scram-sha-512"
         # -- Optional: use a pre-existing secret for the password
         # When omitted, Strimzi will generate a password and store it in a Secret

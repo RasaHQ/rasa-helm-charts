@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 1.3.2](https://img.shields.io/badge/Version-1.3.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.2
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 1.3.2
+helm install my-release rasa/rasa --version 2.0.0
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 1.3.2
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 1.3.2
+helm pull rasa/rasa --version 2.0.0
 ```
 
 ## General Configuration
@@ -111,6 +111,137 @@ rasa:
     - name: BUCKET_NAME
       value: "rasa-models"
 ```
+
+### Mount Configuration Options
+
+**mountDefaultConfigmap:**
+
+By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a ConfigMap to the Rasa deployment. If you prefer to mount these files from a different source (e.g., from the `/.config` directory or baked into the image), you can disable this behavior:
+
+```yaml
+rasa:
+  settings:
+    mountDefaultConfigmap: false
+```
+
+When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
+
+**mountModelsVolume:**
+
+By default, the chart mounts a models volume to the Rasa deployment at `/app/models`. If you prefer to mount models from a different source or bake them into the image, you can disable this behavior:
+
+```yaml
+rasa:
+  settings:
+    mountModelsVolume: false
+```
+
+When disabled, it is expected that the models are mounted to the `/app/models` directory or baked into the image.
+
+### Configuring Credentials and Endpoints via ConfigMap
+
+The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.
+
+#### Configuring Credentials
+
+The `rasa.settings.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
+
+For example, to configure Facebook Messenger:
+
+```yaml
+rasa:
+  settings:
+    credentials:
+      facebook:
+        verify: "rasa"
+        secret: "<SECRET>"
+        page-access-token: "<PAGE-ACCESS-TOKEN>"
+```
+
+For REST channel:
+
+```yaml
+rasa:
+  settings:
+    credentials:
+      rest:
+```
+
+See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
+
+#### Configuring Endpoints
+
+The `rasa.settings.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
+
+**Action Server Endpoint:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      action_endpoint:
+        url: "/webhook"
+```
+
+**Model Storage:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      models:
+        url: http://my-server.com/models/default_core@latest
+        wait_time_between_pulls: 10
+```
+
+**Tracker Store (Redis example):**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      tracker_store:
+        type: redis
+        url: <host of the redis instance>
+        port: 6379
+        db: 0
+        password: <password>
+        use_ssl: false
+```
+
+**Event Broker (Kafka example):**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      event_broker:
+        type: kafka
+        url: localhost:9095
+        sasl_mechanism: SCRAM-SHA-512
+        security_protocol: SASL_PLAINTEXT
+        sasl_username: testuser
+        sasl_password: testpass123
+        partition_by_sender: true
+        client_id: rasa-broker
+```
+
+**Model Groups:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      model_groups:
+        - id: openai-gpt-4o
+          models:
+            - provider: openai
+              model: gpt-4o-2024-11-20
+              request_timeout: 7
+              max_tokens: 256
+```
+
+See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.
 
 ## Values
 
@@ -314,24 +445,17 @@ rasa:
 | rasa.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | rasa.settings.authToken | object | `{"secretKey":"authToken","secretName":"rasa-secrets"}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.cors | string | `"*"` | settings.cors is CORS for the passed origin. Default is * to allow all origins |
-| rasa.settings.credentials.additionalChannelCredentials | object | `{}` | credentials.additionalChannelCredentials defines credentials which should be used by Rasa to connect to various input channels # See: https://rasa.com/docs/rasa/messaging-and-voice-channels |
-| rasa.settings.credentials.enabled | bool | `false` | credentials.enabled enables credentials configuration for channel connectors |
+| rasa.settings.credentials | object | `{}` | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels |
 | rasa.settings.debugMode | bool | `false` | settings.debugMode enables debug mode |
 | rasa.settings.ducklingHttpUrl | string | `nil` | settings.ducklingHttpUrl is HTTP URL to the duckling service |
 | rasa.settings.enableApi | bool | `true` | settings.enableApi start the web server API in addition to the input channel Rasa API supports two authentication methods, Token based Auth or JWT Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
-| rasa.settings.endpoints.actionEndpoint.url | string | `"/webhook"` |  |
-| rasa.settings.endpoints.additionalEndpoints | object | `{}` | `endpoints.additionalEndpoints` to add more settings to `endpoints.yml` |
-| rasa.settings.endpoints.eventBroker | object | `{"enabled":false}` | endpoints.eventBroker allows you to connect your running assistant to other services that process the data See: https://rasa.com/docs/rasa/event-brokers |
-| rasa.settings.endpoints.lockStore | object | `{"enabled":false,"url":"","useConcurrent":true}` | endpoints.lockStore makes lock mechanism to ensure that incoming messages for a given conversation ID are processed in the right order See: https://rasa.com/docs/rasa/lock-stores |
-| rasa.settings.endpoints.modelGroups | list | `[]` | endpoints.modelGroups allow you to define multiple models under a single ID which can be accessed by any component. See: https://rasa.com/docs/reference/config/components/llm-configuration/#model-groups |
-| rasa.settings.endpoints.models | object | `{"enabled":false}` | endpoints.models provides loading models from the storage See: https://rasa.com/docs/rasa/model-storage |
-| rasa.settings.endpoints.tracing | object | `{"enabled":false}` | endpoints.tracing tracks requests as they flow through a distributed system See: https://rasa.com/docs/rasa/monitoring/tracing/ |
-| rasa.settings.endpoints.trackerStore | object | `{"enabled":false}` | endpoints.trackerStore assistant's conversations are stored within a tracker store See: https://rasa.com/docs/rasa/tracker-stores |
+| rasa.settings.endpoints | object | `{}` | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints |
 | rasa.settings.environment | string | `"development"` | settings.environment: development or production |
 | rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
 | rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
 | rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
-| rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. |
+| rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. In this case it is expected that the credentials and endpoints are mounted to the /.config directory or baked into the image. |
+| rasa.settings.mountModelsVolume | bool | `true` | settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment. In this case it is expected that the models are mounted to the /app/models directory or baked into the image. |
 | rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
 | rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
 | rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |

@@ -92,10 +92,45 @@ This chart deploys the following resources:
 
 📋 Kafka Connection Information:
 
+{{- if .Values.strimzi.kafka.listeners }}
+  Bootstrap Servers (from within cluster):
+{{- range $listener := .Values.strimzi.kafka.listeners }}
+    Listener "{{ $listener.name }}" ({{ $listener.type }}):
+      {{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
+{{- end }}
+{{- else }}
   Internal Bootstrap Servers (from within cluster):
     {{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092
+{{- end }}
 
   Environment Variables for Applications:
+{{- if .Values.strimzi.kafka.listeners }}
+{{- range $listener := .Values.strimzi.kafka.listeners }}
+    # For listener "{{ $listener.name }}":
+    KAFKA_BROKER_ADDRESS={{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
+{{- if $listener.tls }}
+    KAFKA_SECURITY_PROTOCOL=SASL_SSL
+{{- else }}
+    KAFKA_SECURITY_PROTOCOL=SASL_PLAINTEXT
+{{- end }}
+{{- if $listener.authentication }}
+    KAFKA_SASL_MECHANISM={{ $listener.authentication.type }}
+{{- else }}
+    KAFKA_SASL_MECHANISM=PLAIN
+{{- end }}
+{{- range $name, $user := $.Values.strimzi.users }}
+{{- if and $user.enabled (ne $name "enabled") }}
+    KAFKA_SASL_USERNAME={{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }}
+    {{- if and $user.authentication $user.authentication.password }}
+    KAFKA_SASL_PASSWORD=[from secret: {{ $user.authentication.password.secretName }} key {{ $user.authentication.password.secretKey }}]
+    {{- else }}
+    KAFKA_SASL_PASSWORD=[from secret: {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }} key password]
+    {{- end }}
+{{- break }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- else }}
     KAFKA_BROKER_ADDRESS={{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092
     KAFKA_SASL_MECHANISM=SCRAM-SHA-512
 {{- range $name, $user := .Values.strimzi.users }}
@@ -107,6 +142,7 @@ This chart deploys the following resources:
     KAFKA_SASL_PASSWORD=[from secret: {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }} key password]
     {{- end }}
 {{- break }}
+{{- end }}
 {{- end }}
 {{- end }}
 
@@ -130,8 +166,15 @@ This chart deploys the following resources:
 {{- end }}
 
   For local development (port-forward):
+{{- if .Values.strimzi.kafka.listeners }}
+{{- range $listener := .Values.strimzi.kafka.listeners }}
+    kubectl port-forward -n {{ include "op-kits.namespace" $ }} svc/{{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap {{ $listener.port }}:{{ $listener.port }}
+    # Then use: localhost:{{ $listener.port }} with appropriate credentials
+{{- end }}
+{{- else }}
     kubectl port-forward -n {{ include "op-kits.namespace" . }} svc/{{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap 9092:9092
     # Then use: localhost:9092 with SASL credentials
+{{- end }}
 
 {{- end }}
 

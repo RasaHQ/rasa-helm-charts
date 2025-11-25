@@ -124,6 +124,10 @@ strimzi:
         tls: false
         authentication:
           type: scram-sha-512
+      - name: noauth
+        port: 9093
+        type: internal
+        tls: false
 
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers
@@ -134,6 +138,7 @@ strimzi:
       transaction.state.log.min.isr: 1
       default.replication.factor: 1
       min.insync.replicas: 1
+      auto.create.topics.enable: true
 
     # -- Resource limits and requests for Kafka brokers
     # Example:
@@ -267,7 +272,6 @@ strimzi:
       enabled: true
       # -- Kafka user name. If empty, defaults to "<release-name>-user"
       name: ""
-
       # Authentication configuration
       authentication:
         # -- Authentication type for Kafka user

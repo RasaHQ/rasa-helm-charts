@@ -111,4 +111,135 @@ rasa:
       value: "rasa-models"
 ```
 
+### Mount Configuration Options
+
+**mountDefaultConfigmap:**
+
+By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a ConfigMap to the Rasa deployment. If you prefer to mount these files from a different source (e.g., from the `/.config` directory or baked into the image), you can disable this behavior:
+
+```yaml
+rasa:
+  settings:
+    mountDefaultConfigmap: false
+```
+
+When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
+
+**mountModelsVolume:**
+
+By default, the chart mounts a models volume to the Rasa deployment at `/app/models`. If you prefer to mount models from a different source or bake them into the image, you can disable this behavior:
+
+```yaml
+rasa:
+  settings:
+    mountModelsVolume: false
+```
+
+When disabled, it is expected that the models are mounted to the `/app/models` directory or baked into the image.
+
+### Configuring Credentials and Endpoints via ConfigMap
+
+The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.
+
+#### Configuring Credentials
+
+The `rasa.settings.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
+
+For example, to configure Facebook Messenger:
+
+```yaml
+rasa:
+  settings:
+    credentials:
+      facebook:
+        verify: "rasa"
+        secret: "<SECRET>"
+        page-access-token: "<PAGE-ACCESS-TOKEN>"
+```
+
+For REST channel:
+
+```yaml
+rasa:
+  settings:
+    credentials:
+      rest:
+```
+
+See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
+
+#### Configuring Endpoints
+
+The `rasa.settings.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
+
+**Action Server Endpoint:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      action_endpoint:
+        url: "/webhook"
+```
+
+**Model Storage:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      models:
+        url: http://my-server.com/models/default_core@latest
+        wait_time_between_pulls: 10
+```
+
+**Tracker Store (Redis example):**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      tracker_store:
+        type: redis
+        url: <host of the redis instance>
+        port: 6379
+        db: 0
+        password: <password>
+        use_ssl: false
+```
+
+**Event Broker (Kafka example):**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      event_broker:
+        type: kafka
+        url: localhost:9095
+        sasl_mechanism: SCRAM-SHA-512
+        security_protocol: SASL_PLAINTEXT
+        sasl_username: testuser
+        sasl_password: testpass123
+        partition_by_sender: true
+        client_id: rasa-broker
+```
+
+**Model Groups:**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      model_groups:
+        - id: openai-gpt-4o
+          models:
+            - provider: openai
+              model: gpt-4o-2024-11-20
+              request_timeout: 7
+              max_tokens: 256
+```
+
+See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.
+
 {{ template "chart.valuesSection" . }}

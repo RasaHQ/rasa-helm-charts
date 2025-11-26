@@ -1,5 +1,5 @@
 {{- if and .Values.strimzi.enabled .Values.strimzi.nodePools.brokers.enabled }}
-apiVersion: kafka.strimzi.io/v1beta2
+apiVersion: kafka.strimzi.io/v1
 kind: KafkaNodePool
 metadata:
   name: {{ include "op-kits.strimzi.kafkaName" . }}-brokers

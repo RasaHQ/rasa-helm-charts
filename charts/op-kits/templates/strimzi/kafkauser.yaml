@@ -3,7 +3,7 @@
 {{- if $user.enabled }}
 {{- if not (eq $name "enabled") }}
 ---
-apiVersion: kafka.strimzi.io/v1beta2
+apiVersion: kafka.strimzi.io/v1
 kind: KafkaUser
 metadata:
   name: {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }}

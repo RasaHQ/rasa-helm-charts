@@ -1,5 +1,5 @@
 {{- if .Values.strimzi.enabled }}
-apiVersion: kafka.strimzi.io/v1beta2
+apiVersion: kafka.strimzi.io/v1
 kind: Kafka
 metadata:
   name: {{ include "op-kits.strimzi.kafkaName" . }}
@@ -43,6 +43,8 @@ spec:
       {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}
     config:
       {{- toYaml .Values.strimzi.kafka.config | nindent 6 }}
+    authorization:
+      {{- toYaml .Values.strimzi.kafka.authorization | nindent 6 }}
     {{- with .Values.strimzi.kafka.resources }}
     resources:
       {{- toYaml . | nindent 6 }}

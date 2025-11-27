@@ -92,9 +92,9 @@ strimzi:
     # -- (string) Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka"
     nameOverride: ""
     # -- Container image for Kafka
-    image:
-      repository: "quay.io/strimzi/kafka"
-      tag: "0.48.0-kafka-4.1.0"
+#    image:
+#      repository: "quay.io/strimzi/kafka"
+#      tag: "0.49.0-kafka-4.1.1"
 
     # -- Annotations to apply to the Kafka Cluster resource
     # Includes both operator configuration and custom annotations
@@ -115,6 +115,10 @@ strimzi:
       userOperator: {}
       disableTopicFinalizer: true
 
+    # Ensure the simple auth kafka plugin is enabled
+    authorization:
+      type: simple
+
     # Kafka listeners configuration
     # -- Kafka listeners define how clients connect to the cluster
     listeners:
@@ -127,7 +131,9 @@ strimzi:
       - name: noauth
         port: 9093
         type: internal
-        tls: false
+        tls: true
+        authentication:
+          type: scram-sha-512
 
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers

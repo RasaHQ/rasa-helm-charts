@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.2.1-rc.2](https://img.shields.io/badge/Version-0.2.1--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.1-rc.3](https://img.shields.io/badge/Version-0.2.1--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.2.1-rc.2
+$ helm install my-release rasa/op-kits --version 0.2.1-rc.3
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.3
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.2.1-rc.2
+$ helm pull rasa/op-kits --version 0.2.1-rc.3
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.2.1-rc.2 \
+    --version 0.2.1-rc.3 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.2.1-rc.2 \
+    --version 0.2.1-rc.3 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -384,9 +384,9 @@ $ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>
 | strimzi.kafka.annotations | object | `{"strimzi.io/kraft":"enabled","strimzi.io/node-pools":"enabled"}` | Annotations to apply to the Kafka Cluster resource Includes both operator configuration and custom annotations Example: annotations:   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources   strimzi.io/restart: "true"           # Custom restart annotation   kafka.strimzi.io/logging: "debug"    # Custom logging annotation |
 | strimzi.kafka.authorization.type | string | `"simple"` |  |
 | strimzi.kafka.config | object | `{"auto.create.topics.enable":true,"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
-| strimzi.kafka.entityOperator.disableTopicFinalizer | bool | `true` |  |
-| strimzi.kafka.entityOperator.topicOperator.resources | object | `{}` | Resource limits and requests for Topic Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
-| strimzi.kafka.entityOperator.userOperator.resources | object | `{}` | Resource limits and requests for User Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
+| strimzi.kafka.entityOperator.disableTopicFinalizer | bool | `true` | Resource limits and requests for User Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
+| strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
+| strimzi.kafka.entityOperator.userOperator | object | `{}` | Resource limits and requests for Topic Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"},{"name":"noauth","port":9093,"tls":false,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.nodePools.brokers.enabled | bool | `true` | Enable broker node pool deployment |

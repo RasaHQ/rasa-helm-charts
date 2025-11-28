@@ -111,7 +111,7 @@ strimzi:
     # Entity Operator configuration
     # Topic and User operators are enabled by default with empty configuration
     entityOperator:
-      topicOperator:
+      topicOperator: {}
         # -- Resource limits and requests for Topic Operator
         # Example:
         # resources:
@@ -121,8 +121,7 @@ strimzi:
         #   requests:
         #     cpu: "100m"
         #     memory: "128Mi"
-        resources: {}
-      userOperator:
+      userOperator: {}
         # -- Resource limits and requests for User Operator
         # Example:
         # resources:
@@ -132,7 +131,6 @@ strimzi:
         #   requests:
         #     cpu: "100m"
         #     memory: "128Mi"
-        resources: {}
       disableTopicFinalizer: true
 
     # Ensure the simple auth kafka plugin is enabled

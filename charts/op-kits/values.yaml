@@ -146,16 +146,16 @@ strimzi:
         tls: false
         authentication:
           type: scram-sha-512
-      - name: noauth
+      - name: tls
         port: 9093
         type: internal
-        tls: false
-      # - name: tls
+        tls: true
+        authentication:
+          type: scram-sha-512
+      # - name: noauth
       #   port: 9094
       #   type: internal
-      #   tls: true
-      #   authentication:
-      #     type: scram-sha-512
+      #   tls: false
 
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers

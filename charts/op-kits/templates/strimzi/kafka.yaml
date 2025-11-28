@@ -45,10 +45,6 @@ spec:
       {{- toYaml .Values.strimzi.kafka.config | nindent 6 }}
     authorization:
       {{- toYaml .Values.strimzi.kafka.authorization | nindent 6 }}
-    {{- with .Values.strimzi.kafka.resources }}
-    resources:
-      {{- toYaml . | nindent 6 }}
-    {{- end }}
     {{- if or .Values.tolerations .Values.affinity }}
     template:
       pod:

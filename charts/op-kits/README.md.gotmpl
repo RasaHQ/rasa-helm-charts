@@ -293,6 +293,58 @@ valkey:
         storageClassName: "your-storage-class"  # Update this
 ```
 
+### Resource Configuration
+
+#### Kafka Resources
+
+CPU and memory resources for Kafka components are configured in specific sections:
+
+- **Kafka brokers and controllers**: Configure resources under `strimzi.nodePools.controllers.resources` and `strimzi.nodePools.brokers.resources`
+- **Entity operators (Topic and User operators)**: Configure resources under `strimzi.kafka.entityOperator.topicOperator.resources` and `strimzi.kafka.entityOperator.userOperator.resources`
+
+Example:
+
+```yaml
+strimzi:
+  nodePools:
+    controllers:
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "1Gi"
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+    brokers:
+      resources:
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+        requests:
+          cpu: "200m"
+          memory: "512Mi"
+  kafka:
+    entityOperator:
+      topicOperator:
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+      userOperator:
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+```
+
+> **Note**: The `.spec.kafka.resources` field is deprecated in Strimzi v1 API. Always use KafkaNodePool resources for broker and controller resource configuration.
+
 ### Scaling Considerations
 
 When scaling Kafka brokers, remember to adjust replication factors:

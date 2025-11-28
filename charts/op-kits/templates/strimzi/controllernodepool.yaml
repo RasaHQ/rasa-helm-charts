@@ -20,6 +20,9 @@ spec:
     size: {{ .Values.strimzi.nodePools.controllers.storage.size }}
     class: {{ .Values.strimzi.nodePools.controllers.storage.class }}
     deleteClaim: {{ .Values.strimzi.nodePools.controllers.storage.deleteClaim }}
+    {{- with .Values.strimzi.nodePools.controllers.storage.volumeAttributesClass }}
+    volumeAttributesClass: {{ . }}
+    {{- end }}
   {{- with .Values.strimzi.nodePools.controllers.resources }}
   resources:
     {{- toYaml . | nindent 4 }}

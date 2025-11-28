@@ -112,7 +112,25 @@ strimzi:
     # Topic and User operators are enabled by default with empty configuration
     entityOperator:
       topicOperator: {}
+        # -- Resource limits and requests for Topic Operator
+        # Example:
+        # resources:
+        #   limits:
+        #     cpu: "500m"
+        #     memory: "512Mi"
+        #   requests:
+        #     cpu: "100m"
+        #     memory: "128Mi"
       userOperator: {}
+        # -- Resource limits and requests for User Operator
+        # Example:
+        # resources:
+        #   limits:
+        #     cpu: "500m"
+        #     memory: "512Mi"
+        #   requests:
+        #     cpu: "100m"
+        #     memory: "128Mi"
       disableTopicFinalizer: true
 
     # Ensure the simple auth kafka plugin is enabled
@@ -128,12 +146,16 @@ strimzi:
         tls: false
         authentication:
           type: scram-sha-512
-      - name: noauth
+      - name: tls
         port: 9093
         type: internal
         tls: true
         authentication:
           type: scram-sha-512
+      # - name: noauth
+      #   port: 9094
+      #   type: internal
+      #   tls: false
 
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers
@@ -146,16 +168,9 @@ strimzi:
       min.insync.replicas: 1
       auto.create.topics.enable: true
 
-    # -- Resource limits and requests for Kafka brokers
-    # Example:
-    # resources:
-    #   limits:
-    #     cpu: "1"
-    #     memory: "2Gi"
-    #   requests:
-    #     cpu: "100m"
-    #     memory: "512Mi"
-    resources: {}
+    # Note: CPU and memory resources for Kafka brokers are configured via
+    # KafkaNodePool resources. See nodePools.controllers.resources and
+    # nodePools.brokers.resources sections below.
 
   # Kafka Node Pools Configuration
   nodePools:
@@ -178,6 +193,8 @@ strimzi:
         class: "gp2"
         # -- Whether to delete PVC when node pool is deleted
         deleteClaim: true
+        # -- (string) Volume attributes class for the PVC (requires Kubernetes 1.34+)
+        volumeAttributesClass: ""
 
       # -- Resource limits and requests for controller nodes
       # Example:
@@ -210,6 +227,7 @@ strimzi:
             size: "10Gi"
             class: "gp2"
             deleteClaim: true
+            # volumeAttributesClass: ""  # Optional: Volume attributes class (requires Kubernetes 1.34+)
 
       # -- Resource limits and requests for broker nodes
       # Example:
@@ -297,7 +315,8 @@ strimzi:
       #     - resource:
       #         type: topic
       #         name: app-events
-      #       operation: Read
+      #       operations:
+      #         - Read
 
     # Additional users can be added here
     # Example:

@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.2.1-rc.4](https://img.shields.io/badge/Version-0.2.1--rc.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.2.1-rc.4
+$ helm install my-release rasa/op-kits --version 0.2.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1-rc.4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.2.1-rc.4
+$ helm pull rasa/op-kits --version 0.2.1
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.2.1-rc.4 \
+    --version 0.2.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.2.1-rc.4 \
+    --version 0.2.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -293,6 +293,58 @@ valkey:
       spec:
         storageClassName: "your-storage-class"  # Update this
 ```
+
+### Resource Configuration
+
+#### Kafka Resources
+
+CPU and memory resources for Kafka components are configured in specific sections:
+
+- **Kafka brokers and controllers**: Configure resources under `strimzi.nodePools.controllers.resources` and `strimzi.nodePools.brokers.resources`
+- **Entity operators (Topic and User operators)**: Configure resources under `strimzi.kafka.entityOperator.topicOperator.resources` and `strimzi.kafka.entityOperator.userOperator.resources`
+
+Example:
+
+```yaml
+strimzi:
+  nodePools:
+    controllers:
+      resources:
+        limits:
+          cpu: "500m"
+          memory: "1Gi"
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+    brokers:
+      resources:
+        limits:
+          cpu: "1"
+          memory: "2Gi"
+        requests:
+          cpu: "200m"
+          memory: "512Mi"
+  kafka:
+    entityOperator:
+      topicOperator:
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+      userOperator:
+        resources:
+          limits:
+            cpu: "500m"
+            memory: "512Mi"
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+```
+
+> **Note**: The `.spec.kafka.resources` field is deprecated in Strimzi v1 API. Always use KafkaNodePool resources for broker and controller resource configuration.
 
 ### Scaling Considerations
 

@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.0-rc.1](https://img.shields.io/badge/Version-0.3.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.0-rc.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.2.1
+$ helm install my-release rasa/op-kits --version 0.3.0-rc.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.2.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.0-rc.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.2.1
+$ helm pull rasa/op-kits --version 0.3.0-rc.1
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.2.1 \
+    --version 0.3.0-rc.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.2.1 \
+    --version 0.3.0-rc.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -439,6 +439,11 @@ $ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>
 | strimzi.kafka.entityOperator.disableTopicFinalizer | bool | `true` | Resource limits and requests for User Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
 | strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
 | strimzi.kafka.entityOperator.userOperator | object | `{}` | Resource limits and requests for Topic Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
+| strimzi.kafka.externalListener | object | `{"enabled":false,"listener":{"authentication":{"type":"scram-sha-512"},"configuration":{"bootstrap":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"}},"brokers":[{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"},"broker":0}]},"name":"external","port":9094,"tls":true,"type":"loadbalancer"}}` | External listener configuration for accessing Kafka from outside the cluster When enabled, this entire listener object is appended to the listeners array |
+| strimzi.kafka.externalListener.enabled | bool | `false` | Enable external access to Kafka via LoadBalancer |
+| strimzi.kafka.externalListener.listener | object | `{"authentication":{"type":"scram-sha-512"},"configuration":{"bootstrap":{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"}},"brokers":[{"annotations":{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"},"broker":0}]},"name":"external","port":9094,"tls":true,"type":"loadbalancer"}` | Complete listener configuration (Strimzi Kafka listener spec) This allows full flexibility - any valid Strimzi listener configuration can be specified here |
+| strimzi.kafka.externalListener.listener.configuration.bootstrap.annotations | object | `{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"}` | Optional: DNS names for the bootstrap service (added to TLS certificate SANs) Uncomment and configure to use custom DNS names for the bootstrap service alternativeNames:   - kafka-bootstrap.example.com   - kafka.example.com |
+| strimzi.kafka.externalListener.listener.configuration.brokers[0].annotations | object | `{"service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout":"10","service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold":"3","service.beta.kubernetes.io/aws-load-balancer-nlb-target-type":"ip","service.beta.kubernetes.io/aws-load-balancer-scheme":"internet-facing","service.beta.kubernetes.io/aws-load-balancer-type":"external"}` | Optional: DNS name that this broker advertises to clients Uncomment and configure to use a custom DNS name for this broker advertisedHost: kafka-broker-0.example.com |
 | strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"},{"authentication":{"type":"scram-sha-512"},"name":"tls","port":9093,"tls":true,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
 | strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
 | strimzi.nodePools.brokers.enabled | bool | `true` | Enable broker node pool deployment |

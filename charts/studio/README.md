@@ -1,8 +1,8 @@
 # studio
 
-This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
+A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.2.2](https://img.shields.io/badge/Version-2.2.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.3](https://img.shields.io/badge/Version-2.2.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.2
+$ helm install my-release rasa/studio --version 2.2.3
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.3
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.2
+$ helm pull rasa/studio --version 2.2.3
 ```
 
 ## General Configuration
@@ -322,7 +322,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | networkPolicy.enabled | bool | `false` | networkPolicy.enabled specifies whether to enable network policies |
 | networkPolicy.nodeCIDR | list | `[]` | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
 | podLabels | object | `{}` | podLabels defines labels to add to all Studio pod(s) |
-| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.13.13-latest"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
+| rasa | object | `{"enabled":true,"fullnameOverride":"rasapro","rasa":{"command":["python","-m","rasa.model_service"],"envFrom":[{"configMapRef":{"name":"shared-environment"}}],"image":{"repository":"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro","tag":"3.13.13-latest"},"ingress":{"annotations":{},"enabled":true,"hosts":[{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}]},"livenessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"overrideEnv":[{"name":"RASA_PRO_LICENSE","valueFrom":{"secretKeyRef":{"key":"RASA_PRO_LICENSE_SECRET_KEY","name":"studio-secrets"}}},{"name":"OPENAI_API_KEY","valueFrom":{"secretKeyRef":{"key":"OPENAI_API_KEY_SECRET_KEY","name":"studio-secrets"}}}],"persistence":{"create":true,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"},"podSecurityContext":{"fsGroup":1001},"readinessProbe":{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8000,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5},"replicaCount":1,"resources":{},"service":{"port":80,"targetPort":8000},"settings":{"mountDefaultConfigmap":false,"mountModelsVolume":false,"useDefaultArgs":false},"strategy":{"type":"Recreate"}},"rasaProServices":{"enabled":false}}` | Define the resources for the Rasa Pro model server |
 | rasa.rasa.ingress.hosts[0] | object | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` | Please update the below URL with the correct host name of the Studio deployment |
 | rasa.rasa.persistence.storageClassName | string | `nil` | Make sure to set the correct storage class name based on your cluster configuration |
 | rasa.rasa.podSecurityContext.fsGroup | int | `1001` | User ID of the container to access the mounted volume |
@@ -330,7 +330,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | replicated.enabled | bool | `false` |  |
 | replicated.sdkVersion | string | `"1.8.1"` |  |
 | repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` | repository specifies image repository for Studio |
-| tag | string | `"1.14.1-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
+| tag | string | `"1.15.1-latest"` | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. |
 | webClient.additionalContainers | list | `[]` | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] |
 | webClient.affinity | object | `{}` | webClient.affinity defines affinity rules for the web client pods. |
 | webClient.annotations | object | `{}` | webClient.annotations defines annotations to add to all Studio Web Client resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ |

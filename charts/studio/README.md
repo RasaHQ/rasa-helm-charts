@@ -1,6 +1,6 @@
 # studio
 
-This chart bootstraps Studio deployment on a Kubernetes cluster using the Helm package manager.
+A Rasa Studio Helm chart for Kubernetes
 
 ![Version: 2.2.3-rc.1](https://img.shields.io/badge/Version-2.2.3--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 

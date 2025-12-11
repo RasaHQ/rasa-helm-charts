@@ -1150,6 +1150,7 @@ rasa:
     settings:
       useDefaultArgs: false
       mountDefaultConfigmap: false
+      mountModelsVolume: false
 
     command: ["python", "-m", "rasa.model_service"]
 

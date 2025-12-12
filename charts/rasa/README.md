@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.0.0
+helm install my-release rasa/rasa --version 2.0.1
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 2.0.0
+helm pull rasa/rasa --version 2.0.1
 ```
 
 ## General Configuration
@@ -245,295 +245,295 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 
 ## Values
 
-| Key | Type | Default | Description |
-|-----|------|---------|-------------|
-| actionServer.additionalContainers | list | `[]` | actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment |
-| actionServer.additionalEnv | list | `[]` | actionServer.additionalEnv adds additional environment variables |
-| actionServer.affinity | object | `{}` | actionServer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| actionServer.args | list | `[]` | actionServer.args overrides the default arguments for the container |
-| actionServer.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
-| actionServer.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
-| actionServer.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
-| actionServer.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
-| actionServer.command | list | `[]` | actionServer.command overrides the default command for the container |
-| actionServer.containerSecurityContext | object | `{"enabled":true}` | actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
-| actionServer.enabled | bool | `false` | actionServer.enabled enables Action Server deployment |
-| actionServer.envFrom | list | `[]` | actionServer.envFrom is used to add environment variables from ConfigMap or Secret |
-| actionServer.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| actionServer.image.repository | string | `"rasa/rasa-sdk"` | image.repository specifies image repository |
-| actionServer.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
-| actionServer.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
-| actionServer.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| actionServer.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
-| actionServer.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
-| actionServer.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
-| actionServer.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| actionServer.initContainers | list | `[]` | actionServer.initContainers allows to specify init containers for the Action Server deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
-| actionServer.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
-| actionServer.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| actionServer.livenessProbe.httpGet | object | `{"path":"/health","port":5055,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
-| actionServer.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| actionServer.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| actionServer.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| actionServer.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
-| actionServer.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| actionServer.nodeSelector | object | `{}` | actionServer.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| actionServer.podAnnotations | object | `{}` | actionServer.podAnnotations defines annotations to add to the pod |
-| actionServer.podSecurityContext | object | `{"enabled":true}` | actionServer.podSecurityContext defines pod security context |
-| actionServer.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
-| actionServer.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| actionServer.readinessProbe.httpGet | object | `{"path":"/health","port":5055,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
-| actionServer.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| actionServer.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| actionServer.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| actionServer.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| actionServer.replicaCount | int | `1` | actionServer.replicaCount specifies number of replicas |
-| actionServer.resources | object | `{}` | actionServer.resources specifies the resources limits and requests |
-| actionServer.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5055,"targetPort":5055,"type":"ClusterIP"}` | actionServer.service define service for Action Server |
-| actionServer.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
-| actionServer.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
-| actionServer.service.loadBalancerIP | string | `nil` | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer |
-| actionServer.service.nodePort | string | `nil` | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport |
-| actionServer.service.port | int | `5055` | service.port is used to specify service port |
-| actionServer.service.targetPort | int | `5055` | service.targetPort is ued to specify service target port |
-| actionServer.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
-| actionServer.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | actionServer.serviceAccount defines service account |
-| actionServer.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| actionServer.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| actionServer.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| actionServer.settings.port | int | `5055` | settings.port defines port on which Action Server runs |
-| actionServer.settings.scheme | string | `"http"` | settings.scheme defines sheme by which the service are accessible |
-| actionServer.strategy | object | `{}` | actionServer.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
-| actionServer.tolerations | list | `[]` | actionServer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| actionServer.volumeMounts | list | `[]` | actionServer.volumeMounts specifies additional volumes to mount in the Action Server container |
-| actionServer.volumes | list | `[]` | actionServer.volumes specify additional volumes to mount in the Action Server container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| deploymentAnnotations | object | `{}` | deploymentAnnotations defines annotations to add to all Rasa deployments |
-| deploymentLabels | object | `{}` | deploymentLabels defines labels to add to all Rasa deployment |
-| dnsConfig | object | `{}` | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config |
-| dnsPolicy | string | `""` | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy |
-| duckling.additionalContainers | list | `[]` | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment |
-| duckling.additionalEnv | list | `[]` | duckling.additionalEnv adds additional environment variables |
-| duckling.affinity | object | `{}` | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| duckling.args | list | `[]` | duckling.args overrides the default arguments for the container |
-| duckling.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
-| duckling.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
-| duckling.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
-| duckling.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
-| duckling.command | list | `[]` | duckling.command overrides the default command for the container |
-| duckling.containerSecurityContext | object | `{"enabled":true}` | duckling.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
-| duckling.enabled | bool | `false` | duckling.enabled enables Duckling deployment |
-| duckling.envFrom | list | `[]` | duckling.envFrom is used to add environment variables from ConfigMap or Secret |
-| duckling.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| duckling.image.repository | string | `"rasa/duckling"` | image.repository specifies image repository |
-| duckling.image.tag | string | `"0.2.0.2-r3"` | image.tag specifies image tag |
-| duckling.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
-| duckling.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| duckling.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
-| duckling.ingress.hosts | list | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
-| duckling.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
-| duckling.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| duckling.initContainers | list | `[]` | duckling.initContainers allows to specify init containers for the Duckling deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ |
-| duckling.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
-| duckling.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| duckling.livenessProbe.httpGet | object | `{"path":"/","port":8000,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
-| duckling.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| duckling.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| duckling.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| duckling.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
-| duckling.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| duckling.nodeSelector | object | `{}` | duckling.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| duckling.podAnnotations | object | `{}` | duckling.podAnnotations defines annotations to add to the pod |
-| duckling.podSecurityContext | object | `{"enabled":true}` | duckling.podSecurityContext defines pod security context |
-| duckling.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
-| duckling.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| duckling.readinessProbe.httpGet | object | `{"path":"/","port":8000,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
-| duckling.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| duckling.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| duckling.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| duckling.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| duckling.replicaCount | int | `1` | duckling.replicaCount specifies number of replicas |
-| duckling.resources | object | `{}` | duckling.resources specifies the resources limits and requests |
-| duckling.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":8000,"targetPort":8000,"type":"ClusterIP"}` | duckling.service define service for Duckling |
-| duckling.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
-| duckling.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
-| duckling.service.loadBalancerIP | string | `nil` | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer |
-| duckling.service.nodePort | string | `nil` | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport |
-| duckling.service.port | int | `8000` | service.port is used to specify service port |
-| duckling.service.targetPort | int | `8000` | service.targetPort is ued to specify service target port |
-| duckling.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
-| duckling.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | duckling.serviceAccount defines service account |
-| duckling.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| duckling.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| duckling.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| duckling.settings.port | int | `8000` | settings.port defines port on which Duckling runs |
-| duckling.settings.scheme | string | `"http"` | settings.scheme defines sheme by which the service are accessible |
-| duckling.strategy | object | `{}` | duckling.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
-| duckling.tolerations | list | `[]` | duckling.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| duckling.volumeMounts | list | `[]` | duckling.volumeMounts specifies additional volumes to mount in the Duckling container |
-| duckling.volumes | list | `[]` | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| fullnameOverride | string | `""` | fullnameOverride overrides the full qualified app name |
-| global.additionalDeploymentLabels | object | `{}` | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ |
-| global.ingressHost | string | `nil` |  |
-| hostAliases | list | `[]` | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable |
-| hostNetwork | bool | `false` | hostNetwork controls whether the pod may use the node network namespace |
-| imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets |
-| nameOverride | string | `""` | nameOverride overrides name of the app |
-| networkPolicy.denyAll | bool | `false` | Specifies whether to apply denyAll network policy |
-| networkPolicy.enabled | bool | `false` | Specifies whether to enable network policies |
-| networkPolicy.nodeCIDR | list | `[]` | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes |
-| podLabels | object | `{}` | podLabels defines labels to add to all Rasa pod(s) |
-| rasa.additionalArgs | list | `[]` | rasa.additionalArgs adds additional arguments to the default args |
-| rasa.additionalContainers | list | `[]` | rasa.additionalContainers allows to specify additional containers for the Rasa Deployment |
-| rasa.additionalEnv | list | `[]` | rasa.additionalEnv adds additional environment variables |
-| rasa.affinity | object | `{}` | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| rasa.args | list | `[]` | rasa.args overrides the default arguments for the container |
-| rasa.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
-| rasa.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
-| rasa.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
-| rasa.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
-| rasa.command | list | `[]` | rasa.command overrides the default command for the container |
-| rasa.containerSecurityContext | object | `{"enabled":true}` | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
-| rasa.enabled | bool | `true` | rasa.enabled enables Rasa Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services |
-| rasa.envFrom | list | `[]` | rasa.envFrom is used to add environment variables from ConfigMap or Secret |
-| rasa.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| rasa.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` | image.repository specifies image repository |
-| rasa.image.tag | string | `"3.14.0-latest"` | image.tag specifies image tag |
-| rasa.ingress.annotations | object | `{}` | ingress.annotations defines annotations to add to the ingress |
-| rasa.ingress.className | string | `""` | ingress.className specifies the ingress className to be used |
-| rasa.ingress.enabled | bool | `false` | ingress.enabled specifies whether an ingress service should be created |
-| rasa.ingress.hosts | list | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` | ingress.hosts specifies the hosts for this ingress |
-| rasa.ingress.labels | object | `{}` | ingress.lables defines labels to add to the ingress |
-| rasa.ingress.tls | list | `[]` | ingress.tls spefices the TLS configuration for ingress |
-| rasa.initContainers | list | `[]` | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file |
-| rasa.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
-| rasa.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasa.livenessProbe.httpGet | object | `{"path":"/","port":5005,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
-| rasa.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| rasa.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| rasa.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasa.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
-| rasa.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| rasa.nodeSelector | object | `{}` | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| rasa.overrideEnv | list | `[]` | rasa.overrideEnv overrides all default environment variables |
-| rasa.persistence.create | bool | `false` |  |
-| rasa.persistence.hostPath.enabled | bool | `false` |  |
-| rasa.persistence.storageCapacity | string | `"1Gi"` |  |
-| rasa.persistence.storageClassName | string | `nil` |  |
-| rasa.persistence.storageRequests | string | `"1Gi"` |  |
-| rasa.podAnnotations | object | `{}` | rasa.podAnnotations defines annotations to add to the pod |
-| rasa.podSecurityContext | object | `{"enabled":true}` | rasa.podSecurityContext defines pod security context |
-| rasa.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
-| rasa.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasa.readinessProbe.httpGet | object | `{"path":"/","port":5005,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
-| rasa.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| rasa.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| rasa.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasa.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| rasa.replicaCount | int | `1` | rasa.replicaCount specifies number of replicas |
-| rasa.resources | object | `{}` | rasa.resources specifies the resources limits and requests |
-| rasa.service | object | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":5005,"type":"ClusterIP"}` | rasa.service define service for Rasa OSS/Plus |
-| rasa.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
-| rasa.service.externalTrafficPolicy | string | `"Cluster"` | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip |
-| rasa.service.loadBalancerIP | string | `nil` | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer |
-| rasa.service.nodePort | string | `nil` | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport |
-| rasa.service.port | int | `5005` | service.port is used to specify service port |
-| rasa.service.targetPort | int | `5005` | service.targetPort is ued to specify service target port |
-| rasa.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
-| rasa.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | rasa.serviceAccount defines service account |
-| rasa.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| rasa.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| rasa.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasa.settings.authToken | object | `{"secretKey":"authToken","secretName":"rasa-secrets"}` | settings.authToken is token Rasa accepts as authentication token from other Rasa services |
-| rasa.settings.cors | string | `"*"` | settings.cors is CORS for the passed origin. Default is * to allow all origins |
-| rasa.settings.credentials | object | `{}` | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels |
-| rasa.settings.debugMode | bool | `false` | settings.debugMode enables debug mode |
-| rasa.settings.ducklingHttpUrl | string | `nil` | settings.ducklingHttpUrl is HTTP URL to the duckling service |
-| rasa.settings.enableApi | bool | `true` | settings.enableApi start the web server API in addition to the input channel Rasa API supports two authentication methods, Token based Auth or JWT Enter details in token or (jwtSecret, jwtMethod) to enable either of them |
-| rasa.settings.endpoints | object | `{}` | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints |
-| rasa.settings.environment | string | `"development"` | settings.environment: development or production |
-| rasa.settings.jwtMethod | string | `"HS256"` | settings.jwtMethod is JWT algorithm to be used |
-| rasa.settings.jwtSecret | object | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services |
-| rasa.settings.logging.logLevel | string | `"info"` | logging.logLevel is Rasa Log Level |
-| rasa.settings.mountDefaultConfigmap | bool | `true` | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. In this case it is expected that the credentials and endpoints are mounted to the /.config directory or baked into the image. |
-| rasa.settings.mountModelsVolume | bool | `true` | settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment. In this case it is expected that the models are mounted to the /app/models directory or baked into the image. |
-| rasa.settings.port | int | `5005` | settings.port defines port on which Rasa runs |
-| rasa.settings.scheme | string | `"http"` | settings.scheme defines scheme by which the service are accessible |
-| rasa.settings.telemetry.debug | bool | `false` | telemetry.debug prints telemetry data to stdout |
-| rasa.settings.telemetry.enabled | bool | `true` | telemetry.enabled allow Rasa to collect anonymous usage details |
-| rasa.settings.useDefaultArgs | bool | `true` | settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case. |
-| rasa.strategy | object | `{}` | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
-| rasa.tolerations | list | `[]` | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| rasa.volumeMounts | list | `[]` | rasa.volumeMounts specifies additional volumes to mount in the Rasa container |
-| rasa.volumes | list | `[]` | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
-| rasaProLicense | object | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` | rasaProLicense is license key for Rasa Pro Services. |
-| rasaProServices.additionalContainers | list | `[]` | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment |
-| rasaProServices.additionalEnv | list | `[]` | rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration Example:   additionalEnv:     - name: MY_CUSTOM_VAR       value: "some-value"     - name: SECRET_VAR       valueFrom:         secretKeyRef:           name: my-secret           key: secret-key     - name: CONFIGMAP_VAR       valueFrom:         configMapKeyRef:           name: my-configmap           key: config-key |
-| rasaProServices.affinity | object | `{}` | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity |
-| rasaProServices.autoscaling.enabled | bool | `false` | autoscaling.enabled specifies whether autoscaling should be enabled |
-| rasaProServices.autoscaling.maxReplicas | int | `100` | autoscaling.maxReplicas specifies the maximum number of replicas |
-| rasaProServices.autoscaling.minReplicas | int | `1` | autoscaling.minReplicas specifies the minimum number of replicas |
-| rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | `80` | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage |
-| rasaProServices.containerSecurityContext | object | `{"enabled":true}` | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context |
-| rasaProServices.database.databaseName | string | `""` | database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.database.enableAwsRdsIam | bool | `false` | database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container. |
-| rasaProServices.database.hostname | string | `""` | database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.database.port | string | `"5432"` | database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.database.sslCaLocation | string | `""` | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full. |
-| rasaProServices.database.sslMode | string | `""` | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.database.url | string | `""` | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. |
-| rasaProServices.database.username | string | `""` | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. |
-| rasaProServices.enabled | bool | `true` | rasaProServices.enabled enables Rasa Pro Services deployment |
-| rasaProServices.envFrom | list | `[]` | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret |
-| rasaProServices.image.pullPolicy | string | `"IfNotPresent"` | image.pullPolicy specifies image pull policy |
-| rasaProServices.image.repository | string | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` | image.repository specifies image repository |
-| rasaProServices.image.tag | string | `"3.6.0-latest"` | Specifies image tag image.tag specifies image tag |
-| rasaProServices.imagePullSecrets | list | `[]` | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. |
-| rasaProServices.kafka.brokerAddress | string | `""` | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. |
-| rasaProServices.kafka.consumerId | string | `"rasa-analytics-group"` | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. |
-| rasaProServices.kafka.dlqTopic | string | `"rasa-analytics-dlq"` | kafka.dlqTopic specifies the DLQ topic fused to publish events that resulted in a processing failure. |
-| rasaProServices.kafka.enableAwsMskIam | bool | `false` | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. |
-| rasaProServices.kafka.saslMechanism | string | `""` | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. |
-| rasaProServices.kafka.saslPassword | object | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
-| rasaProServices.kafka.saslUsername | string | `""` | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. |
-| rasaProServices.kafka.securityProtocol | string | `""` | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL |
-| rasaProServices.kafka.sslCaLocation | string | `""` | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. |
-| rasaProServices.kafka.sslCertFileLocation | string | `""` | kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL. |
-| rasaProServices.kafka.sslKeyFileLocation | string | `""` | kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL. |
-| rasaProServices.kafka.topic | string | `"rasa-core-events"` | kafka.topic specifies the topic for the Rasa Pro Services container. |
-| rasaProServices.livenessProbe.enabled | bool | `true` | livenessProbe.enabled is used to enable or disable liveness probe |
-| rasaProServices.livenessProbe.failureThreshold | int | `6` | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasaProServices.livenessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | livenessProbe.httpGet is used to define HTTP request |
-| rasaProServices.livenessProbe.initialDelaySeconds | int | `15` | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| rasaProServices.livenessProbe.periodSeconds | int | `15` | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| rasaProServices.livenessProbe.successThreshold | int | `1` | livenessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasaProServices.livenessProbe.terminationGracePeriodSeconds | int | `30` | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container |
-| rasaProServices.livenessProbe.timeoutSeconds | int | `5` | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| rasaProServices.loggingLevel | string | `"INFO"` | rasaProServices.loggingLevel specifies the logging level for the Rasa Pro Services container. Valid levels are DEBUG, INFO, WARNING, ERROR, CRITICAL. |
-| rasaProServices.nodeSelector | object | `{}` | rasaProServices.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ |
-| rasaProServices.podAnnotations | object | `{}` | rasaProServices.podAnnotations defines annotations to add to the pod |
-| rasaProServices.podSecurityContext | object | `{"enabled":true}` | rasaProServices.podSecurityContext defines pod security context |
-| rasaProServices.readinessProbe.enabled | bool | `true` | readinessProbe.enabled is used to enable or disable readinessProbe |
-| rasaProServices.readinessProbe.failureThreshold | int | `6` | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy |
-| rasaProServices.readinessProbe.httpGet | object | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` | readinessProbe.httpGet is used to define HTTP request |
-| rasaProServices.readinessProbe.initialDelaySeconds | int | `15` | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe |
-| rasaProServices.readinessProbe.periodSeconds | int | `15` | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds |
-| rasaProServices.readinessProbe.successThreshold | int | `1` | readinessProbe.successThreshold defines how often (in seconds) to perform the probe |
-| rasaProServices.readinessProbe.timeoutSeconds | int | `5` | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out |
-| rasaProServices.replicaCount | int | `1` | rasaProServices.replicaCount specifies number of replicas |
-| rasaProServices.resources | object | `{}` | rasaProServices.resources specifies the resources limits and requests |
-| rasaProServices.service | object | `{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"}` | rasaProServices.service define service for Rasa OSS/Plus |
-| rasaProServices.service.annotations | object | `{}` | service.annotations defines annotations to add to the service |
-| rasaProServices.service.port | int | `8732` | service.port is used to specify service port |
-| rasaProServices.service.targetPort | int | `8732` | service.targetPort is ued to specify service target port |
-| rasaProServices.service.type | string | `"ClusterIP"` | service.type is used to specify service type |
-| rasaProServices.serviceAccount | object | `{"annotations":{},"create":true,"name":""}` | rasaProServices.serviceAccount defines service account |
-| rasaProServices.serviceAccount.annotations | object | `{}` | serviceAccount.annotations defines annotations to add to the service account |
-| rasaProServices.serviceAccount.create | bool | `true` | serviceAccount.create specifies whether a service account should be created |
-| rasaProServices.serviceAccount.name | string | `""` | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template |
-| rasaProServices.strategy | object | `{}` | rasaProServices.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy |
-| rasaProServices.tolerations | list | `[]` | rasaProServices.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ |
-| rasaProServices.useCloudProviderIam.enabled | bool | `false` | useCloudProviderIam.enabled specifies whether to use cloud provider IAM for the Rasa Pro Services container. |
-| rasaProServices.useCloudProviderIam.provider | string | `"aws"` | useCloudProviderIam.provider specifies the cloud provider for the Rasa Pro Services container. Supported value is aws |
-| rasaProServices.useCloudProviderIam.region | string | `"us-east-1"` | useCloudProviderIam.region specifies the region for IAM authentication. Required if IAM_CLOUD_PROVIDER is set to aws. |
-| rasaProServices.volumeMounts | list | `[]` | rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container |
-| rasaProServices.volumes | list | `[]` | rasaProServices.volumes specify additional volumes for the Rasa Pro Services container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ |
+| Key | Type | Description | Default |
+|-----|------|-------------|---------|
+| actionServer.additionalContainers | list | actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment | `[]` |
+| actionServer.additionalEnv | list | actionServer.additionalEnv adds additional environment variables | `[]` |
+| actionServer.affinity | object | actionServer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| actionServer.args | list | actionServer.args overrides the default arguments for the container | `[]` |
+| actionServer.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
+| actionServer.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
+| actionServer.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
+| actionServer.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
+| actionServer.command | list | actionServer.command overrides the default command for the container | `[]` |
+| actionServer.containerSecurityContext | object | actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
+| actionServer.enabled | bool | actionServer.enabled enables Action Server deployment | `false` |
+| actionServer.envFrom | list | actionServer.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
+| actionServer.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
+| actionServer.image.repository | string | image.repository specifies image repository | `"rasa/rasa-sdk"` |
+| actionServer.image.tag | string | image.tag specifies image tag | `"3.15.0-latest"` |
+| actionServer.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
+| actionServer.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
+| actionServer.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
+| actionServer.ingress.hosts | list | ingress.hosts specifies the hosts for this ingress | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` |
+| actionServer.ingress.labels | object | ingress.lables defines labels to add to the ingress | `{}` |
+| actionServer.ingress.tls | list | ingress.tls spefices the TLS configuration for ingress | `[]` |
+| actionServer.initContainers | list | actionServer.initContainers allows to specify init containers for the Action Server deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ | `[]` |
+| actionServer.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
+| actionServer.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| actionServer.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/health","port":5055,"scheme":"HTTP"}` |
+| actionServer.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| actionServer.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| actionServer.livenessProbe.successThreshold | int | livenessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| actionServer.livenessProbe.terminationGracePeriodSeconds | int | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container | `30` |
+| actionServer.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| actionServer.nodeSelector | object | actionServer.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
+| actionServer.podAnnotations | object | actionServer.podAnnotations defines annotations to add to the pod | `{}` |
+| actionServer.podSecurityContext | object | actionServer.podSecurityContext defines pod security context | `{"enabled":true}` |
+| actionServer.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
+| actionServer.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| actionServer.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/health","port":5055,"scheme":"HTTP"}` |
+| actionServer.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| actionServer.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| actionServer.readinessProbe.successThreshold | int | readinessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| actionServer.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| actionServer.replicaCount | int | actionServer.replicaCount specifies number of replicas | `1` |
+| actionServer.resources | object | actionServer.resources specifies the resources limits and requests | `{}` |
+| actionServer.service | object | actionServer.service define service for Action Server | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5055,"targetPort":5055,"type":"ClusterIP"}` |
+| actionServer.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
+| actionServer.service.externalTrafficPolicy | string | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | `"Cluster"` |
+| actionServer.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
+| actionServer.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
+| actionServer.service.port | int | service.port is used to specify service port | `5055` |
+| actionServer.service.targetPort | int | service.targetPort is ued to specify service target port | `5055` |
+| actionServer.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
+| actionServer.serviceAccount | object | actionServer.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
+| actionServer.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
+| actionServer.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
+| actionServer.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
+| actionServer.settings.port | int | settings.port defines port on which Action Server runs | `5055` |
+| actionServer.settings.scheme | string | settings.scheme defines sheme by which the service are accessible | `"http"` |
+| actionServer.strategy | object | actionServer.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
+| actionServer.tolerations | list | actionServer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
+| actionServer.volumeMounts | list | actionServer.volumeMounts specifies additional volumes to mount in the Action Server container | `[]` |
+| actionServer.volumes | list | actionServer.volumes specify additional volumes to mount in the Action Server container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
+| deploymentAnnotations | object | deploymentAnnotations defines annotations to add to all Rasa deployments | `{}` |
+| deploymentLabels | object | deploymentLabels defines labels to add to all Rasa deployment | `{}` |
+| dnsConfig | object | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
+| dnsPolicy | string | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy | `""` |
+| duckling.additionalContainers | list | duckling.additionalContainers allows to specify additional containers for the Duckling Deployment | `[]` |
+| duckling.additionalEnv | list | duckling.additionalEnv adds additional environment variables | `[]` |
+| duckling.affinity | object | duckling.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| duckling.args | list | duckling.args overrides the default arguments for the container | `[]` |
+| duckling.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
+| duckling.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
+| duckling.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
+| duckling.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
+| duckling.command | list | duckling.command overrides the default command for the container | `[]` |
+| duckling.containerSecurityContext | object | duckling.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
+| duckling.enabled | bool | duckling.enabled enables Duckling deployment | `false` |
+| duckling.envFrom | list | duckling.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
+| duckling.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
+| duckling.image.repository | string | image.repository specifies image repository | `"rasa/duckling"` |
+| duckling.image.tag | string | image.tag specifies image tag | `"0.2.0.2-r3"` |
+| duckling.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
+| duckling.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
+| duckling.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
+| duckling.ingress.hosts | list | ingress.hosts specifies the hosts for this ingress | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` |
+| duckling.ingress.labels | object | ingress.lables defines labels to add to the ingress | `{}` |
+| duckling.ingress.tls | list | ingress.tls spefices the TLS configuration for ingress | `[]` |
+| duckling.initContainers | list | duckling.initContainers allows to specify init containers for the Duckling deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ | `[]` |
+| duckling.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
+| duckling.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| duckling.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/","port":8000,"scheme":"HTTP"}` |
+| duckling.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| duckling.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| duckling.livenessProbe.successThreshold | int | livenessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| duckling.livenessProbe.terminationGracePeriodSeconds | int | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container | `30` |
+| duckling.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| duckling.nodeSelector | object | duckling.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
+| duckling.podAnnotations | object | duckling.podAnnotations defines annotations to add to the pod | `{}` |
+| duckling.podSecurityContext | object | duckling.podSecurityContext defines pod security context | `{"enabled":true}` |
+| duckling.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
+| duckling.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| duckling.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/","port":8000,"scheme":"HTTP"}` |
+| duckling.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| duckling.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| duckling.readinessProbe.successThreshold | int | readinessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| duckling.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| duckling.replicaCount | int | duckling.replicaCount specifies number of replicas | `1` |
+| duckling.resources | object | duckling.resources specifies the resources limits and requests | `{}` |
+| duckling.service | object | duckling.service define service for Duckling | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":8000,"targetPort":8000,"type":"ClusterIP"}` |
+| duckling.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
+| duckling.service.externalTrafficPolicy | string | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | `"Cluster"` |
+| duckling.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
+| duckling.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
+| duckling.service.port | int | service.port is used to specify service port | `8000` |
+| duckling.service.targetPort | int | service.targetPort is ued to specify service target port | `8000` |
+| duckling.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
+| duckling.serviceAccount | object | duckling.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
+| duckling.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
+| duckling.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
+| duckling.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
+| duckling.settings.port | int | settings.port defines port on which Duckling runs | `8000` |
+| duckling.settings.scheme | string | settings.scheme defines sheme by which the service are accessible | `"http"` |
+| duckling.strategy | object | duckling.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
+| duckling.tolerations | list | duckling.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
+| duckling.volumeMounts | list | duckling.volumeMounts specifies additional volumes to mount in the Duckling container | `[]` |
+| duckling.volumes | list | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
+| fullnameOverride | string | fullnameOverride overrides the full qualified app name | `""` |
+| global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
+| global.ingressHost | string |  | `nil` |
+| hostAliases | list | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable | `[]` |
+| hostNetwork | bool | hostNetwork controls whether the pod may use the node network namespace | `false` |
+| imagePullSecrets | list | imagePullSecrets is used for private repository pull secrets | `[]` |
+| nameOverride | string | nameOverride overrides name of the app | `""` |
+| networkPolicy.denyAll | bool | Specifies whether to apply denyAll network policy | `false` |
+| networkPolicy.enabled | bool | Specifies whether to enable network policies | `false` |
+| networkPolicy.nodeCIDR | list | Allow for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes | `[]` |
+| podLabels | object | podLabels defines labels to add to all Rasa pod(s) | `{}` |
+| rasa.additionalArgs | list | rasa.additionalArgs adds additional arguments to the default args | `[]` |
+| rasa.additionalContainers | list | rasa.additionalContainers allows to specify additional containers for the Rasa Deployment | `[]` |
+| rasa.additionalEnv | list | rasa.additionalEnv adds additional environment variables | `[]` |
+| rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| rasa.args | list | rasa.args overrides the default arguments for the container | `[]` |
+| rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
+| rasa.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
+| rasa.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
+| rasa.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
+| rasa.command | list | rasa.command overrides the default command for the container | `[]` |
+| rasa.containerSecurityContext | object | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
+| rasa.enabled | bool | rasa.enabled enables Rasa Plus deployment Disable this if you want to deploy ONLY Rasa Pro Services | `true` |
+| rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
+| rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
+| rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
+| rasa.image.tag | string | image.tag specifies image tag | `"3.15.3-latest"` |
+| rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
+| rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
+| rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
+| rasa.ingress.hosts | list | ingress.hosts specifies the hosts for this ingress | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` |
+| rasa.ingress.labels | object | ingress.lables defines labels to add to the ingress | `{}` |
+| rasa.ingress.tls | list | ingress.tls spefices the TLS configuration for ingress | `[]` |
+| rasa.initContainers | list | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file | `[]` |
+| rasa.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
+| rasa.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| rasa.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/","port":5005,"scheme":"HTTP"}` |
+| rasa.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| rasa.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| rasa.livenessProbe.successThreshold | int | livenessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| rasa.livenessProbe.terminationGracePeriodSeconds | int | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container | `30` |
+| rasa.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
+| rasa.overrideEnv | list | rasa.overrideEnv overrides all default environment variables | `[]` |
+| rasa.persistence.create | bool |  | `false` |
+| rasa.persistence.hostPath.enabled | bool |  | `false` |
+| rasa.persistence.storageCapacity | string |  | `"1Gi"` |
+| rasa.persistence.storageClassName | string |  | `nil` |
+| rasa.persistence.storageRequests | string |  | `"1Gi"` |
+| rasa.podAnnotations | object | rasa.podAnnotations defines annotations to add to the pod | `{}` |
+| rasa.podSecurityContext | object | rasa.podSecurityContext defines pod security context | `{"enabled":true}` |
+| rasa.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
+| rasa.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| rasa.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/","port":5005,"scheme":"HTTP"}` |
+| rasa.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| rasa.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| rasa.readinessProbe.successThreshold | int | readinessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| rasa.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| rasa.replicaCount | int | rasa.replicaCount specifies number of replicas | `1` |
+| rasa.resources | object | rasa.resources specifies the resources limits and requests | `{}` |
+| rasa.service | object | rasa.service define service for Rasa OSS/Plus | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":5005,"type":"ClusterIP"}` |
+| rasa.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
+| rasa.service.externalTrafficPolicy | string | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | `"Cluster"` |
+| rasa.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
+| rasa.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
+| rasa.service.port | int | service.port is used to specify service port | `5005` |
+| rasa.service.targetPort | int | service.targetPort is ued to specify service target port | `5005` |
+| rasa.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
+| rasa.serviceAccount | object | rasa.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
+| rasa.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
+| rasa.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
+| rasa.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
+| rasa.settings.authToken | object | settings.authToken is token Rasa accepts as authentication token from other Rasa services | `{"secretKey":"authToken","secretName":"rasa-secrets"}` |
+| rasa.settings.cors | string | settings.cors is CORS for the passed origin. Default is * to allow all origins | `"*"` |
+| rasa.settings.credentials | object | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
+| rasa.settings.debugMode | bool | settings.debugMode enables debug mode | `false` |
+| rasa.settings.ducklingHttpUrl | string | settings.ducklingHttpUrl is HTTP URL to the duckling service | `nil` |
+| rasa.settings.enableApi | bool | settings.enableApi start the web server API in addition to the input channel Rasa API supports two authentication methods, Token based Auth or JWT Enter details in token or (jwtSecret, jwtMethod) to enable either of them | `true` |
+| rasa.settings.endpoints | object | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
+| rasa.settings.environment | string | settings.environment: development or production | `"development"` |
+| rasa.settings.jwtMethod | string | settings.jwtMethod is JWT algorithm to be used | `"HS256"` |
+| rasa.settings.jwtSecret | object | settings.jwtSecret is JWT token Rasa accepts as authentication token from other Rasa services | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` |
+| rasa.settings.logging.logLevel | string | logging.logLevel is Rasa Log Level | `"info"` |
+| rasa.settings.mountDefaultConfigmap | bool | settings.mountVolumes is a flag to disable mounting of credentials.yml and endpoints.yml to the Rasa Pro deployment. In this case it is expected that the credentials and endpoints are mounted to the /.config directory or baked into the image. | `true` |
+| rasa.settings.mountModelsVolume | bool | settings.mountModelsVolume is a flag to disable mounting of models volume to the Rasa Pro deployment. In this case it is expected that the models are mounted to the /app/models directory or baked into the image. | `true` |
+| rasa.settings.port | int | settings.port defines port on which Rasa runs | `5005` |
+| rasa.settings.scheme | string | settings.scheme defines scheme by which the service are accessible | `"http"` |
+| rasa.settings.telemetry.debug | bool | telemetry.debug prints telemetry data to stdout | `false` |
+| rasa.settings.telemetry.enabled | bool | telemetry.enabled allow Rasa to collect anonymous usage details | `true` |
+| rasa.settings.useDefaultArgs | bool | settings.useDefaultArgs is to disable default startup args to be able to be used by Studio. There is no need to ever disable this in Rasa Pro case. | `true` |
+| rasa.strategy | object | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
+| rasa.tolerations | list | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
+| rasa.volumeMounts | list | rasa.volumeMounts specifies additional volumes to mount in the Rasa container | `[]` |
+| rasa.volumes | list | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
+| rasaProLicense | object | rasaProLicense is license key for Rasa Pro Services. | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` |
+| rasaProServices.additionalContainers | list | rasaProServices.additionalContainers allows to specify additional containers for the Rasa Pro Services Deployment | `[]` |
+| rasaProServices.additionalEnv | list | rasaProServices.additionalEnv allows you to specify additional environment variables for the Rasa Pro Services container These are rendered as-is using toYaml, providing maximum flexibility for environment variable configuration Example:   additionalEnv:     - name: MY_CUSTOM_VAR       value: "some-value"     - name: SECRET_VAR       valueFrom:         secretKeyRef:           name: my-secret           key: secret-key     - name: CONFIGMAP_VAR       valueFrom:         configMapKeyRef:           name: my-configmap           key: config-key | `[]` |
+| rasaProServices.affinity | object | rasaProServices.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| rasaProServices.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
+| rasaProServices.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
+| rasaProServices.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
+| rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
+| rasaProServices.containerSecurityContext | object | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
+| rasaProServices.database.databaseName | string | database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.database.enableAwsRdsIam | bool | database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container. | `false` |
+| rasaProServices.database.hostname | string | database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.database.port | string | database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `"5432"` |
+| rasaProServices.database.sslCaLocation | string | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full. | `""` |
+| rasaProServices.database.sslMode | string | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.database.url | string | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. | `""` |
+| rasaProServices.database.username | string | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.enabled | bool | rasaProServices.enabled enables Rasa Pro Services deployment | `true` |
+| rasaProServices.envFrom | list | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
+| rasaProServices.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
+| rasaProServices.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` |
+| rasaProServices.image.tag | string | Specifies image tag image.tag specifies image tag | `"3.7.0-latest"` |
+| rasaProServices.imagePullSecrets | list | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. | `[]` |
+| rasaProServices.kafka.brokerAddress | string | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. | `""` |
+| rasaProServices.kafka.consumerId | string | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. | `"rasa-analytics-group"` |
+| rasaProServices.kafka.dlqTopic | string | kafka.dlqTopic specifies the DLQ topic fused to publish events that resulted in a processing failure. | `"rasa-analytics-dlq"` |
+| rasaProServices.kafka.enableAwsMskIam | bool | kafka.enableAwsMskIam specifies whether to use AWS MSK IAM authentication for the Rasa Pro Services container. | `false` |
+| rasaProServices.kafka.saslMechanism | string | kafka.saslMechanism specifies the SASL mechanism for the Rasa Pro Services container. Leave empty if you are using SSL. | `""` |
+| rasaProServices.kafka.saslPassword | object | kafka.saslPassword specifies the SASL password for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. | `{"secretKey":"kafkaSslPassword","secretName":"rasa-secrets"}` |
+| rasaProServices.kafka.saslUsername | string | kafka.saslUsername specifies the SASL username for the Rasa Pro Services container. Do not set if enableAwsMskIam is true. | `""` |
+| rasaProServices.kafka.securityProtocol | string | kafka.securityProtocol specifies the security protocol for the Rasa Pro Services container. Supported mechanisms are PLAINTEXT, SASL_PLAINTEXT, SASL_SSL and SSL | `""` |
+| rasaProServices.kafka.sslCaLocation | string | kafka.sslCaLocation specifies the SSL CA location for the Rasa Pro Services container. | `""` |
+| rasaProServices.kafka.sslCertFileLocation | string | kafka.sslCertFileLocation specifies the filepath for SSL client Certificate that will be used to connect with Kafka. Required if securityProtocol is SSL. | `""` |
+| rasaProServices.kafka.sslKeyFileLocation | string | kafka.sslKeyFileLocation specifies the filepath for SSL Keyfile that will be used to connect with Kafka. Required if securityProtocol is SSL. | `""` |
+| rasaProServices.kafka.topic | string | kafka.topic specifies the topic for the Rasa Pro Services container. | `"rasa-core-events"` |
+| rasaProServices.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
+| rasaProServices.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| rasaProServices.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` |
+| rasaProServices.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| rasaProServices.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| rasaProServices.livenessProbe.successThreshold | int | livenessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| rasaProServices.livenessProbe.terminationGracePeriodSeconds | int | readinessProbe.terminationGracePeriodSeconds configures a grace period to wait between triggering a shut down of the failed container | `30` |
+| rasaProServices.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| rasaProServices.loggingLevel | string | rasaProServices.loggingLevel specifies the logging level for the Rasa Pro Services container. Valid levels are DEBUG, INFO, WARNING, ERROR, CRITICAL. | `"INFO"` |
+| rasaProServices.nodeSelector | object | rasaProServices.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
+| rasaProServices.podAnnotations | object | rasaProServices.podAnnotations defines annotations to add to the pod | `{}` |
+| rasaProServices.podSecurityContext | object | rasaProServices.podSecurityContext defines pod security context | `{"enabled":true}` |
+| rasaProServices.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
+| rasaProServices.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
+| rasaProServices.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/healthcheck","port":8732,"scheme":"HTTP"}` |
+| rasaProServices.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
+| rasaProServices.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
+| rasaProServices.readinessProbe.successThreshold | int | readinessProbe.successThreshold defines how often (in seconds) to perform the probe | `1` |
+| rasaProServices.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| rasaProServices.replicaCount | int | rasaProServices.replicaCount specifies number of replicas | `1` |
+| rasaProServices.resources | object | rasaProServices.resources specifies the resources limits and requests | `{}` |
+| rasaProServices.service | object | rasaProServices.service define service for Rasa OSS/Plus | `{"annotations":{},"port":8732,"targetPort":8732,"type":"ClusterIP"}` |
+| rasaProServices.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
+| rasaProServices.service.port | int | service.port is used to specify service port | `8732` |
+| rasaProServices.service.targetPort | int | service.targetPort is ued to specify service target port | `8732` |
+| rasaProServices.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
+| rasaProServices.serviceAccount | object | rasaProServices.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
+| rasaProServices.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
+| rasaProServices.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
+| rasaProServices.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
+| rasaProServices.strategy | object | rasaProServices.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
+| rasaProServices.tolerations | list | rasaProServices.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
+| rasaProServices.useCloudProviderIam.enabled | bool | useCloudProviderIam.enabled specifies whether to use cloud provider IAM for the Rasa Pro Services container. | `false` |
+| rasaProServices.useCloudProviderIam.provider | string | useCloudProviderIam.provider specifies the cloud provider for the Rasa Pro Services container. Supported value is aws | `"aws"` |
+| rasaProServices.useCloudProviderIam.region | string | useCloudProviderIam.region specifies the region for IAM authentication. Required if IAM_CLOUD_PROVIDER is set to aws. | `"us-east-1"` |
+| rasaProServices.volumeMounts | list | rasaProServices.volumeMounts specifies additional volumes to mount in the Rasa Pro Services container | `[]` |
+| rasaProServices.volumes | list | rasaProServices.volumes specify additional volumes for the Rasa Pro Services container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |

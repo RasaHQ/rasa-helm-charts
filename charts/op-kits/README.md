@@ -480,3 +480,96 @@ $ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>
 | valkey.cluster.tls | bool | `false` | Enable TLS (requires cert-manager) |
 | valkey.cluster.volumePermissions | bool | `true` | Enable volume permissions initialization |
 | valkey.enabled | bool | `true` | Enable Valkey cluster deployment |
+# op-kits
+
+![Version: 0.2.1](https://img.shields.io/badge/Version-0.2.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+
+Operator Kits Helm Chart
+
+**Homepage:** <https://helm.rasa.com/>
+
+## Maintainers
+
+| Name | Email | Url |
+| ---- | ------ | --- |
+| Rasa Infrastructure and Security Team | <support@rasa.com> | <https://github.com/RasaHQ/rasa-helm-charts> |
+
+## Source Code
+
+* <https://helm.rasa.com/charts/op-kits>
+
+## Values
+
+| Key | Type | Default | Description |
+|-----|------|---------|-------------|
+| affinity | object | `{}` | Affinity rules for all pods Example: affinity:   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: kubernetes.io/os           operator: In           values:           - linux         - key: node-role.kubernetes.io/worker           operator: In           values:            - "true"   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname |
+| cloudnativepg.cluster.annotations | object | `{}` | Additional annotations to apply to the PostgreSQL Cluster resource Example: annotations:   backup.postgresql.cnpg.io/enabled: "true"   monitoring.postgresql.cnpg.io/scrape: "true" |
+| cloudnativepg.cluster.bootstrap.initdb.database | string | `"app"` | Database name to create during initialization |
+| cloudnativepg.cluster.bootstrap.initdb.owner | string | `"appuser"` | Database owner/user to create during initialization |
+| cloudnativepg.cluster.enableSuperuserAccess | bool | `true` | Enable superuser access (creates <cluster>-superuser secret) |
+| cloudnativepg.cluster.image | object | `{"repository":"ghcr.io/cloudnative-pg/postgresql","tag":"16"}` | PostgreSQL container image to use |
+| cloudnativepg.cluster.instances | int | `1` | Number of PostgreSQL instances in the cluster |
+| cloudnativepg.cluster.monitoring.enablePodMonitor | bool | `false` | Enable Prometheus PodMonitor for metrics collection |
+| cloudnativepg.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-pg" |
+| cloudnativepg.cluster.postgresql | object | `{"parameters":{}}` | Additional PostgreSQL configuration parameters Example: postgresql:   parameters:     max_connections: "200"     shared_buffers: "256MB" |
+| cloudnativepg.cluster.resources | object | `{}` | Resource limits and requests for PostgreSQL containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
+| cloudnativepg.cluster.storage.size | string | `"15Gi"` | Storage size for PostgreSQL data |
+| cloudnativepg.cluster.storage.storageClass | string | `"gp2"` | Storage class name. Change to your storage class |
+| cloudnativepg.enabled | bool | `true` | Enable CloudNativePG cluster deployment |
+| commonAnnotations | object | `{}` | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" |
+| commonLabels | object | `{}` | Additional labels to apply to all resources Example: commonLabels:   environment: production   team: platform |
+| fullnameOverride | string | `""` | Override the full qualified app name |
+| global.namespace | string | `""` | Global namespace override. If empty, uses release namespace |
+| nameOverride | string | `""` | Override name of app |
+| nodeSelector | object | `{}` | Node selector for all pods Example: nodeSelector:   kubernetes.io/os: linux   node-role.kubernetes.io/worker: "true" |
+| strimzi.enabled | bool | `true` | Enable Strimzi Kafka cluster deployment |
+| strimzi.kafka.annotations | object | `{"strimzi.io/kraft":"enabled","strimzi.io/node-pools":"enabled"}` | Annotations to apply to the Kafka Cluster resource Includes both operator configuration and custom annotations Example: annotations:   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources   strimzi.io/restart: "true"           # Custom restart annotation   kafka.strimzi.io/logging: "debug"    # Custom logging annotation |
+| strimzi.kafka.authorization.type | string | `"simple"` |  |
+| strimzi.kafka.config | object | `{"auto.create.topics.enable":true,"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) |
+| strimzi.kafka.entityOperator.disableTopicFinalizer | bool | `true` | Resource limits and requests for User Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
+| strimzi.kafka.entityOperator.topicOperator | object | `{}` |  |
+| strimzi.kafka.entityOperator.userOperator | object | `{}` | Resource limits and requests for Topic Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" |
+| strimzi.kafka.listeners | list | `[{"authentication":{"type":"scram-sha-512"},"name":"plain","port":9092,"tls":false,"type":"internal"},{"authentication":{"type":"scram-sha-512"},"name":"tls","port":9093,"tls":true,"type":"internal"}]` | Kafka listeners define how clients connect to the cluster |
+| strimzi.kafka.nameOverride | string | `""` | Override Kafka cluster name. If empty, uses "{{ release-name }}-kafka" |
+| strimzi.nodePools.brokers.enabled | bool | `true` | Enable broker node pool deployment |
+| strimzi.nodePools.brokers.replicas | int | `1` | Number of broker replicas |
+| strimzi.nodePools.brokers.resources | object | `{}` | Resource limits and requests for broker nodes Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "200m"     memory: "512Mi" |
+| strimzi.nodePools.brokers.roles | list | `["broker"]` | Node pool roles for brokers |
+| strimzi.nodePools.brokers.storage.type | string | `"jbod"` | Storage type for broker nodes (JBOD allows multiple volumes) |
+| strimzi.nodePools.brokers.storage.volumes | list | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"10Gi","type":"persistent-claim"}]` | Storage volumes configuration for brokers |
+| strimzi.nodePools.controllers.enabled | bool | `true` | Enable controller node pool deployment |
+| strimzi.nodePools.controllers.replicas | int | `1` | Number of controller replicas |
+| strimzi.nodePools.controllers.resources | object | `{}` | Resource limits and requests for controller nodes Example: resources:   limits:     cpu: "500m"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
+| strimzi.nodePools.controllers.roles | list | `["controller"]` | Node pool roles for controllers |
+| strimzi.nodePools.controllers.storage.class | string | `"gp2"` | Storage class for controller nodes |
+| strimzi.nodePools.controllers.storage.deleteClaim | bool | `true` | Whether to delete PVC when node pool is deleted |
+| strimzi.nodePools.controllers.storage.size | string | `"10Gi"` | Storage size for controller nodes |
+| strimzi.nodePools.controllers.storage.type | string | `"persistent-claim"` | Storage type for controller nodes |
+| strimzi.nodePools.controllers.storage.volumeAttributesClass | string | `""` | Volume attributes class for the PVC (requires Kubernetes 1.34+) |
+| strimzi.topics | object | `{}` |  |
+| strimzi.users.root.authentication.type | string | `"scram-sha-512"` | Authentication type for Kafka user |
+| strimzi.users.root.enabled | bool | `true` | Enable main application user creation |
+| strimzi.users.root.name | string | `""` | Kafka user name. If empty, defaults to "<release-name>-user" |
+| tolerations | list | `[]` | Tolerations for all pods Example: tolerations: - key: "key1"   operator: "Equal"   value: "value1"   effect: "NoSchedule" - key: "key2"   operator: "Exists"   effect: "NoExecute" |
+| valkey.cluster.annotations | object | `{}` | Additional annotations to apply to the Valkey Cluster resource Example: annotations:   valkey.hyperspike.io/monitoring: "enabled"   valkey.hyperspike.io/backup: "enabled" |
+| valkey.cluster.certIssuer | string | `"selfsigned"` | Certificate issuer name |
+| valkey.cluster.certIssuerType | string | `"ClusterIssuer"` | Certificate issuer type |
+| valkey.cluster.externalAccess.enabled | bool | `false` | Enable external access to Valkey cluster |
+| valkey.cluster.externalAccess.type | string | `"LoadBalancer"` | Type of external access (LoadBalancer, NodePort, etc.) |
+| valkey.cluster.image | string | `""` | Container image for Valkey image: "ghcr.io/hyperspike/valkey:8.0.2" |
+| valkey.cluster.nameOverride | string | `""` | Override cluster name. If empty, uses "{{ release-name }}-valkey" |
+| valkey.cluster.nodes | int | `1` | Number of primary nodes; set >1 only if you intend to run Valkey Cluster |
+| valkey.cluster.replicas | int | `0` | Replicas per primary (0 = standalone, >0 = primary + replicas) |
+| valkey.cluster.resources | object | `{}` | Resource limits and requests for Valkey containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" |
+| valkey.cluster.servicePassword.key | string | `"VALKEY_PASSWORD"` | Secret key for the Valkey password |
+| valkey.cluster.servicePassword.name | string | `"app-secrets"` | Secret name containing the Valkey password |
+| valkey.cluster.servicePassword.optional | bool | `false` | Whether the service password is optional |
+| valkey.cluster.storage.spec.accessModes | list | `["ReadWriteOnce"]` | Access modes for Valkey storage |
+| valkey.cluster.storage.spec.resources | object | `{"requests":{"storage":"10Gi"}}` | Storage size for Valkey data |
+| valkey.cluster.storage.spec.storageClassName | string | `"gp2"` | Storage class name. Change to your storage class |
+| valkey.cluster.tls | bool | `false` | Enable TLS (requires cert-manager) |
+| valkey.cluster.volumePermissions | bool | `true` | Enable volume permissions initialization |
+| valkey.enabled | bool | `true` | Enable Valkey cluster deployment |
+
+----------------------------------------------
+Autogenerated from chart metadata using [helm-docs v1.14.2](https://github.com/norwoodj/helm-docs/releases/v1.14.2)

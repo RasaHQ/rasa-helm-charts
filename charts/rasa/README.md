@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.0.0](https://img.shields.io/badge/Version-2.0.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.1](https://img.shields.io/badge/Version-2.0.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.0.0
+helm install my-release rasa/rasa --version 2.0.1
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.0
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 2.0.0
+helm pull rasa/rasa --version 2.0.1
 ```
 
 ## General Configuration
@@ -261,7 +261,7 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 | actionServer.envFrom | list | actionServer.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | actionServer.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | actionServer.image.repository | string | image.repository specifies image repository | `"rasa/rasa-sdk"` |
-| actionServer.image.tag | string | image.tag specifies image tag | `"3.14.0-latest"` |
+| actionServer.image.tag | string | image.tag specifies image tag | `"3.15.0-latest"` |
 | actionServer.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | actionServer.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | actionServer.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
@@ -397,7 +397,7 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.image.tag | string | image.tag specifies image tag | `"3.14.0-latest"` |
+| rasa.image.tag | string | image.tag specifies image tag | `"3.15.3-latest"` |
 | rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
@@ -486,7 +486,7 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 | rasaProServices.envFrom | list | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasaProServices.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasaProServices.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` |
-| rasaProServices.image.tag | string | Specifies image tag image.tag specifies image tag | `"3.6.0-latest"` |
+| rasaProServices.image.tag | string | Specifies image tag image.tag specifies image tag | `"3.7.0-latest"` |
 | rasaProServices.imagePullSecrets | list | imagePullSecrets is used for private repository pull secrets # If this is not set, global `imagePullSecrets` will be applied. If both are set, this takes priority. | `[]` |
 | rasaProServices.kafka.brokerAddress | string | kafka.brokerAddress specifies the broker address for the Rasa Pro Services container. Required if enableAwsMskIam is true. | `""` |
 | rasaProServices.kafka.consumerId | string | kafka.consumerId specifies the consumer ID for the Rasa Pro Services container. | `"rasa-analytics-group"` |

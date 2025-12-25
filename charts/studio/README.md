@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.2.5-rc.1](https://img.shields.io/badge/Version-2.2.5--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.5-rc.2](https://img.shields.io/badge/Version-2.2.5--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5-rc.2
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.5-rc.1
+$ helm install my-release rasa/studio --version 2.2.5-rc.2
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5-rc.2
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.5-rc.1
+$ helm pull rasa/studio --version 2.2.5-rc.2
 ```
 
 ## General Configuration
@@ -117,7 +117,7 @@ config:
       secretKey: "DB_USERNAME"
 ```
 
-**Database name from secret:**
+**Backend database name from secret:**
 ```yaml
 config:
   database:
@@ -134,6 +134,8 @@ config:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
 ```
+
+**Important Note:** The `keycloakDatabaseName` field must be a plain string value and cannot be stored as a secret reference. This is because Keycloak requires the database name to be part of the JDBC URL and is passed as a query parameter, which must be constructed at template rendering time.
 
 ### Keycloak-Specific Database Configuration
 
@@ -312,7 +314,7 @@ config:
 | config.database.backendDatabaseName | string | The database name for Studio backend services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: backendDatabaseName: "studio" Secret reference example: backendDatabaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
 | config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" | `""` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. | `"keycloak"` |
+| config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction. | `"keycloak"` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
 | config.database.port | string | The database port number for PostgreSQL. Default PostgreSQL port is 5432 | `"5432"` |
 | config.database.preferSSL | string | Set to true if you want to use SSL for database connection. When enabled, Studio will attempt to establish an encrypted connection to the database. | `"true"` |

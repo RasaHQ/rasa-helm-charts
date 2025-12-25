@@ -116,7 +116,7 @@ config:
       secretKey: "DB_USERNAME"
 ```
 
-**Database name from secret:**
+**Backend database name from secret:**
 ```yaml
 config:
   database:
@@ -133,6 +133,8 @@ config:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
 ```
+
+**Important Note:** The `keycloakDatabaseName` field must be a plain string value and cannot be stored as a secret reference. This is because Keycloak requires the database name to be part of the JDBC URL and is passed as a query parameter, which must be constructed at template rendering time.
 
 ### Keycloak-Specific Database Configuration
 

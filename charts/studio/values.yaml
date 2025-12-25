@@ -71,6 +71,7 @@ config:
       secretKey: "DATABASE_PASSWORD"
     # -- The database name for Keycloak user management service.
     # This is used by Keycloak to store its user management data.
+    # Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction.
     keycloakDatabaseName: "keycloak"
     # -- The database name for Studio backend services.
     # This is used by Studio to store its data.
@@ -913,6 +914,7 @@ keycloak:
   #   port: "5432"
   #   # -- The database name for Keycloak user management service.
   #   # This is used by Keycloak to store its user management data.
+  #   # Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction.
   #   databaseName: "keycloak"
   #   # -- The database username for Keycloak to connect with.
   #   # This user should have appropriate permissions on the database.

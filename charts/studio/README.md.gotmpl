@@ -82,4 +82,139 @@ config:
 Do *NOT* delete or modify the anchor (`&dns_hostname`).
 If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
 
+## Database Configuration
+
+Studio requires a PostgreSQL database for both the backend services and Keycloak authentication. You can configure database connection settings in two ways:
+
+### Shared Database Configuration
+
+The `config.database` section defines the default database connection settings used by both Studio Backend and Keycloak:
+
+```yaml
+config:
+  database:
+    host: "postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+```
+
+### Using Secrets for Sensitive Values
+
+Database credentials can be provided as plain values or secret references:
+
+**Username from secret:**
+```yaml
+config:
+  database:
+    username:
+      secretName: "my-db-secret"
+      secretKey: "DB_USERNAME"
+```
+
+**Database name from secret:**
+```yaml
+config:
+  database:
+    backendDatabaseName:
+      secretName: "my-db-secret"
+      secretKey: "DB_NAME"
+```
+
+**Password (always from secret):**
+```yaml
+config:
+  database:
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+```
+
+### Keycloak-Specific Database Configuration
+
+If you need different database settings for Keycloak, you can override them using `keycloak.database`. Any values not specified will fall back to `config.database`:
+
+```yaml
+keycloak:
+  database:
+    host: "keycloak-postgres.example.com"
+    port: "5432"
+    username: "keycloak_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_DATABASE_PASSWORD"
+    databaseName: "keycloak"
+```
+
+### Complete Example: Separate Databases
+
+This example shows Studio Backend and Keycloak using different PostgreSQL instances:
+
+```yaml
+config:
+  database:
+    # Studio Backend database
+    host: "studio-postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "STUDIO_DB_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"  # Fallback for Keycloak if not overridden
+
+keycloak:
+  database:
+    # Keycloak-specific database (overrides config.database)
+    host: "keycloak-postgres.example.com"
+    port: "5432"
+    username: "keycloak_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_DB_PASSWORD"
+    databaseName: "keycloak"
+```
+
+### Complete Example: Shared Database
+
+This example shows Studio Backend and Keycloak sharing the same PostgreSQL instance with different databases:
+
+```yaml
+config:
+  database:
+    host: "postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+
+# No keycloak.database override needed - uses config.database settings
+```
+
+### AWS RDS IAM Authentication
+
+For AWS RDS with IAM authentication, configure the following:
+
+```yaml
+config:
+  database:
+    host: "mydb.123456789012.us-east-1.rds.amazonaws.com"
+    port: "5432"
+    username: "studio_user"
+    useAwsIamAuth: "true"
+    awsRegion: "us-east-1"
+    iamDbUsername: "iam_db_user"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+```
+
+**Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
+
 {{ template "chart.valuesSection" . }}

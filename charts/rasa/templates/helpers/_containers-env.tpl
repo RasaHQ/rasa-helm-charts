@@ -25,21 +25,23 @@ Environment Variables for Rasa Containers
 - name: "JWT_METHOD"
   value: {{ .jwtMethod | quote }}
 {{- end }}
-# Rasa Pro License
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.enabled }}
 - name: "RASA_PRO_LICENSE" 
   valueFrom:
     secretKeyRef:
       name: {{ $.Values.rasaProLicense.secretName }}
       key: {{ $.Values.rasaProLicense.secretKey }}
+- name: "RASA_LICENSE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ $.Values.rasaProLicense.secretName }}
+      key: {{ $.Values.rasaProLicense.secretKey }}
 {{- end }}
 {{- if or $.Values.rasaProServices.enabled $.Values.rasa.enabled }}
-# Telemetry
 - name: "RASA_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}
 - name: "RASA_TELEMETRY_DEBUG"
   value: {{ .telemetry.debug | quote }}
-# Logging
 - name: "LOG_LEVEL"
   value: {{ .logging.logLevel | quote | upper }}
 {{- end }}

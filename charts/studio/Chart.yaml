@@ -2,7 +2,7 @@ apiVersion: v2
 name: studio
 description: A Rasa Studio Helm chart for Kubernetes
 type: application
-version: 2.2.5-rc.2
+version: 2.2.5-rc.3
 home: https://helm.rasa.com
 sources:
   - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
@@ -18,7 +18,7 @@ dependencies:
   - name: replicated
     condition: replicated.enabled
     repository: oci://registry.replicated.com/library
-    version: 1.8.1
+    version: 1.12.1
   - name: rasa
     condition: rasa.enabled
     repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts

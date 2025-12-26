@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.2.4](https://img.shields.io/badge/Version-2.2.4-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.5](https://img.shields.io/badge/Version-2.2.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.4
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.2.4
+$ helm install my-release rasa/studio --version 2.2.5
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.4
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.2.5
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.2.4
+$ helm pull rasa/studio --version 2.2.5
 ```
 
 ## General Configuration
@@ -82,6 +82,143 @@ config:
 ### Guidelines:
 Do *NOT* delete or modify the anchor (`&dns_hostname`).
 If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
+
+## Database Configuration
+
+Studio requires a PostgreSQL database for both the backend services and Keycloak authentication. You can configure database connection settings in two ways:
+
+### Shared Database Configuration
+
+The `config.database` section defines the default database connection settings used by both Studio Backend and Keycloak:
+
+```yaml
+config:
+  database:
+    host: "postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+```
+
+### Using Secrets for Sensitive Values
+
+Database credentials can be provided as plain values or secret references:
+
+**Username from secret:**
+```yaml
+config:
+  database:
+    username:
+      secretName: "my-db-secret"
+      secretKey: "DB_USERNAME"
+```
+
+**Backend database name from secret:**
+```yaml
+config:
+  database:
+    backendDatabaseName:
+      secretName: "my-db-secret"
+      secretKey: "DB_NAME"
+```
+
+**Password (always from secret):**
+```yaml
+config:
+  database:
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+```
+
+**Important Note:** The `keycloakDatabaseName` field must be a plain string value and cannot be stored as a secret reference. This is because Keycloak requires the database name to be part of the JDBC URL and is passed as a query parameter, which must be constructed at template rendering time.
+
+### Keycloak-Specific Database Configuration
+
+If you need different database settings for Keycloak, you can override them using `keycloak.database`. Any values not specified will fall back to `config.database`:
+
+```yaml
+keycloak:
+  database:
+    host: "keycloak-postgres.example.com"
+    port: "5432"
+    username: "keycloak_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_DATABASE_PASSWORD"
+    databaseName: "keycloak"
+```
+
+### Complete Example: Separate Databases
+
+This example shows Studio Backend and Keycloak using different PostgreSQL instances:
+
+```yaml
+config:
+  database:
+    # Studio Backend database
+    host: "studio-postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "STUDIO_DB_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"  # Fallback for Keycloak if not overridden
+
+keycloak:
+  database:
+    # Keycloak-specific database (overrides config.database)
+    host: "keycloak-postgres.example.com"
+    port: "5432"
+    username: "keycloak_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_DB_PASSWORD"
+    databaseName: "keycloak"
+```
+
+### Complete Example: Shared Database
+
+This example shows Studio Backend and Keycloak sharing the same PostgreSQL instance with different databases:
+
+```yaml
+config:
+  database:
+    host: "postgres.example.com"
+    port: "5432"
+    username: "studio_user"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "DATABASE_PASSWORD"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+
+# No keycloak.database override needed - uses config.database settings
+```
+
+### AWS RDS IAM Authentication
+
+For AWS RDS with IAM authentication, configure the following:
+
+```yaml
+config:
+  database:
+    host: "mydb.123456789012.us-east-1.rds.amazonaws.com"
+    port: "5432"
+    username: "studio_user"
+    useAwsIamAuth: "true"
+    awsRegion: "us-east-1"
+    iamDbUsername: "iam_db_user"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+```
+
+**Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
 
 ## Values
 
@@ -174,17 +311,17 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | config.connectionType | string | Define if you will be using https or http with the ingressHost. Valid values are "http" or "https". This setting affects how services communicate with each other. | `"http"` |
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","backendDatabaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.backendDatabaseName | string | The database name for Studio backend services. This is used by Studio to store its data. | `"studio"` |
+| config.database.backendDatabaseName | string | The database name for Studio backend services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: backendDatabaseName: "studio" Secret reference example: backendDatabaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
 | config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" | `""` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. | `"keycloak"` |
+| config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction. | `"keycloak"` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
 | config.database.port | string | The database port number for PostgreSQL. Default PostgreSQL port is 5432 | `"5432"` |
 | config.database.preferSSL | string | Set to true if you want to use SSL for database connection. When enabled, Studio will attempt to establish an encrypted connection to the database. | `"true"` |
 | config.database.queryParams | string | The database connection URL query parameters. These parameters are used to configure the database connection. Example: "sslmode=require&connect_timeout=30" | `""` |
 | config.database.rejectUnauthorized | string | If true, the server will reject database connections which are not present in the list of supplied CAs. This provides additional security by ensuring only trusted certificates are accepted. | `""` |
 | config.database.useAwsIamAuth | string | Set to true if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. | `""` |
+| config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. Can be specified as a plain string value or as a secret reference. Plain value example: username: "studio" Secret reference example: username:   secretName: "my-secret"   secretKey: "DB_USERNAME" | `""` |
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
@@ -328,7 +465,7 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 | rasa.rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume | `1001` |
 | rasa.rasa.resources | object | rasa.resources specifies the resources limits and requests | `{}` |
 | replicated.enabled | bool |  | `false` |
-| replicated.sdkVersion | string |  | `"1.8.1"` |
+| replicated.sdkVersion | string |  | `"1.12.1"` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
 | tag | string | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. | `"1.15.1-latest"` |
 | webClient.additionalContainers | list | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |

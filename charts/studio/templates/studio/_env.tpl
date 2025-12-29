@@ -20,9 +20,23 @@ Environment Variables for Keycloak Containers
 {{- define "studio.keycloak.env" -}}
 - name: KC_DB_USERNAME
   {{- if not (empty .Values.keycloak.database.username) }}
+    {{- if kindIs "map" .Values.keycloak.database.username }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.keycloak.database.username.secretName | quote }}
+      key: {{ .Values.keycloak.database.username.secretKey | quote }}
+    {{- else }}
   value: {{ .Values.keycloak.database.username | quote }}
+    {{- end }}
   {{- else }}
+    {{- if kindIs "map" .Values.config.database.username }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.config.database.username.secretName | quote }}
+      key: {{ .Values.config.database.username.secretKey | quote }}
+    {{- else }}
   value: {{ .Values.config.database.username | quote }}
+    {{- end }}
   {{- end }}
 - name: KC_DB_PASSWORD
   {{- if not (empty .Values.keycloak.database.password) }}
@@ -80,7 +94,14 @@ Backend Database Environment Variables
 {{- define "studio.backend.env" -}}
 {{- with .Values.config.database }}
 - name: DB_USER
+  {{- if kindIs "map" .username }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .username.secretName | quote }}
+      key: {{ .username.secretKey | quote }}
+  {{- else }}
   value: {{ .username | quote }}
+  {{- end }}
 {{- if ne (.useAwsIamAuth | toString) "true" }}
 - name: DB_PASS
   valueFrom:
@@ -93,7 +114,14 @@ Backend Database Environment Variables
 - name: DB_PORT
   value: {{ .port | quote }}
 - name: DB_NAME
+  {{- if kindIs "map" .backendDatabaseName }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .backendDatabaseName.secretName | quote }}
+      key: {{ .backendDatabaseName.secretKey | quote }}
+  {{- else }}
   value: {{ .backendDatabaseName | quote }}
+  {{- end }}
 - name: DB_QUERY
   value: {{ .queryParams | quote }}
 {{- if and (not (empty .awsRegion)) (eq (.useAwsIamAuth | toString) "true") }}

@@ -59,6 +59,16 @@ Environment Variables for Rasa Containers
 Environment Variables for Rasa Analytics
 */}}
 {{- define "analytics.env" -}}
+- name: "RASA_PRO_LICENSE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasaProLicense.secretName }}
+      key: {{ .Values.rasaProLicense.secretKey }}
+- name: "RASA_LICENSE"
+  valueFrom:
+    secretKeyRef:
+      name: {{ .Values.rasaProLicense.secretName }}
+      key: {{ .Values.rasaProLicense.secretKey }}
 - name: "LOGGING_LEVEL"
   value: {{ .Values.rasaProServices.loggingLevel | quote }}
 {{- with .Values.rasaProServices.useCloudProviderIam }}

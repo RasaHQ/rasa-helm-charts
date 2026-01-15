@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.3.0](https://img.shields.io/badge/Version-0.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.3.1](https://img.shields.io/badge/Version-0.3.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.3.0
+$ helm install my-release rasa/op-kits --version 0.3.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.3.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.3.0
+$ helm pull rasa/op-kits --version 0.3.1
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.3.0 \
+    --version 0.3.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.3.0 \
+    --version 0.3.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -412,7 +412,7 @@ $ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>
 
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
-| affinity | object | Affinity rules for all pods Example: affinity:   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: kubernetes.io/os           operator: In           values:           - linux         - key: node-role.kubernetes.io/worker           operator: In           values:            - "true"   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname | `{}` |
+| affinity | object | Affinity rules for all pods For CloudNativePG and Valkey, supports both standard Kubernetes affinity and CloudNativePG-specific settings (enablePodAntiAffinity, topologyKey, etc.) Example: affinity:   # Standard Kubernetes node affinity (works for all resources)   nodeAffinity:     requiredDuringSchedulingIgnoredDuringExecution:       nodeSelectorTerms:       - matchExpressions:         - key: eks.amazonaws.com/nodegroup           operator: In           values:           - my-nodegroup         - key: node-role.kubernetes.io/worker           operator: In           values:           - "true"    # Standard Kubernetes pod anti-affinity (works for all resources)   podAntiAffinity:     preferredDuringSchedulingIgnoredDuringExecution:     - weight: 100       podAffinityTerm:         labelSelector:           matchExpressions:           - key: app.kubernetes.io/name             operator: In             values:             - op-kits         topologyKey: kubernetes.io/hostname    # CloudNativePG-specific settings (only for PostgreSQL cluster)   enablePodAntiAffinity: true   topologyKey: kubernetes.io/hostname   podAntiAffinityType: preferred | `{}` |
 | cloudnativepg.cluster.annotations | object | Additional annotations to apply to the PostgreSQL Cluster resource Example: annotations:   backup.postgresql.cnpg.io/enabled: "true"   monitoring.postgresql.cnpg.io/scrape: "true" | `{}` |
 | cloudnativepg.cluster.bootstrap.initdb.database | string | Database name to create during initialization | `"app"` |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | Database owner/user to create during initialization | `"appuser"` |

@@ -449,21 +449,25 @@ nodeSelector: {}
 tolerations: []
 
 # -- Affinity rules for all pods
+# For CloudNativePG and Valkey, supports both standard Kubernetes affinity
+# and CloudNativePG-specific settings (enablePodAntiAffinity, topologyKey, etc.)
 # Example:
 # affinity:
+#   # Standard Kubernetes node affinity (works for all resources)
 #   nodeAffinity:
 #     requiredDuringSchedulingIgnoredDuringExecution:
 #       nodeSelectorTerms:
 #       - matchExpressions:
-#         - key: kubernetes.io/os
+#         - key: eks.amazonaws.com/nodegroup
 #           operator: In
 #           values:
-#           - linux
+#           - my-nodegroup
 #         - key: node-role.kubernetes.io/worker
 #           operator: In
 #           values:
-#            - "true"
-
+#           - "true"
+#
+#   # Standard Kubernetes pod anti-affinity (works for all resources)
 #   podAntiAffinity:
 #     preferredDuringSchedulingIgnoredDuringExecution:
 #     - weight: 100
@@ -475,4 +479,9 @@ tolerations: []
 #             values:
 #             - op-kits
 #         topologyKey: kubernetes.io/hostname
+#
+#   # CloudNativePG-specific settings (only for PostgreSQL cluster)
+#   enablePodAntiAffinity: true
+#   topologyKey: kubernetes.io/hostname
+#   podAntiAffinityType: preferred
 affinity: {}

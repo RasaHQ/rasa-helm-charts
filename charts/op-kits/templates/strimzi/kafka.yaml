@@ -44,6 +44,9 @@ spec:
     {{- end }}
     listeners:
       {{- toYaml .Values.strimzi.kafka.listeners | nindent 6 }}
+      {{- if .Values.strimzi.kafka.externalListener.enabled }}
+      {{- toYaml (list .Values.strimzi.kafka.externalListener.listener) | nindent 6 }}
+      {{- end }}
     config:
       {{- toYaml .Values.strimzi.kafka.config | nindent 6 }}
     authorization:

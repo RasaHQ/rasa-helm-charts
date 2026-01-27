@@ -170,7 +170,7 @@ strimzi:
         name: external
         port: 9094
         type: loadbalancer
-        tls: true
+        tls: false
         authentication:
           type: scram-sha-512
         # AWS Load Balancer Controller configuration (for EKS clusters)
@@ -187,6 +187,7 @@ strimzi:
             #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
             #   service.beta.kubernetes.io/aws-load-balancer-name: strimzi-kafka-bootstrap
             #   service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9094"
             #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
             #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
             #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
@@ -201,6 +202,7 @@ strimzi:
             #     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
             #     service.beta.kubernetes.io/aws-load-balancer-name: strimzi-kafka-broker
             #     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9094"
             #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
             #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
             #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"

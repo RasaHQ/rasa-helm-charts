@@ -157,6 +157,66 @@ strimzi:
       #   type: internal
       #   tls: false
 
+    # External access configuration
+    # -- External listener configuration for accessing Kafka from outside the cluster
+    # When enabled, this entire listener object is appended to the listeners array
+    externalListener:
+      # -- Enable external access to Kafka via LoadBalancer
+      enabled: false
+
+      # -- Complete listener configuration (Strimzi Kafka listener spec)
+      # This allows full flexibility - any valid Strimzi listener configuration can be specified here
+      listener:
+        name: external
+        port: 9094
+        type: loadbalancer
+        tls: false
+        authentication:
+          type: scram-sha-512
+        # AWS Load Balancer Controller configuration (for EKS clusters)
+        # Health check values are optimized for Kafka's behavior during rebalancing and leader elections
+        configuration:
+          bootstrap:
+            # -- Optional: DNS names for the bootstrap service (added to TLS certificate SANs)
+            # Uncomment and configure to use custom DNS names for the bootstrap service
+            # alternativeNames:
+            #   - kafka-bootstrap.example.com
+            #   - kafka.example.com
+            # annotations:
+            #   service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+            #   service.beta.kubernetes.io/aws-load-balancer-name: strimzi-kafka-bootstrap
+            #   service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9094"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
+            #   service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "10"
+          brokers:
+            # - broker: 0
+            #   # -- Optional: DNS name that this broker advertises to clients
+            #   # Uncomment and configure to use a custom DNS name for this broker
+            #   advertisedHost: kafka-broker-0.example.com
+            #   annotations:
+            #     service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            #     service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+            #     service.beta.kubernetes.io/aws-load-balancer-name: strimzi-kafka-broker
+            #     service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9094"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-interval: "10"
+            #     service.beta.kubernetes.io/aws-load-balancer-healthcheck-timeout: "10"
+            # -- Add additional brokers here for multi-broker clusters:
+            # - broker: 1
+            #   advertisedHost: kafka-broker-1.example.com
+            #   annotations: { ... }
+      # Example: Restrict LoadBalancer access to specific CIDR blocks
+      #   configuration:
+      #     bootstrap:
+      #       loadBalancerSourceRanges:
+      #         - "203.0.113.0/24"
+
     # Kafka broker configuration
     # -- Kafka configuration parameters for brokers
     # With 1 broker, keep replication factors at 1 (increase when scaling out)

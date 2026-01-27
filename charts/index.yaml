@@ -2,6 +2,30 @@ apiVersion: v1
 entries:
   op-kits:
   - apiVersion: v2
+    created: "2026-01-27T12:22:47.573021965Z"
+    description: Operator Kits Helm Chart
+    digest: a35dfe057f340f3686723726d288ab9ed0a8dbfd21ab09a012ab5c6dbf926b46
+    home: https://helm.rasa.com/
+    keywords:
+    - postgresql
+    - kafka
+    - cloudnativepg
+    - strimzi
+    - operators
+    - database
+    - messaging
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: op-kits
+    sources:
+    - https://helm.rasa.com/charts/op-kits
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/op-kits-0.4.0/op-kits-0.4.0.tgz
+    version: 0.4.0
+  - apiVersion: v2
     created: "2026-01-15T19:05:02.359251585Z"
     description: Operator Kits Helm Chart
     digest: b72c84d570210189202c17d72934e4c8a48fd453f25a628603ef91fb6172af54
@@ -570,4 +594,4 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
     version: 2.1.9
-generated: "2026-01-15T19:05:02.359316147Z"
+generated: "2026-01-27T12:22:47.573098532Z"

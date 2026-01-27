@@ -1,19 +1,39 @@
 🎉 Operator Kits have been deployed successfully!
 
-📋 Prerequisites verified:
+{{- $enabledCount := 0 }}
+{{- if .Values.cloudnativepg.enabled }}{{ $enabledCount = add $enabledCount 1 }}{{- end }}
+{{- if .Values.strimzi.enabled }}{{ $enabledCount = add $enabledCount 1 }}{{- end }}
+{{- if .Values.valkey.enabled }}{{ $enabledCount = add $enabledCount 1 }}{{- end }}
+
+{{- if gt $enabledCount 0 }}
+📋 Enabled Components ({{ $enabledCount }}):
 {{- if .Values.cloudnativepg.enabled }}
-  ✅ CloudNativePG operator (required for PostgreSQL clusters)
+  ✅ CloudNativePG - PostgreSQL cluster
 {{- end }}
 {{- if .Values.strimzi.enabled }}
-  ✅ Strimzi Kafka operator (required for Kafka clusters)
+  ✅ Strimzi Kafka - Kafka cluster with KRaft mode
 {{- end }}
 {{- if .Values.valkey.enabled }}
-  ✅ Valkey operator (required for Valkey clusters)
+  ✅ Valkey - Redis-compatible in-memory data store
 {{- end }}
 
-💡 If operators are not installed, see README.md for installation instructions.
+💡 Required Operators (must be pre-installed):
+{{- if .Values.cloudnativepg.enabled }}
+  - CloudNativePG operator
+{{- end }}
+{{- if .Values.strimzi.enabled }}
+  - Strimzi Kafka operator
+{{- end }}
+{{- if .Values.valkey.enabled }}
+  - Valkey operator
+{{- end }}
 
-This chart deploys the following resources:
+  See README.md for operator installation instructions if not already installed.
+
+{{- else }}
+⚠️  Warning: No components are enabled!
+   Enable at least one component (cloudnativepg, strimzi, or valkey) to deploy resources.
+{{- end }}
 
 {{- if .Values.cloudnativepg.enabled }}
 
@@ -69,13 +89,6 @@ This chart deploys the following resources:
   - Brokers: {{ .Values.strimzi.nodePools.brokers.replicas }}
   {{- end }}
 
-📝 Kafka Topics:
-{{- range $name, $topic := .Values.strimzi.topics }}
-{{- if and $topic.enabled (ne $name "enabled") }}
-  - {{ $topic.name }} ({{ $topic.partitions }} partitions)
-{{- end }}
-{{- end }}
-
 {{- $hasUsers := false }}
 {{- range $name, $user := .Values.strimzi.users }}
 {{- if and $user.enabled (ne $name "enabled") }}
@@ -93,14 +106,34 @@ This chart deploys the following resources:
 📋 Kafka Connection Information:
 
 {{- if .Values.strimzi.kafka.listeners }}
-  Bootstrap Servers (from within cluster):
+  Internal Bootstrap Servers (from within cluster):
 {{- range $listener := .Values.strimzi.kafka.listeners }}
-    Listener "{{ $listener.name }}" ({{ $listener.type }}):
+    Listener "{{ $listener.name }}" ({{ $listener.type }}{{- if $listener.tls }}, TLS{{- end }}):
       {{ include "op-kits.strimzi.kafkaName" $ }}-kafka-bootstrap.{{ include "op-kits.namespace" $ }}.svc.cluster.local:{{ $listener.port }}
 {{- end }}
 {{- else }}
   Internal Bootstrap Servers (from within cluster):
     {{ include "op-kits.strimzi.kafkaName" . }}-kafka-bootstrap.{{ include "op-kits.namespace" . }}.svc.cluster.local:9092
+{{- end }}
+
+{{- if and .Values.strimzi.kafka.externalListener .Values.strimzi.kafka.externalListener.enabled }}
+
+  🌐 External Access Enabled:
+    Listener: {{ .Values.strimzi.kafka.externalListener.listener.name }} ({{ .Values.strimzi.kafka.externalListener.listener.type }}{{- if .Values.strimzi.kafka.externalListener.listener.tls }}, TLS{{- end }})
+    Port: {{ .Values.strimzi.kafka.externalListener.listener.port }}
+    
+    Get LoadBalancer address:
+      kubectl get service {{ include "op-kits.strimzi.kafkaName" . }}-kafka-{{ .Values.strimzi.kafka.externalListener.listener.name }}-bootstrap -n {{ include "op-kits.namespace" . }}
+    
+    Bootstrap Server (external):
+      <LOADBALANCER-ADDRESS>:{{ .Values.strimzi.kafka.externalListener.listener.port }}
+{{- if .Values.strimzi.kafka.externalListener.listener.tls }}
+    
+    TLS Certificate (required for TLS connections):
+      kubectl get secret {{ include "op-kits.strimzi.kafkaName" . }}-cluster-ca-cert \
+        -n {{ include "op-kits.namespace" . }} \
+        -o jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
+{{- end }}
 {{- end }}
 
   Environment Variables for Applications:
@@ -155,13 +188,6 @@ This chart deploys the following resources:
     kubectl get secret -n {{ include "op-kits.namespace" $ }} {{ include "op-kits.strimzi.kafkaUserName" (dict "user" $user "root" $) }} -o jsonpath='{.data.password}' | base64 -d
     {{- end }}
 {{- break }}
-{{- end }}
-{{- end }}
-
-  Available Topics:
-{{- range $name, $topic := .Values.strimzi.topics }}
-{{- if and $topic.enabled (ne $name "enabled") }}
-    - {{ $topic.name }} ({{ $topic.partitions }} partitions, {{ $topic.replicas }} replicas)
 {{- end }}
 {{- end }}
 

@@ -408,6 +408,208 @@ $ kubectl get secret -n <namespace> <kafka-user-name> -o jsonpath='{.data.passwo
 $ kubectl get secret -n <namespace> <secretName> -o jsonpath='{.data.<secretKey>}' | base64 -d
 ```
 
+### Kafka External Access
+
+The chart supports external access to Kafka via LoadBalancer. This is useful when you need to connect to Kafka from outside the Kubernetes cluster.
+
+#### Enabling External Access
+
+To enable external access, configure the external listener in your values file:
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        name: external
+        port: 9094
+        type: loadbalancer  # Can also be: nodeport, ingress, route (OpenShift)
+        tls: false  # Set to true for TLS encryption
+        authentication:
+          type: scram-sha-512
+        configuration:
+          bootstrap:
+            # Optional: Custom DNS names for TLS certificate SANs
+            # alternativeNames:
+            #   - kafka-bootstrap.example.com
+            #   - kafka.example.com
+            # Optional: LoadBalancer annotations (AWS example)
+            # annotations:
+            #   service.beta.kubernetes.io/aws-load-balancer-type: "external"
+            #   service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+            #   service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+          brokers:
+            # - broker: 0
+            #   # Optional: Custom advertised hostname for this broker
+            #   advertisedHost: kafka-broker-0.example.com
+            #   annotations:
+            #     service.beta.kubernetes.io/aws-load-balancer-type: "external"
+```
+
+#### TLS Configuration
+
+**With TLS disabled** (`tls: false`):
+- Simpler configuration, no certificate management needed
+- Data is transmitted in plaintext (use only in trusted networks)
+- Authentication via SCRAM-SHA-512 still protects credentials
+- Suitable for development or VPC-internal access
+
+**With TLS enabled** (`tls: true`):
+- Strimzi automatically generates TLS certificates
+- Certificates include custom DNS names from `alternativeNames`
+- Data is encrypted in transit
+- Recommended for production and internet-facing deployments
+
+To retrieve the cluster CA certificate for TLS connections:
+
+```console
+# Get the cluster CA certificate
+$ kubectl get secret <kafka-cluster-name>-cluster-ca-cert \
+    -n <namespace> \
+    -o jsonpath='{.data.ca\.crt}' | base64 -d > ca.crt
+
+# Use with your Kafka client
+$ kafka-console-consumer.sh \
+    --bootstrap-server <loadbalancer-ip>:9094 \
+    --topic my-topic \
+    --consumer.config client.properties
+```
+
+Where `client.properties` contains:
+
+```properties
+security.protocol=SASL_SSL
+sasl.mechanism=SCRAM-SHA-512
+sasl.jaas.config=org.apache.kafka.common.security.scram.ScramLoginModule required \
+  username="<kafka-user>" \
+  password="<kafka-password>";
+ssl.truststore.location=/path/to/ca.crt
+ssl.truststore.type=PEM
+```
+
+#### Cloud Provider Configuration
+
+**AWS (using AWS Load Balancer Controller):**
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        configuration:
+          bootstrap:
+            annotations:
+              service.beta.kubernetes.io/aws-load-balancer-type: "external"
+              service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+              service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+              service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: "9094"
+              service.beta.kubernetes.io/aws-load-balancer-healthcheck-healthy-threshold: "3"
+              service.beta.kubernetes.io/aws-load-balancer-healthcheck-unhealthy-threshold: "3"
+          brokers:
+            - broker: 0
+              advertisedHost: kafka-broker-0.example.com
+              annotations:
+                service.beta.kubernetes.io/aws-load-balancer-type: "external"
+                service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+```
+
+**GCP (using GCP Load Balancer):**
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        configuration:
+          bootstrap:
+            annotations:
+              cloud.google.com/load-balancer-type: "External"
+```
+
+**Azure (using Azure Load Balancer):**
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        configuration:
+          bootstrap:
+            annotations:
+              service.beta.kubernetes.io/azure-load-balancer-internal: "false"
+```
+
+#### Getting External Access Information
+
+After enabling external access, get the LoadBalancer address:
+
+```console
+# Get the bootstrap LoadBalancer address
+$ kubectl get service <kafka-cluster-name>-kafka-external-bootstrap \
+    -n <namespace> \
+    -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'
+
+# Or for IP-based LoadBalancers
+$ kubectl get service <kafka-cluster-name>-kafka-external-bootstrap \
+    -n <namespace> \
+    -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
+
+# Get broker-specific LoadBalancer addresses
+$ kubectl get service <kafka-cluster-name>-kafka-0 -n <namespace>
+```
+
+#### Multi-Broker External Access
+
+For production deployments with multiple brokers, configure each broker with its own advertised hostname:
+
+```yaml
+strimzi:
+  nodePools:
+    brokers:
+      replicas: 3
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        configuration:
+          brokers:
+            - broker: 0
+              advertisedHost: kafka-broker-0.example.com
+            - broker: 1
+              advertisedHost: kafka-broker-1.example.com
+            - broker: 2
+              advertisedHost: kafka-broker-2.example.com
+```
+
+Configure DNS records to point each hostname to its respective LoadBalancer address.
+
+#### Security Considerations
+
+When exposing Kafka externally:
+
+1. **Always use authentication** - The chart defaults to SCRAM-SHA-512
+2. **Consider TLS encryption** - Use `tls: true` for internet-facing deployments
+3. **Restrict source IPs** - Use `loadBalancerSourceRanges` to limit access:
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      listener:
+        configuration:
+          bootstrap:
+            loadBalancerSourceRanges:
+              - "203.0.113.0/24"  # Your office IP range
+              - "198.51.100.0/24"  # Your VPN IP range
+```
+
+4. **Use network policies** - The chart includes network policies that can be enabled
+5. **Monitor access** - Enable audit logging and monitor connection attempts
+
 ## Values
 
 | Key | Type | Description | Default |

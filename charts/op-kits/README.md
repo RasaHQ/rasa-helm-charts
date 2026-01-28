@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.4.0](https://img.shields.io/badge/Version-0.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.4.0
+$ helm install my-release rasa/op-kits --version 0.4.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.4.0
+$ helm pull rasa/op-kits --version 0.4.1
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.4.0 \
+    --version 0.4.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.4.0 \
+    --version 0.4.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -587,6 +587,73 @@ strimzi:
 
 Configure DNS records to point each hostname to its respective LoadBalancer address.
 
+#### Cloudflare DNS Configuration
+
+**Important:** If you're using Cloudflare for DNS management, you **must disable Cloudflare's proxy** for Kafka DNS records.
+
+**Why:** Cloudflare's proxy (orange cloud) only supports HTTP/HTTPS traffic on specific ports. Kafka uses a custom protocol on port 9094 (or your configured port), which Cloudflare cannot proxy. Attempting to connect through Cloudflare's proxy will result in connection timeouts.
+
+**Manual Configuration:**
+
+If you manually manage DNS records in Cloudflare:
+
+1. Go to Cloudflare Dashboard → DNS → Records
+2. Find your Kafka DNS records (bootstrap and broker hostnames)
+3. Click the **orange cloud** icon to turn it **gray** (DNS Only)
+4. Ensure the record points directly to your AWS/GCP/Azure LoadBalancer
+
+**Using ExternalDNS:**
+
+If you're using [ExternalDNS](https://github.com/kubernetes-sigs/external-dns) to automatically manage DNS records, add the `cloudflare-proxied: "false"` annotation to disable Cloudflare proxy:
+
+```yaml
+strimzi:
+  kafka:
+    externalListener:
+      enabled: true
+      listener:
+        configuration:
+          bootstrap:
+            alternativeNames:
+              - kafka-bootstrap.example.com
+            annotations:
+              external-dns.alpha.kubernetes.io/hostname: kafka-bootstrap.example.com
+              external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"  # Required!
+              service.beta.kubernetes.io/aws-load-balancer-type: "external"
+              # ... other annotations
+          brokers:
+            - broker: 0
+              advertisedHost: kafka-broker-0.example.com
+              annotations:
+                external-dns.alpha.kubernetes.io/hostname: kafka-broker-0.example.com
+                external-dns.alpha.kubernetes.io/cloudflare-proxied: "false"  # Required!
+                service.beta.kubernetes.io/aws-load-balancer-type: "external"
+                # ... other annotations
+```
+
+Additionally, ensure your ExternalDNS deployment has the `--cloudflare-proxied=false` flag:
+
+```bash
+# Check ExternalDNS configuration
+kubectl get deployment external-dns -n <namespace> -o yaml | grep cloudflare-proxied
+
+# If missing, add it to the deployment args:
+# --cloudflare-proxied=false
+```
+
+**Verification:**
+
+After disabling the proxy, verify DNS resolves to your LoadBalancer (not Cloudflare IPs):
+
+```bash
+# Should return AWS/GCP/Azure IP addresses or hostnames
+# NOT Cloudflare IPs (104.26.x.x, 172.67.x.x, 2606:4700:x)
+dig +short kafka-bootstrap.example.com
+
+# Cloudflare IPs indicate proxy is still enabled (won't work for Kafka)
+# LoadBalancer IPs/hostnames indicate correct configuration
+```
+
 #### Security Considerations
 
 When exposing Kafka externally:
@@ -609,6 +676,7 @@ strimzi:
 
 4. **Use network policies** - The chart includes network policies that can be enabled
 5. **Monitor access** - Enable audit logging and monitor connection attempts
+6. **Disable CDN/Proxy** - If using Cloudflare or similar CDN, disable proxy for Kafka DNS records (see above)
 
 ## Values
 

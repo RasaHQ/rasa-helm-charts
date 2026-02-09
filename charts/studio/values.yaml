@@ -221,7 +221,8 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
-    # -- backend.environmentVariables.MS_API_URL is the base URL for Rasa Pro (overrides default).
+    # -- backend.environmentVariables.MS_API_URL is the base URL for Rasa Pro (overrides default). Default is a service name of the Rasa Pro deployment defined as a dependency in the Chart.yaml file.
+    # If you want to change the default, you need to make sure it is a valid URL and that the Rasa Pro deployment is running and accessible.
     # MS_API_URL:
     #   value: "http://rasapro"
     # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.

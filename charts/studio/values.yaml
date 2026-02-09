@@ -221,6 +221,9 @@ backend:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
+    # -- backend.environmentVariables.MS_API_URL is the base URL for Rasa Pro (overrides default).
+    # MS_API_URL:
+    #   value: "http://rasapro"
     # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
     # Conversations older than this value will be deleted by the cleanup cron job.
     # Leave empty to disable automatic conversation cleanup.

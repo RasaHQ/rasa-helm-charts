@@ -54,6 +54,10 @@ spec:
       securityContext:
         {{- omit .Values.actionServer.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if .Values.actionServer.initContainers }}
+      initContainers:
+        {{- toYaml .Values.actionServer.initContainers | nindent 8 }}
+      {{- end }}
       containers:
         - name: action-server
           {{- if .Values.actionServer.containerSecurityContext.enabled }}

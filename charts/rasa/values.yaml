@@ -958,11 +958,11 @@ actionServer:
   # -- actionServer.initContainers allows to specify init containers for the Action Server deployment
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
   initContainers: []
-  #  - name: init
-  #    image: "busybox"
-  #    command: ["bash", "-c"]
-  #    args:
-  #      - echo "init container"
+    # - name: init
+    #   image: "busybox"
+    #   command: ["bash", "-c"]
+    #   args:
+    #     - echo "init container"
 
   # -- actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment
   additionalContainers: []

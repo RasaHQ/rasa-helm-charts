@@ -77,18 +77,10 @@ spec:
             - name: API_URL
               value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}/api"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"{{ end }}              
             - name: KEYCLOAK_API_GRANT_TYPE
-              {{- if .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE }}
-              value: {{ .Values.backend.environmentVariables.KEYCLOAK_API_GRANT_TYPE.value | quote }}
-              {{- else }}
               value: "password"
-              {{- end }}
-            - name: MS_API_URL
-              {{- if .Values.backend.environmentVariables.MS_API_URL }}
-              value: {{ .Values.backend.environmentVariables.MS_API_URL.value | quote }}
-              {{- else }}
-              value: "http://rasapro"
-              {{- end }}
-            {{- range $key, $value := .Values.backend.environmentVariables }}
+            {{- $defaults := dict "MS_API_URL" (dict "value" "http://rasapro") }}
+            {{- $env := mergeOverwrite $defaults .Values.backend.environmentVariables }}
+            {{- range $key, $value := $env }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}

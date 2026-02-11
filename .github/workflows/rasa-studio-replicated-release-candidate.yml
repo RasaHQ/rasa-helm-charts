@@ -41,17 +41,4 @@ jobs:
           gcp-service-account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
           github-repo: '${{ github.repository }}'
           github-ref: '${{ github.ref }}'
-          chart-path: 'charts/studio'  
-
-  promote-replicated-release:
-    name: Promote Replicated release
-    needs: [release-candidate]
-    if: needs.release-candidate.outputs.release-candidate == 'true'
-    uses: ./.github/workflows/promote-replicated-release.yml
-    with:
-      replicated-channel: studio-release-candidate
-      replicated-version: ${{ needs.release-candidate.outputs.studio-version }}
-      studio-version: ${{ needs.release-candidate.outputs.studio-version }}
-      kafka-version: 31.1.0
-      postgres-version: 16.3.0 #15.5.29
-    secrets: inherit
+          chart-path: 'charts/studio'

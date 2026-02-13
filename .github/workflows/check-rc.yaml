@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
       - 'charts/**'
-      - '!replicated/**'
       - '!.github/**'
 
 jobs:

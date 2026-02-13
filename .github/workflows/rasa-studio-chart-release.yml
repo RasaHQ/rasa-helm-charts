@@ -8,7 +8,6 @@ on:
       - 'charts/studio/**'
       - '!charts/rasa/**'
       - '!charts/op-kits/**'
-      - '!replicated/**'
 
 jobs:
   release:
@@ -64,13 +63,3 @@ jobs:
           slack-message: "⛔️ *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
-  replicated-release:
-    name: Promote Replicated release
-    needs: [release]
-    uses: ./.github/workflows/promote-replicated-release.yml
-    with:
-      replicated-channel: Stable
-      replicated-version: ${{ needs.release.outputs.studio-version }}
-      studio-version: ${{ needs.release.outputs.studio-version }}
-    secrets: inherit

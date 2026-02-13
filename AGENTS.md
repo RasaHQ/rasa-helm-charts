@@ -258,7 +258,6 @@ When making changes to a chart:
 - Chart dependencies are managed via the `dependencies` section in `Chart.yaml`
 - Some charts (like `studio`) have locked dependencies in `Chart.lock`
 - Run `helm dependency build` after modifying dependencies
-- Dependencies may come from OCI registries (e.g., `oci://registry.replicated.com/library`)
 
 ### Security Scanning
 

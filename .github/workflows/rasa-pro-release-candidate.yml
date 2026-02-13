@@ -8,7 +8,6 @@ on:
       - charts/rasa/**
       - '!charts/studio/**'
       - '!charts/op-kits/**'
-      - '!replicated/**'
 
 jobs:
   release-candidate:

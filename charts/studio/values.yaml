@@ -2,10 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-############################
-# THIS IS WORK IN PROGRESS #
-############################
-
 # -- (string) Override name of app
 nameOverride: ""
 # -- (string) Override the full qualified app name
@@ -1152,10 +1148,6 @@ deploymentLabels: {}
 
 # -- podLabels defines labels to add to all Studio pod(s)
 podLabels: {}
-
-replicated:
-  enabled: false
-  sdkVersion: "1.12.1"
 
 # -- Define the resources for the Rasa Pro model server
 rasa:

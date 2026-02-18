@@ -1,9 +1,0 @@
-{{- define "troubleshoot.preflights" -}}
-apiVersion: troubleshoot.sh/v1beta2
-kind: Preflight
-metadata:
-  name: {{ include "studio.fullname" . }}-preflight
-spec:
-  collectors: {{- include "troubleshoot.collectors.shared" .  | nindent 4 }}
-  analyzers: {{- include "troubleshoot.analyzers.shared" .  | nindent 4 }}
-{{- end -}}

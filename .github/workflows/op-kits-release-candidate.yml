@@ -10,7 +10,6 @@ on:
       - charts/op-kits/**
       - '!charts/rasa/**'
       - '!charts/studio/**'
-      - '!replicated/**'
 
 jobs:
   release-candidate:

@@ -432,6 +432,31 @@ entries:
     version: 1.2.7
   studio:
   - apiVersion: v2
+    created: "2026-02-18T13:49:15.873454767Z"
+    dependencies:
+    - condition: rasa.enabled
+      name: rasa
+      repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
+      version: 2.0.2
+    description: A Rasa Studio Helm chart for Kubernetes
+    digest: 35864d9e7c87961d67b3241c1a3f141270e19a6f17e28eb116949464dddbd88e
+    home: https://helm.rasa.com
+    keywords:
+    - Kubernetes
+    - Studio
+    - CALM
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: studio
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.3.0/studio-2.3.0.tgz
+    version: 2.3.0
+  - apiVersion: v2
     created: "2026-02-10T11:46:37.113154002Z"
     dependencies:
     - condition: replicated.enabled
@@ -667,4 +692,4 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
     version: 2.1.9
-generated: "2026-02-10T11:46:37.113219548Z"
+generated: "2026-02-18T13:49:15.873517875Z"

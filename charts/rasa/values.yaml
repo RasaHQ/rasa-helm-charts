@@ -414,14 +414,26 @@ rasaProServices:
     # -- database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container.
     enableAwsRdsIam: false
     # -- database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication.
+    # It can be a plain string or a secret reference:
+    #   url:
+    #     secretName: my-secret
+    #     secretKey: analyticsDbUrl
     url: ""
     # -- database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    # It can be a plain string or a secret reference:
+    #   username:
+    #     secretName: my-secret
+    #     secretKey: analyticsDbUsername
     username: ""
     # -- database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     hostname: ""
     # -- database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     port: "5432"
     # -- database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
+    # It can be a plain string or a secret reference:
+    #   databaseName:
+    #     secretName: my-secret
+    #     secretKey: analyticsDbName
     databaseName: ""
     # -- database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     sslMode: ""

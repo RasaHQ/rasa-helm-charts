@@ -74,9 +74,23 @@ Environment Variables for Rasa Analytics
 - name: "RASA_ANALYTICS_DB_HOST_NAME"
   value: {{ .hostname | quote }}
 - name: "RASA_ANALYTICS_DB_NAME"
+  {{- if kindIs "map" .databaseName }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .databaseName.secretName | quote }}
+      key: {{ .databaseName.secretKey | quote }}
+  {{- else }}
   value: {{ .databaseName | quote }}
+  {{- end }}
 - name: "RASA_ANALYTICS_DB_USERNAME"
+  {{- if kindIs "map" .username }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .username.secretName | quote }}
+      key: {{ .username.secretKey | quote }}
+  {{- else }}
   value: {{ .username | quote }}
+  {{- end }}
 - name: "RASA_ANALYTICS_DB_PORT"
   value: {{ .port | quote }}
 - name: "RASA_ANALYTICS_DB_SSL_MODE"
@@ -85,7 +99,14 @@ Environment Variables for Rasa Analytics
   value: {{ .sslCaLocation | quote }}
 {{- else }}
 - name: "RASA_ANALYTICS_DB_URL"
+  {{- if kindIs "map" .url }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .url.secretName | quote }}
+      key: {{ .url.secretKey | quote }}
+  {{- else }}
   value: {{ .url | quote }}
+  {{- end }}
 {{- end }}
 {{- end }}
 

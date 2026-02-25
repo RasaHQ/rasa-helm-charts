@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.0.2](https://img.shields.io/badge/Version-2.0.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.3](https://img.shields.io/badge/Version-2.0.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -18,7 +18,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.2
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +33,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.0.2
+helm install my-release rasa/rasa --version 2.0.3
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +53,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.2
+helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.3
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-helm pull rasa/rasa --version 2.0.2
+helm pull rasa/rasa --version 2.0.3
 ```
 
 ## General Configuration
@@ -474,14 +474,14 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 | rasaProServices.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
 | rasaProServices.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
 | rasaProServices.containerSecurityContext | object | rasaProServices.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
-| rasaProServices.database.databaseName | string | database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.database.databaseName | string | database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true. It can be a plain string or a secret reference:   databaseName:     secretName: my-secret     secretKey: analyticsDbName | `""` |
 | rasaProServices.database.enableAwsRdsIam | bool | database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container. | `false` |
 | rasaProServices.database.hostname | string | database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
 | rasaProServices.database.port | string | database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `"5432"` |
 | rasaProServices.database.sslCaLocation | string | database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full. | `""` |
 | rasaProServices.database.sslMode | string | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
-| rasaProServices.database.url | string | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. | `""` |
-| rasaProServices.database.username | string | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
+| rasaProServices.database.url | string | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. It can be a plain string or a secret reference:   url:     secretName: my-secret     secretKey: analyticsDbUrl | `""` |
+| rasaProServices.database.username | string | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. It can be a plain string or a secret reference:   username:     secretName: my-secret     secretKey: analyticsDbUsername | `""` |
 | rasaProServices.enabled | bool | rasaProServices.enabled enables Rasa Pro Services deployment | `true` |
 | rasaProServices.envFrom | list | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasaProServices.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |

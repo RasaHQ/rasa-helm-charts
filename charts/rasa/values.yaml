@@ -414,27 +414,36 @@ rasaProServices:
     # -- database.enableAwsRdsIam specifies whether to use AWS RDS IAM authentication for the Rasa Pro Services container.
     enableAwsRdsIam: false
     # -- database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication.
-    # It can be a plain string or a secret reference:
-    #   url:
-    #     secretName: my-secret
-    #     secretKey: analyticsDbUrl
+    # To pass the URL from an existing secret instead, leave this empty and set urlExistingSecretName and urlExistingSecretKey:
+    #   urlExistingSecretName: my-secret
+    #   urlExistingSecretKey: analyticsDbUrl
     url: ""
+    # -- database.urlExistingSecretName specifies the name of an existing secret containing the database URL. Takes precedence over `url` if set.
+    # urlExistingSecretName: ""
+    # -- database.urlExistingSecretKey specifies the key within the existing secret that holds the database URL.
+    # urlExistingSecretKey: ""
     # -- database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
-    # It can be a plain string or a secret reference:
-    #   username:
-    #     secretName: my-secret
-    #     secretKey: analyticsDbUsername
+    # To pass the username from an existing secret instead, leave this empty and set usernameExistingSecretName and usernameExistingSecretKey:
+    #   usernameExistingSecretName: my-secret
+    #   usernameExistingSecretKey: analyticsDbUsername
     username: ""
+    # -- database.usernameExistingSecretName specifies the name of an existing secret containing the database username. Takes precedence over `username` if set.
+    # usernameExistingSecretName: ""
+    # -- database.usernameExistingSecretKey specifies the key within the existing secret that holds the database username.
+    # usernameExistingSecretKey: ""
     # -- database.hostname specifies the hostname of the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     hostname: ""
     # -- database.port specifies the port for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     port: "5432"
     # -- database.databaseName specifies the database name for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
-    # It can be a plain string or a secret reference:
-    #   databaseName:
-    #     secretName: my-secret
-    #     secretKey: analyticsDbName
+    # To pass the database name from an existing secret instead, leave this empty and set databaseNameExistingSecretName and databaseNameExistingSecretKey:
+    #   databaseNameExistingSecretName: my-secret
+    #   databaseNameExistingSecretKey: analyticsDbName
     databaseName: ""
+    # -- database.databaseNameExistingSecretName specifies the name of an existing secret containing the database name. Takes precedence over `databaseName` if set.
+    # databaseNameExistingSecretName: ""
+    # -- database.databaseNameExistingSecretKey specifies the key within the existing secret that holds the database name.
+    # databaseNameExistingSecretKey: ""
     # -- database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true.
     sslMode: ""
     # -- database.sslCaLocation specifies the SSL CA location for the data lake to store analytics data in. Required if sslMode is verify-full.

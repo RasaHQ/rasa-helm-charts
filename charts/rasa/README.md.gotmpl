@@ -92,6 +92,40 @@ rasaProServices:
   enabled: false
 ```
 
+### Rasa Pro Services Database Configuration
+
+The `rasaProServices.database` section configures the analytics data lake connection. There are two ways to provide the database URL.
+
+**Plain value:**
+
+```yaml
+rasaProServices:
+  database:
+    url: "postgresql://user:password@host:5432/dbname"
+```
+
+**From an existing secret** (recommended for production):
+
+Create a Kubernetes secret containing the database URL:
+
+```console
+kubectl create secret generic my-db-secret \
+  --from-literal=analyticsDbUrl="postgresql://user:password@host:5432/dbname"
+```
+
+Then reference it in your values:
+
+```yaml
+rasaProServices:
+  database:
+    urlExistingSecretName: my-db-secret
+    urlExistingSecretKey: analyticsDbUrl
+```
+
+When `urlExistingSecretName` is set it takes precedence over `url`.
+
+For AWS RDS IAM authentication, use `database.enableAwsRdsIam: true` together with `hostname`, `usernameExistingSecretName`/`username`, `databaseNameExistingSecretName`/`databaseName`, `port`, and `sslMode` instead of the URL fields.
+
 ### Use MiniO instead of S3
 
 To use MiniO instead of S3, set `AWS_ENDPOINT_URL` environment variable to the URL of the MiniO server along with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables. Also provide `AWS_REGION` and `BUCKET_NAME` environment variables.

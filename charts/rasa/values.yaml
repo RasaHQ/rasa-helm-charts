@@ -343,7 +343,9 @@ rasa:
     targetCPUUtilizationPercentage: 80
     # targetMemoryUtilizationPercentage: 80
 
-  # rasa.persistence creates PV and PVC to be used as model service. DO NOT use this if you are only running Rasa Pro.
+  # rasa.persistence creates a PVC for model storage. Only supported when running Rasa Pro as a model service for Studio.
+  # Note: the PVC name is scoped to the namespace, so only one release per namespace can use persistence at a time.
+  # A PV is also created when hostPath.enabled is true (for development/single-node use only).
   persistence:
     create: false
     storageClassName:

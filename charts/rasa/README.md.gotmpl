@@ -408,12 +408,16 @@ duckling:
   enabled: true
 ```
 
-Then point Rasa at the Duckling service. The Duckling service name follows the pattern `<release-name>-duckling`:
+When `duckling.enabled: true`, the chart automatically sets `RASA_DUCKLING_HTTP_URL` to the in-cluster service URL — no additional configuration is required.
+
+To connect to an **external** Duckling instance instead, leave `duckling.enabled: false` and set the URL explicitly:
 
 ```yaml
+duckling:
+  enabled: false
 rasa:
   settings:
-    ducklingHttpUrl: "http://my-release-duckling:8000"
+    ducklingHttpUrl: "http://my-external-duckling:8000"
 ```
 
 ### Environment Variables
@@ -490,6 +494,13 @@ rasa:
 ```
 
 The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
+
+You can also set `global.ingressHost` to override the host across all ingress resources at once — it takes precedence over any `hosts[].host` values set per-component:
+
+```yaml
+global:
+  ingressHost: "rasa.example.com"
+```
 
 ### Resources and Autoscaling
 
@@ -571,5 +582,7 @@ networkPolicy:
 ```
 
 > **Note:** When `networkPolicy.denyAll` is true, you must supply `nodeCIDR` so that the kubelet can reach pods for liveness and readiness probes.
+
+> **Note:** The built-in kubelet allowlist only covers the `rasa` and `rasa-pro-services` pods. If you also enable `duckling` or `actionServer` with `denyAll: true`, their probes will fail unless you add additional NetworkPolicy rules manually to allow kubelet access to those pods.
 
 {{ template "chart.valuesSection" . }}

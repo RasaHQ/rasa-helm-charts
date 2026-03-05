@@ -242,6 +242,43 @@ rasa:
 
 See the [Rasa documentation](https://rasa.com/docs/) for details on API authentication.
 
+### Configuring the Readiness Probe
+
+The default readiness probe hits the `/` endpoint, which returns a success code as soon as the HTTP server is up — before any model has been loaded. For production, use the `/status` endpoint instead, which only returns a success code once Rasa has loaded a model and is ready to process conversations.
+
+**Without authentication:**
+
+```yaml
+rasa:
+  readinessProbe:
+    httpGet:
+      path: /status
+      port: 5005
+      scheme: HTTP
+```
+
+**With `authToken` configured:**
+
+When `AUTH_TOKEN` is set, the `/status` endpoint requires authentication. Use an `exec` probe that reads the token from the environment variable:
+
+```yaml
+rasa:
+  readinessProbe:
+    httpGet: null
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - "curl -f http://localhost:5005/status?token=${AUTH_TOKEN}"
+    initialDelaySeconds: 15
+    periodSeconds: 15
+    successThreshold: 1
+    timeoutSeconds: 5
+    failureThreshold: 6
+```
+
+> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. The `httpGet: null` is required to unset the default HTTP probe when switching to an `exec` probe. Update the URL scheme and port in the `curl` command if you have changed `rasa.settings.scheme` or `rasa.settings.port` from their defaults.
+
 ### Configuring Credentials and Endpoints via ConfigMap
 
 The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.

@@ -126,11 +126,36 @@ rasaProServices:
 
 When `urlExistingSecretName` is set it takes precedence over `url`.
 
-For AWS RDS IAM authentication, use `database.enableAwsRdsIam: true` together with `hostname`, `usernameExistingSecretName`/`username`, `databaseNameExistingSecretName`/`databaseName`, `port`, and `sslMode` instead of the URL fields.
+**AWS RDS IAM authentication:**
+
+For IAM-based authentication (passwordless, using an IAM role bound to the pod's service account), use `database.enableAwsRdsIam: true` and provide individual connection fields instead of a URL:
+
+```yaml
+rasaProServices:
+  serviceAccount:
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/rasa-pro-services-role"
+  database:
+    enableAwsRdsIam: true
+    hostname: "my-cluster.cluster-xxxxx.us-east-1.rds.amazonaws.com"
+    port: "5432"
+    username: "rasa_user"
+    databaseName: "rasa_analytics"
+    sslMode: "verify-full"
+    sslCaLocation: "/path/to/rds-ca.pem"
+```
 
 ### Use MinIO instead of S3
 
-To use MinIO instead of S3, set `AWS_ENDPOINT_URL` environment variable to the URL of the MinIO server along with `AWS_ACCESS_KEY_ID` and `AWS_SECRET_ACCESS_KEY` environment variables. Also provide `AWS_REGION` and `BUCKET_NAME` environment variables.
+> **Warning:** MinIO support is deprecated and no longer maintained. Use S3 or another supported object storage provider instead.
+
+To use MinIO instead of S3, set `AWS_ENDPOINT_URL` to the URL of the MinIO server and provide `AWS_REGION` and `BUCKET_NAME`. Store your MinIO credentials in a Kubernetes Secret:
+
+```console
+kubectl create secret generic minio-credentials \
+  --from-literal=accessKey="<YOUR_MINIO_ACCESS_KEY>" \
+  --from-literal=secretKey="<YOUR_MINIO_SECRET_KEY>"
+```
 
 ```yaml
 rasa:
@@ -138,9 +163,15 @@ rasa:
     - name: AWS_ENDPOINT_URL
       value: "http://minio.example.com"
     - name: AWS_ACCESS_KEY_ID
-      value: "minio"
+      valueFrom:
+        secretKeyRef:
+          name: minio-credentials
+          key: accessKey
     - name: AWS_SECRET_ACCESS_KEY
-      value: "minio123"
+      valueFrom:
+        secretKeyRef:
+          name: minio-credentials
+          key: secretKey
     - name: AWS_REGION
       value: "us-east-1"
     - name: BUCKET_NAME
@@ -247,12 +278,14 @@ The `rasa.settings.endpoints` section allows you to configure various endpoints 
 
 **Action Server Endpoint:**
 
+The action endpoint URL must be a full HTTP URL. When using the bundled Action Server component, the service name follows the pattern `<fullname>-action-server`:
+
 ```yaml
 rasa:
   settings:
     endpoints:
       action_endpoint:
-        url: "/webhook"
+        url: "http://my-release-action-server:5055/webhook"
 ```
 
 **Model Storage:**
@@ -281,6 +314,22 @@ rasa:
         use_ssl: false
 ```
 
+**Tracker Store (PostgreSQL example):**
+
+```yaml
+rasa:
+  settings:
+    endpoints:
+      tracker_store:
+        type: sql
+        dialect: postgresql
+        url: <hostname>
+        db: <database>
+        username: <username>
+        password: <password>
+        port: 5432
+```
+
 **Event Broker (Kafka example):**
 
 ```yaml
@@ -300,8 +349,21 @@ rasa:
 
 **Model Groups:**
 
+Model groups require an LLM provider API key. Inject it as an environment variable from a Kubernetes Secret:
+
+```console
+kubectl create secret generic openai-secret \
+  --from-literal=apiKey="<YOUR_OPENAI_API_KEY>"
+```
+
 ```yaml
 rasa:
+  additionalEnv:
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: openai-secret
+          key: apiKey
   settings:
     endpoints:
       model_groups:
@@ -352,6 +414,147 @@ Then point Rasa at the Duckling service. The Duckling service name follows the p
 rasa:
   settings:
     ducklingHttpUrl: "http://my-release-duckling:8000"
+```
+
+### Environment Variables
+
+Use `additionalEnv` to inject extra environment variables into any component without replacing the chart-managed ones. Both plain values and Secret/ConfigMap references are supported:
+
+```yaml
+rasa:
+  additionalEnv:
+    - name: MY_VAR
+      value: "my-value"
+    - name: MY_SECRET_VAR
+      valueFrom:
+        secretKeyRef:
+          name: my-secret
+          key: my-key
+    - name: MY_CONFIGMAP_VAR
+      valueFrom:
+        configMapKeyRef:
+          name: my-configmap
+          key: my-key
+```
+
+Use `envFrom` to inject all keys from a ConfigMap or Secret as environment variables at once:
+
+```yaml
+rasa:
+  envFrom:
+    - configMapRef:
+        name: my-configmap
+    - secretRef:
+        name: my-secret
+```
+
+Both `additionalEnv` and `envFrom` are available on all components (`rasa`, `rasaProServices`, `actionServer`, `duckling`).
+
+### Loading Initial Models
+
+Use `initContainers` to download a model before the Rasa server starts. The init container shares the `/app/models` volume with the main container:
+
+```yaml
+rasa:
+  initContainers:
+    - name: load-initial-model
+      image: alpine
+      command: ["/bin/sh", "-c"]
+      args:
+        - wget https://my-model-server.example.com/models/model.tar.gz -O /app/models/model.tar.gz
+      volumeMounts:
+        - mountPath: /app/models
+          name: models
+```
+
+### Ingress
+
+To expose the Rasa API externally, enable the ingress resource. The example below uses nginx with TLS managed by cert-manager:
+
+```yaml
+rasa:
+  ingress:
+    enabled: true
+    className: "nginx"
+    annotations:
+      cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    hosts:
+      - host: rasa.example.com
+        paths:
+          - path: /
+            pathType: Prefix
+    tls:
+      - secretName: rasa-tls
+        hosts:
+          - rasa.example.com
+```
+
+The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
+
+### Resources and Autoscaling
+
+No resource requests or limits are set by default. For production, always set these explicitly:
+
+```yaml
+rasa:
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 2
+      memory: 4Gi
+```
+
+Enable Horizontal Pod Autoscaling (HPA) to scale replicas based on CPU or memory:
+
+```yaml
+rasa:
+  autoscaling:
+    enabled: true
+    minReplicas: 2
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+    # targetMemoryUtilizationPercentage: 80
+```
+
+The same `resources` and `autoscaling` blocks are available for `rasaProServices`, `actionServer`, and `duckling`.
+
+### Rasa Pro Services Kafka Configuration
+
+Rasa Pro Services consumes conversation events from Kafka for the analytics pipeline. Configure the Kafka connection under `rasaProServices.kafka`:
+
+**SASL_SSL (recommended for production):**
+
+```yaml
+rasaProServices:
+  kafka:
+    brokerAddress: "kafka-bootstrap.example.com:9092"
+    topic: "rasa-core-events"
+    dlqTopic: "rasa-analytics-dlq"
+    consumerId: "rasa-analytics-group"
+    securityProtocol: "SASL_SSL"
+    saslMechanism: "SCRAM-SHA-512"
+    saslUsername: "rasa-analytics"
+    saslPassword:
+      secretName: kafka-credentials
+      secretKey: password
+    sslCaLocation: "/path/to/ca.pem"
+```
+
+**AWS MSK with IAM authentication:**
+
+```yaml
+rasaProServices:
+  kafka:
+    enableAwsMskIam: true
+    brokerAddress: "b-1.my-cluster.xxxxx.c1.kafka.us-east-1.amazonaws.com:9098"
+    topic: "rasa-core-events"
+    dlqTopic: "rasa-analytics-dlq"
+  useCloudProviderIam:
+    enabled: true
+    provider: "aws"
+    region: "us-east-1"
 ```
 
 ### Network Policies

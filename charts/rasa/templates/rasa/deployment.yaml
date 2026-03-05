@@ -90,24 +90,24 @@ spec:
             {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
           {{- else }}
           env:
-            {{- include "rasa.containers.env" . | nindent 12 }}
+            {{- include "rasa.containers.env" . | trim | nindent 12 }}
           {{- end }}
           {{- if .Values.rasa.envFrom }}
           envFrom:
             {{- toYaml .Values.rasa.envFrom | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.livenessProbe.enabled }}
+          {{- if .Values.rasa.livenessProbe.enabled }}
           livenessProbe:
             {{- omit .Values.rasa.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.readinessProbe.enabled }}
+          {{- if .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.rasa.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.rasa.resources | nindent 12 }}
           volumeMounts:
-            {{- include "rasa.containers.volumeMounts" . | nindent 12 }}
+            {{- include "rasa.containers.volumeMounts" . | trim | nindent 12 }}
           {{- if .Values.rasa.volumeMounts }}
             {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
           {{- end }}

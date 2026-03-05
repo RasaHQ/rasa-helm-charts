@@ -45,8 +45,10 @@ spec:
       dnsConfig:
         {{ toYaml .Values.dnsConfig | nindent 8 }}
       {{- end }}
+      {{- if or .Values.rasaProServices.imagePullSecrets .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- include "rasaProServices.imagePullSecrets" . }}
+      {{- end }}
       serviceAccountName: {{ include "rasa.rasaProServices.serviceAccountName" . }}
       {{- if .Values.rasaProServices.podSecurityContext.enabled }}
       securityContext:
@@ -95,8 +97,8 @@ spec:
       {{- if .Values.rasaProServices.additionalContainers }}
         {{- toYaml .Values.rasaProServices.additionalContainers | nindent 8 }}
       {{- end }}
-      volumes:
       {{- if .Values.rasaProServices.volumes }}
+      volumes:
         {{- toYaml .Values.rasaProServices.volumes | nindent 8 }}
       {{- end }}
       {{- with .Values.rasaProServices.nodeSelector }}

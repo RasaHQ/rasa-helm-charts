@@ -96,11 +96,11 @@ spec:
           envFrom:
             {{- toYaml .Values.rasa.envFrom | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.livenessProbe.enabled }}
+          {{- if .Values.rasa.livenessProbe.enabled }}
           livenessProbe:
             {{- omit .Values.rasa.livenessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          {{- if or .Values.rasa.readinessProbe.enabled }}
+          {{- if .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.rasa.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}

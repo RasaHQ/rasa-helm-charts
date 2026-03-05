@@ -6,7 +6,7 @@ metadata:
 spec:
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "rasa.name" . }}
+      app.kubernetes.io/name: {{ include "rasa.fullname" . }}
   policyTypes:
   - Egress
   egress:

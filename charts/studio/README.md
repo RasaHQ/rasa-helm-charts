@@ -6,7 +6,7 @@ A Rasa Studio Helm chart for Kubernetes
 
 ## Prerequisites
 
-- Kubernetes 1.23+
+- Kubernetes 1.30+
 - Helm 3.8.0+
 
 ## Installing the Chart

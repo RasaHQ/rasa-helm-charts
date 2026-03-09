@@ -219,18 +219,32 @@
       color: var(--text-muted);
     }
 
-    /* Tables — scroll within their container, never bleed into margin */
+    /* Tables — fill full width; Description column wraps, others stay compact */
     .content table {
       border-collapse: collapse;
-      width: max-content;
-      min-width: 100%;
+      width: 100%;
       margin-bottom: 0;
       font-size: 0.9rem;
     }
 
     .content table + p { margin-top: 1.25rem; }
 
-    /* Scroll wrapper injected by JS for wide tables */
+    /* Key / Type / Default columns: as narrow as content, no wrapping */
+    .content td:not(:nth-child(3)),
+    .content th:not(:nth-child(3)) {
+      white-space: nowrap;
+      width: 1%;
+    }
+
+    /* Description column (3rd): wraps and takes all remaining space */
+    .content td:nth-child(3),
+    .content th:nth-child(3) {
+      white-space: normal;
+      min-width: 180px;
+      overflow-wrap: break-word;
+    }
+
+    /* Scroll wrapper — safety net for any table that still overflows */
     .table-wrap {
       overflow-x: auto;
       margin-bottom: 1.25rem;

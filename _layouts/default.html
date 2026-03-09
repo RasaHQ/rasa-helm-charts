@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <style>
+    /* ── Reset ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Brand tokens ────────────────────────────────────────────────────── */
+    :root {
+      --purple:       #5a17ee;
+      --purple-light: #ede8fd;
+      --navy:         #32415b;
+      --text:         #24292f;
+      --text-muted:   #57606a;
+      --bg:           #ffffff;
+      --code-bg:      #f6f8fa;
+      --border:       #d0d7de;
+      --radius:       6px;
+    }
+
+    /* ── Base ────────────────────────────────────────────────────────────── */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ── Purple accent strip ─────────────────────────────────────────────── */
+    .accent-strip {
+      height: 3px;
+      background: var(--purple);
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+      gap: 1rem;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    /* Rasa speech-bubble icon */
+    .logo-icon {
+      display: block;
+      flex-shrink: 0;
+    }
+
+    .logo-wordmark {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .logo-rasa { color: var(--navy); }
+
+    .logo-divider {
+      color: var(--border);
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .logo-product { color: var(--purple); }
+
+    /* Nav */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+
+    nav a:hover { color: var(--purple); }
+
+    nav a.external::after {
+      content: " ↗";
+      font-size: 0.75em;
+    }
+
+    /* ── Main content ────────────────────────────────────────────────────── */
+    main {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 3rem 2rem 5rem;
+    }
+
+    /* ── Markdown content styles ─────────────────────────────────────────── */
+
+    /* Headings */
+    .content h1,
+    .content h2,
+    .content h3,
+    .content h4,
+    .content h5,
+    .content h6 {
+      color: var(--navy);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .content h1 {
+      font-size: 2.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .content h2 {
+      font-size: 1.45rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h3 {
+      font-size: 1.15rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .content h4,
+    .content h5,
+    .content h6 {
+      font-size: 1rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Body text */
+    .content p { margin-bottom: 1rem; }
+
+    /* Lists */
+    .content ul,
+    .content ol {
+      margin: 0.5rem 0 1rem 1.5rem;
+    }
+
+    .content li { margin-bottom: 0.3rem; }
+
+    .content li > ul,
+    .content li > ol {
+      margin-top: 0.3rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Links */
+    .content a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .content a:hover { text-decoration: underline; }
+
+    /* Inline code */
+    .content code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15em 0.4em;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.875em;
+      color: var(--navy);
+    }
+
+    /* Code blocks */
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+    }
+
+    .content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    /* Blockquote */
+    .content blockquote {
+      border-left: 3px solid var(--purple);
+      margin: 0 0 1rem;
+      padding: 0.5rem 0 0.5rem 1rem;
+      color: var(--text-muted);
+    }
+
+    /* Tables */
+    .content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 1.25rem;
+      font-size: 0.9rem;
+    }
+
+    .content th,
+    .content td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    .content th {
+      background: var(--code-bg);
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .content tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Horizontal rule */
+    .content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    /* Images */
+    .content img { max-width: 100%; border-radius: var(--radius); }
+
+    /* Badges (shield.io) */
+    .content img[src*="shields.io"],
+    .content img[src*="img.shields.io"] {
+      border-radius: 3px;
+      vertical-align: middle;
+    }
+
+    /* ── Syntax highlighting (Rouge / GitHub style) ───────────────────────── */
+    .highlight .c,  .highlight .cd { color: #6a737d; font-style: italic }
+    .highlight .cm { color: #6a737d; font-style: italic }
+    .highlight .c1 { color: #6a737d; font-style: italic }
+    .highlight .cp { color: #999999; font-weight: bold }
+    .highlight .cs { color: #999999; font-weight: bold; font-style: italic }
+    .highlight .err { color: #a61717; background-color: #e3d2d2 }
+    .highlight .gd { color: #000000; background-color: #ffdddd }
+    .highlight .ge { font-style: italic }
+    .highlight .gr { color: #aa0000 }
+    .highlight .gh { color: #999999 }
+    .highlight .gi { color: #000000; background-color: #ddffdd }
+    .highlight .go { color: #888888 }
+    .highlight .gp { color: #555555 }
+    .highlight .gs { font-weight: bold }
+    .highlight .gu { color: #aaaaaa }
+    .highlight .gt { color: #aa0000 }
+    .highlight .k,  .highlight .kc,
+    .highlight .kd, .highlight .kn,
+    .highlight .kp, .highlight .kr { color: #d73a49; font-weight: bold }
+    .highlight .kt { color: #445588; font-weight: bold }
+    .highlight .m,  .highlight .mf,
+    .highlight .mh, .highlight .mi,
+    .highlight .mo, .highlight .il { color: #005cc5 }
+    .highlight .n  { color: var(--text) }
+    .highlight .na { color: #005cc5 }
+    .highlight .nb { color: #0086b3 }
+    .highlight .nc { color: #445588; font-weight: bold }
+    .highlight .no { color: #008080 }
+    .highlight .nd { color: #3c5d5d; font-weight: bold }
+    .highlight .ni { color: #800080 }
+    .highlight .ne { color: #990000; font-weight: bold }
+    .highlight .nf { color: #6f42c1; font-weight: bold }
+    .highlight .nn { color: #555555 }
+    .highlight .nt { color: #22863a; font-weight: bold }
+    .highlight .nv { color: #008080 }
+    .highlight .o,  .highlight .ow { color: var(--text); font-weight: bold }
+    .highlight .s,  .highlight .sb,
+    .highlight .sc, .highlight .sd,
+    .highlight .s2, .highlight .se,
+    .highlight .sh, .highlight .si,
+    .highlight .sx, .highlight .sr,
+    .highlight .s1, .highlight .ss { color: #032f62 }
+    .highlight .bp { color: #999999 }
+    .highlight .vc { color: #008080 }
+    .highlight .vg { color: #008080 }
+    .highlight .vi { color: #008080 }
+    .highlight .w  { color: #bbbbbb }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    footer .sep { margin: 0 0.5rem; opacity: 0.4; }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .header-inner {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 0.6rem 0;
+        gap: 0.5rem;
+      }
+
+      nav { gap: 1rem; }
+
+      main { padding: 2rem 1.25rem 4rem; }
+
+      .content h1 { font-size: 1.65rem; }
+      .content h2 { font-size: 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 0 1rem; }
+      footer { padding: 1rem; }
+      nav a.external { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="accent-strip"></div>
+
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <!-- Rasa speech-bubble icon mark -->
+        <svg class="logo-icon" width="28" height="24" viewBox="0 0 28 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd"
+            d="M0 0v15.5h9v5.5l5.5-5.5H28V0H0z"
+            fill="#5a17ee"/>
+        </svg>
+        <span class="logo-wordmark">
+          <span class="logo-rasa">rasa</span>
+          <span class="logo-divider">|</span>
+          <span class="logo-product">helm charts</span>
+        </span>
+      </a>
+
+      <nav aria-label="Chart documentation">
+        <a href="/charts/studio/">Studio</a>
+        <a href="/charts/rasa/">Rasa Pro</a>
+        <a href="/charts/op-kits/">Operator Kits</a>
+        <a href="https://rasa.com/docs" class="external" target="_blank" rel="noopener">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="content">
+      {{ content }}
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      &copy; {{ site.time | date: "%Y" }}
+      Rasa Technologies GmbH
+      <span class="sep">|</span>
+      <a href="https://rasa.com/eula" target="_blank" rel="noopener">EULA</a>
+      <span class="sep">|</span>
+      <a href="https://github.com/RasaHQ/rasa-helm-charts" target="_blank" rel="noopener">GitHub</a>
+      <span class="sep">|</span>
+      <a href="https://rasa.com/docs" target="_blank" rel="noopener">Documentation</a>
+    </p>
+  </footer>
+
+</body>
+</html>

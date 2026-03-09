@@ -113,9 +113,7 @@
 
     /* ── Main content ────────────────────────────────────────────────────── */
     main {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 3rem 2rem 5rem;
+      padding: 3rem 1.5rem 5rem;
     }
 
     /* ── Markdown content styles ─────────────────────────────────────────── */
@@ -221,12 +219,22 @@
       color: var(--text-muted);
     }
 
-    /* Tables */
+    /* Tables — scroll within their container, never bleed into margin */
     .content table {
       border-collapse: collapse;
-      width: 100%;
-      margin-bottom: 1.25rem;
+      width: max-content;
+      min-width: 100%;
+      margin-bottom: 0;
       font-size: 0.9rem;
+    }
+
+    .content table + p { margin-top: 1.25rem; }
+
+    /* Scroll wrapper injected by JS for wide tables */
+    .table-wrap {
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+      border-radius: var(--radius);
     }
 
     .content th,
@@ -339,7 +347,7 @@
 
       nav { gap: 1rem; }
 
-      main { padding: 2rem 1.25rem 4rem; }
+      main { padding: 2rem 1rem 4rem; }
 
       .content h1 { font-size: 1.65rem; }
       .content h2 { font-size: 1.25rem; }
@@ -399,6 +407,17 @@
       <a href="https://rasa.com/docs" target="_blank" rel="noopener">Documentation</a>
     </p>
   </footer>
+
+  <script>
+    // Wrap every table in a scroll container so wide tables scroll
+    // independently rather than forcing horizontal page scroll.
+    document.querySelectorAll('.content table').forEach(function(t) {
+      var wrap = document.createElement('div');
+      wrap.className = 'table-wrap';
+      t.parentNode.insertBefore(wrap, t);
+      wrap.appendChild(t);
+    });
+  </script>
 
 </body>
 </html>

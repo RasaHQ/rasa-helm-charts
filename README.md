@@ -18,7 +18,12 @@ By installing and using this software, you agree to be bound by the terms and co
 
 You can install charts from either the GitHub Helm repository or the OCI registry.
 
-> **Note:** Rasa Pro and Rasa Studio require a valid license key. Create the required secret before installing — see the [chart documentation](https://helm.rasa.com) for details.
+A valid license key is required. Create the secret first — the chart looks for it by default under `rasa-secrets`. See the [chart documentation](https://helm.rasa.com) for details.
+
+```bash
+kubectl create secret generic rasa-secrets \
+  --from-literal=rasaProLicense="<YOUR_LICENSE_KEY>"
+```
 
 ```bash
 # From GitHub Helm repository

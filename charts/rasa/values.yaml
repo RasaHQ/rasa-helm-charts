@@ -48,14 +48,16 @@ rasa:
     scheme: http
     # -- settings.enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod).
     enableApi: true
-    # -- settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
-    authToken:
-      secretName: "rasa-secrets"
-      secretKey: "authToken"
-    # -- settings.jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
-    jwtSecret:
-      secretName: "rasa-secrets"
-      secretKey: "jwtSecret"
+    # -- settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Leave empty (default) to disable token-based auth.
+    # authToken:
+    #   secretName: "rasa-secrets"
+    #   secretKey: "authToken"
+    authToken: {}
+    # -- settings.jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Leave empty (default) to disable JWT auth.
+    # jwtSecret:
+    #   secretName: "rasa-secrets"
+    #   secretKey: "jwtSecret"
+    jwtSecret: {}
     # -- settings.jwtMethod is JWT algorithm to be used
     jwtMethod: HS256
     # -- settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.

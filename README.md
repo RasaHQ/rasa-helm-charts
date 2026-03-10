@@ -18,6 +18,8 @@ By installing and using this software, you agree to be bound by the terms and co
 
 You can install charts from either the GitHub Helm repository or the OCI registry.
 
+A valid license key is required before installing. Refer to the documentation for each chart for setup instructions: [Rasa Pro](https://helm.rasa.com/charts/rasa/) · [Rasa Studio](https://helm.rasa.com/charts/studio/).
+
 ```bash
 # From GitHub Helm repository
 helm repo add rasa https://helm.rasa.com/charts && helm repo update
@@ -33,7 +35,7 @@ helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases
 
 ### Prerequisites
 
-- Kubernetes 1.24+
+- Kubernetes 1.30+
 - Helm 3.0.0+
 
 ### Setup a Kubernetes Cluster

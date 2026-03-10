@@ -324,7 +324,7 @@ rasa:
     jwtMethod: HS256
 ```
 
-See the [Rasa documentation](https://rasa.com/docs/) for details on API authentication.
+See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-rest-api/) for details on API authentication.
 
 ### Configuring the Readiness Probe
 
@@ -699,6 +699,10 @@ networkPolicy:
 > **Note:** When `networkPolicy.denyAll` is true, you must supply `nodeCIDR` so that the kubelet can reach pods for liveness and readiness probes.
 
 > **Warning:** The built-in kubelet allowlist only covers the `rasa` and `rasa-pro-services` pods. If you enable `duckling` or `actionServer` alongside `denyAll: true`, their liveness and readiness probes will silently fail — the pods will start but Kubernetes will never mark them as ready. You must add NetworkPolicy rules manually to allow kubelet access to those pods before enabling `denyAll`.
+
+## Configuration Reference
+
+The following table lists all configurable parameters for this chart and their default values.
 
 ## Values
 

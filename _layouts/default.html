@@ -113,7 +113,11 @@
 
     /* ── Main content ────────────────────────────────────────────────────── */
     main {
+      max-width: 900px;
+      margin: 0 auto;
       padding: 3rem 1.5rem 5rem;
+      /* clip prevents the full-width table breakout from causing a horizontal scrollbar */
+      overflow-x: clip;
     }
 
     /* ── Markdown content styles ─────────────────────────────────────────── */
@@ -244,11 +248,16 @@
       overflow-wrap: break-word;
     }
 
-    /* Scroll wrapper — safety net for any table that still overflows */
+    /* Full-width table breakout — escapes the 900px content column */
     .table-wrap {
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 0 1.5rem;
+      box-sizing: border-box;
       overflow-x: auto;
       margin-bottom: 1.25rem;
-      border-radius: var(--radius);
     }
 
     .content th,
@@ -361,7 +370,7 @@
 
       nav { gap: 1rem; }
 
-      main { padding: 2rem 1rem 4rem; }
+      main { padding: 2rem 1rem 4rem; overflow-x: clip; }
 
       .content h1 { font-size: 1.65rem; }
       .content h2 { font-size: 1.25rem; }

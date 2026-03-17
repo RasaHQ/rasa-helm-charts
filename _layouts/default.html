@@ -113,11 +113,24 @@
 
     /* ── Main content ────────────────────────────────────────────────────── */
     main {
+      padding: 3rem 0 5rem;
+    }
+
+    /* Prose column: constrain every direct child except table-wraps */
+    .content > *:not(.table-wrap) {
       max-width: 900px;
-      margin: 0 auto;
-      padding: 3rem 1.5rem 5rem;
-      /* clip prevents the full-width table breakout from causing a horizontal scrollbar */
-      overflow-x: clip;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      box-sizing: border-box;
+    }
+
+    /* Lists: the full-bleed rule above sets padding-left to 1.5rem (page
+       margin), which would clip bullets. Restore the list indent on top. */
+    .content > ul:not(.table-wrap),
+    .content > ol:not(.table-wrap) {
+      padding-left: 3rem;
     }
 
     /* ── Markdown content styles ─────────────────────────────────────────── */
@@ -248,12 +261,8 @@
       overflow-wrap: break-word;
     }
 
-    /* Full-width table breakout — escapes the 900px content column */
-    .table-wrap {
-      width: 100vw;
-      position: relative;
-      left: 50%;
-      transform: translateX(-50%);
+    /* Tables: full page width, small margin on each side */
+    .content > .table-wrap {
       padding: 0 1.5rem;
       box-sizing: border-box;
       overflow-x: auto;
@@ -370,7 +379,11 @@
 
       nav { gap: 1rem; }
 
-      main { padding: 2rem 1rem 4rem; overflow-x: clip; }
+      main { padding: 2rem 0 4rem; }
+
+      .content > *:not(.table-wrap) { padding-left: 1rem; padding-right: 1rem; }
+      .content > ul:not(.table-wrap), .content > ol:not(.table-wrap) { padding-left: 2.5rem; }
+      .content > .table-wrap { padding: 0 1rem; }
 
       .content h1 { font-size: 1.65rem; }
       .content h2 { font-size: 1.25rem; }

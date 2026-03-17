@@ -1127,7 +1127,7 @@ hostNetwork: false
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
 dnsPolicy: ""
 
-# -- dnsConfig specifies Pod's DNS condig
+# -- dnsConfig specifies Pod's DNS config
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
 dnsConfig: {}
   # options:

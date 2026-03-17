@@ -269,6 +269,39 @@
       margin-bottom: 1.25rem;
     }
 
+    /* Fixed sticky header clone injected by JS */
+    .sticky-thead {
+      position: fixed;
+      z-index: 100;
+      display: none;
+      overflow: hidden;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .sticky-thead table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin: 0;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .sticky-thead th {
+      background: var(--code-bg);
+      font-weight: 600;
+      color: var(--navy);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .sticky-thead th:nth-child(3) {
+      white-space: normal;
+    }
+
     .content th,
     .content td {
       border: 1px solid var(--border);
@@ -412,7 +445,7 @@
         <span class="logo-wordmark">
           <span class="logo-rasa">rasa</span>
           <span class="logo-divider">|</span>
-          <span class="logo-product">helm charts</span>
+          <span class="logo-product">Helm Charts</span>
         </span>
       </a>
 
@@ -445,14 +478,65 @@
   </footer>
 
   <script>
-    // Wrap every table in a scroll container so wide tables scroll
-    // independently rather than forcing horizontal page scroll.
-    document.querySelectorAll('.content table').forEach(function(t) {
-      var wrap = document.createElement('div');
-      wrap.className = 'table-wrap';
-      t.parentNode.insertBefore(wrap, t);
-      wrap.appendChild(t);
-    });
+    (function () {
+      var accentH = 3; // .accent-strip height
+      var navEl   = document.querySelector('header');
+
+      document.querySelectorAll('.content table').forEach(function (table) {
+        // ── Wrap table for horizontal scroll ─────────────────────────────
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap';
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
+
+        // ── Sticky header clone ───────────────────────────────────────────
+        var thead = table.querySelector('thead');
+        if (!thead) return;
+
+        var bar = document.createElement('div');
+        bar.className = 'sticky-thead';
+        document.body.appendChild(bar);
+
+        var cloneTable = document.createElement('table');
+        cloneTable.appendChild(thead.cloneNode(true));
+        bar.appendChild(cloneTable);
+
+        function syncAndToggle() {
+          var navH      = accentH + (navEl ? navEl.offsetHeight : 0);
+          var tableRect = table.getBoundingClientRect();
+          var theadRect = thead.getBoundingClientRect();
+
+          // Show when thead has scrolled above the nav bar and the table
+          // body is still at least partially visible below it.
+          var visible = theadRect.bottom <= navH && tableRect.bottom > navH + 20;
+
+          if (visible) {
+            // Align the clone exactly over the real table
+            bar.style.top   = navH + 'px';
+            bar.style.left  = tableRect.left + 'px';
+            bar.style.width = tableRect.width + 'px';
+
+            // Match each column width so text aligns with the table body
+            var realThs  = Array.from(thead.querySelectorAll('th'));
+            var cloneThs = Array.from(bar.querySelectorAll('th'));
+            realThs.forEach(function (th, i) {
+              if (cloneThs[i]) {
+                cloneThs[i].style.width = th.getBoundingClientRect().width + 'px';
+              }
+            });
+
+            bar.style.display = 'block';
+          } else {
+            bar.style.display = 'none';
+          }
+        }
+
+        window.addEventListener('scroll', syncAndToggle, { passive: true });
+        window.addEventListener('resize', syncAndToggle, { passive: true });
+        // Re-sync when the table scrolls horizontally so the clone stays aligned
+        wrap.addEventListener('scroll', syncAndToggle, { passive: true });
+      });
+    }());
   </script>
 
 </body>

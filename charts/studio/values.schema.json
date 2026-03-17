@@ -1,0 +1,525 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "Rasa Studio Helm Chart Values",
+  "description": "Schema for validating Rasa Studio Helm chart values",
+  "$defs": {
+    "secretRef": {
+      "description": "Reference to a Kubernetes Secret key",
+      "type": "object",
+      "required": ["secretName", "secretKey"],
+      "properties": {
+        "secretName": {
+          "description": "Name of the Kubernetes Secret",
+          "type": "string",
+          "minLength": 1
+        },
+        "secretKey": {
+          "description": "Key within the Kubernetes Secret",
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "secretRefOrString": {
+      "description": "Plain string value or a reference to a Kubernetes Secret key",
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "$ref": "#/$defs/secretRef"
+        }
+      ]
+    },
+    "imageConfig": {
+      "description": "Container image configuration",
+      "type": "object",
+      "properties": {
+        "name": {
+          "description": "Container image name",
+          "type": "string"
+        },
+        "pullPolicy": {
+          "description": "Image pull policy",
+          "type": "string",
+          "enum": ["Always", "IfNotPresent", "Never"]
+        }
+      }
+    },
+    "resourceRequirements": {
+      "description": "Kubernetes resource limits and requests",
+      "type": "object",
+      "properties": {
+        "limits": {
+          "type": "object"
+        },
+        "requests": {
+          "type": "object"
+        }
+      }
+    },
+    "autoscaling": {
+      "description": "Horizontal Pod Autoscaler configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "minReplicas": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "maxReplicas": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "targetCPUUtilizationPercentage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "targetMemoryUtilizationPercentage": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        }
+      }
+    },
+    "serviceConfig": {
+      "description": "Kubernetes Service configuration",
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["ClusterIP", "NodePort", "LoadBalancer"]
+        },
+        "port": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        },
+        "targetPort": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 65535
+        }
+      }
+    },
+    "ingressConfig": {
+      "description": "Kubernetes Ingress configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "className": {
+          "type": "string"
+        },
+        "labels": {
+          "type": "object"
+        },
+        "additionalAnnotations": {
+          "type": "object"
+        },
+        "tls": {
+          "type": "array"
+        }
+      }
+    },
+    "serviceAccount": {
+      "description": "Kubernetes ServiceAccount configuration",
+      "type": "object",
+      "properties": {
+        "create": {
+          "type": "boolean"
+        },
+        "annotations": {
+          "type": "object"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "schedulingConfig": {
+      "description": "Pod scheduling configuration (nodeSelector, affinity, tolerations)",
+      "type": "object",
+      "properties": {
+        "nodeSelector": {
+          "type": "object"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        }
+      }
+    }
+  },
+  "type": "object",
+  "required": ["config"],
+  "properties": {
+    "nameOverride": {
+      "description": "Override name of app",
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "description": "Override the full qualified app name",
+      "type": "string"
+    },
+    "imagePullSecrets": {
+      "description": "Image pull secrets for private registries",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["name"],
+        "properties": {
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "repository": {
+      "description": "Image repository for all Studio components",
+      "type": "string"
+    },
+    "tag": {
+      "description": "Image tag for all Studio components",
+      "type": "string"
+    },
+    "config": {
+      "description": "Global configuration shared across all Studio components",
+      "type": "object",
+      "required": ["ingressHost", "database"],
+      "properties": {
+        "ingressHost": {
+          "description": "Hostname for all Studio ingress resources. Must be a valid DNS name.",
+          "type": "string",
+          "minLength": 1
+        },
+        "ingressAnnotations": {
+          "description": "Annotations applied to all ingress resources",
+          "type": "object"
+        },
+        "ingressClassName": {
+          "description": "Ingress class name applied to all ingress resources",
+          "type": "string"
+        },
+        "connectionType": {
+          "description": "URL scheme for internal service-to-service communication",
+          "type": "string",
+          "enum": ["http", "https"]
+        },
+        "database": {
+          "description": "PostgreSQL database connection settings shared by all components",
+          "type": "object",
+          "required": ["host"],
+          "properties": {
+            "host": {
+              "description": "Database host name or IP address",
+              "type": "string"
+            },
+            "port": {
+              "description": "Database port (default: 5432)",
+              "type": "string"
+            },
+            "username": {
+              "description": "Database username — plain string or secret reference",
+              "$ref": "#/$defs/secretRefOrString"
+            },
+            "password": {
+              "description": "Database password — always a secret reference",
+              "$ref": "#/$defs/secretRef"
+            },
+            "keycloakDatabaseName": {
+              "description": "Database name for Keycloak. Must be a plain string (used in JDBC URL construction).",
+              "type": "string"
+            },
+            "backendDatabaseName": {
+              "description": "Database name for Studio backend — plain string or secret reference",
+              "$ref": "#/$defs/secretRefOrString"
+            },
+            "queryParams": {
+              "description": "Additional database connection URL query parameters",
+              "type": "string"
+            },
+            "preferSSL": {
+              "description": "Enable SSL for database connections",
+              "type": "string"
+            },
+            "rejectUnauthorized": {
+              "description": "Reject database connections with untrusted certificates",
+              "type": "string"
+            },
+            "useAwsIamAuth": {
+              "description": "Use AWS IAM authentication instead of password",
+              "type": "string"
+            },
+            "awsRegion": {
+              "description": "AWS region for IAM database authentication",
+              "type": "string"
+            },
+            "iamDbUsername": {
+              "description": "IAM database username for AWS RDS IAM authentication",
+              "type": "string"
+            }
+          }
+        },
+        "keycloak": {
+          "description": "Keycloak authentication service configuration",
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "Override Keycloak endpoint URL. Leave empty to use the default service URL.",
+              "type": "string"
+            },
+            "adminUsername": {
+              "description": "Keycloak admin console username",
+              "type": "string"
+            },
+            "adminPassword": {
+              "description": "Keycloak admin console password — secret reference",
+              "$ref": "#/$defs/secretRef"
+            },
+            "realm": {
+              "description": "Keycloak realm name",
+              "type": "string"
+            },
+            "clientId": {
+              "description": "Keycloak client ID for Studio backend",
+              "type": "string"
+            },
+            "apiClientId": {
+              "description": "Keycloak API client ID",
+              "type": "string"
+            },
+            "apiUsername": {
+              "description": "Keycloak API username",
+              "type": "string"
+            },
+            "apiPassword": {
+              "description": "Keycloak API password — secret reference",
+              "$ref": "#/$defs/secretRef"
+            }
+          }
+        },
+        "nodeSelector": {
+          "description": "Global node selector applied to all deployments",
+          "type": "object"
+        },
+        "affinity": {
+          "description": "Global affinity rules applied to all deployments",
+          "type": "object"
+        },
+        "tolerations": {
+          "description": "Global tolerations applied to all deployments",
+          "type": "array"
+        }
+      }
+    },
+    "backend": {
+      "description": "Studio Backend component configuration",
+      "type": "object",
+      "properties": {
+        "replicaCount": {
+          "description": "Number of backend replicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "image": {
+          "$ref": "#/$defs/imageConfig"
+        },
+        "autoscaling": {
+          "$ref": "#/$defs/autoscaling"
+        },
+        "service": {
+          "$ref": "#/$defs/serviceConfig"
+        },
+        "ingress": {
+          "$ref": "#/$defs/ingressConfig"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "resources": {
+          "$ref": "#/$defs/resourceRequirements"
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        }
+      }
+    },
+    "webClient": {
+      "description": "Studio Web Client component configuration",
+      "type": "object",
+      "properties": {
+        "replicaCount": {
+          "description": "Number of web client replicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "image": {
+          "$ref": "#/$defs/imageConfig"
+        },
+        "service": {
+          "$ref": "#/$defs/serviceConfig"
+        },
+        "ingress": {
+          "$ref": "#/$defs/ingressConfig"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "resources": {
+          "$ref": "#/$defs/resourceRequirements"
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        }
+      }
+    },
+    "eventIngestion": {
+      "description": "Studio Event Ingestion component configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Deploy the event ingestion component",
+          "type": "boolean"
+        },
+        "replicaCount": {
+          "description": "Number of event ingestion replicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "image": {
+          "$ref": "#/$defs/imageConfig"
+        },
+        "autoscaling": {
+          "$ref": "#/$defs/autoscaling"
+        },
+        "service": {
+          "$ref": "#/$defs/serviceConfig"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "resources": {
+          "$ref": "#/$defs/resourceRequirements"
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        }
+      }
+    },
+    "keycloak": {
+      "description": "Bundled Keycloak identity provider configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Deploy the bundled Keycloak identity provider",
+          "type": "boolean"
+        },
+        "replicaCount": {
+          "description": "Number of Keycloak replicas",
+          "type": "integer",
+          "minimum": 1
+        },
+        "image": {
+          "$ref": "#/$defs/imageConfig"
+        },
+        "service": {
+          "$ref": "#/$defs/serviceConfig"
+        },
+        "ingress": {
+          "$ref": "#/$defs/ingressConfig"
+        },
+        "serviceAccount": {
+          "$ref": "#/$defs/serviceAccount"
+        },
+        "resources": {
+          "$ref": "#/$defs/resourceRequirements"
+        },
+        "nodeSelector": {
+          "type": "object"
+        },
+        "affinity": {
+          "type": "object"
+        },
+        "tolerations": {
+          "type": "array"
+        }
+      }
+    },
+    "networkPolicy": {
+      "description": "Kubernetes NetworkPolicy configuration",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enable NetworkPolicy resources. Requires a CNI that enforces NetworkPolicy (e.g. Calico, Cilium).",
+          "type": "boolean"
+        },
+        "denyAll": {
+          "description": "Create a default-deny policy for all ingress and egress traffic",
+          "type": "boolean"
+        }
+      }
+    },
+    "global": {
+      "description": "Global values passed to subcharts",
+      "type": "object"
+    },
+    "hostNetwork": {
+      "description": "Allow pods to use the node network namespace",
+      "type": "boolean"
+    },
+    "dnsPolicy": {
+      "description": "Pod DNS policy override",
+      "type": "string"
+    },
+    "dnsConfig": {
+      "description": "Pod DNS config override",
+      "type": "object"
+    },
+    "deploymentAnnotations": {
+      "description": "Annotations applied to all Studio Deployment resources",
+      "type": "object"
+    },
+    "deploymentLabels": {
+      "description": "Labels applied to all Studio Deployment resources",
+      "type": "object"
+    },
+    "podLabels": {
+      "description": "Labels applied to all Studio pods",
+      "type": "object"
+    },
+    "rasa": {
+      "description": "Rasa Pro subchart configuration. See charts/rasa/values.yaml for all available options.",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Deploy the bundled Rasa Pro model server. Set false to use an external instance.",
+          "type": "boolean"
+        }
+      }
+    }
+  }
+}

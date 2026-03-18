@@ -48,7 +48,7 @@ jobs:
         if: steps.release.outcome == 'success'
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
-          # Send notication to #release slack channel
+          # Send notification to #release slack channel
           channel-id: 'C024Z61K9QU'
           slack-message: "🚀 New *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` has been released!"
         env:
@@ -58,7 +58,7 @@ jobs:
         if: steps.release.outcome == 'failure'
         uses: slackapi/slack-github-action@007b2c3c751a190b6f0f040e47ed024deaa72844
         with:
-          # Send notication to #release slack channel
+          # Send notification to #release slack channel
           channel-id: 'C024Z61K9QU'
           slack-message: "⛔️ *Studio* Helm Chart version `${{ steps.chart-info.outputs.name }}-${{ steps.chart-info.outputs.version }}` could not be released 😱! Please check out <https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}|Github Action workflow log>"
         env:

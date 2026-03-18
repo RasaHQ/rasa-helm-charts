@@ -396,8 +396,8 @@ backend:
 
     # -- backend.migration.waitForIt determines whether to wait for the database to be ready before running migrations.
     waitForIt: false
-    # -- backend.migration.waitFotItContainer defines the configuration for the wait-for-it container.
-    waitFotItContainer:
+    # -- backend.migration.waitForItContainer defines the configuration for the wait-for-it container.
+    waitForItContainer:
       image: postgres:17.2
 
     # -- backend.migration.annotations defines annotations to add to the migration job resource.
@@ -1127,7 +1127,7 @@ hostNetwork: false
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
 dnsPolicy: ""
 
-# -- dnsConfig specifies Pod's DNS condig
+# -- dnsConfig specifies Pod's DNS config
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
 dnsConfig: {}
   # options:

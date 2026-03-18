@@ -2,14 +2,71 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.0.5-rc.1](https://img.shields.io/badge/Version-2.0.5--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.0.5](https://img.shields.io/badge/Version-2.0.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
-- Kubernetes 1.23+
+- Kubernetes 1.30+
 - Helm 3.8.0+
+- A valid Rasa Pro license key
+
+## Creating Secrets
+
+The chart reads credentials exclusively from Kubernetes Secrets. Only the **license secret is required** to install — all other secrets are optional and only referenced when you enable the corresponding feature.
+
+### License Secret (required)
+
+Create a secret containing your Rasa Pro license key before installing:
+
+```console
+kubectl create secret generic rasa-secrets \
+  --from-literal=rasaProLicense="<YOUR_LICENSE_KEY>"
+```
+
+The chart defaults to `secretName: rasa-secrets` and `secretKey: rasaProLicense`. Override both in your values if you use a different name or key:
+
+```yaml
+rasaProLicense:
+  secretName: my-custom-secret
+  secretKey: myLicenseKey
+```
+
+### Optional Secrets
+
+Add optional keys to the same secret (or separate secrets) as you enable features. You can extend the secret you created above:
+
+```console
+kubectl patch secret rasa-secrets -p \
+  '{"stringData":{"authToken":"<YOUR_TOKEN>","jwtSecret":"<YOUR_JWT_SECRET>"}}'
+```
+
+The table below lists all secret-backed fields:
+
+| Secret key | Feature | values.yaml field |
+|---|---|---|
+| `authToken` | Token-based API authentication | `rasa.settings.authToken` |
+| `jwtSecret` | JWT API authentication | `rasa.settings.jwtSecret` |
+| `kafkaSslPassword` | Kafka SASL password (non-IAM) | `rasaProServices.kafka.saslPassword` |
+| `analyticsDbUrl` | Analytics database URL (non-IAM) | `rasaProServices.database.urlExistingSecretName` |
+
+Alternatively, create all credentials upfront from a manifest. The chart ships a `secrets.yaml` example that you can use as a starting point — **use `stringData` so Kubernetes base64-encodes the values automatically**:
+
+```yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: rasa-secrets
+type: Opaque
+stringData:
+  rasaProLicense: "<YOUR_LICENSE_KEY>"    # required for all deployments
+  authToken: "<YOUR_AUTH_TOKEN>"          # optional: token-based API auth
+  jwtSecret: "<YOUR_JWT_SECRET>"          # optional: JWT auth
+  kafkaSslPassword: "<KAFKA_PASSWORD>"    # optional: Kafka SASL (non-IAM)
+```
 
 ## Installing the Chart
+
+Before installing, make sure you have created the license secret as described in [Creating Secrets](#creating-secrets) above.
 
 You can install the chart from either the OCI registry or the GitHub Helm repository.
 
@@ -18,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.5-rc.1
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.5
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,8 +90,25 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.0.5-rc.1
+helm install my-release rasa/rasa --version 2.0.5
 ```
+
+## Upgrading the Chart
+
+To upgrade to a new chart version, update the repository index and run:
+
+```console
+helm repo update
+helm upgrade my-release rasa/rasa --version <new-version> -f values.yaml
+```
+
+Or from OCI:
+
+```console
+helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version <new-version> -f values.yaml
+```
+
+> **Note:** Always check the [release notes](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading across major versions.
 
 ## Uninstalling the Chart
 
@@ -45,22 +119,6 @@ helm delete my-release
 ```
 
 The command removes all the Kubernetes components associated with the chart and deletes the release.
-
-## Pull the Chart
-
-You can pull the chart from either source:
-
-### From OCI Registry:
-
-```console
-helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.0.5-rc.1
-```
-
-### From GitHub Helm Repository:
-
-```console
-helm pull rasa/rasa --version 2.0.5-rc.1
-```
 
 ## General Configuration
 
@@ -94,6 +152,32 @@ rasa:
 rasaProServices:
   enabled: false
 ```
+
+### Minimal Working Configuration
+
+The following is the smallest `values.yaml` needed to get Rasa Pro running. It assumes the license secret was created as shown in [Creating Secrets](#creating-secrets):
+
+```yaml
+rasaProLicense:
+  secretName: rasa-secrets
+  secretKey: rasaProLicense
+
+rasa:
+  enabled: true
+  image:
+    tag: "3.x.x"  # pin to a specific Rasa Pro version
+
+rasaProServices:
+  enabled: false
+```
+
+Install with:
+
+```console
+helm install my-release rasa/rasa -f values.yaml
+```
+
+From there, add sections from the rest of this guide as your deployment grows.
 
 ### Rasa Pro Services Database Configuration
 
@@ -148,7 +232,7 @@ rasaProServices:
 
 ### Use MinIO instead of S3
 
-> **Warning:** MinIO support is deprecated and no longer maintained. Use S3 or another supported object storage provider instead.
+> **Warning:** MinIO is end-of-life and no longer receives updates. The chart still supports connecting to a MinIO instance, but we recommend migrating to S3 or another actively maintained object storage provider.
 
 To use MinIO instead of S3, set `AWS_ENDPOINT_URL` to the URL of the MinIO server and provide `AWS_REGION` and `BUCKET_NAME`. Store your MinIO credentials in a Kubernetes Secret:
 
@@ -240,7 +324,7 @@ rasa:
     jwtMethod: HS256
 ```
 
-See the [Rasa documentation](https://rasa.com/docs/) for details on API authentication.
+See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-rest-api/) for details on API authentication.
 
 ### Configuring the Readiness Probe
 
@@ -277,7 +361,7 @@ rasa:
     failureThreshold: 6
 ```
 
-> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. The `httpGet: null` is required to unset the default HTTP probe when switching to an `exec` probe. Update the URL scheme and port in the `curl` command if you have changed `rasa.settings.scheme` or `rasa.settings.port` from their defaults.
+> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the URL scheme and port in the `curl` command if you have changed `rasa.settings.scheme` or `rasa.settings.port` from their defaults.
 
 ### Configuring Credentials and Endpoints via ConfigMap
 
@@ -417,7 +501,7 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 
 ### Action Server
 
-The chart can optionally deploy a [Rasa SDK](https://rasa.com/docs/action-server) Action Server alongside Rasa Pro.
+The chart can optionally deploy a [Rasa SDK](https://rasa.com/docs/action-server) Action Server alongside Rasa Pro. You must build and publish your own container image from your actions code — there is no default image provided.
 
 ```yaml
 actionServer:
@@ -533,13 +617,6 @@ rasa:
 
 The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
 
-You can also set `global.ingressHost` to override the host across all ingress resources at once — it takes precedence over any `hosts[].host` values set per-component:
-
-```yaml
-global:
-  ingressHost: "rasa.example.com"
-```
-
 ### Resources and Autoscaling
 
 No resource requests or limits are set by default. For production, always set these explicitly:
@@ -621,7 +698,11 @@ networkPolicy:
 
 > **Note:** When `networkPolicy.denyAll` is true, you must supply `nodeCIDR` so that the kubelet can reach pods for liveness and readiness probes.
 
-> **Note:** The built-in kubelet allowlist only covers the `rasa` and `rasa-pro-services` pods. If you also enable `duckling` or `actionServer` with `denyAll: true`, their probes will fail unless you add additional NetworkPolicy rules manually to allow kubelet access to those pods.
+> **Warning:** The built-in kubelet allowlist only covers the `rasa` and `rasa-pro-services` pods. If you enable `duckling` or `actionServer` alongside `denyAll: true`, their liveness and readiness probes will silently fail — the pods will start but Kubernetes will never mark them as ready. You must add NetworkPolicy rules manually to allow kubelet access to those pods before enabling `denyAll`.
+
+## Configuration Reference
+
+The following table lists all configurable parameters for this chart and their default values.
 
 ## Values
 

@@ -115,7 +115,7 @@ spec:
         {{- toYaml .Values.rasa.additionalContainers | nindent 8 }}
       {{- end }}
       volumes:
-        {{- include "rasa.containers.volumes" . | nindent 8 }}
+        {{- include "rasa.containers.volumes" . | trim | nindent 8 }}
       {{- if .Values.rasa.volumes }}
         {{- toYaml .Values.rasa.volumes | nindent 8 }}
       {{- end }}

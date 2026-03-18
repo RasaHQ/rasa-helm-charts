@@ -2,12 +2,64 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.3.0](https://img.shields.io/badge/Version-2.3.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.4.0](https://img.shields.io/badge/Version-2.4.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+
+## Architecture
+
+The Studio chart deploys up to five components. All components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+
+| Component | Description | Ingress path | Toggle |
+|-----------|-------------|--------------|--------|
+| **backend** | Studio API server — handles business logic and data persistence | `/api` | always on |
+| **web-client** | React frontend served by nginx | `/` | always on |
+| **keycloak** | Bundled identity provider for user authentication | `/auth` | `keycloak.enabled` (default: `true`) |
+| **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.enabled` (default: `true`) |
+| **rasa** | Rasa Pro model server (OCI subchart dependency) | `/talk` | `rasa.enabled` (default: `true`) |
+
+> **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
 
 ## Prerequisites
 
-- Kubernetes 1.23+
+- Kubernetes 1.30+
 - Helm 3.8.0+
+- A PostgreSQL instance (version 14+ recommended) accessible from the cluster
+- A Kafka broker (if `eventIngestion.enabled: true`) accessible from the cluster
+- A Rasa Pro license key
+
+## Before You Install
+
+### 1. Build chart dependencies
+
+The Rasa Pro server is bundled as an OCI subchart. Before installing, fetch it:
+
+```console
+$ helm dependency build ./charts/studio
+```
+
+### 2. Create the `studio-secrets` Secret
+
+All components read credentials from a single Kubernetes Secret named `studio-secrets` by default.
+A ready-made template is included at the chart root:
+
+```console
+$ cp charts/studio/secrets.yaml my-studio-secrets.yaml
+# Edit my-studio-secrets.yaml — base64-encode each value
+$ kubectl apply -f my-studio-secrets.yaml
+```
+
+Or create it imperatively:
+
+```console
+$ kubectl create secret generic studio-secrets \
+    --from-literal=DATABASE_PASSWORD="<db-password>" \
+    --from-literal=KEYCLOAK_ADMIN_PASSWORD="<keycloak-admin-pw>" \
+    --from-literal=KEYCLOAK_API_PASSWORD="<keycloak-api-pw>" \
+    --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
+    --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
+    --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
+```
+
+> **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
 ## Installing the Chart
 
@@ -18,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.3.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.4.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -33,7 +85,39 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.3.0
+$ helm install my-release rasa/studio --version 2.4.0
+```
+
+## Quick Start
+
+Minimum `values.yaml` to get Studio running (assumes `studio-secrets` already created):
+
+```yaml
+config:
+  ingressHost: &dns_hostname studio.example.com
+  ingressClassName: nginx
+  database:
+    host: "postgres.example.com"
+    username: "studio"
+    backendDatabaseName: "studio"
+    keycloakDatabaseName: "keycloak"
+
+# Disable event ingestion for a minimal setup — requires Kafka when enabled.
+# See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
+eventIngestion:
+  enabled: false
+```
+
+```console
+$ helm dependency build ./charts/studio
+$ helm install my-release rasa/studio -f values.yaml
+```
+
+After install, the backend migration Job runs automatically as a pre-install hook. Monitor progress with:
+
+```console
+$ kubectl get jobs
+$ kubectl logs job/my-release-studio-database-migration
 ```
 
 ## Uninstalling the Chart
@@ -53,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.3.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.4.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.3.0
+$ helm pull rasa/studio --version 2.4.0
 ```
 
 ## General Configuration
@@ -220,6 +304,193 @@ config:
 
 **Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
 
+## Chart Dependencies — Rasa Pro
+
+Studio bundles the [Rasa Pro Helm chart](https://helm.rasa.com) as an optional OCI subchart:
+
+```yaml
+rasa:
+  enabled: true  # set false to use an external Rasa Pro instance
+```
+
+When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
+- Read the license and OpenAI API key from `studio-secrets`
+- Expose the model server at `/talk` on the shared ingress host
+- Use a `Recreate` update strategy (no rolling updates — stateful model loading)
+- Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the backend uses internally
+
+When `rasa.enabled: false`, point Studio Backend at your own Rasa Pro instance:
+
+```yaml
+backend:
+  environmentVariables:
+    MS_API_URL:
+      value: "http://your-rasa-pro-service"
+```
+
+> **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
+
+### Rasa Pro Model Service Environment Variables
+
+The following environment variables can be configured on the Rasa Pro model server container via `rasa.rasa.overrideEnv`:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `MAX_PARALLEL_TRAININGS` | Maximum number of parallel model trainings the model service will run simultaneously | `10` |
+| `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
+| `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded (e.g. `aws`, `gcs`, `azure`). Leave unset to disable remote storage. | `None` |
+
+Example:
+
+```yaml
+rasa:
+  enabled: true
+  rasa:
+    overrideEnv:
+      - name: MAX_PARALLEL_TRAININGS
+        value: "5"
+      - name: MAX_PARALLEL_BOT_RUNS
+        value: "20"
+      - name: RASA_REMOTE_STORAGE
+        value: "aws"
+```
+
+### Studio Backend Model Service Environment Variables
+
+The following environment variables control how Studio Backend polls and manages the Rasa Pro model service, configurable via `backend.environmentVariables`:
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TRAINING_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for training status updates | `1000` |
+| `MODEL_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for model status updates | `2000` |
+| `MODEL_INACTIVE_AFTER_MS` | Time (ms) after which an unused model is marked as inactive | `3600000` (1 hour) |
+
+Example:
+
+```yaml
+backend:
+  environmentVariables:
+    TRAINING_POLLING_INTERVAL_MS:
+      value: "2000"
+    MODEL_POLLING_INTERVAL_MS:
+      value: "5000"
+    MODEL_INACTIVE_AFTER_MS:
+      value: "7200000"  # 2 hours
+```
+
+## Internal Service Communication
+
+`config.connectionType` controls the URL scheme used for **internal** service-to-service calls (backend → Keycloak, backend → Rasa Pro). Set to `"https"` only when internal services communicate over HTTPS:
+
+```yaml
+config:
+  connectionType: "https"  # default: "http"
+```
+
+If your ingress terminates TLS externally and services communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`. A mismatch causes backend-to-Keycloak authentication failures.
+
+> **Note:** `config.keycloak.url` can override the Keycloak endpoint entirely (e.g. `https://<ingressHost>/auth`). This is only needed when your cluster redirects internal HTTP traffic to HTTPS.
+
+## Event Ingestion and Kafka
+
+The event-ingestion component consumes Rasa Pro conversation events from a Kafka broker. Configure the connection via environment variables:
+
+```yaml
+eventIngestion:
+  environmentVariables:
+    KAFKA_BOOTSTRAP_SERVERS:
+      value: "kafka-broker:9092"
+    KAFKA_TOPIC:
+      value: "rasa-events"
+```
+
+### SASL Authentication
+
+```yaml
+eventIngestion:
+  environmentVariables:
+    KAFKA_SASL_MECHANISM:
+      value: "SCRAM-SHA-256"  # plain | SCRAM-SHA-256 | SCRAM-SHA-512
+    KAFKA_SASL_USERNAME:
+      value: "kafka-user"
+    KAFKA_SASL_PASSWORD:
+      secret:
+        name: studio-secrets
+        key: KAFKA_SASL_PASSWORD
+```
+
+### SSL/TLS
+
+```yaml
+eventIngestion:
+  environmentVariables:
+    KAFKA_ENABLE_SSL:
+      value: "true"
+    KAFKA_REJECT_UNAUTHORIZED:
+      value: "true"
+    # Mount custom certificates via eventIngestion.volumes / eventIngestion.volumeMounts
+    # then reference the paths below:
+    KAFKA_CA_FILE:
+      value: "/etc/ssl/kafka/ca.crt"
+    KAFKA_CERT_FILE:
+      value: "/etc/ssl/kafka/tls.crt"
+    KAFKA_KEY_FILE:
+      value: "/etc/ssl/kafka/tls.key"
+```
+
+To disable event ingestion entirely: `eventIngestion.enabled: false`.
+
+## Network Policies
+
+The chart ships a default-deny network policy model. Enable it to restrict pod-to-pod traffic:
+
+```yaml
+networkPolicy:
+  enabled: true
+  denyAll: true
+```
+
+When enabled, three policies are created:
+- **deny-all** — drops all ingress/egress by default (namespace-scoped)
+- **allow-dns-access** — permits UDP/TCP port 53 for DNS resolution
+- **ingress-egress-from-kubelet** — allows Kubernetes health-check traffic from the kubelet
+
+> **Note:** Requires a CNI plugin that enforces `NetworkPolicy` (e.g. Calico, Cilium, Antrea). Enabling network policies without a compatible CNI has no effect.
+
+## Database Migration
+
+The backend runs a `pre-install,pre-upgrade` Helm hook Job that applies database schema migrations before any pods start. On first install this job creates all tables; on upgrades it applies incremental migrations.
+
+Monitor migration progress:
+
+```console
+$ kubectl get jobs
+$ kubectl logs job/<release-name>-studio-database-migration
+```
+
+**If a migration fails**, the job is preserved for debugging — inspect the logs before retrying:
+
+```console
+$ kubectl logs job/<release-name>-studio-database-migration
+```
+
+Once you have identified and resolved the root cause, re-run `helm upgrade`. The failed job is automatically cleaned up before the next migration attempt.
+
+Enable `backend.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
+
+## Upgrading
+
+When upgrading between chart versions, Helm runs the database migration hook automatically before updating the deployments. The `studio-secrets` Secret is not managed by the chart — it persists across upgrades.
+
+To upgrade to a new version:
+
+```console
+$ helm dependency build ./charts/studio
+$ helm upgrade my-release rasa/studio --version <new-version> -f values.yaml
+```
+
+Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
+
 ## Values
 
 | Key | Type | Description | Default |
@@ -256,7 +527,7 @@ config:
 | backend.livenessProbe.periodSeconds | int | backend.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | backend.livenessProbe.successThreshold | int | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | backend.livenessProbe.timeoutSeconds | int | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| backend.migration | object | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitFotItContainer":{"image":"postgres:17.2"}}` |
+| backend.migration | object | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
 | backend.migration.affinity | object | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | backend.migration.annotations | object | backend.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | backend.migration.enabled | bool | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
@@ -274,7 +545,7 @@ config:
 | backend.migration.serviceAccount.name | string | backend.migration.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname + "-db-migration" suffix. | `""` |
 | backend.migration.tolerations | list | backend.migration.tolerations defines tolerations for the migration job. This allows the job to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | backend.migration.waitForIt | bool | backend.migration.waitForIt determines whether to wait for the database to be ready before running migrations. | `false` |
-| backend.migration.waitFotItContainer | object | backend.migration.waitFotItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:17.2"}` |
+| backend.migration.waitForItContainer | object | backend.migration.waitForItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:17.2"}` |
 | backend.nodeSelector | object | backend.nodeSelector defines which nodes the backend pods can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
 | backend.podAnnotations | object | backend.podAnnotations defines annotations to add to the backend pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | backend.podSecurityContext | object | backend.podSecurityContext defines the security settings for the entire pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
@@ -338,7 +609,7 @@ config:
 | config.tolerations | list | Pod tolerations for all deployments. These settings can be overridden by component-specific configurations. | `[]` |
 | deploymentAnnotations | object | deploymentAnnotations defines annotations to add to all Studio resources. These annotations are applied globally to all resources (Deployments, Services, Ingresses, Jobs, HPAs, ConfigMaps, ServiceAccounts). Component-specific annotations can override these values if keys conflict. Example:   key: "value" Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | deploymentLabels | object | deploymentLabels defines labels to add to all Studio deployment | `{}` |
-| dnsConfig | object | dnsConfig specifies Pod's DNS condig # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
+| dnsConfig | object | dnsConfig specifies Pod's DNS config # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
 | dnsPolicy | string | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy | `""` |
 | eventIngestion.additionalContainers | list | eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
 | eventIngestion.affinity | object | eventIngestion.affinity defines affinity rules for the event ingestion pods. | `{}` |

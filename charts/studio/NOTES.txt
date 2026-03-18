@@ -1,7 +1,7 @@
 CHART NAME: {{ .Chart.Name }}
 CHART VERSION: {{ .Chart.Version }}
 
-Thank you for using Studio Helm Chart! 
+Thank you for using Studio Helm Chart!
 By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available at https://rasa.com/eula/. Please review the EULA carefully before proceeding.
 
 ** Please be patient while the chart is being installed. **
@@ -10,20 +10,16 @@ By installing and using this software, you agree to be bound by the terms and co
 
 {{- if .Values.backend.ingress.enabled }}
 http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/api
-{{- end }}
-
 {{- else if contains "NodePort" .Values.backend.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
-
 {{- else if contains "LoadBalancer" .Values.backend.service.type }}
 
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
   echo http://$SERVICE_IP:{{ .Values.backend.service.port }}
-
 {{- else if contains "ClusterIP" .Values.backend.service.type }}
 
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
@@ -35,21 +31,17 @@ http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressH
 2. Access your Studio Web Client installation:
 
 {{- if .Values.webClient.ingress.enabled }}
-http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}
-{{- end }}
-
+http{{ if $.Values.webClient.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}
 {{- else if contains "NodePort" .Values.webClient.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
-
 {{- else if contains "LoadBalancer" .Values.webClient.service.type }}
 
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
   echo http://$SERVICE_IP:{{ .Values.webClient.service.port }}
-
 {{- else if contains "ClusterIP" .Values.webClient.service.type }}
 
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
@@ -60,23 +52,19 @@ http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressH
 
 3. Access your Studio Keycloak installation:
 
-{{- if .Values.keycloak.ingress.enabled }}
+{{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled }}
 http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/auth
-{{- end }}
-
-{{- else if contains "NodePort" .Values.keycloak.service.type }}
+{{- else if and .Values.keycloak.enabled (contains "NodePort" .Values.keycloak.service.type) }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
-
-{{- else if contains "LoadBalancer" .Values.keycloak.service.type }}
+{{- else if and .Values.keycloak.enabled (contains "LoadBalancer" .Values.keycloak.service.type) }}
 
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
   echo http://$SERVICE_IP:{{ .Values.keycloak.service.port }}
-
-{{- else if contains "ClusterIP" .Values.keycloak.service.type }}
+{{- else if and .Values.keycloak.enabled (contains "ClusterIP" .Values.keycloak.service.type) }}
 
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")

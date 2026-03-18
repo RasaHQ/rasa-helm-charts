@@ -252,9 +252,11 @@
 
     .content table + p { margin-top: 1.25rem; }
 
-    /* Key / Type / Default columns: as narrow as content, no wrapping */
-    .content td:not(:nth-child(3)),
-    .content th:not(:nth-child(3)) {
+    /* Key / Type columns: shrink to content, no wrapping */
+    .content td:nth-child(1),
+    .content th:nth-child(1),
+    .content td:nth-child(2),
+    .content th:nth-child(2) {
       white-space: nowrap;
       width: 1%;
     }
@@ -265,6 +267,15 @@
       white-space: normal;
       min-width: 180px;
       overflow-wrap: break-word;
+    }
+
+    /* Default column (4th/last): wraps, with word-break for long strings */
+    .content td:nth-child(4),
+    .content th:nth-child(4) {
+      white-space: normal;
+      min-width: 120px;
+      overflow-wrap: break-word;
+      word-break: break-all;
     }
 
     /* Tables: full page width, small margin on each side */
@@ -305,7 +316,8 @@
       text-overflow: ellipsis;
     }
 
-    .sticky-thead th:nth-child(3) {
+    .sticky-thead th:nth-child(3),
+    .sticky-thead th:nth-child(4) {
       white-space: normal;
     }
 

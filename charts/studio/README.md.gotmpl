@@ -467,15 +467,15 @@ $ kubectl get jobs
 $ kubectl logs job/<release-name>-studio-database-migration
 ```
 
-**If a migration fails**, the job is not automatically cleaned up (only successful jobs are deleted). Before retrying `helm upgrade`, manually delete the failed job:
+**If a migration fails**, the job is preserved for debugging — inspect the logs before retrying:
 
 ```console
-$ kubectl delete job <release-name>-studio-database-migration
+$ kubectl logs job/<release-name>-studio-database-migration
 ```
 
-Then re-run `helm upgrade` after investigating and resolving the root cause.
+Once you have identified and resolved the root cause, re-run `helm upgrade`. The failed job is automatically cleaned up before the next migration attempt.
 
-The migration job waits for PostgreSQL to be ready when `backend.migration.waitForIt: true` (default). Disable this only if your database is guaranteed reachable at deploy time.
+Enable `backend.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
 
 ## Upgrading
 

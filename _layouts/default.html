@@ -261,18 +261,19 @@
       width: 1%;
     }
 
-    /* Description column (3rd): wraps and takes all remaining space */
+    /* Description and Default columns share remaining space equally */
     .content td:nth-child(3),
     .content th:nth-child(3) {
       white-space: normal;
-      min-width: 180px;
+      width: 50%;
+      min-width: 160px;
       overflow-wrap: break-word;
     }
 
-    /* Default column (4th/last): wraps, with word-break for long strings */
     .content td:nth-child(4),
     .content th:nth-child(4) {
       white-space: normal;
+      width: 50%;
       min-width: 120px;
       overflow-wrap: break-word;
       word-break: break-all;

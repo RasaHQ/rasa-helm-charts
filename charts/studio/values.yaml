@@ -1149,7 +1149,7 @@ deploymentLabels: {}
 # -- podLabels defines labels to add to all Studio pod(s)
 podLabels: {}
 
-# -- Define the resources for the Rasa Pro model server
+# Define the resources for the Rasa Pro model server
 rasa:
   enabled: true
   fullnameOverride: rasapro

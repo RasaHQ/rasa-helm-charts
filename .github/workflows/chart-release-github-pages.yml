@@ -74,7 +74,7 @@ jobs:
           echo "op_kits=$(git tag --sort=-version:refname | grep '^op-kits-' | head -1 || true)" >> $GITHUB_OUTPUT
 
       - name: Generate Studio release notes
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
           args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
@@ -83,7 +83,7 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Generate Rasa Pro release notes
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
           args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
@@ -92,7 +92,7 @@ jobs:
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Generate op-kits release notes
-        uses: orhun/git-cliff-action@v4
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
           args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}

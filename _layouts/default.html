@@ -255,24 +255,24 @@
     /* Values table column layout — only applied to the last table on each
        page (the auto-generated helm-docs Values reference). Other tables
        use the browser's default auto layout. */
-    .values-table td:nth-child(1),
-    .values-table th:nth-child(1),
-    .values-table td:nth-child(2),
-    .values-table th:nth-child(2) {
+    #values-table td:nth-child(1),
+    #values-table th:nth-child(1),
+    #values-table td:nth-child(2),
+    #values-table th:nth-child(2) {
       overflow-wrap: break-word;
       word-break: break-all;
     }
 
-    .values-table td:nth-child(3),
-    .values-table th:nth-child(3) {
+    #values-table td:nth-child(3),
+    #values-table th:nth-child(3) {
       white-space: normal;
       width: 50%;
       min-width: 160px;
       overflow-wrap: break-word;
     }
 
-    .values-table td:nth-child(4),
-    .values-table th:nth-child(4) {
+    #values-table td:nth-child(4),
+    #values-table th:nth-child(4) {
       white-space: normal;
       width: 50%;
       min-width: 120px;
@@ -499,13 +499,8 @@
     (function () {
       var accentH = 3; // .accent-strip height
       var navEl   = document.querySelector('header');
-      var tables  = Array.from(document.querySelectorAll('.content table'));
-      var lastTable = tables[tables.length - 1] || null;
 
-      tables.forEach(function (table) {
-        // ── Mark the last table as the Values table ───────────────────────
-        if (table === lastTable) table.classList.add('values-table');
-
+      document.querySelectorAll('.content table').forEach(function (table) {
         // ── Wrap table for horizontal scroll ─────────────────────────────
         var wrap = document.createElement('div');
         wrap.className = 'table-wrap';
@@ -517,7 +512,7 @@
         if (!thead) return;
 
         var bar = document.createElement('div');
-        bar.className = 'sticky-thead' + (table === lastTable ? ' values-sticky' : '');
+        bar.className = 'sticky-thead' + (table.id === 'values-table' ? ' values-sticky' : '');
         document.body.appendChild(bar);
 
         var cloneTable = document.createElement('table');

@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout (full history)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           token: ${{ secrets.CHART_RELEASER_PAT }}
@@ -61,7 +61,7 @@ jobs:
           fi
 
       - name: Set up Helm
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
           version: v3.15.2
 
@@ -127,7 +127,7 @@ jobs:
       # Open/update a PR into main with only charts/index.yaml
       - name: Create PR for index.yaml
         if: steps.fetch_index.outputs.no_index != 'true'
-        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.CHART_RELEASER_PAT }}
           commit-message: "chore(helm): update ${INDEX_PATH}"

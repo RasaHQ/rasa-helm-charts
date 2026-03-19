@@ -65,16 +65,51 @@ jobs:
         with:
           version: v3.15.2
 
+      # Resolve the most recent tag per chart to scope the changelog range
+      - name: Get previous chart tags
+        id: prev-tags
+        run: |
+          echo "studio=$(git tag --sort=-version:refname | grep '^studio-' | head -1 || true)" >> $GITHUB_OUTPUT
+          echo "rasa=$(git tag --sort=-version:refname | grep '^rasa-' | head -1 || true)" >> $GITHUB_OUTPUT
+          echo "op_kits=$(git tag --sort=-version:refname | grep '^op-kits-' | head -1 || true)" >> $GITHUB_OUTPUT
+
+      - name: Generate Studio release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
+        env:
+          OUTPUT: charts/studio/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Generate Rasa Pro release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
+        env:
+          OUTPUT: charts/rasa/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Generate op-kits release notes
+        uses: orhun/git-cliff-action@v4
+        with:
+          config: cliff.toml
+          args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}
+        env:
+          OUTPUT: charts/op-kits/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
       # Package charts, upload to Releases, and write charts/index.yaml to ci/helm-index
       - name: Run chart-releaser (packages + index → ${PAGES_BRANCH})
         uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
         with:
           charts_dir: charts
+          notes_file: RELEASE_NOTES.md
         env:
           CR_TOKEN: ${{ secrets.CHART_RELEASER_PAT }}
           CR_PAGES_BRANCH: ${{ env.PAGES_BRANCH }}
           CR_PAGES_INDEX_PATH: ${{ env.INDEX_PATH }}
-          CR_GENERATE_RELEASE_NOTES: "true"
           CR_SKIP_EXISTING: "true"
 
       # Fetch the updated index.yaml from ci/helm-index

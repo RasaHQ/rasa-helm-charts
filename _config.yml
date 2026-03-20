@@ -11,7 +11,6 @@ defaults:
 
 # Don't process Helm chart source files as Jekyll pages
 exclude:
-  - charts/index.yaml
   - charts/rasa/templates/
   - charts/studio/templates/
   - charts/op-kits/templates/

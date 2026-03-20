@@ -1,0 +1,549 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
+  <meta name="description" content="{{ page.description | default: site.description }}">
+  <style>
+    /* ── Reset ──────────────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Brand tokens ────────────────────────────────────────────────────── */
+    :root {
+      --purple:       #5a17ee;
+      --purple-light: #ede8fd;
+      --navy:         #32415b;
+      --text:         #24292f;
+      --text-muted:   #57606a;
+      --bg:           #ffffff;
+      --code-bg:      #f6f8fa;
+      --border:       #d0d7de;
+      --radius:       6px;
+    }
+
+    /* ── Base ────────────────────────────────────────────────────────────── */
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-size: 16px;
+      line-height: 1.65;
+      color: var(--text);
+      background: var(--bg);
+    }
+
+    /* ── Purple accent strip ─────────────────────────────────────────────── */
+    .accent-strip {
+      position: sticky;
+      top: 0;
+      z-index: 201;
+      height: 3px;
+      background: var(--purple);
+    }
+
+    /* ── Header ──────────────────────────────────────────────────────────── */
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 200;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 0 2rem;
+    }
+
+    .header-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+      gap: 1rem;
+    }
+
+    /* Logo */
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      flex-shrink: 0;
+    }
+
+    /* Rasa wordmark SVG */
+    .logo-icon {
+      display: block;
+      flex-shrink: 0;
+      width: auto;
+    }
+
+    .logo-wordmark {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      font-size: 1.05rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
+    }
+
+    .logo-divider {
+      color: var(--border);
+      font-weight: 300;
+      font-size: 1.1rem;
+    }
+
+    .logo-product { color: var(--purple); }
+
+    /* Nav */
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 1.75rem;
+    }
+
+    nav a {
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 0.875rem;
+      font-weight: 500;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+
+    nav a:hover { color: var(--purple); }
+
+    nav a.external::after {
+      content: " ↗";
+      font-size: 0.75em;
+    }
+
+    /* ── Main content ────────────────────────────────────────────────────── */
+    main {
+      padding: 3rem 0 5rem;
+    }
+
+    /* Prose column: constrain every direct child except table-wraps */
+    .content > *:not(.table-wrap) {
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      padding-left: 1.5rem;
+      padding-right: 1.5rem;
+      box-sizing: border-box;
+    }
+
+    /* Lists: the full-bleed rule above sets padding-left to 1.5rem (page
+       margin), which would clip bullets. Restore the list indent on top. */
+    .content > ul:not(.table-wrap),
+    .content > ol:not(.table-wrap) {
+      padding-left: 3rem;
+    }
+
+    /* ── Markdown content styles ─────────────────────────────────────────── */
+
+    /* Headings */
+    .content h1,
+    .content h2,
+    .content h3,
+    .content h4,
+    .content h5,
+    .content h6 {
+      color: var(--navy);
+      font-weight: 700;
+      line-height: 1.3;
+    }
+
+    .content h1 {
+      font-size: 2.1rem;
+      margin-bottom: 1rem;
+    }
+
+    .content h2 {
+      font-size: 1.45rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.75rem;
+      padding-bottom: 0.4rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .content h3 {
+      font-size: 1.15rem;
+      margin-top: 1.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .content h4,
+    .content h5,
+    .content h6 {
+      font-size: 1rem;
+      margin-top: 1.25rem;
+      margin-bottom: 0.4rem;
+    }
+
+    /* Body text */
+    .content p { margin-bottom: 1rem; }
+
+    /* Lists */
+    .content ul,
+    .content ol {
+      margin: 0.5rem 0 1rem 1.5rem;
+    }
+
+    .content li { margin-bottom: 0.3rem; }
+
+    .content li > ul,
+    .content li > ol {
+      margin-top: 0.3rem;
+      margin-bottom: 0.3rem;
+    }
+
+    /* Links */
+    .content a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    .content a:hover { text-decoration: underline; }
+
+    /* Inline code */
+    .content code {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15em 0.4em;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.875em;
+      color: var(--navy);
+    }
+
+    /* Code blocks */
+    .content pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+    }
+
+    .content pre code {
+      background: none;
+      border: none;
+      padding: 0;
+      font-size: 0.875rem;
+      color: var(--text);
+    }
+
+    /* Blockquote */
+    .content blockquote {
+      border-left: 3px solid var(--purple);
+      margin: 0 0 1rem;
+      padding: 0.5rem 0 0.5rem 1rem;
+      color: var(--text-muted);
+    }
+
+    /* Tables — fill full width; Description column wraps, others stay compact */
+    .content table {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 0;
+      font-size: 0.9rem;
+    }
+
+    .content table + p { margin-top: 1.25rem; }
+
+    /* Tables: constrained to prose column by default */
+    .content > .table-wrap {
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 0 1.5rem;
+      box-sizing: border-box;
+      overflow-x: auto;
+      margin-bottom: 1.25rem;
+    }
+
+    /* Values table only: full page width */
+    .content > .table-wrap.values-table-wrap {
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    /* Fixed sticky header clone injected by JS */
+    .sticky-thead {
+      position: fixed;
+      z-index: 100;
+      display: none;
+      overflow: hidden;
+      background: var(--code-bg);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    }
+
+    .sticky-thead table {
+      border-collapse: collapse;
+      table-layout: fixed;
+      margin: 0;
+      font-size: 0.9rem;
+      font-family: inherit;
+    }
+
+    .sticky-thead th {
+      background: var(--code-bg);
+      font-weight: 600;
+      color: var(--navy);
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+
+    .content th,
+    .content td {
+      border: 1px solid var(--border);
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+    }
+
+    .content th {
+      background: var(--code-bg);
+      font-weight: 600;
+      color: var(--navy);
+    }
+
+    .content tr:nth-child(even) td { background: #fafbfc; }
+
+    /* Horizontal rule */
+    .content hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 2rem 0;
+    }
+
+    /* Images */
+    .content img { max-width: 100%; border-radius: var(--radius); }
+
+    /* Badges (shield.io) */
+    .content img[src*="shields.io"],
+    .content img[src*="img.shields.io"] {
+      border-radius: 3px;
+      vertical-align: middle;
+    }
+
+    /* ── Syntax highlighting (Rouge / GitHub style) ───────────────────────── */
+    .highlight .c,  .highlight .cd { color: #6a737d; font-style: italic }
+    .highlight .cm { color: #6a737d; font-style: italic }
+    .highlight .c1 { color: #6a737d; font-style: italic }
+    .highlight .cp { color: #999999; font-weight: bold }
+    .highlight .cs { color: #999999; font-weight: bold; font-style: italic }
+    .highlight .err { color: #a61717; background-color: #e3d2d2 }
+    .highlight .gd { color: #000000; background-color: #ffdddd }
+    .highlight .ge { font-style: italic }
+    .highlight .gr { color: #aa0000 }
+    .highlight .gh { color: #999999 }
+    .highlight .gi { color: #000000; background-color: #ddffdd }
+    .highlight .go { color: #888888 }
+    .highlight .gp { color: #555555 }
+    .highlight .gs { font-weight: bold }
+    .highlight .gu { color: #aaaaaa }
+    .highlight .gt { color: #aa0000 }
+    .highlight .k,  .highlight .kc,
+    .highlight .kd, .highlight .kn,
+    .highlight .kp, .highlight .kr { color: #d73a49; font-weight: bold }
+    .highlight .kt { color: #445588; font-weight: bold }
+    .highlight .m,  .highlight .mf,
+    .highlight .mh, .highlight .mi,
+    .highlight .mo, .highlight .il { color: #005cc5 }
+    .highlight .n  { color: var(--text) }
+    .highlight .na { color: #005cc5 }
+    .highlight .nb { color: #0086b3 }
+    .highlight .nc { color: #445588; font-weight: bold }
+    .highlight .no { color: #008080 }
+    .highlight .nd { color: #3c5d5d; font-weight: bold }
+    .highlight .ni { color: #800080 }
+    .highlight .ne { color: #990000; font-weight: bold }
+    .highlight .nf { color: #6f42c1; font-weight: bold }
+    .highlight .nn { color: #555555 }
+    .highlight .nt { color: #22863a; font-weight: bold }
+    .highlight .nv { color: #008080 }
+    .highlight .o,  .highlight .ow { color: var(--text); font-weight: bold }
+    .highlight .s,  .highlight .sb,
+    .highlight .sc, .highlight .sd,
+    .highlight .s2, .highlight .se,
+    .highlight .sh, .highlight .si,
+    .highlight .sx, .highlight .sr,
+    .highlight .s1, .highlight .ss { color: #032f62 }
+    .highlight .bp { color: #999999 }
+    .highlight .vc { color: #008080 }
+    .highlight .vg { color: #008080 }
+    .highlight .vi { color: #008080 }
+    .highlight .w  { color: #bbbbbb }
+
+    /* ── Footer ──────────────────────────────────────────────────────────── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 1.5rem 2rem;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+    }
+
+    footer a {
+      color: var(--purple);
+      text-decoration: none;
+    }
+
+    footer a:hover { text-decoration: underline; }
+
+    footer .sep { margin: 0 0.5rem; opacity: 0.4; }
+
+    /* ── Responsive ──────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      .header-inner {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 0.6rem 0;
+        gap: 0.5rem;
+      }
+
+      nav { gap: 1rem; }
+
+      main { padding: 2rem 0 4rem; }
+
+      .content > *:not(.table-wrap) { padding-left: 1rem; padding-right: 1rem; }
+      .content > ul:not(.table-wrap), .content > ol:not(.table-wrap) { padding-left: 2.5rem; }
+      .content > .table-wrap { padding: 0 1rem; }
+      .content > .table-wrap.values-table-wrap { max-width: none; margin-left: 0; margin-right: 0; }
+
+      .content h1 { font-size: 1.65rem; }
+      .content h2 { font-size: 1.25rem; }
+    }
+
+    @media (max-width: 480px) {
+      header { padding: 0 1rem; }
+      footer { padding: 1rem; }
+      nav a.external { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="accent-strip"></div>
+
+  <header>
+    <div class="header-inner">
+      <a href="/" class="logo">
+        <!-- Rasa wordmark (left half of docs-logo.svg, viewBox crops out "docs") -->
+        <svg class="logo-icon" height="22" viewBox="0 0 16600 8286" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Rasa">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M15601.1 5569.8h-1405.8v1422.92L11364.2 5569.8H789.573V1262.83H15601.1V5569.8Zm789.6-5109.82H0v5913.87h11180.9L14986 8285.41V6373.85h1404.7V459.98ZM3343.35 3741.86l902.37-333.92 42.88-17.32V1893.63H1409.95v2986.8h695.58v-681.59l528.73-194.73 796.04 876.32h870.64l-957.59-1138.57Zm-1233.71-305.84v-825.56h1473.99v279.57l-1473.99 545.99ZM4934.81 4887V1893.63h2937.41v2986.8h-704.98v-896.04H5639.79V4887h-704.98Zm704.98-1619.44h1527.45v-657.1H5639.79v657.1Zm5757.31 268.81v1344.06H8518.46V4163.6h2173.64v-418.15H8518.46V1893.63h2878.64v716.83H9223.43v418.16h2173.67v507.75Zm646.2-1642.74V4887h705v-902.61h1527.5v896.04h704.9v-2986.8h-2937.4Zm2232.5 1373.93h-1527.5v-657.1h1527.5v657.1Z" fill="#32415b"/>
+        </svg>
+        <span class="logo-wordmark">
+          <span class="logo-divider">|</span>
+          <span class="logo-product">Helm Charts</span>
+        </span>
+      </a>
+
+      <nav aria-label="Chart documentation">
+        <a href="/charts/studio/">Studio</a>
+        <a href="/charts/rasa/">Rasa Pro</a>
+        <a href="/charts/op-kits/">Operator Kits</a>
+        <a href="https://rasa.com/docs" class="external" target="_blank" rel="noopener">Docs</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="content">
+      {{ content }}
+    </div>
+  </main>
+
+  <footer>
+    <p>
+      &copy; {{ site.time | date: "%Y" }}
+      Rasa Technologies GmbH
+      <span class="sep">|</span>
+      <a href="https://rasa.com/eula" target="_blank" rel="noopener">EULA</a>
+      <span class="sep">|</span>
+      <a href="https://github.com/RasaHQ/rasa-helm-charts" target="_blank" rel="noopener">GitHub</a>
+      <span class="sep">|</span>
+      <a href="https://rasa.com/docs" target="_blank" rel="noopener">Documentation</a>
+    </p>
+  </footer>
+
+  <script>
+    (function () {
+      var accentH = 3; // .accent-strip height
+      var navEl   = document.querySelector('header');
+
+      function isValuesTable(table) {
+        var ths = Array.from(table.querySelectorAll('thead th'));
+        var headers = ths.map(function (th) { return th.textContent.trim(); });
+        return headers[0] === 'Key' && headers[1] === 'Type' &&
+               headers[2] === 'Description' && headers[3] === 'Default';
+      }
+
+      document.querySelectorAll('.content table').forEach(function (table) {
+        var isValues = isValuesTable(table);
+
+        // ── Wrap table for horizontal scroll ─────────────────────────────
+        var wrap = document.createElement('div');
+        wrap.className = 'table-wrap' + (isValues ? ' values-table-wrap' : '');
+        table.parentNode.insertBefore(wrap, table);
+        wrap.appendChild(table);
+
+        // ── Sticky header clone ───────────────────────────────────────────
+        var thead = table.querySelector('thead');
+        if (!thead) return;
+
+        var bar = document.createElement('div');
+        bar.className = 'sticky-thead' + (isValues ? ' values-sticky' : '');
+        document.body.appendChild(bar);
+
+        var cloneTable = document.createElement('table');
+        cloneTable.appendChild(thead.cloneNode(true));
+        bar.appendChild(cloneTable);
+
+        function syncAndToggle() {
+          var navH      = accentH + (navEl ? navEl.offsetHeight : 0);
+          var tableRect = table.getBoundingClientRect();
+          var theadRect = thead.getBoundingClientRect();
+
+          // Show when thead has scrolled above the nav bar and the table
+          // body is still at least partially visible below it.
+          var visible = theadRect.bottom <= navH && tableRect.bottom > navH + 20;
+
+          if (visible) {
+            // Align the clone exactly over the real table
+            bar.style.top   = navH + 'px';
+            bar.style.left  = tableRect.left + 'px';
+            bar.style.width = tableRect.width + 'px';
+
+            // Match each column width so text aligns with the table body
+            var realThs  = Array.from(thead.querySelectorAll('th'));
+            var cloneThs = Array.from(bar.querySelectorAll('th'));
+            realThs.forEach(function (th, i) {
+              if (cloneThs[i]) {
+                cloneThs[i].style.width = th.getBoundingClientRect().width + 'px';
+              }
+            });
+
+            bar.style.display = 'block';
+          } else {
+            bar.style.display = 'none';
+          }
+        }
+
+        window.addEventListener('scroll', syncAndToggle, { passive: true });
+        window.addEventListener('resize', syncAndToggle, { passive: true });
+        // Re-sync when the table scrolls horizontally so the clone stays aligned
+        wrap.addEventListener('scroll', syncAndToggle, { passive: true });
+      });
+    }());
+  </script>
+
+</body>
+</html>

@@ -21,7 +21,7 @@ jobs:
 
     steps:
       - name: Checkout (full history)
-        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           fetch-depth: 0
           token: ${{ secrets.CHART_RELEASER_PAT }}
@@ -61,20 +61,55 @@ jobs:
           fi
 
       - name: Set up Helm
-        uses: azure/setup-helm@5119fcb9089d432beecbf79bb2c7915207344b78
+        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
           version: v3.15.2
+
+      # Resolve the most recent tag per chart to scope the changelog range
+      - name: Get previous chart tags
+        id: prev-tags
+        run: |
+          echo "studio=$(git tag --sort=-version:refname | grep '^studio-' | head -1 || true)" >> $GITHUB_OUTPUT
+          echo "rasa=$(git tag --sort=-version:refname | grep '^rasa-' | head -1 || true)" >> $GITHUB_OUTPUT
+          echo "op_kits=$(git tag --sort=-version:refname | grep '^op-kits-' | head -1 || true)" >> $GITHUB_OUTPUT
+
+      - name: Generate Studio release notes
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        with:
+          config: cliff.toml
+          args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
+        env:
+          OUTPUT: charts/studio/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Generate Rasa Pro release notes
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        with:
+          config: cliff.toml
+          args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
+        env:
+          OUTPUT: charts/rasa/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
+
+      - name: Generate op-kits release notes
+        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        with:
+          config: cliff.toml
+          args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}
+        env:
+          OUTPUT: charts/op-kits/RELEASE_NOTES.md
+          GITHUB_REPO: ${{ github.repository }}
 
       # Package charts, upload to Releases, and write charts/index.yaml to ci/helm-index
       - name: Run chart-releaser (packages + index → ${PAGES_BRANCH})
         uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
         with:
           charts_dir: charts
+          notes_file: RELEASE_NOTES.md
         env:
           CR_TOKEN: ${{ secrets.CHART_RELEASER_PAT }}
           CR_PAGES_BRANCH: ${{ env.PAGES_BRANCH }}
           CR_PAGES_INDEX_PATH: ${{ env.INDEX_PATH }}
-          CR_GENERATE_RELEASE_NOTES: "true"
           CR_SKIP_EXISTING: "true"
 
       # Fetch the updated index.yaml from ci/helm-index
@@ -92,7 +127,7 @@ jobs:
       # Open/update a PR into main with only charts/index.yaml
       - name: Create PR for index.yaml
         if: steps.fetch_index.outputs.no_index != 'true'
-        uses: peter-evans/create-pull-request@c5a7806660adbe173f04e3e038b0ccdcd758773c # v6
+        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
         with:
           token: ${{ secrets.CHART_RELEASER_PAT }}
           commit-message: "chore(helm): update ${INDEX_PATH}"

@@ -280,12 +280,22 @@
       word-break: break-all;
     }
 
-    /* Tables: full page width, small margin on each side */
+    /* Tables: constrained to prose column by default */
     .content > .table-wrap {
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
       padding: 0 1.5rem;
       box-sizing: border-box;
       overflow-x: auto;
       margin-bottom: 1.25rem;
+    }
+
+    /* Values table only: full page width */
+    .content > .table-wrap:has(#values-table) {
+      max-width: none;
+      margin-left: 0;
+      margin-right: 0;
     }
 
     /* Fixed sticky header clone injected by JS */
@@ -438,6 +448,7 @@
       .content > *:not(.table-wrap) { padding-left: 1rem; padding-right: 1rem; }
       .content > ul:not(.table-wrap), .content > ol:not(.table-wrap) { padding-left: 2.5rem; }
       .content > .table-wrap { padding: 0 1rem; }
+      .content > .table-wrap:has(#values-table) { max-width: none; margin-left: 0; margin-right: 0; }
 
       .content h1 { font-size: 1.65rem; }
       .content h2 { font-size: 1.25rem; }

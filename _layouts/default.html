@@ -252,34 +252,6 @@
 
     .content table + p { margin-top: 1.25rem; }
 
-    /* Values table column layout — only applied to the last table on each
-       page (the auto-generated helm-docs Values reference). Other tables
-       use the browser's default auto layout. */
-    #values-table td:nth-child(1),
-    #values-table th:nth-child(1),
-    #values-table td:nth-child(2),
-    #values-table th:nth-child(2) {
-      overflow-wrap: break-word;
-      word-break: break-all;
-    }
-
-    #values-table td:nth-child(3),
-    #values-table th:nth-child(3) {
-      white-space: normal;
-      width: 50%;
-      min-width: 160px;
-      overflow-wrap: break-word;
-    }
-
-    #values-table td:nth-child(4),
-    #values-table th:nth-child(4) {
-      white-space: normal;
-      width: 50%;
-      min-width: 120px;
-      overflow-wrap: break-word;
-      word-break: break-all;
-    }
-
     /* Tables: constrained to prose column by default */
     .content > .table-wrap {
       max-width: 900px;
@@ -292,7 +264,7 @@
     }
 
     /* Values table only: full page width */
-    .content > .table-wrap:has(#values-table) {
+    .content > .table-wrap.values-table-wrap {
       max-width: none;
       margin-left: 0;
       margin-right: 0;
@@ -328,10 +300,6 @@
       text-overflow: ellipsis;
     }
 
-    .sticky-thead.values-sticky th:nth-child(3),
-    .sticky-thead.values-sticky th:nth-child(4) {
-      white-space: normal;
-    }
 
     .content th,
     .content td {
@@ -448,7 +416,7 @@
       .content > *:not(.table-wrap) { padding-left: 1rem; padding-right: 1rem; }
       .content > ul:not(.table-wrap), .content > ol:not(.table-wrap) { padding-left: 2.5rem; }
       .content > .table-wrap { padding: 0 1rem; }
-      .content > .table-wrap:has(#values-table) { max-width: none; margin-left: 0; margin-right: 0; }
+      .content > .table-wrap.values-table-wrap { max-width: none; margin-left: 0; margin-right: 0; }
 
       .content h1 { font-size: 1.65rem; }
       .content h2 { font-size: 1.25rem; }
@@ -511,10 +479,19 @@
       var accentH = 3; // .accent-strip height
       var navEl   = document.querySelector('header');
 
+      function isValuesTable(table) {
+        var ths = Array.from(table.querySelectorAll('thead th'));
+        var headers = ths.map(function (th) { return th.textContent.trim(); });
+        return headers[0] === 'Key' && headers[1] === 'Type' &&
+               headers[2] === 'Description' && headers[3] === 'Default';
+      }
+
       document.querySelectorAll('.content table').forEach(function (table) {
+        var isValues = isValuesTable(table);
+
         // ── Wrap table for horizontal scroll ─────────────────────────────
         var wrap = document.createElement('div');
-        wrap.className = 'table-wrap';
+        wrap.className = 'table-wrap' + (isValues ? ' values-table-wrap' : '');
         table.parentNode.insertBefore(wrap, table);
         wrap.appendChild(table);
 
@@ -523,7 +500,7 @@
         if (!thead) return;
 
         var bar = document.createElement('div');
-        bar.className = 'sticky-thead' + (table.id === 'values-table' ? ' values-sticky' : '');
+        bar.className = 'sticky-thead' + (isValues ? ' values-sticky' : '');
         document.body.appendChild(bar);
 
         var cloneTable = document.createElement('table');

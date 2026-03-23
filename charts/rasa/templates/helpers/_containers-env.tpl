@@ -73,40 +73,41 @@ Environment Variables for Rasa Analytics
   value: "true"
 - name: "RASA_ANALYTICS_DB_HOST_NAME"
   value: {{ .hostname | quote }}
+{{- if .databaseNameExistingSecretName }}
 - name: "RASA_ANALYTICS_DB_NAME"
-  {{- if .databaseNameExistingSecretName }}
   valueFrom:
     secretKeyRef:
       name: {{ .databaseNameExistingSecretName | quote }}
       key: {{ .databaseNameExistingSecretKey | quote }}
-  {{- else }}
+{{- else if .databaseName }}
+- name: "RASA_ANALYTICS_DB_NAME"
   value: {{ .databaseName | quote }}
-  {{- end }}
+{{- end }}
+{{- if .usernameExistingSecretName }}
 - name: "RASA_ANALYTICS_DB_USERNAME"
-  {{- if .usernameExistingSecretName }}
   valueFrom:
     secretKeyRef:
       name: {{ .usernameExistingSecretName | quote }}
       key: {{ .usernameExistingSecretKey | quote }}
-  {{- else }}
+{{- else if .username }}
+- name: "RASA_ANALYTICS_DB_USERNAME"
   value: {{ .username | quote }}
-  {{- end }}
+{{- end }}
 - name: "RASA_ANALYTICS_DB_PORT"
   value: {{ .port | quote }}
 - name: "RASA_ANALYTICS_DB_SSL_MODE"
   value: {{ .sslMode | quote }}
 - name: "RASA_ANALYTICS_DB_SSL_CA_LOCATION"
   value: {{ .sslCaLocation | quote }}
-{{- else }}
+{{- else if .urlExistingSecretName }}
 - name: "RASA_ANALYTICS_DB_URL"
-  {{- if .urlExistingSecretName }}
   valueFrom:
     secretKeyRef:
       name: {{ .urlExistingSecretName | quote }}
       key: {{ .urlExistingSecretKey | quote }}
-  {{- else }}
+{{- else if .url }}
+- name: "RASA_ANALYTICS_DB_URL"
   value: {{ .url | quote }}
-  {{- end }}
 {{- end }}
 {{- end }}
 

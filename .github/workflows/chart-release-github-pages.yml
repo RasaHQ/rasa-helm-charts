@@ -102,7 +102,8 @@ jobs:
 
       # Write cr config so chart-releaser picks up the generated RELEASE_NOTES.md per chart
       - name: Write chart-releaser config
-        run: printf 'release-notes-file: RELEASE_NOTES.md\n' > .cr.yaml
+        run: |
+          echo 'release-notes-file: RELEASE_NOTES.md' > .cr.yaml
 
       # Package charts, upload to Releases, and write charts/index.yaml to ci/helm-index
       - name: Run chart-releaser (packages + index → ${PAGES_BRANCH})

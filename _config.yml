@@ -1,0 +1,38 @@
+title: Rasa Helm Charts
+description: Helm charts for deploying Rasa products on Kubernetes
+url: https://helm.rasa.com
+
+# Apply the custom layout to all markdown pages
+defaults:
+  - scope:
+      path: ""
+    values:
+      layout: default
+
+# Don't process Helm chart source files as Jekyll pages
+exclude:
+  - charts/rasa/templates/
+  - charts/studio/templates/
+  - charts/op-kits/templates/
+  - charts/rasa/Chart.yaml
+  - charts/rasa/Chart.lock
+  - charts/studio/Chart.yaml
+  - charts/studio/Chart.lock
+  - charts/op-kits/Chart.yaml
+  - charts/op-kits/Chart.lock
+  - charts/rasa/values.yaml
+  - charts/studio/values.yaml
+  - charts/op-kits/values.yaml
+  - ct.yaml
+  - lintconf.yaml
+  - chart_schema.yaml
+  - CONTRIBUTING.md
+  - SECURITY.md
+  - CODE_OF_CONDUCT.md
+
+markdown: kramdown
+highlighter: rouge
+
+kramdown:
+  input: GFM
+  syntax_highlighter: rouge

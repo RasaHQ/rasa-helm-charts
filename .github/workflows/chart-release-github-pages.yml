@@ -100,12 +100,16 @@ jobs:
           OUTPUT: charts/op-kits/RELEASE_NOTES.md
           GITHUB_REPO: ${{ github.repository }}
 
+      # Write cr config so chart-releaser picks up the generated RELEASE_NOTES.md per chart
+      - name: Write chart-releaser config
+        run: printf 'release-notes-file: RELEASE_NOTES.md\n' > .cr.yaml
+
       # Package charts, upload to Releases, and write charts/index.yaml to ci/helm-index
       - name: Run chart-releaser (packages + index → ${PAGES_BRANCH})
         uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
         with:
           charts_dir: charts
-          notes_file: RELEASE_NOTES.md
+          config: .cr.yaml
         env:
           CR_TOKEN: ${{ secrets.CHART_RELEASER_PAT }}
           CR_PAGES_BRANCH: ${{ env.PAGES_BRANCH }}

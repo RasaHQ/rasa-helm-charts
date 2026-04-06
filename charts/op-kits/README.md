@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.4.1](https://img.shields.io/badge/Version-0.4.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.4.2](https://img.shields.io/badge/Version-0.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.2
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.4.1
+$ helm install my-release rasa/op-kits --version 0.4.2
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.2
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.4.1
+$ helm pull rasa/op-kits --version 0.4.2
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.4.1 \
+    --version 0.4.2 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.4.1 \
+    --version 0.4.2 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -687,7 +687,7 @@ strimzi:
 | cloudnativepg.cluster.bootstrap.initdb.database | string | Database name to create during initialization | `"app"` |
 | cloudnativepg.cluster.bootstrap.initdb.owner | string | Database owner/user to create during initialization | `"appuser"` |
 | cloudnativepg.cluster.enableSuperuserAccess | bool | Enable superuser access (creates <cluster>-superuser secret) | `true` |
-| cloudnativepg.cluster.image | object | PostgreSQL container image to use | `{"repository":"ghcr.io/cloudnative-pg/postgresql","tag":"16"}` |
+| cloudnativepg.cluster.image | object | PostgreSQL container image to use | `{"repository":"ghcr.io/cloudnative-pg/postgresql","tag":"18.3"}` |
 | cloudnativepg.cluster.instances | int | Number of PostgreSQL instances in the cluster | `1` |
 | cloudnativepg.cluster.monitoring.enablePodMonitor | bool | Enable Prometheus PodMonitor for metrics collection | `false` |
 | cloudnativepg.cluster.nameOverride | string | Override cluster name. If empty, uses "{{ release-name }}-pg" | `""` |

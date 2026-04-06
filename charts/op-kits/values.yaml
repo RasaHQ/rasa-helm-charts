@@ -28,7 +28,7 @@ cloudnativepg:
     # -- PostgreSQL container image to use
     image:
       repository: "ghcr.io/cloudnative-pg/postgresql"
-      tag: "16"
+      tag: "18.3"
 
     # -- Additional annotations to apply to the PostgreSQL Cluster resource
     # Example:

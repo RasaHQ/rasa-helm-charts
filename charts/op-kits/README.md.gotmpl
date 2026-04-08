@@ -200,6 +200,7 @@ Based on the fullname, resources are named as follows:
 #### PostgreSQL (CloudNativePG)
 - **Cluster name**: `{fullname}-pg`
   - Override: Set `cloudnativepg.cluster.nameOverride`
+- **Database names**: taken directly from `cloudnativepg.databases.<key>.name`
 
 #### Kafka (Strimzi)
 - **Kafka cluster**: `{fullname}-kafka`
@@ -292,6 +293,41 @@ valkey:
       spec:
         storageClassName: "your-storage-class"  # Update this
 ```
+
+### PostgreSQL Additional Databases
+
+By default, the CloudNativePG `Cluster` creates one database (set via `cloudnativepg.cluster.bootstrap.initdb.database`). To create additional databases inside the same cluster, use the `cloudnativepg.databases` map. Each entry creates a separate `postgresql.cnpg.io/v1` `Database` CR managed by the CloudNativePG operator.
+
+```yaml
+cloudnativepg:
+  databases:
+    studioDb:
+      enabled: true
+      name: "studio"
+      owner: "appuser"
+    analyticsDb:
+      enabled: true
+      name: "analytics"
+      owner: "appuser"
+      encoding: "UTF8"
+      allowConnections: true
+      connectionLimit: -1
+```
+
+The `owner` must be a role that already exists in the cluster (e.g. the user created via `bootstrap.initdb.owner`). All databases automatically reference the cluster created by this chart release.
+
+Available fields per database entry:
+
+| Field | Required | Description |
+|---|---|---|
+| `enabled` | yes | Whether to create this Database CR |
+| `name` | yes | Database name in PostgreSQL |
+| `owner` | yes | PostgreSQL role that owns the database |
+| `encoding` | no | Character set encoding (e.g. `UTF8`) |
+| `tablespace` | no | Default tablespace for the database |
+| `allowConnections` | no | Whether the database can be connected to (default: `true`) |
+| `connectionLimit` | no | Max concurrent connections; `-1` means unlimited |
+| `isTemplate` | no | Whether the database is a template |
 
 ### Resource Configuration
 

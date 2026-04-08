@@ -1,0 +1,38 @@
+{{- if .Values.cloudnativepg.enabled }}
+{{- range $name, $db := .Values.cloudnativepg.databases }}
+{{- if $db.enabled }}
+---
+apiVersion: postgresql.cnpg.io/v1
+kind: Database
+metadata:
+  name: {{ $db.name }}
+  namespace: {{ include "op-kits.namespace" $ }}
+  labels:
+    {{- include "op-kits.cloudnativepg.labels" $ | nindent 4 }}
+  {{- with $.Values.commonAnnotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  name: {{ $db.name }}
+  owner: {{ $db.owner }}
+  cluster:
+    name: {{ include "op-kits.cloudnativepg.clusterName" $ }}
+  {{- with $db.encoding }}
+  encoding: {{ . }}
+  {{- end }}
+  {{- with $db.tablespace }}
+  tablespace: {{ . }}
+  {{- end }}
+  {{- if hasKey $db "allowConnections" }}
+  allowConnections: {{ $db.allowConnections }}
+  {{- end }}
+  {{- if hasKey $db "connectionLimit" }}
+  connectionLimit: {{ $db.connectionLimit }}
+  {{- end }}
+  {{- if hasKey $db "isTemplate" }}
+  isTemplate: {{ $db.isTemplate }}
+  {{- end }}
+{{- end }}
+{{- end }}
+{{- end }}

@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.4.2](https://img.shields.io/badge/Version-0.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.0-rc.0](https://img.shields.io/badge/Version-0.5.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.0-rc.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.4.2
+$ helm install my-release rasa/op-kits --version 0.5.0-rc.0
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.4.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.0-rc.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.4.2
+$ helm pull rasa/op-kits --version 0.5.0-rc.0
 ```
 
 ## Operator Installation
@@ -141,13 +141,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.4.2 \
+    --version 0.5.0-rc.0 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.4.2 \
+    --version 0.5.0-rc.0 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -201,6 +201,7 @@ Based on the fullname, resources are named as follows:
 #### PostgreSQL (CloudNativePG)
 - **Cluster name**: `{fullname}-pg`
   - Override: Set `cloudnativepg.cluster.nameOverride`
+- **Database names**: taken directly from `cloudnativepg.databases.<key>.name`
 
 #### Kafka (Strimzi)
 - **Kafka cluster**: `{fullname}-kafka`
@@ -293,6 +294,41 @@ valkey:
       spec:
         storageClassName: "your-storage-class"  # Update this
 ```
+
+### PostgreSQL Additional Databases
+
+By default, the CloudNativePG `Cluster` creates one database (set via `cloudnativepg.cluster.bootstrap.initdb.database`). To create additional databases inside the same cluster, use the `cloudnativepg.databases` map. Each entry creates a separate `postgresql.cnpg.io/v1` `Database` CR managed by the CloudNativePG operator.
+
+```yaml
+cloudnativepg:
+  databases:
+    studioDb:
+      enabled: true
+      name: "studio"
+      owner: "appuser"
+    analyticsDb:
+      enabled: true
+      name: "analytics"
+      owner: "appuser"
+      encoding: "UTF8"
+      allowConnections: true
+      connectionLimit: -1
+```
+
+The `owner` must be a role that already exists in the cluster (e.g. the user created via `bootstrap.initdb.owner`). All databases automatically reference the cluster created by this chart release.
+
+Available fields per database entry:
+
+| Field | Required | Description |
+|---|---|---|
+| `enabled` | yes | Whether to create this Database CR |
+| `name` | yes | Database name in PostgreSQL |
+| `owner` | yes | PostgreSQL role that owns the database |
+| `encoding` | no | Character set encoding (e.g. `UTF8`) |
+| `tablespace` | no | Default tablespace for the database |
+| `allowConnections` | no | Whether the database can be connected to (default: `true`) |
+| `connectionLimit` | no | Max concurrent connections; `-1` means unlimited |
+| `isTemplate` | no | Whether the database is a template |
 
 ### Resource Configuration
 
@@ -695,6 +731,7 @@ strimzi:
 | cloudnativepg.cluster.resources | object | Resource limits and requests for PostgreSQL containers Example: resources:   limits:     cpu: "1"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" | `{}` |
 | cloudnativepg.cluster.storage.size | string | Storage size for PostgreSQL data | `"15Gi"` |
 | cloudnativepg.cluster.storage.storageClass | string | Storage class name. Change to your storage class | `"gp2"` |
+| cloudnativepg.databases | object | Map of Database CRs to create inside the PostgreSQL cluster Each entry creates a separate postgresql.cnpg.io/v1 Database resource Example: databases:   studioDb:     enabled: true     name: "studio"     owner: "appuser"   rasaDb:     enabled: true     name: "rasa"     owner: "appuser"     encoding: "UTF8"     allowConnections: true     connectionLimit: -1 | `{}` |
 | cloudnativepg.enabled | bool | Enable CloudNativePG cluster deployment | `true` |
 | commonAnnotations | object | Additional annotations to apply to all resources Example: commonAnnotations:   monitoring.coreos.com/scrape: "true"   prometheus.io/port: "8080" | `{}` |
 | commonLabels | object | Additional labels to apply to all resources Example: commonLabels:   environment: production   team: platform | `{}` |

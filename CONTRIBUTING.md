@@ -45,6 +45,53 @@ Make sure to always check if `README.md` is valid and reflects your changes prop
 enabled: false
 ```
 
+## Commit Message Guidelines
+
+We follow the [Conventional Commits](https://www.conventionalcommits.org/) specification. The format is:
+
+```
+<type>(<scope>): <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+### Types
+
+| Type | When to use | Version bump |
+|---|---|---|
+| `feat` | New feature or new value/template added to a chart | MINOR |
+| `fix` | Bug fix in a template, value default, or helper | PATCH |
+| `chore` | Version bumps, dependency updates, CI changes | PATCH |
+| `docs` | Changes to `README.md.gotmpl`, `CONTRIBUTING.md`, or inline comments | PATCH |
+| `refactor` | Template restructuring with no behaviour change | PATCH |
+| `BREAKING CHANGE` | Footer on any commit that changes existing default values or removes fields | MAJOR |
+
+### Scope
+
+Use the chart name as the scope: `rasa`, `studio`, or `op-kits`.
+
+### Examples
+
+```
+feat(op-kits): add CloudNativePG Database CR support for additional databases
+```
+```
+fix(rasa): correct ingress host template for action-server
+```
+```
+chore(studio): bump chart version to 2.5.0
+```
+```
+docs(op-kits): document Kafka external listener configuration
+```
+```
+feat(studio): add imagePullSecrets support to web-client component
+
+BREAKING CHANGE: renames webClient.image.pullPolicy to webClient.imagePullPolicy
+```
+
 This repository automatically release a new version of the Helm chart once new changes are merged. The only required steps are:
 
 1. Make the changes to the chart

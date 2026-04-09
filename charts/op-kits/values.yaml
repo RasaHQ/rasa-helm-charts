@@ -80,6 +80,24 @@ cloudnativepg:
     #     memory: "256Mi"
     resources: {}
 
+  # CloudNativePG Databases Configuration
+  # -- Map of Database CRs to create inside the PostgreSQL cluster
+  # Each entry creates a separate postgresql.cnpg.io/v1 Database resource
+  # Example:
+  # databases:
+  #   studioDb:
+  #     enabled: true
+  #     name: "studio"
+  #     owner: "appuser"
+  #   rasaDb:
+  #     enabled: true
+  #     name: "rasa"
+  #     owner: "appuser"
+  #     encoding: "UTF8"
+  #     allowConnections: true
+  #     connectionLimit: -1
+  databases: {}
+
 # Strimzi Kafka Configuration
 strimzi:
   # -- Enable Strimzi Kafka cluster deployment

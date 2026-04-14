@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.5.0](https://img.shields.io/badge/Version-0.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.5.0
+$ helm install my-release rasa/op-kits --version 0.5.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.5.0
+$ helm pull rasa/op-kits --version 0.5.1
 ```
 
 ## Operator Installation
@@ -106,17 +106,18 @@ $ helm install strimzi-operator oci://quay.io/strimzi-helm/strimzi-kafka-operato
 
 ### 3. Valkey Operator
 
-Install the Valkey operator using the official Helm chart:
+Install the Valkey operator from the official OCI registry:
 
 ```console
-# Add the Hyperspike Helm repository
-$ helm repo add hyperspike https://charts.hyperspike.io
-$ helm repo update
+# Get the latest release version
+$ LATEST=$(curl -s https://api.github.com/repos/hyperspike/valkey-operator/releases/latest | jq -cr .tag_name)
 
-# Install Valkey operator in valkey-system namespace
-$ helm install valkey-operator hyperspike/valkey-operator \
-    --namespace valkey-system \
-    --create-namespace
+# Install Valkey operator in valkey-operator-system namespace
+$ helm install valkey-operator \
+    --namespace valkey-operator-system \
+    --create-namespace \
+    oci://ghcr.io/hyperspike/valkey-operator \
+    --version ${LATEST}-chart
 ```
 
 ### 4. Verify Operator Installation
@@ -131,7 +132,7 @@ $ kubectl get pods -n cnpg-system
 $ kubectl get pods -n strimzi-system
 
 # Check Valkey operator
-$ kubectl get pods -n valkey-system
+$ kubectl get pods -n valkey-operator-system
 ```
 
 ### 5. Install Application Resources
@@ -141,13 +142,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.5.0 \
+    --version 0.5.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.5.0 \
+    --version 0.5.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -164,10 +165,10 @@ $ helm uninstall cnpg-operator -n cnpg-system
 $ helm uninstall strimzi-operator -n strimzi-system
 
 # Remove Valkey operator
-$ helm uninstall valkey-operator -n valkey-system
+$ helm uninstall valkey-operator -n valkey-operator-system
 
 # Optionally remove the namespaces (only if empty)
-$ kubectl delete namespace cnpg-system strimzi-system valkey-system
+$ kubectl delete namespace cnpg-system strimzi-system valkey-operator-system
 ```
 
 > **Warning**: Removing operators will affect all PostgreSQL, Kafka, and Valkey clusters managed by them across the entire cluster.

@@ -114,7 +114,7 @@ $ LATEST=$(curl -s https://api.github.com/repos/hyperspike/valkey-operator/relea
 
 # Install Valkey operator in valkey-operator-system namespace
 $ helm install valkey-operator \
-    --namespace valkey-operator-system \
+    --namespace valkey-system \
     --create-namespace \
     oci://ghcr.io/hyperspike/valkey-operator \
     --version ${LATEST}-chart
@@ -132,7 +132,7 @@ $ kubectl get pods -n cnpg-system
 $ kubectl get pods -n strimzi-system
 
 # Check Valkey operator
-$ kubectl get pods -n valkey-operator-system
+$ kubectl get pods -n valkey-system
 ```
 
 ### 5. Install Application Resources
@@ -165,10 +165,10 @@ $ helm uninstall cnpg-operator -n cnpg-system
 $ helm uninstall strimzi-operator -n strimzi-system
 
 # Remove Valkey operator
-$ helm uninstall valkey-operator -n valkey-operator-system
+$ helm uninstall valkey-operator -n valkey-system
 
 # Optionally remove the namespaces (only if empty)
-$ kubectl delete namespace cnpg-system strimzi-system valkey-operator-system
+$ kubectl delete namespace cnpg-system strimzi-system valkey-system
 ```
 
 > **Warning**: Removing operators will affect all PostgreSQL, Kafka, and Valkey clusters managed by them across the entire cluster.

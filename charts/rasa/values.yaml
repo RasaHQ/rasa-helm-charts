@@ -77,6 +77,13 @@ rasa:
       #   secret: "<SECRET>"
       #   page-access-token: "<PAGE-ACCESS-TOKEN>"
 
+    # -- settings.credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file)
+    # that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts.
+    # Intended for `helm install --set-file rasa.settings.credentialsRaw=./credentials.yml`
+    # or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`.
+    # Leave unset/empty to disable. Malformed YAML fails the template render.
+    credentialsRaw: ""
+
     # See: https://rasa.com/docs/rasa/telemetry/telemetry/
     telemetry:
       # -- telemetry.enabled allow Rasa to collect anonymous usage details
@@ -93,6 +100,15 @@ rasa:
       # models:
       #   url: http://my-server.com/models/default_core@latest
         # wait_time_between_pulls:  10   # [optional](default: 100)
+
+    # -- settings.endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file)
+    # that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts,
+    # so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence
+    # over the same keys in the raw file.
+    # Intended for `helm install --set-file rasa.settings.endpointsRaw=./endpoints.yml`
+    # or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`.
+    # Leave unset/empty to disable. Malformed YAML fails the template render.
+    endpointsRaw: ""
 
       # --endpoints.action_endpoint is a server which runs your custom actions.
       # See: https://rasa.com/docs/reference/integrations/action-server/actions

@@ -8,6 +8,7 @@ on:
       - charts/rasa/**
       - '!charts/studio/**'
       - '!charts/op-kits/**'
+  workflow_dispatch: {}
 
 jobs:
   release-candidate:

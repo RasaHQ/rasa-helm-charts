@@ -1,4 +1,36 @@
 {{- if .Values.rasa.settings.mountDefaultConfigmap }}
+{{- /*
+Build the credentials map by deep-merging the structured value with the optional
+raw YAML string (credentialsRaw). The structured value wins on key conflicts.
+*/ -}}
+{{- $credentialsMerged := dict }}
+{{- if .Values.rasa.settings.credentialsRaw }}
+{{-   $rawTrim := .Values.rasa.settings.credentialsRaw | toString | trim }}
+{{-   if $rawTrim }}
+{{-     $parsed := fromYaml $rawTrim }}
+{{-     if hasKey $parsed "Error" }}
+{{-       fail (printf "rasa.settings.credentialsRaw: invalid YAML: %s" (index $parsed "Error")) }}
+{{-     end }}
+{{-     $credentialsMerged = $parsed }}
+{{-   end }}
+{{- end }}
+{{- if .Values.rasa.settings.credentials }}
+{{-   $credentialsMerged = merge (deepCopy .Values.rasa.settings.credentials) $credentialsMerged }}
+{{- end }}
+{{- $endpointsMerged := dict }}
+{{- if .Values.rasa.settings.endpointsRaw }}
+{{-   $rawTrim := .Values.rasa.settings.endpointsRaw | toString | trim }}
+{{-   if $rawTrim }}
+{{-     $parsed := fromYaml $rawTrim }}
+{{-     if hasKey $parsed "Error" }}
+{{-       fail (printf "rasa.settings.endpointsRaw: invalid YAML: %s" (index $parsed "Error")) }}
+{{-     end }}
+{{-     $endpointsMerged = $parsed }}
+{{-   end }}
+{{- end }}
+{{- if .Values.rasa.settings.endpoints }}
+{{-   $endpointsMerged = merge (deepCopy .Values.rasa.settings.endpoints) $endpointsMerged }}
+{{- end }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,12 +38,12 @@ metadata:
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 data:
-{{- with .Values.rasa.settings.credentials }}
+{{- if $credentialsMerged }}
   credentials: |
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml $credentialsMerged | nindent 4 }}
 {{- end }}
-{{- with .Values.rasa.settings.endpoints }}
+{{- if $endpointsMerged }}
   endpoints: |
-    {{- toYaml . | nindent 4 }}
+    {{- toYaml $endpointsMerged | nindent 4 }}
 {{- end }}
 {{- end }}

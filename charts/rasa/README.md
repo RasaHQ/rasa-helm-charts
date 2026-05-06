@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.1.0](https://img.shields.io/badge/Version-2.1.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.2.0](https://img.shields.io/badge/Version-2.2.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.1.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.2.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +90,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.1.0
+helm install my-release rasa/rasa --version 2.2.0
 ```
 
 ## Upgrading the Chart
@@ -393,6 +393,42 @@ rasa:
 ```
 
 See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
+
+#### Sourcing Endpoints and Credentials from Raw YAML Files
+
+In addition to the structured `rasa.settings.endpoints` and `rasa.settings.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.settings.endpointsRaw` and `rasa.settings.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
+
+When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.settings.endpoints` override the same keys in the raw file.
+
+Helm CLI (`--set-file`):
+
+```console
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
+  --version 2.2.0 \
+  --set-file rasa.settings.endpointsRaw=./endpoints.yml \
+  --set-file rasa.settings.credentialsRaw=./credentials.yml
+```
+
+ArgoCD multi-source `Application` (referencing files from a values repo):
+
+```yaml
+spec:
+  sources:
+    - repoURL: https://github.com/RasaHQ/rasa-helm-charts
+      chart: rasa
+      targetRevision: 2.2.0
+      helm:
+        fileParameters:
+          - name: rasa.settings.endpointsRaw
+            path: $values/endpoints.yml
+          - name: rasa.settings.credentialsRaw
+            path: $values/credentials.yml
+    - repoURL: https://github.com/your-org/your-app-repo
+      targetRevision: main
+      ref: values
+```
+
+`${VAR}` placeholders inside the raw file are preserved verbatim through the parse/merge/render pipeline, so Rasa's runtime environment-variable substitution continues to work.
 
 #### Configuring Endpoints
 
@@ -907,10 +943,12 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.settings.authToken | object | settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. | `{"secretKey":"authToken","secretName":"rasa-secrets"}` |
 | rasa.settings.cors | string | settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
 | rasa.settings.credentials | object | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
+| rasa.settings.credentialsRaw | string | settings.credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.settings.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.settings.debugMode | bool | settings.debugMode enables debug mode | `false` |
 | rasa.settings.ducklingHttpUrl | string | settings.ducklingHttpUrl is the HTTP URL of the Duckling entity extraction service. Required when using Duckling for entity extraction. | `nil` |
 | rasa.settings.enableApi | bool | settings.enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod). | `true` |
 | rasa.settings.endpoints | object | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
+| rasa.settings.endpointsRaw | string | settings.endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.settings.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.settings.environment | string | settings.environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
 | rasa.settings.jwtMethod | string | settings.jwtMethod is JWT algorithm to be used | `"HS256"` |
 | rasa.settings.jwtSecret | object | settings.jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. | `{"secretKey":"jwtSecret","secretName":"rasa-secrets"}` |

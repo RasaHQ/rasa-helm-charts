@@ -393,6 +393,42 @@ rasa:
 
 See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
 
+#### Sourcing Endpoints and Credentials from Raw YAML Files
+
+In addition to the structured `rasa.settings.endpoints` and `rasa.settings.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.settings.endpointsRaw` and `rasa.settings.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
+
+When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.settings.endpoints` override the same keys in the raw file.
+
+Helm CLI (`--set-file`):
+
+```console
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ template "chart.name" . }} \
+  --version {{ template "chart.version" . }} \
+  --set-file rasa.settings.endpointsRaw=./endpoints.yml \
+  --set-file rasa.settings.credentialsRaw=./credentials.yml
+```
+
+ArgoCD multi-source `Application` (referencing files from a values repo):
+
+```yaml
+spec:
+  sources:
+    - repoURL: https://github.com/RasaHQ/rasa-helm-charts
+      chart: rasa
+      targetRevision: {{ template "chart.version" . }}
+      helm:
+        fileParameters:
+          - name: rasa.settings.endpointsRaw
+            path: $values/endpoints.yml
+          - name: rasa.settings.credentialsRaw
+            path: $values/credentials.yml
+    - repoURL: https://github.com/your-org/your-app-repo
+      targetRevision: main
+      ref: values
+```
+
+`${VAR}` placeholders inside the raw file are preserved verbatim through the parse/merge/render pipeline, so Rasa's runtime environment-variable substitution continues to work.
+
 #### Configuring Endpoints
 
 The `rasa.settings.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.

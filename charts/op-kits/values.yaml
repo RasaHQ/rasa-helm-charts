@@ -149,7 +149,28 @@ strimzi:
         #   requests:
         #     cpu: "100m"
         #     memory: "128Mi"
-      disableTopicFinalizer: true
+      # -- entityOperator.topicOperatorContainer configures the Topic Operator container template (Strimzi ContainerTemplate).
+      # Default disables Topic finalizers via STRIMZI_USE_FINALIZERS=false.
+      # Override the entire `env` list (or any other ContainerTemplate field) to customize.
+      # NOTE: providing your own `env` list replaces the default — re-include STRIMZI_USE_FINALIZERS yourself
+      # if you want to keep the disabled-finalizer behavior. To omit the env entirely, set `env: []`.
+      # Migration from the removed `disableTopicFinalizer` flag:
+      # `disableTopicFinalizer: false` → `topicOperatorContainer.env: [{name: STRIMZI_USE_FINALIZERS, value: "true"}]`.
+      # See: https://strimzi.io/docs/operators/latest/configuring#type-ContainerTemplate-reference
+      topicOperatorContainer:
+        env:
+          - name: STRIMZI_USE_FINALIZERS
+            value: "false"
+
+      # -- entityOperator.userOperatorContainer configures the User Operator container template (Strimzi ContainerTemplate).
+      # Pass any valid ContainerTemplate fields (env, securityContext, volumeMounts, etc.) — they are rendered verbatim.
+      # See: https://strimzi.io/docs/operators/latest/configuring#type-ContainerTemplate-reference
+      userOperatorContainer: {}
+        # env:
+        #   - name: MY_VAR
+        #     value: my-value
+        # securityContext:
+        #   readOnlyRootFilesystem: true
 
     # Ensure the simple auth kafka plugin is enabled
     authorization:

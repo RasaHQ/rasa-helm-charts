@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.5.1](https://img.shields.io/badge/Version-0.5.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.0-rc.0](https://img.shields.io/badge/Version-0.6.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.0-rc.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.5.1
+$ helm install my-release rasa/op-kits --version 0.6.0-rc.0
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.5.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.0-rc.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.5.1
+$ helm pull rasa/op-kits --version 0.6.0-rc.0
 ```
 
 ## Operator Installation
@@ -142,13 +142,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.5.1 \
+    --version 0.6.0-rc.0 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.5.1 \
+    --version 0.6.0-rc.0 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -744,9 +744,10 @@ strimzi:
 | strimzi.kafka.annotations | object | Annotations to apply to the Kafka Cluster resource Includes both operator configuration and custom annotations Example: annotations:   strimzi.io/kraft: "enabled"           # Enable KRaft mode (no ZooKeeper)   strimzi.io/node-pools: "enabled"     # Use KafkaNodePool resources   strimzi.io/restart: "true"           # Custom restart annotation   kafka.strimzi.io/logging: "debug"    # Custom logging annotation | `{"strimzi.io/kraft":"enabled","strimzi.io/node-pools":"enabled"}` |
 | strimzi.kafka.authorization.type | string |  | `"simple"` |
 | strimzi.kafka.config | object | Kafka configuration parameters for brokers With 1 broker, keep replication factors at 1 (increase when scaling out) | `{"auto.create.topics.enable":true,"default.replication.factor":1,"min.insync.replicas":1,"offsets.topic.replication.factor":1,"transaction.state.log.min.isr":1,"transaction.state.log.replication.factor":1}` |
-| strimzi.kafka.entityOperator.disableTopicFinalizer | bool | Resource limits and requests for User Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" | `true` |
 | strimzi.kafka.entityOperator.topicOperator | object |  | `{}` |
+| strimzi.kafka.entityOperator.topicOperatorContainer | object | entityOperator.topicOperatorContainer configures the Topic Operator container template (Strimzi ContainerTemplate). Default disables Topic finalizers via STRIMZI_USE_FINALIZERS=false. Override the entire `env` list (or any other ContainerTemplate field) to customize. NOTE: providing your own `env` list replaces the default — re-include STRIMZI_USE_FINALIZERS yourself if you want to keep the disabled-finalizer behavior. To omit the env entirely, set `env: []`. Migration from the removed `disableTopicFinalizer` flag: `disableTopicFinalizer: false` → `topicOperatorContainer.env: [{name: STRIMZI_USE_FINALIZERS, value: "true"}]`. See: https://strimzi.io/docs/operators/latest/configuring#type-ContainerTemplate-reference | `{"env":[{"name":"STRIMZI_USE_FINALIZERS","value":"false"}]}` |
 | strimzi.kafka.entityOperator.userOperator | object | Resource limits and requests for Topic Operator Example: resources:   limits:     cpu: "500m"     memory: "512Mi"   requests:     cpu: "100m"     memory: "128Mi" | `{}` |
+| strimzi.kafka.entityOperator.userOperatorContainer | object | entityOperator.userOperatorContainer configures the User Operator container template (Strimzi ContainerTemplate). Pass any valid ContainerTemplate fields (env, securityContext, volumeMounts, etc.) — they are rendered verbatim. See: https://strimzi.io/docs/operators/latest/configuring#type-ContainerTemplate-reference | `{}` |
 | strimzi.kafka.externalListener | object | External listener configuration for accessing Kafka from outside the cluster When enabled, this entire listener object is appended to the listeners array | `{"enabled":false,"listener":{"authentication":{"type":"scram-sha-512"},"configuration":{"bootstrap":null,"brokers":null},"name":"external","port":9094,"tls":false,"type":"loadbalancer"}}` |
 | strimzi.kafka.externalListener.enabled | bool | Enable external access to Kafka via LoadBalancer | `false` |
 | strimzi.kafka.externalListener.listener | object | Complete listener configuration (Strimzi Kafka listener spec) This allows full flexibility - any valid Strimzi listener configuration can be specified here | `{"authentication":{"type":"scram-sha-512"},"configuration":{"bootstrap":null,"brokers":null},"name":"external","port":9094,"tls":false,"type":"loadbalancer"}` |

@@ -33,10 +33,14 @@ spec:
           {{- toYaml . | nindent 10 }}
         {{- end }}
       {{- end }}
+      {{- with .Values.strimzi.kafka.entityOperator.topicOperatorContainer }}
       topicOperatorContainer:
-        env:
-          - name: STRIMZI_USE_FINALIZERS
-            value: {{ if not .Values.strimzi.kafka.entityOperator.disableTopicFinalizer }}"true"{{ else }}"false"{{ end }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.strimzi.kafka.entityOperator.userOperatorContainer }}
+      userOperatorContainer:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
   kafka:
     {{- with .Values.strimzi.kafka.image }}
     # Container image

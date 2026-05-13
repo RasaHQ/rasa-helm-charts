@@ -47,9 +47,10 @@ inputs:
     required: true
   gcp-service-account:
     description: |
+      [DEPRECATED — direct WIF is now used; this input is ignored]
       The email address for an Google service account that can access your artifact repository via your identity provider
       e.g. my-service-account@my-project.iam.gserviceaccount.com
-    required: true
+    required: false
   gar-location:
     description: The location of your Google Artifact Registry to push the Helm chart to to, e.g. the region
     required: false
@@ -82,8 +83,8 @@ runs:
       id: google-auth
       uses: google-github-actions/auth@7c6bc770dae815cd3e89ee6cdf493a5fab2cc093 # v3
       with:
+        token_format: access_token
         workload_identity_provider: ${{ inputs.gcp-identity-provider }}
-        service_account: '${{ inputs.gcp-service-account }}'
 
     - name: Get chart name
       id: get-chart-name

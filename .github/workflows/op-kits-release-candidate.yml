@@ -38,7 +38,6 @@ jobs:
         uses: ./.github/actions/release-helm-charts-oci
         with:
           gcp-identity-provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER_OIDC_HELM }}
-          gcp-service-account: '${{ secrets.SERVICE_ACCOUNT_OIDC_HELM }}'
           github-repo: '${{ github.repository }}'
           github-ref: '${{ github.ref }}'
           chart-path: 'charts/op-kits'

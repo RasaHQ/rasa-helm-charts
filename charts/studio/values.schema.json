@@ -301,6 +301,10 @@
             "apiPassword": {
               "description": "Keycloak API password — secret reference",
               "$ref": "#/$defs/secretRef"
+            },
+            "backendClientSecret": {
+              "description": "Keycloak backend client secret — secret reference",
+              "$ref": "#/$defs/secretRef"
             }
           }
         },

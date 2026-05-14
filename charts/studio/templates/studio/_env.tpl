@@ -85,6 +85,11 @@ Backend Keycloak env
     secretKeyRef:
       name: {{ .apiPassword.secretName | quote }}
       key: {{ .apiPassword.secretKey | quote }}
+- name: KEYCLOAK_BACKEND_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: {{ .backendClientSecret.secretName | quote }}
+      key: {{ .backendClientSecret.secretKey | quote }}
 {{- end }}
 {{- end -}}
 

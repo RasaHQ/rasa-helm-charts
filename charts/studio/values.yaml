@@ -128,6 +128,11 @@ config:
     apiPassword:
       secretName: "studio-secrets"
       secretKey: "KEYCLOAK_API_PASSWORD"
+    # -- config.keycloak.backendClientSecret is the client secret for the Keycloak backend client.
+    # This secret is used by Studio Backend to authenticate with Keycloak.
+    backendClientSecret:
+      secretName: "studio-secrets"
+      secretKey: "KEYCLOAK_BACKEND_CLIENT_SECRET"
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.

@@ -15,13 +15,17 @@ spec:
   roles:
     {{- toYaml .Values.strimzi.nodePools.controllers.roles | nindent 4 }}
   replicas: {{ .Values.strimzi.nodePools.controllers.replicas }}
+  {{- $storage := .Values.strimzi.nodePools.controllers.storage }}
   storage:
-    type: {{ .Values.strimzi.nodePools.controllers.storage.type }}
-    size: {{ .Values.strimzi.nodePools.controllers.storage.size }}
-    class: {{ .Values.strimzi.nodePools.controllers.storage.class }}
-    deleteClaim: {{ .Values.strimzi.nodePools.controllers.storage.deleteClaim }}
-    {{- with .Values.strimzi.nodePools.controllers.storage.volumeAttributesClass }}
-    volumeAttributesClass: {{ . }}
+    type: {{ $storage.type }}
+    {{- if eq $storage.type "persistent-claim" }}
+    size: {{ $storage.size }}
+    class: {{ $storage.class }}
+    deleteClaim: {{ $storage.deleteClaim }}
+    {{- else if eq $storage.type "ephemeral" }}
+    {{- with $storage.sizeLimit }}
+    sizeLimit: {{ . }}
+    {{- end }}
     {{- end }}
   {{- with .Values.strimzi.nodePools.controllers.resources }}
   resources:

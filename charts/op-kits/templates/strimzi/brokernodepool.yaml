@@ -15,10 +15,21 @@ spec:
   roles:
     {{- toYaml .Values.strimzi.nodePools.brokers.roles | nindent 4 }}
   replicas: {{ .Values.strimzi.nodePools.brokers.replicas }}
+  {{- $storage := .Values.strimzi.nodePools.brokers.storage }}
   storage:
-    type: {{ .Values.strimzi.nodePools.brokers.storage.type }}
+    type: {{ $storage.type }}
+    {{- if eq $storage.type "jbod" }}
     volumes:
-      {{- toYaml .Values.strimzi.nodePools.brokers.storage.volumes | nindent 6 }}
+      {{- toYaml $storage.volumes | nindent 6 }}
+    {{- else if eq $storage.type "ephemeral" }}
+    {{- with $storage.sizeLimit }}
+    sizeLimit: {{ . }}
+    {{- end }}
+    {{- else if eq $storage.type "persistent-claim" }}
+    size: {{ $storage.size }}
+    class: {{ $storage.class }}
+    deleteClaim: {{ $storage.deleteClaim }}
+    {{- end }}
   {{- with .Values.strimzi.nodePools.brokers.resources }}
   resources:
     {{- toYaml . | nindent 4 }}

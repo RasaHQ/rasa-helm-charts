@@ -74,8 +74,8 @@ Backend Keycloak env
 {{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
   value: {{ .realm | quote }}
-- name: KEYCLOAK_CLIENT_ID
-  value: {{ .clientId | quote }}
+- name: KEYCLOAK_BACKEND_CLIENT_ID
+  value: {{ .backendClientId | quote }}
 - name: KEYCLOAK_API_CLIENT_ID
   value: {{ .apiClientId | quote }}
 - name: KEYCLOAK_API_USERNAME

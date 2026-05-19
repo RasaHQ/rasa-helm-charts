@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.4.2](https://img.shields.io/badge/Version-2.4.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.0](https://img.shields.io/badge/Version-3.0.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.4.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.4.2
+$ helm install my-release rasa/studio --version 3.0.0-rc.0
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.4.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.4.2
+$ helm pull rasa/studio --version 3.0.0-rc.0
 ```
 
 ## General Configuration
@@ -596,13 +596,14 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
-| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
+| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","backendClientId":"rasa-studio-backend","frontendClientId":"rasa-studio-frontend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
 | config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio Backend to authenticate with Keycloak. | `"admin-cli"` |
 | config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. | `"realmadmin"` |
-| config.keycloak.clientId | string | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. | `"rasa-studio-backend"` |
+| config.keycloak.backendClientId | string | config.keycloak.backendClientId is the client ID used by the Studio backend to authenticate with Keycloak. | `"rasa-studio-backend"` |
+| config.keycloak.frontendClientId | string | config.keycloak.frontendClientId is the client ID used by the Studio frontend to authenticate with Keycloak. | `"rasa-studio-frontend"` |
 | config.keycloak.realm | string | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. | `"rasa-studio"` |
 | config.keycloak.url | string | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. | `""` |
 | config.nodeSelector | object | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. | `{}` |

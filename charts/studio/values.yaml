@@ -114,9 +114,10 @@ config:
     # -- config.keycloak.realm is the realm name for Keycloak.
     # This realm is used by Studio to manage users and clients.
     realm: "rasa-studio"
-    # -- config.keycloak.clientId is the client ID for Keycloak.
-    # This client is used by Studio to authenticate with Keycloak.
-    clientId: "rasa-studio-backend"
+    # -- config.keycloak.frontendClientId is the client ID used by the Studio frontend to authenticate with Keycloak.
+    frontendClientId: "rasa-studio-frontend"
+    # -- config.keycloak.backendClientId is the client ID used by the Studio backend to authenticate with Keycloak.
+    backendClientId: "rasa-studio-backend"
     # -- config.keycloak.apiClientId is the client ID for Keycloak API.
     # This client is used by Studio Backend to authenticate with Keycloak.
     apiClientId: "admin-cli"

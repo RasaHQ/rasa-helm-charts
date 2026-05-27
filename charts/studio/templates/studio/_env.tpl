@@ -53,7 +53,7 @@ Environment Variables for Keycloak Containers
 - name: KC_DB_URL
   value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
 - name: KC_HOSTNAME
-  value: "http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.keycloak.ingress.hostName | default .Values.config.ingressHost }}/auth"
+  value: "{{ .Values.config.connectionType }}://{{ .Values.keycloak.ingress.hostName | default .Values.config.ingressHost }}/auth"
 {{- end -}}
 
 {{/*

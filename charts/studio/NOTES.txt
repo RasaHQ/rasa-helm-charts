@@ -9,7 +9,7 @@ By installing and using this software, you agree to be bound by the terms and co
 1. Access your Studio Backend installation:
 
 {{- if .Values.backend.ingress.enabled }}
-http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/api
+{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api
 {{- else if contains "NodePort" .Values.backend.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
@@ -53,7 +53,7 @@ http{{ if $.Values.webClient.ingress.tls }}s{{ end }}://{{ .Values.config.ingres
 3. Access your Studio Keycloak installation:
 
 {{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled }}
-http{{ if $.Values.backend.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}/auth
+{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/auth
 {{- else if and .Values.keycloak.enabled (contains "NodePort" .Values.keycloak.service.type) }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")

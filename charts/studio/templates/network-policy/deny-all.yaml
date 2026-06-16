@@ -1,5 +1,5 @@
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.denyAll }}
-apiVersion: {{ template "networkPolicy.apiVersion" . }}
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: {{ include "studio.fullname" . }}-deny-all

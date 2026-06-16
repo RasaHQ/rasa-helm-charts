@@ -411,6 +411,26 @@ entries:
     version: 0.1.5
   rasa:
   - apiVersion: v2
+    created: "2026-06-16T08:36:42.863355916Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: 9f857c5897e2c6cfd40a6611cac4e43c0f5c244bfa22899d691340d0ec2e8ac9
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-2.3.0/rasa-2.3.0.tgz
+    version: 2.3.0
+  - apiVersion: v2
     created: "2026-05-06T09:22:48.100641727Z"
     description: A Rasa Pro Helm chart for Kubernetes
     digest: d4e6a8f80c4e978db09f84825184dad63f85f91c53cd337db85fd0ec5aa92a55
@@ -1007,4 +1027,4 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
     version: 2.1.9
-generated: "2026-05-15T11:18:38.21521535Z"
+generated: "2026-06-16T08:36:42.863530755Z"

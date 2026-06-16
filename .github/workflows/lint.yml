@@ -22,7 +22,7 @@ jobs:
     - name: Install Helm 3
       uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
       with:
-        version: v3.11.2
+        version: v3.15.2
 
     - name: Install Python
       uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405 # v6.2.0
@@ -51,6 +51,34 @@ jobs:
     # - name: Run chart-testing (install)
     #   run: ct install --config ct.yaml
 
+  lint-helm4:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
+    runs-on: ubuntu-24.04
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      with:
+        fetch-depth: 0
+        ref: ${{ github.event.pull_request.head.sha }}
+
+    - name: Install Helm 4
+      uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+      with:
+        version: v4.2.0
+
+    - name: Build dependencies
+      run: |
+        helm dependency build charts/studio
+        helm dependency build charts/rasa
+        helm dependency build charts/op-kits
+
+    - name: Lint charts (strict)
+      run: |
+        helm lint --strict charts/studio
+        helm lint --strict charts/rasa
+        helm lint --strict charts/op-kits
+
   snyk:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-24.04
@@ -71,13 +99,13 @@ jobs:
       - name: Install Helm 3
         uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
         with:
-          version: v3.11.2
+          version: v3.15.2
 
       - name: Update dependencies
         run: helm dependency build ./charts/${{ matrix.charts }}
 
       - name: Generate Helm template
-        run: helm template ./charts/${{ matrix.charts }} --output-dir ./output
+        run: helm template ./charts/${{ matrix.charts }} --output-dir ./output --kube-version 1.29.0
 
       - name: Scan chart with Snyk IAC
         uses: snyk/actions/iac@9adf32b1121593767fc3c057af55b55db032dc04 # master

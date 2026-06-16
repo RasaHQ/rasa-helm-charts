@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema#",
   "additionalProperties": true,
-  "$defs": {
+  "definitions": {
     "secretRef": {
       "type": "object",
       "required": ["secretName", "secretKey"],
@@ -14,7 +14,7 @@
     "secretRefOrString": {
       "oneOf": [
         { "type": "string" },
-        { "$ref": "#/$defs/secretRef" }
+        { "$ref": "#/definitions/secretRef" }
       ]
     },
     "imagePullPolicy": {
@@ -26,7 +26,7 @@
       "additionalProperties": true,
       "properties": {
         "repository": { "type": "string" },
-        "pullPolicy": { "$ref": "#/$defs/imagePullPolicy" },
+        "pullPolicy": { "$ref": "#/definitions/imagePullPolicy" },
         "tag": { "type": "string" }
       }
     },
@@ -137,7 +137,7 @@
     "deploymentAnnotations": { "type": "object" },
     "deploymentLabels": { "type": "object" },
     "podLabels": { "type": "object" },
-    "rasaProLicense": { "$ref": "#/$defs/secretRef" },
+    "rasaProLicense": { "$ref": "#/definitions/secretRef" },
     "global": {
       "type": "object",
       "additionalProperties": true,
@@ -161,7 +161,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "replicaCount": { "type": "integer", "minimum": 0 },
-        "image": { "$ref": "#/$defs/imageConfig" },
+        "image": { "$ref": "#/definitions/imageConfig" },
         "strategy": { "type": "object" },
         "settings": {
           "type": "object",
@@ -171,10 +171,10 @@
             "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
             "scheme": { "type": "string", "enum": ["http", "https"] },
             "enableApi": { "type": "boolean" },
-            "authToken": { "$ref": "#/$defs/secretRef" },
-            "jwtSecret": { "$ref": "#/$defs/secretRef" },
+            "authToken": { "$ref": "#/definitions/secretRef" },
+            "jwtSecret": { "$ref": "#/definitions/secretRef" },
             "jwtMethod": { "type": "string" },
-            "cors": { "$ref": "#/$defs/secretRefOrString" },
+            "cors": { "$ref": "#/definitions/secretRefOrString" },
             "useDefaultArgs": { "type": "boolean" },
             "mountDefaultConfigmap": { "type": "boolean" },
             "mountModelsVolume": { "type": "boolean" },
@@ -212,16 +212,16 @@
         "additionalContainers": { "type": "array" },
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
-        "serviceAccount": { "$ref": "#/$defs/serviceAccountConfig" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
         "podAnnotations": { "type": "object" },
-        "podSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "containerSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "service": { "$ref": "#/$defs/serviceConfig" },
-        "livenessProbe": { "$ref": "#/$defs/probeConfig" },
-        "readinessProbe": { "$ref": "#/$defs/probeConfig" },
-        "ingress": { "$ref": "#/$defs/ingressConfig" },
+        "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "service": { "$ref": "#/definitions/serviceConfig" },
+        "livenessProbe": { "$ref": "#/definitions/probeConfig" },
+        "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
-        "autoscaling": { "$ref": "#/$defs/autoscalingConfig" },
+        "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "persistence": {
           "type": "object",
           "additionalProperties": true,
@@ -251,7 +251,7 @@
         "enabled": { "type": "boolean" },
         "imagePullSecrets": { "type": "array" },
         "replicaCount": { "type": "integer", "minimum": 0 },
-        "image": { "$ref": "#/$defs/imageConfig" },
+        "image": { "$ref": "#/definitions/imageConfig" },
         "loggingLevel": { "type": "string", "enum": ["DEBUG", "INFO", "WARNING", "ERROR"] },
         "useCloudProviderIam": {
           "type": "object",
@@ -297,7 +297,7 @@
             "sslKeyFileLocation": { "type": "string" },
             "consumerId": { "type": "string" },
             "saslUsername": { "type": "string" },
-            "saslPassword": { "$ref": "#/$defs/secretRef" }
+            "saslPassword": { "$ref": "#/definitions/secretRef" }
           }
         },
         "additionalEnv": { "type": "array" },
@@ -305,15 +305,15 @@
         "additionalContainers": { "type": "array" },
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
-        "serviceAccount": { "$ref": "#/$defs/serviceAccountConfig" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
         "podAnnotations": { "type": "object" },
-        "podSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "containerSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "service": { "$ref": "#/$defs/serviceConfig" },
-        "livenessProbe": { "$ref": "#/$defs/probeConfig" },
-        "readinessProbe": { "$ref": "#/$defs/probeConfig" },
+        "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "service": { "$ref": "#/definitions/serviceConfig" },
+        "livenessProbe": { "$ref": "#/definitions/probeConfig" },
+        "readinessProbe": { "$ref": "#/definitions/probeConfig" },
         "resources": { "type": "object" },
-        "autoscaling": { "$ref": "#/$defs/autoscalingConfig" },
+        "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
         "affinity": { "type": "object" }
@@ -325,7 +325,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "replicaCount": { "type": "integer", "minimum": 0 },
-        "image": { "$ref": "#/$defs/imageConfig" },
+        "image": { "$ref": "#/definitions/imageConfig" },
         "strategy": { "type": "object" },
         "settings": {
           "type": "object",
@@ -343,16 +343,16 @@
         "additionalContainers": { "type": "array" },
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
-        "serviceAccount": { "$ref": "#/$defs/serviceAccountConfig" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
         "podAnnotations": { "type": "object" },
-        "podSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "containerSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "service": { "$ref": "#/$defs/serviceConfig" },
-        "livenessProbe": { "$ref": "#/$defs/probeConfig" },
-        "readinessProbe": { "$ref": "#/$defs/probeConfig" },
-        "ingress": { "$ref": "#/$defs/ingressConfig" },
+        "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "service": { "$ref": "#/definitions/serviceConfig" },
+        "livenessProbe": { "$ref": "#/definitions/probeConfig" },
+        "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
-        "autoscaling": { "$ref": "#/$defs/autoscalingConfig" },
+        "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
         "affinity": { "type": "object" }
@@ -364,7 +364,7 @@
       "properties": {
         "enabled": { "type": "boolean" },
         "replicaCount": { "type": "integer", "minimum": 0 },
-        "image": { "$ref": "#/$defs/imageConfig" },
+        "image": { "$ref": "#/definitions/imageConfig" },
         "strategy": { "type": "object" },
         "settings": {
           "type": "object",
@@ -382,16 +382,16 @@
         "additionalContainers": { "type": "array" },
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
-        "serviceAccount": { "$ref": "#/$defs/serviceAccountConfig" },
+        "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
         "podAnnotations": { "type": "object" },
-        "podSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "containerSecurityContext": { "$ref": "#/$defs/securityContextConfig" },
-        "service": { "$ref": "#/$defs/serviceConfig" },
-        "livenessProbe": { "$ref": "#/$defs/probeConfig" },
-        "readinessProbe": { "$ref": "#/$defs/probeConfig" },
-        "ingress": { "$ref": "#/$defs/ingressConfig" },
+        "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
+        "service": { "$ref": "#/definitions/serviceConfig" },
+        "livenessProbe": { "$ref": "#/definitions/probeConfig" },
+        "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
-        "autoscaling": { "$ref": "#/$defs/autoscalingConfig" },
+        "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
         "affinity": { "type": "object" }

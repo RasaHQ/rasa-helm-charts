@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - INFRA-2166
     paths:
       - 'charts/rasa/**'
       - '!charts/studio/**'

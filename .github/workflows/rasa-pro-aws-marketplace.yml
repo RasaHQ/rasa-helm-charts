@@ -80,7 +80,7 @@ jobs:
         run: |
           helm push \
             rasa-${{ needs.read-chart.outputs.chart_version }}.tgz \
-            oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa
+            oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa
 
   publish-images:
     needs: read-chart

@@ -53,7 +53,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Log in to marketplace ECR
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin \
+            709825985650.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Overwrite values with marketplace overrides
         run: mv charts/rasa/values.marketplace.yaml charts/rasa/values.yaml
@@ -113,7 +116,10 @@ jobs:
           aws-region: us-east-1
 
       - name: Log in to marketplace ECR
-        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin \
+            709825985650.dkr.ecr.us-east-1.amazonaws.com
 
       - name: Pull source image
         run: docker pull ${{ matrix.source }}:${{ matrix.tag }}

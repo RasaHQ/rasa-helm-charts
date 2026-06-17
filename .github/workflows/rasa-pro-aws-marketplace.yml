@@ -1,0 +1,124 @@
+name: Publish Rasa Pro AWS Marketplace artifacts
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'charts/rasa/**'
+      - '!charts/studio/**'
+      - '!charts/op-kits/**'
+
+jobs:
+  read-chart:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      chart_version: ${{ steps.read.outputs.chart_version }}
+      rasa_pro_tag: ${{ steps.read.outputs.rasa_pro_tag }}
+      rasa_pro_services_tag: ${{ steps.read.outputs.rasa_pro_services_tag }}
+      duckling_tag: ${{ steps.read.outputs.duckling_tag }}
+      rasa_sdk_tag: ${{ steps.read.outputs.rasa_sdk_tag }}
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Read chart version and image tags
+        id: read
+        uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
+        with:
+          cmd: |
+            echo "chart_version=$(yq '.version' charts/rasa/Chart.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_pro_tag=$(yq '.rasa.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_pro_services_tag=$(yq '.rasaProServices.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "duckling_tag=$(yq '.duckling.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_sdk_tag=$(yq '.actionServer.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+
+  publish-chart:
+    needs: read-chart
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Log in to marketplace ECR
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+
+      - name: Overwrite values with marketplace overrides
+        run: mv charts/rasa/values.marketplace.yaml charts/rasa/values.yaml
+
+      - name: Update image tags in values
+        env:
+          RASA_PRO_TAG: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+          RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+          DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
+          RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+        uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
+        with:
+          cmd: |
+            yq -i '
+              .rasa.image.tag = strenv(RASA_PRO_TAG) |
+              .rasaProServices.image.tag = strenv(RASA_PRO_SERVICES_TAG) |
+              .duckling.image.tag = strenv(DUCKLING_TAG) |
+              .actionServer.image.tag = strenv(RASA_SDK_TAG)
+            ' charts/rasa/values.yaml
+
+      - name: Package chart
+        run: helm package charts/rasa 
+
+      - name: Push chart to marketplace ECR
+        run: |
+          helm push \
+            rasa-${{ needs.read-chart.outputs.chart_version }}.tgz \
+            oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa
+
+  publish-images:
+    needs: read-chart
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro
+            tag: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+          - source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-services
+            tag: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+          - source: rasa/duckling
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/duckling
+            tag: ${{ needs.read-chart.outputs.duckling_tag }}
+          - source: rasa/rasa-sdk
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-sdk
+            tag: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Log in to marketplace ECR
+        uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
+
+      - name: Pull source image
+        run: docker pull ${{ matrix.source }}:${{ matrix.tag }}
+
+      - name: Tag image for marketplace ECR
+        run: docker tag ${{ matrix.source }}:${{ matrix.tag }} ${{ matrix.target }}:${{ matrix.tag }}
+
+      - name: Push image to marketplace ECR
+        run: docker push ${{ matrix.target }}:${{ matrix.tag }}

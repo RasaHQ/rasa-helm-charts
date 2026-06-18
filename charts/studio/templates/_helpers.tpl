@@ -420,3 +420,41 @@ tolerations:
   {{- .Values.backend.migration.tolerations | toYaml | nindent 2 }}
 {{- end }}
 {{- end }}
+
+{{/*
+Resolve the model service ingress host
+*/}}
+{{- define "studio.modelServiceHost" -}}
+{{- if .Values.rasa.rasa.ingress.hostName -}}
+{{- .Values.rasa.rasa.ingress.hostName -}}
+{{- else if and .Values.rasa.rasa.ingress.hosts (index .Values.rasa.rasa.ingress.hosts 0).host -}}
+{{- (index .Values.rasa.rasa.ingress.hosts 0).host -}}
+{{- else -}}
+{{- .Values.config.ingressHost -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Model service base URL (no /talk) for window.MS_API_URL
+*/}}
+{{- define "studio.modelServiceBaseUrl" -}}
+{{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
+{{- end -}}
+
+{{/*
+Model service talk URL for RASA_MODEL_SERVER_BASE_URL
+*/}}
+{{- define "studio.modelServiceTalkUrl" -}}
+{{- printf "%s://%s/talk" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
+{{- end -}}
+
+{{/*
+Web client external URL for CORS_ORIGINS
+*/}}
+{{- define "studio.webClientUrl" -}}
+{{- if .Values.webClient.ingress.hostName -}}
+{{- printf "%s://%s" .Values.config.connectionType .Values.webClient.ingress.hostName -}}
+{{- else -}}
+{{- printf "%s://%s" .Values.config.connectionType .Values.config.ingressHost -}}
+{{- end -}}
+{{- end -}}

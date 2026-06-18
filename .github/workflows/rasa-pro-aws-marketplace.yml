@@ -133,12 +133,7 @@ jobs:
       - name: Check if image already exists in marketplace ECR
         id: check
         run: |
-          REPO="${{ matrix.target }}"
-          REPO="${REPO#709825985650.dkr.ecr.us-east-1.amazonaws.com/}"
-          if aws ecr describe-images \
-            --repository-name "${REPO}" \
-            --image-ids imageTag="${{ matrix.tag }}" \
-            --region us-east-1 > /dev/null 2>&1; then
+          if docker manifest inspect "${{ matrix.target }}:${{ matrix.tag }}" > /dev/null 2>&1; then
             echo "Image ${{ matrix.name }}:${{ matrix.tag }} already exists in marketplace ECR — skipping push"
             echo "exists=true" >> "$GITHUB_OUTPUT"
           else

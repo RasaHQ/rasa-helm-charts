@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.3.1-rc.1](https://img.shields.io/badge/Version-2.3.1--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.3.1-rc.2](https://img.shields.io/badge/Version-2.3.1--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.3.1-rc.1
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.3.1-rc.2
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +90,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.3.1-rc.1
+helm install my-release rasa/rasa --version 2.3.1-rc.2
 ```
 
 ## Upgrading the Chart
@@ -404,7 +404,7 @@ Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 2.3.1-rc.1 \
+  --version 2.3.1-rc.2 \
   --set-file rasa.settings.endpointsRaw=./endpoints.yml \
   --set-file rasa.settings.credentialsRaw=./credentials.yml
 ```
@@ -416,7 +416,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 2.3.1-rc.1
+      targetRevision: 2.3.1-rc.2
       helm:
         fileParameters:
           - name: rasa.settings.endpointsRaw

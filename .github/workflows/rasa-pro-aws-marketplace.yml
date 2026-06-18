@@ -129,3 +129,96 @@ jobs:
 
       - name: Push image to marketplace ECR
         run: docker push ${{ matrix.target }}:${{ matrix.tag }}
+
+  request-version:
+    needs:
+      - read-chart
+      - publish-chart
+      - publish-images
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      PRODUCT_ID: prod-gmp3hw75wk2gk
+      ECR_REGISTRY: 709825985650.dkr.ecr.us-east-1.amazonaws.com
+      CHART_VERSION: ${{ needs.read-chart.outputs.chart_version }}
+      RASA_PRO_TAG: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+      RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+      DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
+      RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Request new Helm version via Catalog API
+        run: |
+          set -euo pipefail
+
+          HELM_CHART_URI="${ECR_REGISTRY}/rasa/rasa:${CHART_VERSION}"
+
+          # DetailsDocument for the AddDeliveryOptions change. The new version
+          # title and Helm chart tag both track the chart version. All images
+          # referenced by the chart must be listed and must live in the
+          # marketplace ECR repositories populated by the publish-* jobs.
+          details=$(jq -nc \
+            --arg version "${CHART_VERSION}" \
+            --arg helm_uri "${HELM_CHART_URI}" \
+            --arg img_rasa_pro "${ECR_REGISTRY}/rasa/rasa-pro:${RASA_PRO_TAG}" \
+            --arg img_rasa_pro_services "${ECR_REGISTRY}/rasa/rasa-pro-services:${RASA_PRO_SERVICES_TAG}" \
+            --arg img_duckling "${ECR_REGISTRY}/rasa/duckling:${DUCKLING_TAG}" \
+            --arg img_rasa_sdk "${ECR_REGISTRY}/rasa/rasa-sdk:${RASA_SDK_TAG}" \
+            '{
+              Version: {
+                VersionTitle: $version,
+                ReleaseNotes: ("Rasa Pro Helm chart \($version).")
+              },
+              DeliveryOptions: [
+                {
+                  DeliveryOptionTitle: ("Rasa Pro Helm chart \($version)"),
+                  Details: {
+                    HelmDeliveryOptionDetails: {
+                      CompatibleServices: ["EKS"],
+                      ContainerImages: [
+                        $img_rasa_pro,
+                        $img_rasa_pro_services,
+                        $img_duckling,
+                        $img_rasa_sdk
+                      ],
+                      HelmChartUri: $helm_uri,
+                      Description: "Rasa Pro deployment Helm chart.",
+                      UsageInstructions: ("Pull the chart with: helm pull oci://\($helm_uri | sub(":[^:/]+$"; "")) --version \($version)"),
+                      OverrideParameters: [
+                        {
+                          Key: "rasa.serviceAccount.name",
+                          DefaultValue: "${AWSMP_SERVICE_ACCOUNT}"
+                        }
+                      ]
+                    }
+                  }
+                }
+              ]
+            }')
+
+          change_set=$(jq -nc \
+            --arg pid "${PRODUCT_ID}" \
+            --argjson details "${details}" \
+            '[
+              {
+                ChangeType: "AddDeliveryOptions",
+                Entity: {
+                  Identifier: $pid,
+                  Type: "ContainerProduct@1.0"
+                },
+                DetailsDocument: $details
+              }
+            ]')
+
+          echo "Submitting AddDeliveryOptions change set for version ${CHART_VERSION}"
+          aws marketplace-catalog start-change-set \
+            --catalog AWSMarketplace \
+            --change-set "${change_set}"

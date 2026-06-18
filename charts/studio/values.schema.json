@@ -2,7 +2,7 @@
   "$schema": "https://json-schema.org/draft-07/schema#",
   "title": "Rasa Studio Helm Chart Values",
   "description": "Schema for validating Rasa Studio Helm chart values",
-  "$defs": {
+  "definitions": {
     "secretRef": {
       "description": "Reference to a Kubernetes Secret key",
       "type": "object",
@@ -28,7 +28,7 @@
           "type": "string"
         },
         {
-          "$ref": "#/$defs/secretRef"
+          "$ref": "#/definitions/secretRef"
         }
       ]
     },
@@ -226,11 +226,11 @@
             },
             "username": {
               "description": "Database username — plain string or secret reference",
-              "$ref": "#/$defs/secretRefOrString"
+              "$ref": "#/definitions/secretRefOrString"
             },
             "password": {
               "description": "Database password — always a secret reference",
-              "$ref": "#/$defs/secretRef"
+              "$ref": "#/definitions/secretRef"
             },
             "keycloakDatabaseName": {
               "description": "Database name for Keycloak. Must be a plain string (used in JDBC URL construction).",
@@ -238,7 +238,7 @@
             },
             "backendDatabaseName": {
               "description": "Database name for Studio backend — plain string or secret reference",
-              "$ref": "#/$defs/secretRefOrString"
+              "$ref": "#/definitions/secretRefOrString"
             },
             "queryParams": {
               "description": "Additional database connection URL query parameters",
@@ -280,7 +280,7 @@
             },
             "adminPassword": {
               "description": "Keycloak admin console password — secret reference",
-              "$ref": "#/$defs/secretRef"
+              "$ref": "#/definitions/secretRef"
             },
             "realm": {
               "description": "Keycloak realm name",
@@ -300,7 +300,7 @@
             },
             "apiPassword": {
               "description": "Keycloak API password — secret reference",
-              "$ref": "#/$defs/secretRef"
+              "$ref": "#/definitions/secretRef"
             }
           }
         },
@@ -328,22 +328,22 @@
           "minimum": 1
         },
         "image": {
-          "$ref": "#/$defs/imageConfig"
+          "$ref": "#/definitions/imageConfig"
         },
         "autoscaling": {
-          "$ref": "#/$defs/autoscaling"
+          "$ref": "#/definitions/autoscaling"
         },
         "service": {
-          "$ref": "#/$defs/serviceConfig"
+          "$ref": "#/definitions/serviceConfig"
         },
         "ingress": {
-          "$ref": "#/$defs/ingressConfig"
+          "$ref": "#/definitions/ingressConfig"
         },
         "serviceAccount": {
-          "$ref": "#/$defs/serviceAccount"
+          "$ref": "#/definitions/serviceAccount"
         },
         "resources": {
-          "$ref": "#/$defs/resourceRequirements"
+          "$ref": "#/definitions/resourceRequirements"
         },
         "nodeSelector": {
           "type": "object"
@@ -366,19 +366,19 @@
           "minimum": 1
         },
         "image": {
-          "$ref": "#/$defs/imageConfig"
+          "$ref": "#/definitions/imageConfig"
         },
         "service": {
-          "$ref": "#/$defs/serviceConfig"
+          "$ref": "#/definitions/serviceConfig"
         },
         "ingress": {
-          "$ref": "#/$defs/ingressConfig"
+          "$ref": "#/definitions/ingressConfig"
         },
         "serviceAccount": {
-          "$ref": "#/$defs/serviceAccount"
+          "$ref": "#/definitions/serviceAccount"
         },
         "resources": {
-          "$ref": "#/$defs/resourceRequirements"
+          "$ref": "#/definitions/resourceRequirements"
         },
         "nodeSelector": {
           "type": "object"
@@ -405,19 +405,19 @@
           "minimum": 1
         },
         "image": {
-          "$ref": "#/$defs/imageConfig"
+          "$ref": "#/definitions/imageConfig"
         },
         "autoscaling": {
-          "$ref": "#/$defs/autoscaling"
+          "$ref": "#/definitions/autoscaling"
         },
         "service": {
-          "$ref": "#/$defs/serviceConfig"
+          "$ref": "#/definitions/serviceConfig"
         },
         "serviceAccount": {
-          "$ref": "#/$defs/serviceAccount"
+          "$ref": "#/definitions/serviceAccount"
         },
         "resources": {
-          "$ref": "#/$defs/resourceRequirements"
+          "$ref": "#/definitions/resourceRequirements"
         },
         "nodeSelector": {
           "type": "object"
@@ -444,19 +444,19 @@
           "minimum": 1
         },
         "image": {
-          "$ref": "#/$defs/imageConfig"
+          "$ref": "#/definitions/imageConfig"
         },
         "service": {
-          "$ref": "#/$defs/serviceConfig"
+          "$ref": "#/definitions/serviceConfig"
         },
         "ingress": {
-          "$ref": "#/$defs/ingressConfig"
+          "$ref": "#/definitions/ingressConfig"
         },
         "serviceAccount": {
-          "$ref": "#/$defs/serviceAccount"
+          "$ref": "#/definitions/serviceAccount"
         },
         "resources": {
-          "$ref": "#/$defs/resourceRequirements"
+          "$ref": "#/definitions/resourceRequirements"
         },
         "nodeSelector": {
           "type": "object"

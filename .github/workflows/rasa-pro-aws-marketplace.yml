@@ -12,6 +12,7 @@ on:
 
 jobs:
   read-chart:
+    name: Read Chart Version and Image Tags
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,7 +24,8 @@ jobs:
       rasa_sdk_tag: ${{ steps.read.outputs.rasa_sdk_tag }}
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Read chart version and image tags
         id: read
@@ -37,6 +39,7 @@ jobs:
             echo "rasa_sdk_tag=$(yq '.actionServer.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
 
   publish-chart:
+    name: Publish Helm Chart to Marketplace ECR
     needs: read-chart
     runs-on: ubuntu-latest
     permissions:
@@ -44,7 +47,8 @@ jobs:
       contents: read
 
     steps:
-      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
 
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
@@ -87,6 +91,7 @@ jobs:
             oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa
 
   publish-images:
+    name: Publish ${{ matrix.name }} image to Marketplace ECR
     needs: read-chart
     runs-on: ubuntu-latest
     permissions:
@@ -95,16 +100,20 @@ jobs:
     strategy:
       matrix:
         include:
-          - source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
+          - name: rasa-pro
+            source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
             target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro
             tag: ${{ needs.read-chart.outputs.rasa_pro_tag }}
-          - source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services
+          - name: rasa-pro-services
+            source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services
             target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-services
             tag: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
-          - source: rasa/duckling
+          - name: duckling
+            source: rasa/duckling
             target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/duckling
             tag: ${{ needs.read-chart.outputs.duckling_tag }}
-          - source: rasa/rasa-sdk
+          - name: rasa-sdk
+            source: rasa/rasa-sdk
             target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-sdk
             tag: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
 
@@ -121,16 +130,35 @@ jobs:
             docker login --username AWS --password-stdin \
             709825985650.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Pull source image
+      - name: Check if image already exists in marketplace ECR
+        id: check
+        run: |
+          REPO="${{ matrix.target }}"
+          REPO="${REPO#709825985650.dkr.ecr.us-east-1.amazonaws.com/}"
+          if aws ecr describe-images \
+            --repository-name "${REPO}" \
+            --image-ids imageTag="${{ matrix.tag }}" \
+            --region us-east-1 > /dev/null 2>&1; then
+            echo "Image ${{ matrix.name }}:${{ matrix.tag }} already exists in marketplace ECR — skipping push"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull image from source registry
+        if: steps.check.outputs.exists != 'true'
         run: docker pull ${{ matrix.source }}:${{ matrix.tag }}
 
       - name: Tag image for marketplace ECR
+        if: steps.check.outputs.exists != 'true'
         run: docker tag ${{ matrix.source }}:${{ matrix.tag }} ${{ matrix.target }}:${{ matrix.tag }}
 
       - name: Push image to marketplace ECR
+        if: steps.check.outputs.exists != 'true'
         run: docker push ${{ matrix.target }}:${{ matrix.tag }}
 
   request-version:
+    name: Request New Version in AWS Marketplace
     needs:
       - read-chart
       - publish-chart

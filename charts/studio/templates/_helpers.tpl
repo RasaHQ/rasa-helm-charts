@@ -435,17 +435,28 @@ Resolve the model service ingress host
 {{- end -}}
 
 {{/*
-Model service base URL (no /talk) for window.MS_API_URL
+Model service ingress path prefix
+*/}}
+{{- define "studio.modelServiceIngressPath" -}}
+{{- if and .Values.rasa.rasa.ingress.hosts (index .Values.rasa.rasa.ingress.hosts 0).paths (index (index .Values.rasa.rasa.ingress.hosts 0).paths 0).path -}}
+{{- (index (index .Values.rasa.rasa.ingress.hosts 0).paths 0).path -}}
+{{- else -}}
+/modelservice
+{{- end -}}
+{{- end -}}
+
+{{/*
+Model service base URL (no ingress path) for window.MS_API_URL
 */}}
 {{- define "studio.modelServiceBaseUrl" -}}
 {{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
 {{- end -}}
 
 {{/*
-Model service talk URL for RASA_MODEL_SERVER_BASE_URL
+Model service URL for RASA_MODEL_SERVER_BASE_URL
 */}}
 {{- define "studio.modelServiceTalkUrl" -}}
-{{- printf "%s://%s/talk" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
+{{- printf "%s://%s%s" .Values.config.connectionType (include "studio.modelServiceHost" .) (include "studio.modelServiceIngressPath" .) -}}
 {{- end -}}
 
 {{/*

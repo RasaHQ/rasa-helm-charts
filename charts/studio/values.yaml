@@ -1222,7 +1222,7 @@ rasa:
         # -- Please update the below URL with the correct host name of the Studio deployment
         - host: *dns_hostname
           paths:
-            - path: /talk
+            - path: /modelservice
               pathType: Prefix
 
     persistence:

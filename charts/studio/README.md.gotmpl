@@ -315,6 +315,7 @@ rasa:
 When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Read the license and OpenAI API key from `studio-secrets`
 - Expose the model server at `/modelservice` on the shared ingress host
+- Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)

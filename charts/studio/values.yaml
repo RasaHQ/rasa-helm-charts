@@ -8,8 +8,7 @@ nameOverride: ""
 fullnameOverride: ""
 
 # -- imagePullSecret defines repository pull secrets
-imagePullSecrets:
-  []
+imagePullSecrets: []
   # - name: regcred
 
 # -- repository specifies image repository for Studio
@@ -1194,7 +1193,7 @@ rasa:
     livenessProbe:
       enabled: true
       httpGet:
-        path: /modelservice
+        path: /modelservice/health
         port: 8000
         scheme: HTTP
       initialDelaySeconds: 30
@@ -1206,7 +1205,7 @@ rasa:
     readinessProbe:
       enabled: true
       httpGet:
-        path: /modelservice
+        path: /modelservice/health
         port: 8000
         scheme: HTTP
       initialDelaySeconds: 30

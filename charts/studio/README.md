@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.7](https://img.shields.io/badge/Version-3.0.0--rc.7-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.8](https://img.shields.io/badge/Version-3.0.0--rc.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.7
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.8
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.7
+$ helm install my-release rasa/studio --version 3.0.0-rc.8
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.7
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.8
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.7
+$ helm pull rasa/studio --version 3.0.0-rc.8
 ```
 
 ## General Configuration
@@ -770,7 +770,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.ingress.hosts[0] | object | Please update the below URL with the correct host name of the Studio deployment | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/modelservice","pathType":"Prefix"}]}` |
 | rasa.rasa.livenessProbe.enabled | bool |  | `true` |
 | rasa.rasa.livenessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.livenessProbe.httpGet.path | string |  | `"/modelservice"` |
+| rasa.rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |
 | rasa.rasa.livenessProbe.httpGet.port | int |  | `8000` |
 | rasa.rasa.livenessProbe.httpGet.scheme | string |  | `"HTTP"` |
 | rasa.rasa.livenessProbe.initialDelaySeconds | int |  | `30` |
@@ -791,7 +791,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume | `1001` |
 | rasa.rasa.readinessProbe.enabled | bool |  | `true` |
 | rasa.rasa.readinessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.readinessProbe.httpGet.path | string |  | `"/modelservice"` |
+| rasa.rasa.readinessProbe.httpGet.path | string |  | `"/modelservice/health"` |
 | rasa.rasa.readinessProbe.httpGet.port | int |  | `8000` |
 | rasa.rasa.readinessProbe.httpGet.scheme | string |  | `"HTTP"` |
 | rasa.rasa.readinessProbe.initialDelaySeconds | int |  | `30` |

@@ -65,6 +65,9 @@ jobs:
       - name: Overwrite values with marketplace overrides
         run: mv charts/rasa/values.marketplace.yaml charts/rasa/values.yaml
 
+      - name: Overwrite README with marketplace README
+        run: mv charts/rasa/README.marketplace.md charts/rasa/README.md
+
       - name: Update image tags in values
         env:
           RASA_PRO_TAG: ${{ needs.read-chart.outputs.rasa_pro_tag }}
@@ -170,6 +173,7 @@ jobs:
       RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
       DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
       RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+      USAGE_INSTRUCTIONS: "Follow the steps in the 'Pull container images and Helm charts — optional' section below in order to pull the Helm chart, you do not need to pull the container images. Next, follow the steps documented in the README file inside the chart to launch the product."
 
     steps:
       - name: Configure AWS credentials via OIDC
@@ -184,10 +188,6 @@ jobs:
 
           HELM_CHART_URI="${ECR_REGISTRY}/rasa/rasa:${CHART_VERSION}"
 
-          # DetailsDocument for the AddDeliveryOptions change. The new version
-          # title and Helm chart tag both track the chart version. All images
-          # referenced by the chart must be listed and must live in the
-          # marketplace ECR repositories populated by the publish-* jobs.
           details=$(jq -nc \
             --arg version "${CHART_VERSION}" \
             --arg helm_uri "${HELM_CHART_URI}" \
@@ -195,6 +195,7 @@ jobs:
             --arg img_rasa_pro_services "${ECR_REGISTRY}/rasa/rasa-pro-services:${RASA_PRO_SERVICES_TAG}" \
             --arg img_duckling "${ECR_REGISTRY}/rasa/duckling:${DUCKLING_TAG}" \
             --arg img_rasa_sdk "${ECR_REGISTRY}/rasa/rasa-sdk:${RASA_SDK_TAG}" \
+            --arg usage_instructions "${USAGE_INSTRUCTIONS}" \
             '{
               Version: {
                 VersionTitle: $version,
@@ -213,14 +214,11 @@ jobs:
                         $img_rasa_sdk
                       ],
                       HelmChartUri: $helm_uri,
-                      Description: "Rasa Pro deployment Helm chart.",
-                      UsageInstructions: ("Pull the chart with: helm pull oci://\($helm_uri | sub(":[^:/]+$"; "")) --version \($version)"),
-                      OverrideParameters: [
-                        {
-                          Key: "rasa.serviceAccount.name",
-                          DefaultValue: "${AWSMP_SERVICE_ACCOUNT}"
-                        }
-                      ]
+                      Description: "Rasa Pro Helm chart.",
+                      MarketplaceServiceAccountName: "rasa",
+                      ReleaseName: "rasa",
+                      Namespace: "rasa",
+                      UsageInstructions: $usage_instructions,
                     }
                   }
                 }

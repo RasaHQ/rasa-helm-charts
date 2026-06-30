@@ -173,7 +173,7 @@ jobs:
       RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
       DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
       RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
-      USAGE_INSTRUCTIONS: "Follow the steps in the 'Pull container images and Helm charts — optional' section below in order to pull the Helm chart, you do not need to pull the container images. Next, follow the steps documented in the README file inside the chart to launch the product."
+      USAGE_INSTRUCTIONS: "Follow the steps in the 'Pull container images and Helm charts' section below in order to pull the Helm chart, you do not need to pull the container images. Next, follow the steps documented in the README file inside the chart to launch the product."
 
     steps:
       - name: Configure AWS credentials via OIDC

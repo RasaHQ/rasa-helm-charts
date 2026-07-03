@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.10](https://img.shields.io/badge/Version-3.0.0--rc.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-better-auth-rc.5](https://img.shields.io/badge/Version-3.0.0--better--auth--rc.5-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -12,7 +12,7 @@ The Studio chart deploys up to five components. All components share a single `i
 |-----------|-------------|--------------|--------|
 | **backend** | Studio API server — handles business logic and data persistence | `/api` | always on |
 | **web-client** | React frontend served by nginx | `/` | always on |
-| **keycloak** | Bundled identity provider for user authentication | `/auth` | `keycloak.enabled` (default: `true`) |
+| **keycloak** | Legacy identity provider, retained to support migrating existing users to the new backend's internal authentication | `/auth` | `keycloak.enabled` (default: `true`) |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.enabled` (default: `true`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
@@ -52,12 +52,17 @@ Or create it imperatively:
 ```console
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
+    --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
     --from-literal=KEYCLOAK_ADMIN_PASSWORD="<keycloak-admin-pw>" \
     --from-literal=KEYCLOAK_API_PASSWORD="<keycloak-api-pw>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
+
+> **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `KEYCLOAK_ADMIN_PASSWORD` and `KEYCLOAK_API_PASSWORD` are only required while the bundled Keycloak (`keycloak.enabled: true`) is deployed for migration. Once you disable Keycloak, they can be removed.
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -70,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.10
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-better-auth-rc.5
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +90,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.10
+$ helm install my-release rasa/studio --version 3.0.0-better-auth-rc.5
 ```
 
 ## Quick Start
@@ -100,7 +105,6 @@ config:
     host: "postgres.example.com"
     username: "studio"
     backendDatabaseName: "studio"
-    keycloakDatabaseName: "keycloak"
 
 # Disable event ingestion for a minimal setup — requires Kafka when enabled.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
@@ -137,13 +141,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.10
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-better-auth-rc.5
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.10
+$ helm pull rasa/studio --version 3.0.0-better-auth-rc.5
 ```
 
 ## General Configuration
@@ -169,11 +173,11 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 
 ## Database Configuration
 
-Studio requires a PostgreSQL database for both the backend services and Keycloak authentication. You can configure database connection settings in two ways:
+Studio requires a PostgreSQL database for the backend services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
 
-### Shared Database Configuration
+### Database Configuration
 
-The `config.database` section defines the default database connection settings used by both Studio Backend and Keycloak:
+The `config.database` section defines the database connection settings used by Studio Backend:
 
 ```yaml
 config:
@@ -185,7 +189,6 @@ config:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
     backendDatabaseName: "studio"
-    keycloakDatabaseName: "keycloak"
 ```
 
 ### Using Secrets for Sensitive Values
@@ -219,72 +222,6 @@ config:
       secretKey: "DATABASE_PASSWORD"
 ```
 
-**Important Note:** The `keycloakDatabaseName` field must be a plain string value and cannot be stored as a secret reference. This is because Keycloak requires the database name to be part of the JDBC URL and is passed as a query parameter, which must be constructed at template rendering time.
-
-### Keycloak-Specific Database Configuration
-
-If you need different database settings for Keycloak, you can override them using `keycloak.database`. Any values not specified will fall back to `config.database`:
-
-```yaml
-keycloak:
-  database:
-    host: "keycloak-postgres.example.com"
-    port: "5432"
-    username: "keycloak_user"
-    password:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_DATABASE_PASSWORD"
-    databaseName: "keycloak"
-```
-
-### Complete Example: Separate Databases
-
-This example shows Studio Backend and Keycloak using different PostgreSQL instances:
-
-```yaml
-config:
-  database:
-    # Studio Backend database
-    host: "studio-postgres.example.com"
-    port: "5432"
-    username: "studio_user"
-    password:
-      secretName: "studio-secrets"
-      secretKey: "STUDIO_DB_PASSWORD"
-    backendDatabaseName: "studio"
-    keycloakDatabaseName: "keycloak"  # Fallback for Keycloak if not overridden
-
-keycloak:
-  database:
-    # Keycloak-specific database (overrides config.database)
-    host: "keycloak-postgres.example.com"
-    port: "5432"
-    username: "keycloak_user"
-    password:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_DB_PASSWORD"
-    databaseName: "keycloak"
-```
-
-### Complete Example: Shared Database
-
-This example shows Studio Backend and Keycloak sharing the same PostgreSQL instance with different databases:
-
-```yaml
-config:
-  database:
-    host: "postgres.example.com"
-    port: "5432"
-    username: "studio_user"
-    password:
-      secretName: "studio-secrets"
-      secretKey: "DATABASE_PASSWORD"
-    backendDatabaseName: "studio"
-    keycloakDatabaseName: "keycloak"
-
-# No keycloak.database override needed - uses config.database settings
-```
-
 ### AWS RDS IAM Authentication
 
 For AWS RDS with IAM authentication, configure the following:
@@ -299,7 +236,6 @@ config:
     awsRegion: "us-east-1"
     iamDbUsername: "iam_db_user"
     backendDatabaseName: "studio"
-    keycloakDatabaseName: "keycloak"
 ```
 
 **Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
@@ -389,33 +325,23 @@ backend:
       value: "7200000"  # 2 hours
 ```
 
-## Internal Service Communication
+## URL Scheme (`connectionType`)
 
-`config.connectionType` controls the URL scheme used for **internal** service-to-service calls (backend → Keycloak, backend → Rasa Pro) and for externally visible URLs derived from the ingress host (Keycloak `KC_HOSTNAME`, model service `RASA_MODEL_SERVER_BASE_URL`, web client `CORS_ORIGINS`). Set to `"https"` only when internal services communicate over HTTPS:
+`config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
+
+- backend `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
+- the web client's `API_ENDPOINT`
+- the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
+- `CORS_ORIGINS`
+
+Set it to `"https"` when clients reach these hosts over TLS:
 
 ```yaml
 config:
   connectionType: "https"  # default: "http"
 ```
 
-If your ingress terminates TLS externally and services communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`. A mismatch causes backend-to-Keycloak authentication failures.
-
-> **Note:** `config.keycloak.url` can override the Keycloak endpoint entirely (e.g. `https://<ingressHost>/auth`). This is only needed when your cluster redirects internal HTTP traffic to HTTPS.
-
-## Keycloak Authentication
-
-Studio uses separate Keycloak client IDs for the frontend and backend:
-
-```yaml
-config:
-  keycloak:
-    frontendClientId: "rasa-studio-frontend"  # web client (`window.KEYCLOAK_CLIENT_ID`)
-    backendClientId: "rasa-studio-backend"  # Studio API server
-```
-
-> **Breaking change (v3.0.0):** `config.keycloak.clientId` was replaced by `frontendClientId` and `backendClientId`. Update your values when upgrading.
-
-Keycloak receives `KC_HOSTNAME` automatically as `{connectionType}://{ingressHost}/auth` so browser redirects use the correct external URL.
+It does **not** affect in-cluster service-to-service calls — those use hardcoded `http://` service names (e.g. backend → Rasa Pro at `http://rasapro`). If your ingress terminates TLS externally while pods communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`.
 
 ## Event Ingestion and Kafka
 
@@ -524,6 +450,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | backend.additionalContainers | list | backend.additionalContainers defines additional containers to run alongside the main Studio Backend container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | backend.affinity | object | backend.affinity defines affinity rules for the backend pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | backend.annotations | object | backend.annotations defines annotations to add to all Studio Backend resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| backend.authSecret | object | backend.authSecret is the secret used by backend to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
 | backend.autoscaling | object | backend.autoscaling defines the Horizontal Pod Autoscaling configuration. This enables automatic scaling of the backend deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
 | backend.autoscaling.enabled | bool | backend.autoscaling.enabled determines whether to enable horizontal pod autoscaling. | `false` |
 | backend.autoscaling.maxReplicas | int | backend.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
@@ -622,14 +549,13 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
-| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","backendClientId":"rasa-studio-backend","frontendClientId":"rasa-studio-frontend","realm":"rasa-studio","url":""}` |
+| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new backend's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
 | config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio Backend to authenticate with Keycloak. | `"admin-cli"` |
 | config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. | `"realmadmin"` |
-| config.keycloak.backendClientId | string | config.keycloak.backendClientId is the client ID used by the Studio backend to authenticate with Keycloak. | `"rasa-studio-backend"` |
-| config.keycloak.frontendClientId | string | config.keycloak.frontendClientId is the client ID used by the Studio frontend to authenticate with Keycloak. | `"rasa-studio-frontend"` |
+| config.keycloak.clientId | string | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. | `"rasa-studio-backend"` |
 | config.keycloak.realm | string | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. | `"rasa-studio"` |
 | config.keycloak.url | string | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. | `""` |
 | config.nodeSelector | object | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. | `{}` |

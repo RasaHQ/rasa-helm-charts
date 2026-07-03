@@ -267,7 +267,7 @@
           }
         },
         "keycloak": {
-          "description": "Keycloak authentication service configuration",
+          "description": "Keycloak authentication service configuration. Retained to support migration of existing data to Better Auth.",
           "type": "object",
           "properties": {
             "url": {
@@ -286,11 +286,7 @@
               "description": "Keycloak realm name",
               "type": "string"
             },
-            "frontendClientId": {
-              "description": "Keycloak client ID for Studio frontend",
-              "type": "string"
-            },
-            "backendClientId": {
+            "clientId": {
               "description": "Keycloak client ID for Studio backend",
               "type": "string"
             },
@@ -330,6 +326,10 @@
           "description": "Number of backend replicas",
           "type": "integer",
           "minimum": 1
+        },
+        "authSecret": {
+          "description": "Secret used by backend to sign sessions and tokens (min 32 chars) — secret reference. Required.",
+          "$ref": "#/definitions/secretRef"
         },
         "image": {
           "$ref": "#/definitions/imageConfig"
@@ -435,7 +435,7 @@
       }
     },
     "keycloak": {
-      "description": "Bundled Keycloak identity provider configuration",
+      "description": "Bundled Keycloak identity provider configuration. Retained to support migration of existing data to Better Auth.",
       "type": "object",
       "properties": {
         "enabled": {

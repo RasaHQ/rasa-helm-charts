@@ -4,6 +4,7 @@ metadata:
   name: shared-environment
   namespace: {{ .Release.Namespace }}
 data:
-  RASA_MODEL_SERVER_BASE_URL: "{{ .Values.config.connectionType }}://{{ .Values.rasa.rasa.ingress.hostName | default .Values.config.ingressHost }}/talk"
+  RASA_MODEL_SERVER_BASE_URL: "{{ include "studio.modelServiceTalkUrl" . }}"
+  CORS_ORIGINS: "{{ include "studio.webClientUrl" . }}"
   KEYCLOAK_URL: "http://{{ include "studio.fullname" . }}-keycloak/auth"
   KEYCLOAK_REALM: "{{ .Values.config.keycloak.realm }}"

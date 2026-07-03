@@ -286,7 +286,11 @@
               "description": "Keycloak realm name",
               "type": "string"
             },
-            "clientId": {
+            "frontendClientId": {
+              "description": "Keycloak client ID for Studio frontend",
+              "type": "string"
+            },
+            "backendClientId": {
               "description": "Keycloak client ID for Studio backend",
               "type": "string"
             },

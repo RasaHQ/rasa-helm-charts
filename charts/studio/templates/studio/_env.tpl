@@ -52,6 +52,8 @@ Environment Variables for Keycloak Containers
   {{- end }}
 - name: KC_DB_URL
   value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
+- name: KC_HOSTNAME
+  value: "{{ .Values.config.connectionType }}://{{ .Values.keycloak.ingress.hostName | default .Values.config.ingressHost }}/auth"
 {{- end -}}
 
 {{/*
@@ -74,8 +76,8 @@ Backend Keycloak env
 {{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
   value: {{ .realm | quote }}
-- name: KEYCLOAK_CLIENT_ID
-  value: {{ .clientId | quote }}
+- name: KEYCLOAK_BACKEND_CLIENT_ID
+  value: {{ .backendClientId | quote }}
 - name: KEYCLOAK_API_CLIENT_ID
   value: {{ .apiClientId | quote }}
 - name: KEYCLOAK_API_USERNAME

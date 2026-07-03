@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.8](https://img.shields.io/badge/Version-3.0.0--rc.8-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -14,7 +14,7 @@ The Studio chart deploys up to five components. All components share a single `i
 | **web-client** | React frontend served by nginx | `/` | always on |
 | **keycloak** | Bundled identity provider for user authentication | `/auth` | `keycloak.enabled` (default: `true`) |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.enabled` (default: `true`) |
-| **rasa** | Rasa Pro model server (OCI subchart dependency) | `/talk` | `rasa.enabled` (default: `true`) |
+| **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
 > **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.5.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.8
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.5.0
+$ helm install my-release rasa/studio --version 3.0.0-rc.8
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.5.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.8
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.5.0
+$ helm pull rasa/studio --version 3.0.0-rc.8
 ```
 
 ## General Configuration
@@ -315,7 +315,10 @@ rasa:
 
 When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Read the license and OpenAI API key from `studio-secrets`
-- Expose the model server at `/talk` on the shared ingress host
+- Expose the model server at `/modelservice` on the shared ingress host
+- Use `/modelservice` for liveness and readiness probes on port `8000`
+- Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
+- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the backend uses internally
 
@@ -326,6 +329,14 @@ backend:
   environmentVariables:
     MS_API_URL:
       value: "http://your-rasa-pro-service"
+```
+
+Override the web client model service URL when using an external instance or a custom ingress host:
+
+```yaml
+webClient:
+  environmentVariables:
+    MS_API_URL: "https://studio.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -380,7 +391,7 @@ backend:
 
 ## Internal Service Communication
 
-`config.connectionType` controls the URL scheme used for **internal** service-to-service calls (backend → Keycloak, backend → Rasa Pro). Set to `"https"` only when internal services communicate over HTTPS:
+`config.connectionType` controls the URL scheme used for **internal** service-to-service calls (backend → Keycloak, backend → Rasa Pro) and for externally visible URLs derived from the ingress host (Keycloak `KC_HOSTNAME`, model service `RASA_MODEL_SERVER_BASE_URL`, web client `CORS_ORIGINS`). Set to `"https"` only when internal services communicate over HTTPS:
 
 ```yaml
 config:
@@ -390,6 +401,21 @@ config:
 If your ingress terminates TLS externally and services communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`. A mismatch causes backend-to-Keycloak authentication failures.
 
 > **Note:** `config.keycloak.url` can override the Keycloak endpoint entirely (e.g. `https://<ingressHost>/auth`). This is only needed when your cluster redirects internal HTTP traffic to HTTPS.
+
+## Keycloak Authentication
+
+Studio uses separate Keycloak client IDs for the frontend and backend:
+
+```yaml
+config:
+  keycloak:
+    frontendClientId: "rasa-studio-frontend"  # web client (`window.KEYCLOAK_CLIENT_ID`)
+    backendClientId: "rasa-studio-backend"  # Studio API server
+```
+
+> **Breaking change (v3.0.0):** `config.keycloak.clientId` was replaced by `frontendClientId` and `backendClientId`. Update your values when upgrading.
+
+Keycloak receives `KC_HOSTNAME` automatically as `{connectionType}://{ingressHost}/auth` so browser redirects use the correct external URL.
 
 ## Event Ingestion and Kafka
 
@@ -596,13 +622,14 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
-| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
+| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","backendClientId":"rasa-studio-backend","frontendClientId":"rasa-studio-frontend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
 | config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio Backend to authenticate with Keycloak. | `"admin-cli"` |
 | config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. | `"realmadmin"` |
-| config.keycloak.clientId | string | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. | `"rasa-studio-backend"` |
+| config.keycloak.backendClientId | string | config.keycloak.backendClientId is the client ID used by the Studio backend to authenticate with Keycloak. | `"rasa-studio-backend"` |
+| config.keycloak.frontendClientId | string | config.keycloak.frontendClientId is the client ID used by the Studio frontend to authenticate with Keycloak. | `"rasa-studio-frontend"` |
 | config.keycloak.realm | string | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. | `"rasa-studio"` |
 | config.keycloak.url | string | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. | `""` |
 | config.nodeSelector | object | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. | `{}` |
@@ -740,10 +767,10 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.image.tag | string |  | `"3.16.2-latest"` |
 | rasa.rasa.ingress.annotations | object |  | `{}` |
 | rasa.rasa.ingress.enabled | bool |  | `true` |
-| rasa.rasa.ingress.hosts[0] | object | Please update the below URL with the correct host name of the Studio deployment | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` |
+| rasa.rasa.ingress.hosts[0] | object | Please update the below URL with the correct host name of the Studio deployment | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/modelservice","pathType":"Prefix"}]}` |
 | rasa.rasa.livenessProbe.enabled | bool |  | `true` |
 | rasa.rasa.livenessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.livenessProbe.httpGet.path | string |  | `"/"` |
+| rasa.rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |
 | rasa.rasa.livenessProbe.httpGet.port | int |  | `8000` |
 | rasa.rasa.livenessProbe.httpGet.scheme | string |  | `"HTTP"` |
 | rasa.rasa.livenessProbe.initialDelaySeconds | int |  | `30` |
@@ -764,7 +791,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume | `1001` |
 | rasa.rasa.readinessProbe.enabled | bool |  | `true` |
 | rasa.rasa.readinessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.readinessProbe.httpGet.path | string |  | `"/"` |
+| rasa.rasa.readinessProbe.httpGet.path | string |  | `"/modelservice/health"` |
 | rasa.rasa.readinessProbe.httpGet.port | int |  | `8000` |
 | rasa.rasa.readinessProbe.httpGet.scheme | string |  | `"HTTP"` |
 | rasa.rasa.readinessProbe.initialDelaySeconds | int |  | `30` |

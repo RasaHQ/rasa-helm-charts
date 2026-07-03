@@ -2,6 +2,30 @@ apiVersion: v1
 entries:
   op-kits:
   - apiVersion: v2
+    created: "2026-05-15T11:18:38.215002793Z"
+    description: Operator Kits Helm Chart
+    digest: 6f3d1eea64d156165a655739f196b72977adbe2c5179620f4f3dc2edeb9ea444
+    home: https://helm.rasa.com/
+    keywords:
+    - postgresql
+    - kafka
+    - cloudnativepg
+    - strimzi
+    - operators
+    - database
+    - messaging
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: op-kits
+    sources:
+    - https://helm.rasa.com/charts/op-kits
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/op-kits-0.6.1/op-kits-0.6.1.tgz
+    version: 0.6.1
+  - apiVersion: v2
     created: "2026-05-06T13:57:15.429935712Z"
     description: Operator Kits Helm Chart
     digest: 1820a267f737a391c94c8fdada4eb6b0283effc17bed4028daab4562568cd573
@@ -387,6 +411,46 @@ entries:
     version: 0.1.5
   rasa:
   - apiVersion: v2
+    created: "2026-06-24T16:11:44.280787224Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: c41e2c8534ead85dd0415b9beb526a477467a935575a0e94507ef2cfcd5c8b4d
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-2.4.0/rasa-2.4.0.tgz
+    version: 2.4.0
+  - apiVersion: v2
+    created: "2026-06-16T08:36:42.863355916Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: 9f857c5897e2c6cfd40a6611cac4e43c0f5c244bfa22899d691340d0ec2e8ac9
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-2.3.0/rasa-2.3.0.tgz
+    version: 2.3.0
+  - apiVersion: v2
     created: "2026-05-06T09:22:48.100641727Z"
     description: A Rasa Pro Helm chart for Kubernetes
     digest: d4e6a8f80c4e978db09f84825184dad63f85f91c53cd337db85fd0ec5aa92a55
@@ -647,6 +711,31 @@ entries:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-1.2.7/rasa-1.2.7.tgz
     version: 1.2.7
   studio:
+  - apiVersion: v2
+    created: "2026-06-18T12:27:41.315487787Z"
+    dependencies:
+    - condition: rasa.enabled
+      name: rasa
+      repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
+      version: 2.3.0
+    description: A Rasa Studio Helm chart for Kubernetes
+    digest: b6e23dc6996f244785c29525e229a161cb593004d0bba3b071bcc6906e7df3c8
+    home: https://helm.rasa.com
+    keywords:
+    - Kubernetes
+    - Studio
+    - CALM
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: studio
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.5.0/studio-2.5.0.tgz
+    version: 2.5.0
   - apiVersion: v2
     created: "2026-04-09T11:47:52.412168921Z"
     dependencies:
@@ -983,4 +1072,4 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
     version: 2.1.9
-generated: "2026-05-06T13:57:15.430119179Z"
+generated: "2026-06-24T16:11:44.280930585Z"

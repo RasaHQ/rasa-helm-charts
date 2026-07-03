@@ -2,7 +2,7 @@
 
 Operator Kits Helm Chart
 
-![Version: 0.6.0](https://img.shields.io/badge/Version-0.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 0.6.1](https://img.shields.io/badge/Version-0.6.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -21,7 +21,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -36,7 +36,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/op-kits --version 0.6.0
+$ helm install my-release rasa/op-kits --version 0.6.1
 ```
 
 ## Uninstalling the Chart
@@ -58,13 +58,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits --version 0.6.1
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/op-kits --version 0.6.0
+$ helm pull rasa/op-kits --version 0.6.1
 ```
 
 ## Operator Installation
@@ -142,13 +142,13 @@ Once operators are installed and running, you can deploy your application resour
 ```console
 # Option 1: Install from OCI Registry
 $ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/op-kits \
-    --version 0.6.0 \
+    --version 0.6.1 \
     --namespace my-app-namespace \
     --create-namespace
 
 # Option 2: Install from GitHub Helm Repository (after adding the repo)
 $ helm install my-release rasa/op-kits \
-    --version 0.6.0 \
+    --version 0.6.1 \
     --namespace my-app-namespace \
     --create-namespace
 ```
@@ -758,17 +758,16 @@ strimzi:
 | strimzi.nodePools.brokers.replicas | int | Number of broker replicas | `1` |
 | strimzi.nodePools.brokers.resources | object | Resource limits and requests for broker nodes Example: resources:   limits:     cpu: "1"     memory: "2Gi"   requests:     cpu: "200m"     memory: "512Mi" | `{}` |
 | strimzi.nodePools.brokers.roles | list | Node pool roles for brokers | `["broker"]` |
-| strimzi.nodePools.brokers.storage.type | string | Storage type for broker nodes (JBOD allows multiple volumes) | `"jbod"` |
-| strimzi.nodePools.brokers.storage.volumes | list | Storage volumes configuration for brokers | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"10Gi","type":"persistent-claim"}]` |
+| strimzi.nodePools.brokers.storage.type | string | Storage type for broker nodes (jbod recommended even with one volume) | `"jbod"` |
+| strimzi.nodePools.brokers.storage.volumes | list | Storage volumes configuration for brokers (each volume can be persistent-claim or ephemeral) | `[{"class":"gp2","deleteClaim":true,"id":0,"size":"10Gi","type":"persistent-claim"}]` |
 | strimzi.nodePools.controllers.enabled | bool | Enable controller node pool deployment | `true` |
 | strimzi.nodePools.controllers.replicas | int | Number of controller replicas | `1` |
 | strimzi.nodePools.controllers.resources | object | Resource limits and requests for controller nodes Example: resources:   limits:     cpu: "500m"     memory: "1Gi"   requests:     cpu: "100m"     memory: "256Mi" | `{}` |
 | strimzi.nodePools.controllers.roles | list | Node pool roles for controllers | `["controller"]` |
-| strimzi.nodePools.controllers.storage.class | string | Storage class for controller nodes | `"gp2"` |
-| strimzi.nodePools.controllers.storage.deleteClaim | bool | Whether to delete PVC when node pool is deleted | `true` |
-| strimzi.nodePools.controllers.storage.size | string | Storage size for controller nodes | `"10Gi"` |
-| strimzi.nodePools.controllers.storage.type | string | Storage type for controller nodes | `"persistent-claim"` |
-| strimzi.nodePools.controllers.storage.volumeAttributesClass | string | Volume attributes class for the PVC (requires Kubernetes 1.34+) | `""` |
+| strimzi.nodePools.controllers.storage.class | string | Storage class for controller nodes (persistent-claim only) | `"gp2"` |
+| strimzi.nodePools.controllers.storage.deleteClaim | bool | Whether to delete PVC when node pool is deleted (persistent-claim only) | `true` |
+| strimzi.nodePools.controllers.storage.size | string | Storage size for controller nodes (persistent-claim only) | `"10Gi"` |
+| strimzi.nodePools.controllers.storage.type | string | Storage type for controller nodes (persistent-claim, ephemeral, or jbod) | `"persistent-claim"` |
 | strimzi.topics | object |  | `{}` |
 | strimzi.users.root.authentication.type | string | Authentication type for Kafka user | `"scram-sha-512"` |
 | strimzi.users.root.enabled | bool | Enable main application user creation | `true` |

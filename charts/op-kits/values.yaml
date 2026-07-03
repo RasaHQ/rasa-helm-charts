@@ -282,18 +282,24 @@ strimzi:
       # -- Node pool roles for controllers
       roles: ["controller"]
 
-      # Storage configuration for controllers
+      # Storage configuration for controllers — passed through verbatim to KafkaNodePool.spec.storage.
+      # Supports any Strimzi storage type: persistent-claim, ephemeral, or jbod.
+      # See: https://strimzi.io/docs/operators/latest/configuring#type-EphemeralStorage-reference
+      #      https://strimzi.io/docs/operators/latest/configuring#type-PersistentClaimStorage-reference
       storage:
-        # -- Storage type for controller nodes
+        # -- Storage type for controller nodes (persistent-claim, ephemeral, or jbod)
         type: "persistent-claim"
-        # -- Storage size for controller nodes
+        # -- Storage size for controller nodes (persistent-claim only)
         size: "10Gi"
-        # -- Storage class for controller nodes
+        # -- Storage class for controller nodes (persistent-claim only)
         class: "gp2"
-        # -- Whether to delete PVC when node pool is deleted
+        # -- Whether to delete PVC when node pool is deleted (persistent-claim only)
         deleteClaim: true
-        # -- (string) Volume attributes class for the PVC (requires Kubernetes 1.34+)
-        volumeAttributesClass: ""
+        # volumeAttributesClass: ""   # Optional, persistent-claim only (requires Kubernetes 1.34+)
+        #
+        # To use ephemeral storage (dev/test only — data lost on pod restart):
+        # type: ephemeral
+        # sizeLimit: 5Gi
 
       # -- Resource limits and requests for controller nodes
       # Example:
@@ -315,11 +321,13 @@ strimzi:
       # -- Node pool roles for brokers
       roles: ["broker"]
 
-      # Storage configuration for brokers
+      # Storage configuration for brokers — passed through verbatim to KafkaNodePool.spec.storage.
+      # Supports any Strimzi storage type. JBOD (default) lets you mix volume types per disk.
+      # See: https://strimzi.io/docs/operators/latest/configuring#type-JbodStorage-reference
       storage:
-        # -- Storage type for broker nodes (JBOD allows multiple volumes)
+        # -- Storage type for broker nodes (jbod recommended even with one volume)
         type: "jbod"
-        # -- Storage volumes configuration for brokers
+        # -- Storage volumes configuration for brokers (each volume can be persistent-claim or ephemeral)
         volumes:
           - id: 0
             type: "persistent-claim"
@@ -327,6 +335,10 @@ strimzi:
             class: "gp2"
             deleteClaim: true
             # volumeAttributesClass: ""  # Optional: Volume attributes class (requires Kubernetes 1.34+)
+          # To use ephemeral storage for a volume (dev/test only — data lost on pod restart):
+          # - id: 0
+          #   type: ephemeral
+          #   sizeLimit: 5Gi
 
       # -- Resource limits and requests for broker nodes
       # Example:

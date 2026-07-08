@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.6.0-rc.0](https://img.shields.io/badge/Version-2.6.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.5.0
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.6.0-rc.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.5.0
+$ helm install my-release rasa/studio --version 2.6.0-rc.0
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.5.0
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.6.0-rc.0
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.5.0
+$ helm pull rasa/studio --version 2.6.0-rc.0
 ```
 
 ## General Configuration
@@ -504,7 +504,8 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | backend.autoscaling.minReplicas | int | backend.autoscaling.minReplicas is the minimum number of replicas. | `1` |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | backend.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
 | backend.envFrom | list | backend.envFrom defines additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
-| backend.environmentVariables | object | backend.environmentVariables defines the environment variables for the Studio Backend deployment. These variables configure the runtime behavior of the backend service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
+| backend.environmentVariables | object | backend.environmentVariables defines the environment variables for the Studio Backend deployment. These variables configure the runtime behavior of the backend service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DB_TRANSACTION_TIMEOUT":{"value":"10000"},"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
+| backend.environmentVariables.DB_TRANSACTION_TIMEOUT | object | backend.environmentVariables.DB_TRANSACTION_TIMEOUT is the database transaction timeout in milliseconds. Default: 10000 (10s). | `{"value":"10000"}` |
 | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
 | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
 | backend.image | object | backend.image defines the container image settings for the backend service. This section defines the container image settings for the backend service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` |
@@ -621,7 +622,8 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. | `80` |
 | eventIngestion.enabled | bool | eventIngestion.enabled determines whether to deploy the event ingestion component. | `true` |
 | eventIngestion.envFrom | list | eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
-| eventIngestion.environmentVariables | object | eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` |
+| eventIngestion.environmentVariables | object | eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"DB_TRANSACTION_TIMEOUT":{"value":"60000"},"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""},"VERSION_DAILY_STATISTICS_CRON_EXPRESSION":{"value":"0 0 * * *"}}` |
+| eventIngestion.environmentVariables.DB_TRANSACTION_TIMEOUT | object | eventIngestion.environmentVariables.DB_TRANSACTION_TIMEOUT is the database transaction timeout in milliseconds. Default: 60000 (60s) — higher than the backend because the daily analytics aggregation job takes longer to run. | `{"value":"60000"}` |
 | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker. | `{"value":""}` |
 | eventIngestion.environmentVariables.KAFKA_CA_FILE | object | eventIngestion.environmentVariables.KAFKA_CA_FILE is the path to the CA certificate file for Kafka SSL. | `{"value":""}` |
 | eventIngestion.environmentVariables.KAFKA_CERT_FILE | object | eventIngestion.environmentVariables.KAFKA_CERT_FILE is the path to the client certificate file for Kafka SSL. | `{"value":""}` |
@@ -636,6 +638,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME | object | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication. | `{"value":""}` |
 | eventIngestion.environmentVariables.KAFKA_TOPIC | object | eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events. | `{"value":"rasa-events"}` |
 | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates. | `{"value":""}` |
+| eventIngestion.environmentVariables.VERSION_DAILY_STATISTICS_CRON_EXPRESSION | object | eventIngestion.environmentVariables.VERSION_DAILY_STATISTICS_CRON_EXPRESSION is the cron schedule for the daily statistics aggregation job. Format: "minute hour day-of-month month day-of-week" Default: "0 0 * * *" runs daily at midnight. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 0 * * *"}` |
 | eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. | `{"name":"studio-event-ingestion","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | eventIngestion.image.name is the name of the Event Ingestion container image. | `"studio-event-ingestion"` |
 | eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
@@ -781,7 +784,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.strategy.type | string |  | `"Recreate"` |
 | rasa.rasaProServices.enabled | bool |  | `false` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
-| tag | string | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. | `"1.16.0-latest"` |
+| tag | string | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. | `"1.17.0-latest"` |
 | webClient.additionalContainers | list | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
 | webClient.affinity | object | webClient.affinity defines affinity rules for the web client pods. | `{}` |
 | webClient.annotations | object | webClient.annotations defines annotations to add to all Studio Web Client resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |

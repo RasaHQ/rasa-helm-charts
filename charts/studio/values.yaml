@@ -234,10 +234,6 @@ backend:
     # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
     DELETE_CONVERSATIONS_CRON_EXPRESSION:
       value: "0 * * * *"
-    # -- backend.environmentVariables.DB_TRANSACTION_TIMEOUT is the database transaction timeout in milliseconds.
-    # Default: 10000 (10s).
-    DB_TRANSACTION_TIMEOUT:
-      value: "10000"
 
   # -- backend.envFrom defines additional environment variables from ConfigMap or Secret.
   # These will be mounted as environment variables in the container.
@@ -776,16 +772,6 @@ eventIngestion:
     # -- eventIngestion.environmentVariables.KAFKA_GROUP_ID is the Kafka consumer group ID for Studio.
     KAFKA_GROUP_ID:
       value: "studio"
-    # -- eventIngestion.environmentVariables.VERSION_DAILY_STATISTICS_CRON_EXPRESSION is the cron schedule for the daily statistics aggregation job.
-    # Format: "minute hour day-of-month month day-of-week"
-    # Default: "0 0 * * *" runs daily at midnight.
-    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
-    VERSION_DAILY_STATISTICS_CRON_EXPRESSION:
-      value: "0 0 * * *"
-    # -- eventIngestion.environmentVariables.DB_TRANSACTION_TIMEOUT is the database transaction timeout in milliseconds.
-    # Default: 60000 (60s) — higher than the backend because the daily analytics aggregation job takes longer to run.
-    DB_TRANSACTION_TIMEOUT:
-      value: "60000"
 
   # -- eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret.
   # Example:

@@ -1,5 +1,5 @@
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
-apiVersion: {{ template "networkPolicy.apiVersion" . }}
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-egress-from-kubelet-to-rasa
@@ -21,7 +21,7 @@ spec:
       - protocol: TCP
         port: {{ .Values.rasa.service.port }}
 ---
-apiVersion: {{ template "networkPolicy.apiVersion" . }}
+apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: ingress-egress-from-kubelet-to-rasa-pro-services

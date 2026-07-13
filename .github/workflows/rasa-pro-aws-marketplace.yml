@@ -1,0 +1,245 @@
+name: Publish Rasa Pro AWS Marketplace artifacts
+
+on:
+  push:
+    branches:
+      - main
+      - INFRA-2166
+    paths:
+      - 'charts/rasa/**'
+      - '!charts/studio/**'
+      - '!charts/op-kits/**'
+
+jobs:
+  read-chart:
+    name: Read Chart Version and Image Tags
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      chart_version: ${{ steps.read.outputs.chart_version }}
+      rasa_pro_tag: ${{ steps.read.outputs.rasa_pro_tag }}
+      rasa_pro_services_tag: ${{ steps.read.outputs.rasa_pro_services_tag }}
+      duckling_tag: ${{ steps.read.outputs.duckling_tag }}
+      rasa_sdk_tag: ${{ steps.read.outputs.rasa_sdk_tag }}
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Read chart version and image tags
+        id: read
+        uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
+        with:
+          cmd: |
+            echo "chart_version=$(yq '.version' charts/rasa/Chart.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_pro_tag=$(yq '.rasa.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_pro_services_tag=$(yq '.rasaProServices.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "duckling_tag=$(yq '.duckling.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+            echo "rasa_sdk_tag=$(yq '.actionServer.image.tag' charts/rasa/values.yaml)" >> "$GITHUB_OUTPUT"
+
+  publish-chart:
+    name: Publish Helm Chart to Marketplace ECR
+    needs: read-chart
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Log in to marketplace ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin \
+            709825985650.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Overwrite values with marketplace overrides
+        run: mv charts/rasa/values.marketplace.yaml charts/rasa/values.yaml
+
+      - name: Overwrite README with marketplace README
+        run: mv charts/rasa/README.marketplace.md charts/rasa/README.md
+
+      - name: Update image tags in values
+        env:
+          RASA_PRO_TAG: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+          RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+          DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
+          RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+        uses: mikefarah/yq@1b9b4ac5187171d2e5e3129be0cfa827c7f9d53d # v4.53.3
+        with:
+          cmd: |
+            yq -i '
+              .rasa.image.tag = strenv(RASA_PRO_TAG) |
+              .rasaProServices.image.tag = strenv(RASA_PRO_SERVICES_TAG) |
+              .duckling.image.tag = strenv(DUCKLING_TAG) |
+              .actionServer.image.tag = strenv(RASA_SDK_TAG)
+            ' charts/rasa/values.yaml
+
+      - name: Package chart
+        run: helm package charts/rasa 
+
+      - name: Push chart to marketplace ECR
+        run: |
+          helm push \
+            rasa-${{ needs.read-chart.outputs.chart_version }}.tgz \
+            oci://709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa
+
+  publish-images:
+    name: Publish ${{ matrix.name }} image to Marketplace ECR
+    needs: read-chart
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    strategy:
+      matrix:
+        include:
+          - name: rasa-pro
+            source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro
+            tag: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+          - name: rasa-pro-services
+            source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-services
+            tag: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+          - name: duckling
+            source: rasa/duckling
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/duckling
+            tag: ${{ needs.read-chart.outputs.duckling_tag }}
+          - name: rasa-sdk
+            source: rasa/rasa-sdk
+            target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-sdk
+            tag: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Log in to marketplace ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | \
+            docker login --username AWS --password-stdin \
+            709825985650.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Check if image already exists in marketplace ECR
+        id: check
+        run: |
+          if docker manifest inspect "${{ matrix.target }}:${{ matrix.tag }}" > /dev/null 2>&1; then
+            echo "Image ${{ matrix.name }}:${{ matrix.tag }} already exists in marketplace ECR — skipping push"
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Pull image from source registry
+        if: steps.check.outputs.exists != 'true'
+        run: docker pull ${{ matrix.source }}:${{ matrix.tag }}
+
+      - name: Tag image for marketplace ECR
+        if: steps.check.outputs.exists != 'true'
+        run: docker tag ${{ matrix.source }}:${{ matrix.tag }} ${{ matrix.target }}:${{ matrix.tag }}
+
+      - name: Push image to marketplace ECR
+        if: steps.check.outputs.exists != 'true'
+        run: docker push ${{ matrix.target }}:${{ matrix.tag }}
+
+  request-version:
+    name: Request New Version in AWS Marketplace
+    needs:
+      - read-chart
+      - publish-chart
+      - publish-images
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+    env:
+      PRODUCT_ID: prod-gmp3hw75wk2gk
+      ECR_REGISTRY: 709825985650.dkr.ecr.us-east-1.amazonaws.com
+      CHART_VERSION: ${{ needs.read-chart.outputs.chart_version }}
+      RASA_PRO_TAG: ${{ needs.read-chart.outputs.rasa_pro_tag }}
+      RASA_PRO_SERVICES_TAG: ${{ needs.read-chart.outputs.rasa_pro_services_tag }}
+      DUCKLING_TAG: ${{ needs.read-chart.outputs.duckling_tag }}
+      RASA_SDK_TAG: ${{ needs.read-chart.outputs.rasa_sdk_tag }}
+      USAGE_INSTRUCTIONS: "Follow the steps in the 'Pull container images and Helm charts' section below in order to pull the Helm chart, you do not need to pull the container images. Next, follow the steps documented in the README file inside the chart to launch the product."
+
+    steps:
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
+        with:
+          role-to-assume: ${{ secrets.AWS_MARKETPLACE_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Request new Helm version via Catalog API
+        run: |
+          set -euo pipefail
+
+          HELM_CHART_URI="${ECR_REGISTRY}/rasa/rasa:${CHART_VERSION}"
+
+          details=$(jq -nc \
+            --arg version "${CHART_VERSION}" \
+            --arg helm_uri "${HELM_CHART_URI}" \
+            --arg img_rasa_pro "${ECR_REGISTRY}/rasa/rasa-pro:${RASA_PRO_TAG}" \
+            --arg img_rasa_pro_services "${ECR_REGISTRY}/rasa/rasa-pro-services:${RASA_PRO_SERVICES_TAG}" \
+            --arg img_duckling "${ECR_REGISTRY}/rasa/duckling:${DUCKLING_TAG}" \
+            --arg img_rasa_sdk "${ECR_REGISTRY}/rasa/rasa-sdk:${RASA_SDK_TAG}" \
+            --arg usage_instructions "${USAGE_INSTRUCTIONS}" \
+            '{
+              Version: {
+                VersionTitle: $version,
+                ReleaseNotes: ("Rasa Pro Helm chart \($version).")
+              },
+              DeliveryOptions: [
+                {
+                  DeliveryOptionTitle: ("Rasa Pro Helm chart \($version)"),
+                  Details: {
+                    HelmDeliveryOptionDetails: {
+                      CompatibleServices: ["EKS"],
+                      ContainerImages: [
+                        $img_rasa_pro,
+                        $img_rasa_pro_services,
+                        $img_duckling,
+                        $img_rasa_sdk
+                      ],
+                      HelmChartUri: $helm_uri,
+                      Description: "Rasa Pro Helm chart.",
+                      MarketplaceServiceAccountName: "rasa",
+                      ReleaseName: "rasa",
+                      Namespace: "rasa",
+                      UsageInstructions: $usage_instructions,
+                    }
+                  }
+                }
+              ]
+            }')
+
+          change_set=$(jq -nc \
+            --arg pid "${PRODUCT_ID}" \
+            --argjson details "${details}" \
+            '[
+              {
+                ChangeType: "AddDeliveryOptions",
+                Entity: {
+                  Identifier: $pid,
+                  Type: "ContainerProduct@1.0"
+                },
+                DetailsDocument: $details
+              }
+            ]')
+
+          echo "Submitting AddDeliveryOptions change set for version ${CHART_VERSION}"
+          aws marketplace-catalog start-change-set \
+            --catalog AWSMarketplace \
+            --change-set "${change_set}"

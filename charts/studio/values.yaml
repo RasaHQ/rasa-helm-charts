@@ -96,6 +96,7 @@ config:
 
   # -- config.keycloak defines the Keycloak configuration settings.
   # This section configures the authentication and authorization service.
+  # Note: Keycloak is retained to support migration of existing data to the new backend's internal authentication.
   keycloak:
     # -- config.keycloak.url overrides the default service endpoint for Keycloak.
     # Format is `http(s)://<ingressHost>/auth`.
@@ -113,10 +114,9 @@ config:
     # -- config.keycloak.realm is the realm name for Keycloak.
     # This realm is used by Studio to manage users and clients.
     realm: "rasa-studio"
-    # -- config.keycloak.frontendClientId is the client ID used by the Studio frontend to authenticate with Keycloak.
-    frontendClientId: "rasa-studio-frontend"
-    # -- config.keycloak.backendClientId is the client ID used by the Studio backend to authenticate with Keycloak.
-    backendClientId: "rasa-studio-backend"
+    # -- config.keycloak.clientId is the client ID for Keycloak.
+    # This client is used by Studio to authenticate with Keycloak.
+    clientId: "rasa-studio-backend"
     # -- config.keycloak.apiClientId is the client ID for Keycloak API.
     # This client is used by Studio Backend to authenticate with Keycloak.
     apiClientId: "admin-cli"
@@ -204,6 +204,12 @@ backend:
   #   custom.annotation/key: value
   # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
   annotations: {}
+
+  # -- backend.authSecret is the secret used by backend to sign sessions and tokens.
+  # Must be at least 32 characters long. Stored in a Kubernetes secret. Required.
+  authSecret:
+    secretName: "studio-secrets"
+    secretKey: "AUTH_SECRET"
 
   # -- backend.environmentVariables defines the environment variables for the Studio Backend deployment.
   # These variables configure the runtime behavior of the backend service.
@@ -881,6 +887,7 @@ eventIngestion:
   affinity: {}
 
 # Studio Keycloak component specific configuration
+# Keycloak is retained to support migration of existing data to the new backend's internal authentication.
 keycloak:
   # -- keycloak.enabled determines whether to deploy the Keycloak authentication service.
   enabled: true

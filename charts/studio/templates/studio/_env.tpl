@@ -52,12 +52,10 @@ Environment Variables for Keycloak Containers
   {{- end }}
 - name: KC_DB_URL
   value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
-- name: KC_HOSTNAME
-  value: "{{ .Values.config.connectionType }}://{{ .Values.keycloak.ingress.hostName | default .Values.config.ingressHost }}/auth"
 {{- end -}}
 
 {{/*
-Keycloak URL
+Keycloak URL - UNUSED - might get reused for Keyclaok -> Better Auth migration job
 */}}
 {{- define "studio.keycloak.url" -}}
 {{- if not (empty .Values.config.keycloak.url ) -}}
@@ -70,13 +68,13 @@ Keycloak URL
 {{- end -}}
 
 {{/*
-Backend Keycloak env
+Backend Keycloak env - UNUSED - might get reused for Keyclaok -> Better Auth migration job
 */}}
 {{- define "studio.backend.keycloak" -}}
 {{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
   value: {{ .realm | quote }}
-- name: KEYCLOAK_BACKEND_CLIENT_ID
+- name: KEYCLOAK_CLIENT_ID
   value: {{ .backendClientId | quote }}
 - name: KEYCLOAK_API_CLIENT_ID
   value: {{ .apiClientId | quote }}

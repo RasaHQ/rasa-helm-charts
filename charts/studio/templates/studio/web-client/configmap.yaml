@@ -5,9 +5,6 @@ metadata:
 data:
   windowVariables: |
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ if .Values.backend.ingress.hostName }}{{ .Values.backend.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/api";
-    window.KEYCLOAK_URL = "{{ .Values.config.connectionType }}://{{ if .Values.keycloak.ingress.hostName }}{{ .Values.keycloak.ingress.hostName }}{{ else }}{{ .Values.config.ingressHost }}{{ end }}/auth";
-    window.KEYCLOAK_REALM = {{ .Values.config.keycloak.realm | quote }};
-    window.KEYCLOAK_CLIENT_ID = {{ .Values.config.keycloak.frontendClientId | quote }};
     {{- with .Values.webClient.environmentVariables.MS_API_URL }}
     window.MS_API_URL = {{ . | quote }};
     {{- else }}

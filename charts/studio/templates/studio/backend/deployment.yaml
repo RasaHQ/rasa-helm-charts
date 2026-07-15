@@ -69,15 +69,17 @@ spec:
             {{- toYaml .Values.backend.resources | nindent 12 }}
           env:
             {{- include "studio.backend.env" . | nindent 12 }}
-            {{- include "studio.shared.env" . | nindent 12 }}
-            {{- include "studio.keycloak.url" . | nindent 12 }}
-            {{- include "studio.backend.keycloak" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: {{ if .Values.webClient.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.webClient.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
             - name: API_URL
-              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}/api"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"{{ end }}              
-            - name: KEYCLOAK_API_GRANT_TYPE
-              value: "password"
+              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}/api"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api"{{ end }}
+            - name: AUTH_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.backend.authSecret.secretName | quote }}
+                  key: {{ .Values.backend.authSecret.secretKey | quote }}
+            - name: BETTER_AUTH_BASE_URL
+              value: {{ if .Values.backend.ingress.hostName }}"{{ .Values.config.connectionType }}://{{ .Values.backend.ingress.hostName }}"{{ else }}"{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}"{{ end }}
             {{- $defaults := dict "MS_API_URL" (dict "value" "http://rasapro") }}
             {{- $env := mergeOverwrite $defaults .Values.backend.environmentVariables }}
             {{- range $key, $value := $env }}

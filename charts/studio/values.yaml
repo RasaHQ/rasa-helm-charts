@@ -227,6 +227,14 @@ backend:
     # If you want to change the default, you need to make sure it is a valid URL and that the Rasa Pro deployment is running and accessible.
     # MS_API_URL:
     #   value: "http://rasapro"
+    # -- backend.environmentVariables.SEED_USER_PASSWORD is the password for the default users seeded on backend startup
+    # (admin@studio.local and member@studio.local). Required in production — the backend exits if unset.
+    # Must be at least 8 characters. Change these passwords after the first login.
+    # Stored in a Kubernetes secret. Required.
+    SEED_USER_PASSWORD:
+      secret:
+        name: "studio-secrets"
+        key: "SEED_USER_PASSWORD"
     # -- backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
     # Conversations older than this value will be deleted by the cleanup cron job.
     # Leave empty to disable automatic conversation cleanup.
@@ -240,6 +248,20 @@ backend:
     # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
     DELETE_CONVERSATIONS_CRON_EXPRESSION:
       value: "0 * * * *"
+    # -- Optional GitHub App credentials for connecting Studio projects to GitHub repositories.
+    # All three values must be set together. Leave unset if you do not use GitHub integration.
+    # GITHUB_APP_ID:
+    #   secret:
+    #     name: "studio-secrets"
+    #     key: "GITHUB_APP_ID"
+    # GITHUB_APP_INSTALLATION_ID:
+    #   secret:
+    #     name: "studio-secrets"
+    #     key: "GITHUB_APP_INSTALLATION_ID"
+    # GITHUB_APP_PRIVATE_KEY:
+    #   secret:
+    #     name: "studio-secrets"
+    #     key: "GITHUB_APP_PRIVATE_KEY"
 
   # -- backend.envFrom defines additional environment variables from ConfigMap or Secret.
   # These will be mounted as environment variables in the container.

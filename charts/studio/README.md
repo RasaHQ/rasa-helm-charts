@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.11](https://img.shields.io/badge/Version-3.0.0--rc.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.12](https://img.shields.io/badge/Version-3.0.0--rc.12-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -53,6 +53,7 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=SEED_USER_PASSWORD="<seed-user-password-min-8-chars>" \
     --from-literal=KEYCLOAK_ADMIN_PASSWORD="<keycloak-admin-pw>" \
     --from-literal=KEYCLOAK_API_PASSWORD="<keycloak-api-pw>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
@@ -61,6 +62,8 @@ $ kubectl create secret generic studio-secrets \
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `SEED_USER_PASSWORD` must be at least 8 characters. It sets the initial password for the seeded users `admin@studio.local` and `member@studio.local`. Change these passwords after the first login. The backend will not start in production if this value is missing.
 
 > **Note:** `KEYCLOAK_ADMIN_PASSWORD` and `KEYCLOAK_API_PASSWORD` are only required while the bundled Keycloak (`keycloak.enabled: true`) is deployed for migration. Once you disable Keycloak, they can be removed.
 
@@ -75,7 +78,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.11
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.12
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +93,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.11
+$ helm install my-release rasa/studio --version 3.0.0-rc.12
 ```
 
 ## Quick Start
@@ -141,13 +144,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.11
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.12
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.11
+$ helm pull rasa/studio --version 3.0.0-rc.12
 ```
 
 ## General Configuration
@@ -325,6 +328,53 @@ backend:
       value: "7200000"  # 2 hours
 ```
 
+## Seeded Users
+
+On every backend start, Studio seeds two default users if they do not already exist:
+
+| Email | Role | Password |
+|-------|------|----------|
+| `admin@studio.local` | admin (full permissions) | `SEED_USER_PASSWORD` |
+| `member@studio.local` | regular user | `SEED_USER_PASSWORD` |
+
+Configure the password via `backend.environmentVariables.SEED_USER_PASSWORD` (defaults to the `SEED_USER_PASSWORD` key in `studio-secrets`):
+
+```yaml
+backend:
+  environmentVariables:
+    SEED_USER_PASSWORD:
+      secret:
+        name: studio-secrets
+        key: SEED_USER_PASSWORD
+```
+
+Change the seeded users' passwords after the first login. Existing users are not overwritten on restart — only the role is reconciled to match the seed definition.
+
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and provide its credentials as backend environment variables. All three values must be set together:
+
+```yaml
+backend:
+  environmentVariables:
+    GITHUB_APP_ID:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_ID
+    GITHUB_APP_INSTALLATION_ID:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_INSTALLATION_ID
+    GITHUB_APP_PRIVATE_KEY:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_PRIVATE_KEY
+```
+
+Add the corresponding keys to `studio-secrets` (or your custom secret). The private key may contain literal `\n` sequences for newlines — the backend normalizes them at runtime.
+
+Leave these unset if you do not use GitHub integration.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
@@ -457,9 +507,10 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | backend.autoscaling.minReplicas | int | backend.autoscaling.minReplicas is the minimum number of replicas. | `1` |
 | backend.autoscaling.targetCPUUtilizationPercentage | int | backend.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
 | backend.envFrom | list | backend.envFrom defines additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
-| backend.environmentVariables | object | backend.environmentVariables defines the environment variables for the Studio Backend deployment. These variables configure the runtime behavior of the backend service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
+| backend.environmentVariables | object | backend.environmentVariables defines the environment variables for the Studio Backend deployment. These variables configure the runtime behavior of the backend service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""},"SEED_USER_PASSWORD":{"secret":{"key":"SEED_USER_PASSWORD","name":"studio-secrets"}}}` |
 | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
 | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
+| backend.environmentVariables.SEED_USER_PASSWORD | object | backend.environmentVariables.SEED_USER_PASSWORD is the password for the default users seeded on backend startup (admin@studio.local and member@studio.local). Required in production — the backend exits if unset. Must be at least 8 characters. Change these passwords after the first login. Stored in a Kubernetes secret. Required. | `{"secret":{"key":"SEED_USER_PASSWORD","name":"studio-secrets"}}` |
 | backend.image | object | backend.image defines the container image settings for the backend service. This section defines the container image settings for the backend service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` |
 | backend.image.name | string | backend.image.name is the name of the Studio Backend container image. This should match the image name in your container registry. | `"studio-backend"` |
 | backend.image.pullPolicy | string | backend.image.pullPolicy is the container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |

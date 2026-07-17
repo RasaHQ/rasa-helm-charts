@@ -52,6 +52,7 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=SEED_USER_PASSWORD="<seed-user-password-min-8-chars>" \
     --from-literal=KEYCLOAK_ADMIN_PASSWORD="<keycloak-admin-pw>" \
     --from-literal=KEYCLOAK_API_PASSWORD="<keycloak-api-pw>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
@@ -60,6 +61,8 @@ $ kubectl create secret generic studio-secrets \
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `SEED_USER_PASSWORD` must be at least 8 characters. It sets the initial password for the seeded users `admin@studio.local` and `member@studio.local`. Change these passwords after the first login. The backend will not start in production if this value is missing.
 
 > **Note:** `KEYCLOAK_ADMIN_PASSWORD` and `KEYCLOAK_API_PASSWORD` are only required while the bundled Keycloak (`keycloak.enabled: true`) is deployed for migration. Once you disable Keycloak, they can be removed.
 
@@ -323,6 +326,53 @@ backend:
     MODEL_INACTIVE_AFTER_MS:
       value: "7200000"  # 2 hours
 ```
+
+## Seeded Users
+
+On every backend start, Studio seeds two default users if they do not already exist:
+
+| Email | Role | Password |
+|-------|------|----------|
+| `admin@studio.local` | admin (full permissions) | `SEED_USER_PASSWORD` |
+| `member@studio.local` | regular user | `SEED_USER_PASSWORD` |
+
+Configure the password via `backend.environmentVariables.SEED_USER_PASSWORD` (defaults to the `SEED_USER_PASSWORD` key in `studio-secrets`):
+
+```yaml
+backend:
+  environmentVariables:
+    SEED_USER_PASSWORD:
+      secret:
+        name: studio-secrets
+        key: SEED_USER_PASSWORD
+```
+
+Change the seeded users' passwords after the first login. Existing users are not overwritten on restart — only the role is reconciled to match the seed definition.
+
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and provide its credentials as backend environment variables. All three values must be set together:
+
+```yaml
+backend:
+  environmentVariables:
+    GITHUB_APP_ID:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_ID
+    GITHUB_APP_INSTALLATION_ID:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_INSTALLATION_ID
+    GITHUB_APP_PRIVATE_KEY:
+      secret:
+        name: studio-secrets
+        key: GITHUB_APP_PRIVATE_KEY
+```
+
+Add the corresponding keys to `studio-secrets` (or your custom secret). The private key may contain literal `\n` sequences for newlines — the backend normalizes them at runtime.
+
+Leave these unset if you do not use GitHub integration.
 
 ## URL Scheme (`connectionType`)
 

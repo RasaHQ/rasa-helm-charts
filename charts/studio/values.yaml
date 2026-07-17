@@ -229,7 +229,7 @@ backend:
     #   value: "http://rasapro"
     # -- backend.environmentVariables.SEED_USER_PASSWORD is the password for the default users seeded on backend startup
     # (admin@studio.local and member@studio.local). Required in production — the backend exits if unset.
-    # Must be at least 8 characters. Change these passwords after the first login.
+    # Must be at least 8 characters.
     # Stored in a Kubernetes secret. Required.
     SEED_USER_PASSWORD:
       secret:

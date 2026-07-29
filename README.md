@@ -102,6 +102,22 @@ In Claude Code, add this repository as a plugin marketplace and install the plug
 /plugin install rasa-helm-deploy@rasa-helm-charts
 ```
 
+> **Preview / testing from the `feat/agentic-helm` branch**
+>
+> This plugin is not yet merged to `main`. To try it before then, pin the
+> marketplace to the branch with an `@<branch>` suffix:
+>
+> ```text
+> /plugin marketplace add RasaHQ/rasa-helm-charts@feat/agentic-helm
+> /plugin install rasa-helm-deploy@rasa-helm-charts
+> ```
+>
+> Install it from a directory **outside** a local checkout of this repo — when
+> you are inside the repo, Claude Code already loads the skill and `/rasa-helm`
+> command from the project's `.claude/` directory, and installing the plugin on
+> top of that causes a name conflict. Once the branch merges, drop the
+> `@feat/agentic-helm` suffix and use the plain command above.
+
 ### Use it
 
 Invoke the command with the chart you want to deploy — `rasa` for [`charts/rasa/`](charts/rasa/) (Rasa Pro) or `studio` for [`charts/studio/`](charts/studio/) (Rasa Studio):

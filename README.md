@@ -81,6 +81,38 @@ helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases
 helm install <your release name> oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version <desired version>
 ```
 
+## Guided deployment with Claude Code
+
+If you use [Claude Code](https://www.claude.com/product/claude-code), this repository ships a plugin — **`rasa-helm-deploy`** — that walks you through deploying the charts step by step. It is aimed at users who want a working deployment with minimal Helm or Rasa knowledge.
+
+The assistant will:
+
+- Ask only for what a deployment actually needs (license, ingress host, datastore connection, …) and apply sensible defaults for the rest.
+- Auto-detect your ingress controller (nginx / Traefik / AWS ALB) and generate matching annotations.
+- Generate the required Kubernetes `Secret` — either as a ready-to-run `kubectl create secret` command (from values you provide) or as a placeholder manifest with instructions (if you'd rather not share values). Chart-required secrets such as the Rasa Pro `authToken` and `jwtSecret` are generated for you.
+- Generate a schema-valid `values.yaml` (or equivalent `--set` flags), then validate it with `helm lint --strict` and a `helm template` render before handing you a version-pinned `helm install` command.
+- Optionally provision PostgreSQL / Kafka in-cluster via the [op-kits](charts/op-kits/) chart and wire the connection details into Studio for you.
+
+### Install the plugin
+
+In Claude Code, add this repository as a plugin marketplace and install the plugin:
+
+```text
+/plugin marketplace add RasaHQ/rasa-helm-charts
+/plugin install rasa-helm-deploy@rasa-helm-charts
+```
+
+### Use it
+
+Invoke the command with the chart you want to deploy — `rasa` for [`charts/rasa/`](charts/rasa/) (Rasa Pro) or `studio` for [`charts/studio/`](charts/studio/) (Rasa Studio):
+
+```text
+/rasa-helm configure rasa
+/rasa-helm configure studio
+```
+
+Use `configure` to generate the secret and values files only, or `install` / `upgrade <release>` to also produce (and, after you confirm, run) the Helm command. The assistant never runs a mutating command without your explicit confirmation, and always tells you which cluster context and namespace it targets first.
+
 ## Contributing
 
 We'd love to have you contribute! Please refer to our [contribution guidelines](CONTRIBUTING.md) for details.

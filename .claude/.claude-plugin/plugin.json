@@ -1,0 +1,11 @@
+{
+  "name": "rasa-helm-deploy",
+  "version": "0.1.0",
+  "description": "Guided configuration and deployment of the Rasa Pro and Rasa Studio Helm charts to Kubernetes, including secrets, values, ingress, and datastore provisioning.",
+  "author": {
+    "name": "Rasa",
+    "url": "https://rasa.com"
+  },
+  "homepage": "https://github.com/RasaHQ/rasa-helm-charts",
+  "keywords": ["rasa", "studio", "helm", "kubernetes", "deployment"]
+}

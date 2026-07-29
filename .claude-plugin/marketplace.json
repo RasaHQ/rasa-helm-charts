@@ -1,0 +1,19 @@
+{
+  "name": "rasa-helm-charts",
+  "owner": {
+    "name": "Rasa",
+    "url": "https://github.com/RasaHQ/rasa-helm-charts"
+  },
+  "metadata": {
+    "description": "Claude Code plugin for deploying Rasa Helm charts",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "rasa-helm-deploy",
+      "source": "./.claude",
+      "description": "Guided configuration and deployment of the Rasa Pro and Rasa Studio Helm charts (secrets, values, ingress, op-kits datastore provisioning).",
+      "category": "deployment"
+    }
+  ]
+}

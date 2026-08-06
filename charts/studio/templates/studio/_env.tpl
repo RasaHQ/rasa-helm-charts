@@ -1,5 +1,5 @@
 {{/*
-Environment Variables for Studio between Keycloak and Backend
+Environment Variables for Studio between Keycloak and App
 */}}
 {{- define "studio.shared.env" -}}
 - name: KEYCLOAK_ADMIN
@@ -68,9 +68,9 @@ Keycloak URL - UNUSED - might get reused for Keyclaok -> Better Auth migration j
 {{- end -}}
 
 {{/*
-Backend Keycloak env - UNUSED - might get reused for Keyclaok -> Better Auth migration job
+Studio App Keycloak env - UNUSED - might get reused for Keyclaok -> Better Auth migration job
 */}}
-{{- define "studio.backend.keycloak" -}}
+{{- define "studio.app.keycloak" -}}
 {{- with .Values.config.keycloak }}
 - name: KEYCLOAK_REALM
   value: {{ .realm | quote }}
@@ -89,9 +89,9 @@ Backend Keycloak env - UNUSED - might get reused for Keyclaok -> Better Auth mig
 {{- end -}}
 
 {{/*
-Backend Database Environment Variables
+Studio App Database Environment Variables
 */}}
-{{- define "studio.backend.env" -}}
+{{- define "studio.app.env" -}}
 {{- with .Values.config.database }}
 - name: DB_USER
   {{- if kindIs "map" .username }}
@@ -114,13 +114,13 @@ Backend Database Environment Variables
 - name: DB_PORT
   value: {{ .port | quote }}
 - name: DB_NAME
-  {{- if kindIs "map" .backendDatabaseName }}
+  {{- if kindIs "map" .databaseName }}
   valueFrom:
     secretKeyRef:
-      name: {{ .backendDatabaseName.secretName | quote }}
-      key: {{ .backendDatabaseName.secretKey | quote }}
+      name: {{ .databaseName.secretName | quote }}
+      key: {{ .databaseName.secretKey | quote }}
   {{- else }}
-  value: {{ .backendDatabaseName | quote }}
+  value: {{ .databaseName | quote }}
   {{- end }}
 - name: DB_QUERY
   value: {{ .queryParams | quote }}

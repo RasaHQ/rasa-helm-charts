@@ -1,8 +1,8 @@
-{{- if .Values.backend.migration.enabled }}
+{{- if .Values.app.migration.enabled }}
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: {{ include "studio.fullname" . }}-database-migration
+  name: {{ include "studio.fullname" . }}-app-migration
   labels:
     {{- include "studio.labels" . | nindent 4 }}
   annotations:
@@ -11,13 +11,13 @@ metadata:
     "helm.sh/hook": pre-install,pre-upgrade
     "helm.sh/hook-weight": "-1"
     "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
-    {{- with .Values.backend.migration.annotations }}
+    {{- with .Values.app.migration.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
   template:
     metadata:
-      {{- with .Values.backend.migration.podAnnotations }}
+      {{- with .Values.app.migration.podAnnotations }}
       annotations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
@@ -28,15 +28,15 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.backend.migration.serviceAccount.create }}
-      serviceAccountName: {{ include "studio.backend.migration.serviceAccountName" . }}
+      {{- if .Values.app.migration.serviceAccount.create }}
+      serviceAccountName: {{ include "studio.app.migration.serviceAccountName" . }}
       {{- end }}
       restartPolicy: Never
-      {{- include "studio.backend.migration.scheduling" . | nindent 6 }}
-      {{- if .Values.backend.migration.waitForIt }}
+      {{- include "studio.app.migration.scheduling" . | nindent 6 }}
+      {{- if .Values.app.migration.waitForIt }}
       initContainers:
         - name: wait-for-postgresql
-          image: {{ .Values.backend.migration.waitForItContainer.image }}
+          image: {{ .Values.app.migration.waitForItContainer.image }}
           command: ['sh', '-c', 'until pg_isready -h {{ .Values.config.database.host }} -p {{ .Values.config.database.port }} -U "$DB_USER"; do echo waiting for postgresql; sleep 2; done;']
           env:
             - name: DB_USER
@@ -50,12 +50,14 @@ spec:
               {{- end }}
       {{- end }}
       containers:
-      - name: {{ .Chart.Name }}-database-migration
+      - name: {{ .Chart.Name }}-app-migration
         image: {{ include "studio.migration.image" . }}
-        imagePullPolicy: {{ .Values.backend.migration.image.pullPolicy }}
+        imagePullPolicy: {{ .Values.app.migration.image.pullPolicy }}
         env:
-          {{- include "studio.backend.env" . | nindent 10 }}
+          {{- include "studio.app.env" . | nindent 10 }}
           {{- include "studio.keycloak.env" . | nindent 10 }}
+          - name: STUDIO_ROLE
+            value: "migration"
           - name: DB_SSL
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
@@ -64,7 +66,7 @@ spec:
           - name: SKIP_KEYCLOAK
             value: "true"
           {{- end }}
-          {{- range $key, $value := .Values.backend.migration.environmentVariables }}
+          {{- range $key, $value := .Values.app.migration.environmentVariables }}
           {{- if not (and (eq $key "SKIP_KEYCLOAK") (not $.Values.keycloak.enabled)) }}
           - name: {{ $key | upper }}
             {{- if $value.value }}

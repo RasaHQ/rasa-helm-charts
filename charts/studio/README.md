@@ -2,18 +2,17 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.11](https://img.shields.io/badge/Version-3.0.0--rc.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.13](https://img.shields.io/badge/Version-3.0.0--rc.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
-The Studio chart deploys up to five components. All components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+The Studio chart deploys a unified Studio image. The app serves both the API and SPA; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
-| **backend** | Studio API server — handles business logic and data persistence | `/api` | always on |
-| **web-client** | React frontend served by nginx | `/` | always on |
-| **keycloak** | Legacy identity provider, retained to support migrating existing users to the new backend's internal authentication | `/auth` | `keycloak.enabled` (default: `true`) |
-| **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.enabled` (default: `true`) |
+| **app** | Studio API server and SPA — handles business logic and data persistence | `/api` and `/` | always on |
+| **keycloak** | Temporary legacy identity provider, retained while migrating existing users to Better Auth | `/auth` | `keycloak.enabled` (default: `true`) |
+| **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
 > **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
@@ -23,7 +22,7 @@ The Studio chart deploys up to five components. All components share a single `i
 - Kubernetes 1.30+
 - Helm 3.8.0+
 - A PostgreSQL instance (version 14+ recommended) accessible from the cluster
-- A Kafka broker (if `eventIngestion.enabled: true`) accessible from the cluster
+- A Kafka broker (unless `eventIngestion.mode: disabled`) accessible from the cluster
 - A Rasa Pro license key
 
 ## Before You Install
@@ -75,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.11
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.13
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.11
+$ helm install my-release rasa/studio --version 3.0.0-rc.13
 ```
 
 ## Quick Start
@@ -104,12 +103,12 @@ config:
   database:
     host: "postgres.example.com"
     username: "studio"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 
-# Disable event ingestion for a minimal setup — requires Kafka when enabled.
+# Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
 eventIngestion:
-  enabled: false
+  mode: disabled
 ```
 
 ```console
@@ -117,11 +116,11 @@ $ helm dependency build ./charts/studio
 $ helm install my-release rasa/studio -f values.yaml
 ```
 
-After install, the backend migration Job runs automatically as a pre-install hook. Monitor progress with:
+After install, the app migration Job runs automatically as a pre-install hook. Monitor progress with:
 
 ```console
 $ kubectl get jobs
-$ kubectl logs job/my-release-studio-database-migration
+$ kubectl logs job/my-release-studio-app-migration
 ```
 
 ## Uninstalling the Chart
@@ -141,13 +140,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.11
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.13
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.11
+$ helm pull rasa/studio --version 3.0.0-rc.13
 ```
 
 ## General Configuration
@@ -173,11 +172,11 @@ If you need to change the ingress host, only modify the value (e.g., `INGRESS.HO
 
 ## Database Configuration
 
-Studio requires a PostgreSQL database for the backend services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
+Studio requires a PostgreSQL database for the app services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
 
 ### Database Configuration
 
-The `config.database` section defines the database connection settings used by Studio Backend:
+The `config.database` section defines the database connection settings used by the Studio app:
 
 ```yaml
 config:
@@ -188,7 +187,7 @@ config:
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 ```
 
 ### Using Secrets for Sensitive Values
@@ -204,11 +203,11 @@ config:
       secretKey: "DB_USERNAME"
 ```
 
-**Backend database name from secret:**
+**App database name from secret:**
 ```yaml
 config:
   database:
-    backendDatabaseName:
+    databaseName:
       secretName: "my-db-secret"
       secretKey: "DB_NAME"
 ```
@@ -235,7 +234,7 @@ config:
     useAwsIamAuth: "true"
     awsRegion: "us-east-1"
     iamDbUsername: "iam_db_user"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 ```
 
 **Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
@@ -256,12 +255,12 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
-- Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the backend uses internally
+- Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
-When `rasa.enabled: false`, point Studio Backend at your own Rasa Pro instance:
+When `rasa.enabled: false`, point Studio App at your own Rasa Pro instance:
 
 ```yaml
-backend:
+app:
   environmentVariables:
     MS_API_URL:
       value: "http://your-rasa-pro-service"
@@ -302,20 +301,20 @@ rasa:
         value: "aws"
 ```
 
-### Studio Backend Model Service Environment Variables
+### Studio App Model Service Environment Variables
 
-The following environment variables control how Studio Backend polls and manages the Rasa Pro model service, configurable via `backend.environmentVariables`:
+The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.environmentVariables`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `TRAINING_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for training status updates | `1000` |
-| `MODEL_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for model status updates | `2000` |
+| `TRAINING_POLLING_INTERVAL_MS` | Interval (ms) at which Studio App polls the model service for training status updates | `1000` |
+| `MODEL_POLLING_INTERVAL_MS` | Interval (ms) at which Studio App polls the model service for model status updates | `2000` |
 | `MODEL_INACTIVE_AFTER_MS` | Time (ms) after which an unused model is marked as inactive | `3600000` (1 hour) |
 
 Example:
 
 ```yaml
-backend:
+app:
   environmentVariables:
     TRAINING_POLLING_INTERVAL_MS:
       value: "2000"
@@ -329,8 +328,8 @@ backend:
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
 
-- backend `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
-- the web client's `API_ENDPOINT`
+- app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
+- the app-served SPA's `API_ENDPOINT`
 - the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
 - `CORS_ORIGINS`
 
@@ -341,7 +340,7 @@ config:
   connectionType: "https"  # default: "http"
 ```
 
-It does **not** affect in-cluster service-to-service calls — those use hardcoded `http://` service names (e.g. backend → Rasa Pro at `http://rasapro`). If your ingress terminates TLS externally while pods communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`.
+It does **not** affect in-cluster service-to-service calls — those use hardcoded `http://` service names (e.g. app → Rasa Pro at `http://rasapro`). If your ingress terminates TLS externally while pods communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`.
 
 ## Event Ingestion and Kafka
 
@@ -390,7 +389,7 @@ eventIngestion:
       value: "/etc/ssl/kafka/tls.key"
 ```
 
-To disable event ingestion entirely: `eventIngestion.enabled: false`.
+Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
 
 ## Network Policies
 
@@ -411,24 +410,24 @@ When enabled, three policies are created:
 
 ## Database Migration
 
-The backend runs a `pre-install,pre-upgrade` Helm hook Job that applies database schema migrations before any pods start. On first install this job creates all tables; on upgrades it applies incremental migrations.
+The app runs a `pre-install,pre-upgrade` Helm hook Job that applies database schema migrations before any pods start. On first install this job creates all tables; on upgrades it applies incremental migrations.
 
 Monitor migration progress:
 
 ```console
 $ kubectl get jobs
-$ kubectl logs job/<release-name>-studio-database-migration
+$ kubectl logs job/<release-name>-studio-app-migration
 ```
 
 **If a migration fails**, the job is preserved for debugging — inspect the logs before retrying:
 
 ```console
-$ kubectl logs job/<release-name>-studio-database-migration
+$ kubectl logs job/<release-name>-studio-app-migration
 ```
 
 Once you have identified and resolved the root cause, re-run `helm upgrade`. The failed job is automatically cleaned up before the next migration attempt.
 
-Enable `backend.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
+Enable `app.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
 
 ## Upgrading
 
@@ -443,99 +442,107 @@ $ helm upgrade my-release rasa/studio --version <new-version> -f values.yaml
 
 Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
 
+### Upgrading to chart 3.0.0
+
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure SPA runtime values under `webClient.environmentVariables`.
+
+Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
+
+Helm does not delete resources that disappeared from the previous topology. After upgrade, remove the old backend, web-client, and event-ingestion resources as described in the chart release notes (`helm get notes <release-name>`).
+
 ## Values
 
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
-| backend.additionalContainers | list | backend.additionalContainers defines additional containers to run alongside the main Studio Backend container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
-| backend.affinity | object | backend.affinity defines affinity rules for the backend pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
-| backend.annotations | object | backend.annotations defines annotations to add to all Studio Backend resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.authSecret | object | backend.authSecret is the secret used by backend to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
-| backend.autoscaling | object | backend.autoscaling defines the Horizontal Pod Autoscaling configuration. This enables automatic scaling of the backend deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
-| backend.autoscaling.enabled | bool | backend.autoscaling.enabled determines whether to enable horizontal pod autoscaling. | `false` |
-| backend.autoscaling.maxReplicas | int | backend.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
-| backend.autoscaling.minReplicas | int | backend.autoscaling.minReplicas is the minimum number of replicas. | `1` |
-| backend.autoscaling.targetCPUUtilizationPercentage | int | backend.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
-| backend.envFrom | list | backend.envFrom defines additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
-| backend.environmentVariables | object | backend.environmentVariables defines the environment variables for the Studio Backend deployment. These variables configure the runtime behavior of the backend service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
-| backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | backend.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
-| backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | backend.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
-| backend.image | object | backend.image defines the container image settings for the backend service. This section defines the container image settings for the backend service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio-backend","pullPolicy":"IfNotPresent"}` |
-| backend.image.name | string | backend.image.name is the name of the Studio Backend container image. This should match the image name in your container registry. | `"studio-backend"` |
-| backend.image.pullPolicy | string | backend.image.pullPolicy is the container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
-| backend.ingress | object | backend.ingress defines how the backend service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
-| backend.ingress.additionalAnnotations | object | backend.ingress.additionalAnnotations defines additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.ingress.className | string | backend.ingress.className is the ingress class name. This should match your cluster's ingress controller. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
-| backend.ingress.enabled | bool | backend.ingress.enabled determines whether to create an ingress resource. | `true` |
-| backend.ingress.labels | object | backend.ingress.labels defines labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| backend.ingress.tls | list | backend.ingress.tls defines the TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
-| backend.livenessProbe | object | backend.livenessProbe defines the liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| backend.livenessProbe.enabled | bool | backend.livenessProbe.enabled determines whether to enable the liveness probe. | `true` |
-| backend.livenessProbe.failureThreshold | int | backend.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy. | `6` |
-| backend.livenessProbe.httpGet | object | backend.livenessProbe.httpGet defines the HTTP GET probe configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command | `{"path":"/api/health","port":4000,"scheme":"HTTP"}` |
-| backend.livenessProbe.httpGet.path | string | backend.livenessProbe.httpGet.path is the path to check for liveness. | `"/api/health"` |
-| backend.livenessProbe.httpGet.port | int | backend.livenessProbe.httpGet.port is the port to check for liveness. | `4000` |
-| backend.livenessProbe.httpGet.scheme | string | backend.livenessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| backend.livenessProbe.initialDelaySeconds | int | backend.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
-| backend.livenessProbe.periodSeconds | int | backend.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
-| backend.livenessProbe.successThreshold | int | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| backend.livenessProbe.timeoutSeconds | int | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| backend.migration | object | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
-| backend.migration.affinity | object | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
-| backend.migration.annotations | object | backend.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.migration.enabled | bool | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
-| backend.migration.environmentVariables | object | backend.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}}` |
-| backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME | object | backend.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database. if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database. | `{"value":"postgres"}` |
-| backend.migration.environmentVariables.SKIP_KEYCLOAK | object | backend.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation. Set to "true" if you have already created the Keycloak database manually. | `{"value":"false"}` |
-| backend.migration.image | object | backend.migration.image defines the image configuration for the migration job. | `{"name":"studio-database-migration","pullPolicy":"IfNotPresent"}` |
-| backend.migration.image.name | string | backend.migration.image.name is the name of the migration container image. | `"studio-database-migration"` |
-| backend.migration.image.pullPolicy | string | backend.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
-| backend.migration.nodeSelector | object | backend.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
-| backend.migration.podAnnotations | object | backend.migration.podAnnotations defines annotations to add to the migration job pod. Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.migration.serviceAccount | object | backend.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. | `{"annotations":{},"create":false,"name":""}` |
-| backend.migration.serviceAccount.annotations | object | backend.migration.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
-| backend.migration.serviceAccount.create | bool | backend.migration.serviceAccount.create determines whether to create a new service account. | `false` |
-| backend.migration.serviceAccount.name | string | backend.migration.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname + "-db-migration" suffix. | `""` |
-| backend.migration.tolerations | list | backend.migration.tolerations defines tolerations for the migration job. This allows the job to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
-| backend.migration.waitForIt | bool | backend.migration.waitForIt determines whether to wait for the database to be ready before running migrations. | `false` |
-| backend.migration.waitForItContainer | object | backend.migration.waitForItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:17.2"}` |
-| backend.nodeSelector | object | backend.nodeSelector defines which nodes the backend pods can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
-| backend.podAnnotations | object | backend.podAnnotations defines annotations to add to the backend pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-backend: runtime/default Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.podSecurityContext | object | backend.podSecurityContext defines the security settings for the entire pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
-| backend.podSecurityContext.enabled | bool | backend.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
-| backend.readinessProbe | object | backend.readinessProbe defines the readiness probe configuration. This determines if the container is ready to receive traffic. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| backend.readinessProbe.enabled | bool | backend.readinessProbe.enabled determines whether to enable the readiness probe. | `true` |
-| backend.readinessProbe.failureThreshold | int | backend.readinessProbe.failureThreshold is the number of failures before the container is considered not ready. | `6` |
-| backend.readinessProbe.httpGet | object | backend.readinessProbe.httpGet defines the HTTP GET probe configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-readiness-probe | `{"path":"/api/health","port":4000,"scheme":"HTTP"}` |
-| backend.readinessProbe.httpGet.path | string | backend.readinessProbe.httpGet.path is the path to check for readiness. | `"/api/health"` |
-| backend.readinessProbe.httpGet.port | int | backend.readinessProbe.httpGet.port is the port to check for readiness. | `4000` |
-| backend.readinessProbe.httpGet.scheme | string | backend.readinessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| backend.readinessProbe.initialDelaySeconds | int | backend.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
-| backend.readinessProbe.periodSeconds | int | backend.readinessProbe.periodSeconds is how often to perform the probe. | `15` |
-| backend.readinessProbe.successThreshold | int | backend.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| backend.readinessProbe.timeoutSeconds | int | backend.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| backend.replicaCount | int | backend.replicaCount is the number of replicas for the Studio Backend deployment. Increase this value for high availability and better load distribution. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#replicas | `1` |
-| backend.resources | object | backend.resources defines the resource limits and requests for Studio Backend. This controls the compute resources allocated to the backend container. Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ | `{}` |
-| backend.securityContext | object | backend.securityContext defines the security settings for the backend container. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
-| backend.securityContext.allowPrivilegeEscalation | bool | backend.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. Should be false for security best practices. | `false` |
-| backend.securityContext.capabilities | object | backend.securityContext.capabilities defines the Linux capabilities configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container | `{"drop":["ALL"]}` |
-| backend.securityContext.capabilities.drop | list | backend.securityContext.capabilities.drop defines capabilities to drop from the container. ALL drops all capabilities for maximum security. | `["ALL"]` |
-| backend.securityContext.enabled | bool | backend.securityContext.enabled determines whether to enable the security context. | `true` |
-| backend.securityContext.runAsNonRoot | bool | backend.securityContext.runAsNonRoot determines whether to run the container as a non-root user. Should be true for security best practices. | `true` |
-| backend.service | object | backend.service defines how the backend service is exposed within the cluster. Ref: https://kubernetes.io/docs/concepts/services-networking/service/ | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` |
-| backend.service.port | int | backend.service.port is the port number for the service. | `80` |
-| backend.service.targetPort | int | backend.service.targetPort is the target port in the container. This should match the port your application listens on. | `4000` |
-| backend.service.type | string | backend.service.type is the type of Kubernetes service. Valid values: ClusterIP, NodePort, LoadBalancer, ExternalName Ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types | `"ClusterIP"` |
-| backend.serviceAccount | object | backend.serviceAccount defines the Kubernetes service account used by the backend pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `{"annotations":{},"create":false,"name":""}` |
-| backend.serviceAccount.annotations | object | backend.serviceAccount.annotations defines annotations to add to the service account. Useful for cloud provider specific configurations. | `{}` |
-| backend.serviceAccount.create | bool | backend.serviceAccount.create determines whether to create a new service account. | `false` |
-| backend.serviceAccount.name | string | backend.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
-| backend.tolerations | list | backend.tolerations defines tolerations for the backend pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
+| app.additionalContainers | list | app.additionalContainers defines additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
+| app.affinity | object | app.affinity defines affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| app.annotations | object | app.annotations defines annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.authSecret | object | app.authSecret is the secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
+| app.autoscaling | object | app.autoscaling defines the Horizontal Pod Autoscaling configuration. This enables automatic scaling of the app deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
+| app.autoscaling.enabled | bool | app.autoscaling.enabled determines whether to enable horizontal pod autoscaling. | `false` |
+| app.autoscaling.maxReplicas | int | app.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
+| app.autoscaling.minReplicas | int | app.autoscaling.minReplicas is the minimum number of replicas. | `1` |
+| app.autoscaling.targetCPUUtilizationPercentage | int | app.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
+| app.envFrom | list | app.envFrom defines additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
+| app.environmentVariables | object | app.environmentVariables defines the environment variables for the Studio App deployment. These variables configure the runtime behavior of the app service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
+| app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
+| app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
+| app.image | object | app.image defines the container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
+| app.image.name | string | app.image.name is the unified Studio container image (API + SPA + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
+| app.image.pullPolicy | string | app.image.pullPolicy is the container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
+| app.ingress | object | app.ingress defines how the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
+| app.ingress.additionalAnnotations | object | app.ingress.additionalAnnotations defines additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.ingress.className | string | app.ingress.className is the ingress class name. This should match your cluster's ingress controller. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
+| app.ingress.enabled | bool | app.ingress.enabled determines whether to create an ingress resource. | `true` |
+| app.ingress.labels | object | app.ingress.labels defines labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
+| app.ingress.tls | list | app.ingress.tls defines the TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
+| app.livenessProbe | object | app.livenessProbe defines the liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
+| app.livenessProbe.enabled | bool | app.livenessProbe.enabled determines whether to enable the liveness probe. | `true` |
+| app.livenessProbe.failureThreshold | int | app.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy. | `6` |
+| app.livenessProbe.httpGet | object | app.livenessProbe.httpGet defines the HTTP GET probe configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-liveness-command | `{"path":"/api/health","port":4000,"scheme":"HTTP"}` |
+| app.livenessProbe.httpGet.path | string | app.livenessProbe.httpGet.path is the path to check for liveness. | `"/api/health"` |
+| app.livenessProbe.httpGet.port | int | app.livenessProbe.httpGet.port is the port to check for liveness. | `4000` |
+| app.livenessProbe.httpGet.scheme | string | app.livenessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
+| app.livenessProbe.initialDelaySeconds | int | app.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
+| app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
+| app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
+| app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.migration.enabled | bool | app.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
+| app.migration.environmentVariables | object | app.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}}` |
+| app.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME | object | app.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database. if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database. | `{"value":"postgres"}` |
+| app.migration.environmentVariables.SKIP_KEYCLOAK | object | app.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation. Set to "true" if you have already created the Keycloak database manually. | `{"value":"false"}` |
+| app.migration.image | object | app.migration.image defines the image configuration for the migration job. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
+| app.migration.image.name | string | app.migration.image.name uses the same unified studio image with STUDIO_ROLE=migration. | `"studio"` |
+| app.migration.image.pullPolicy | string | app.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
+| app.migration.nodeSelector | object | app.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
+| app.migration.podAnnotations | object | app.migration.podAnnotations defines annotations to add to the migration job pod. Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.migration.serviceAccount | object | app.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. | `{"annotations":{},"create":false,"name":""}` |
+| app.migration.serviceAccount.annotations | object | app.migration.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
+| app.migration.serviceAccount.create | bool | app.migration.serviceAccount.create determines whether to create a new service account. | `false` |
+| app.migration.serviceAccount.name | string | app.migration.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname + "-db-migration" suffix. | `""` |
+| app.migration.tolerations | list | app.migration.tolerations defines tolerations for the migration job. This allows the job to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
+| app.migration.waitForIt | bool | app.migration.waitForIt determines whether to wait for the database to be ready before running migrations. | `false` |
+| app.migration.waitForItContainer | object | app.migration.waitForItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:17.2"}` |
+| app.nodeSelector | object | app.nodeSelector defines which nodes the app pods can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
+| app.podAnnotations | object | app.podAnnotations defines annotations to add to the app pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app: runtime/default Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.podSecurityContext | object | app.podSecurityContext defines the security settings for the entire pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
+| app.podSecurityContext.enabled | bool | app.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
+| app.readinessProbe | object | app.readinessProbe defines the readiness probe configuration. This determines if the container is ready to receive traffic. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
+| app.readinessProbe.enabled | bool | app.readinessProbe.enabled determines whether to enable the readiness probe. | `true` |
+| app.readinessProbe.failureThreshold | int | app.readinessProbe.failureThreshold is the number of failures before the container is considered not ready. | `6` |
+| app.readinessProbe.httpGet | object | app.readinessProbe.httpGet defines the HTTP GET probe configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/#define-a-readiness-probe | `{"path":"/api/health","port":4000,"scheme":"HTTP"}` |
+| app.readinessProbe.httpGet.path | string | app.readinessProbe.httpGet.path is the path to check for readiness. | `"/api/health"` |
+| app.readinessProbe.httpGet.port | int | app.readinessProbe.httpGet.port is the port to check for readiness. | `4000` |
+| app.readinessProbe.httpGet.scheme | string | app.readinessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
+| app.readinessProbe.initialDelaySeconds | int | app.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
+| app.readinessProbe.periodSeconds | int | app.readinessProbe.periodSeconds is how often to perform the probe. | `15` |
+| app.readinessProbe.successThreshold | int | app.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
+| app.readinessProbe.timeoutSeconds | int | app.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
+| app.replicaCount | int | app.replicaCount is the number of replicas for the Studio App deployment. Increase this value for high availability and better load distribution. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#replicas | `1` |
+| app.resources | object | app.resources defines the resource limits and requests for Studio App. This controls the compute resources allocated to the app container. Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ | `{}` |
+| app.securityContext | object | app.securityContext defines the security settings for the app container. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
+| app.securityContext.allowPrivilegeEscalation | bool | app.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. Should be false for security best practices. | `false` |
+| app.securityContext.capabilities | object | app.securityContext.capabilities defines the Linux capabilities configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container | `{"drop":["ALL"]}` |
+| app.securityContext.capabilities.drop | list | app.securityContext.capabilities.drop defines capabilities to drop from the container. ALL drops all capabilities for maximum security. | `["ALL"]` |
+| app.securityContext.enabled | bool | app.securityContext.enabled determines whether to enable the security context. | `true` |
+| app.securityContext.runAsNonRoot | bool | app.securityContext.runAsNonRoot determines whether to run the container as a non-root user. Should be true for security best practices. | `true` |
+| app.service | object | app.service defines how the app service is exposed within the cluster. Ref: https://kubernetes.io/docs/concepts/services-networking/service/ | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` |
+| app.service.port | int | app.service.port is the port number for the service. | `80` |
+| app.service.targetPort | int | app.service.targetPort is the target port in the container. This should match the port your application listens on. | `4000` |
+| app.service.type | string | app.service.type is the type of Kubernetes service. Valid values: ClusterIP, NodePort, LoadBalancer, ExternalName Ref: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types | `"ClusterIP"` |
+| app.serviceAccount | object | app.serviceAccount defines the Kubernetes service account used by the app pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `{"annotations":{},"create":false,"name":""}` |
+| app.serviceAccount.annotations | object | app.serviceAccount.annotations defines annotations to add to the service account. Useful for cloud provider specific configurations. | `{}` |
+| app.serviceAccount.create | bool | app.serviceAccount.create determines whether to create a new service account. | `false` |
+| app.serviceAccount.name | string | app.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
+| app.tolerations | list | app.tolerations defines tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define if you will be using https or http with the ingressHost. Valid values are "http" or "https". This setting affects how services communicate with each other. | `"http"` |
-| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","backendDatabaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
+| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.backendDatabaseName | string | The database name for Studio backend services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: backendDatabaseName: "studio" Secret reference example: backendDatabaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
+| config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
 | config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" | `""` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction. | `"keycloak"` |
@@ -549,12 +556,12 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
-| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new backend's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
+| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new app's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
-| config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio Backend to authenticate with Keycloak. | `"admin-cli"` |
-| config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio Backend to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
-| config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio Backend to authenticate with Keycloak. | `"realmadmin"` |
+| config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio App to authenticate with Keycloak. | `"admin-cli"` |
+| config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio App to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
+| config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio App to authenticate with Keycloak. | `"realmadmin"` |
 | config.keycloak.clientId | string | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. | `"rasa-studio-backend"` |
 | config.keycloak.realm | string | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. | `"rasa-studio"` |
 | config.keycloak.url | string | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. | `""` |
@@ -572,7 +579,6 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | eventIngestion.autoscaling.maxReplicas | int | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
 | eventIngestion.autoscaling.minReplicas | int | eventIngestion.autoscaling.minReplicas is the minimum number of replicas. | `1` |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. | `80` |
-| eventIngestion.enabled | bool | eventIngestion.enabled determines whether to deploy the event ingestion component. | `true` |
 | eventIngestion.envFrom | list | eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
 | eventIngestion.environmentVariables | object | eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` |
 | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker. | `{"value":""}` |
@@ -589,11 +595,12 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME | object | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication. | `{"value":""}` |
 | eventIngestion.environmentVariables.KAFKA_TOPIC | object | eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events. | `{"value":"rasa-events"}` |
 | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates. | `{"value":""}` |
-| eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. | `{"name":"studio-event-ingestion","pullPolicy":"IfNotPresent"}` |
-| eventIngestion.image.name | string | eventIngestion.image.name is the name of the Event Ingestion container image. | `"studio-event-ingestion"` |
+| eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
+| eventIngestion.image.name | string | eventIngestion.image.name is the unified studio image for the separate ingestion Deployment. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
+| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics. | `"colocated"` |
 | eventIngestion.nodeSelector | object | eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on. | `{}` |
-| eventIngestion.podAnnotations | object | eventIngestion.podAnnotations defines annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-event-ingestion: runtime/default | `{}` |
+| eventIngestion.podAnnotations | object | eventIngestion.podAnnotations defines annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | eventIngestion.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |
 | eventIngestion.podSecurityContext.enabled | bool | eventIngestion.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
 | eventIngestion.replicaCount | int | eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment. | `1` |
@@ -734,61 +741,5 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.strategy.type | string |  | `"Recreate"` |
 | rasa.rasaProServices.enabled | bool |  | `false` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
-| tag | string | tag specifies image tag for Studio # Overrides the image tag whose default is the chart appVersion. | `"1.16.0-latest"` |
-| webClient.additionalContainers | list | webClient.additionalContainers defines additional containers to run alongside the main Web Client container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
-| webClient.affinity | object | webClient.affinity defines affinity rules for the web client pods. | `{}` |
-| webClient.annotations | object | webClient.annotations defines annotations to add to all Studio Web Client resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| webClient.envFrom | list | webClient.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
-| webClient.environmentVariables | object | webClient.environmentVariables defines the environment variables for the Web Client deployment. Example: Specify the string value for variables   value: my-value These environment variables are only being passed to the `configmap`, not to the container, therefore they cannot be a secret! | `{}` |
-| webClient.image | object | webClient.image defines the container image settings for the web client service. | `{"name":"studio-web-client","pullPolicy":"IfNotPresent"}` |
-| webClient.image.name | string | webClient.image.name is the name of the Web Client container image. | `"studio-web-client"` |
-| webClient.image.pullPolicy | string | webClient.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
-| webClient.ingress | object | webClient.ingress defines how the web client service is exposed externally. | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
-| webClient.ingress.additionalAnnotations | object | webClient.ingress.additionalAnnotations defines additional annotations for the ingress resource. | `{}` |
-| webClient.ingress.className | string | webClient.ingress.className is the ingress class name. | `""` |
-| webClient.ingress.enabled | bool | webClient.ingress.enabled determines whether to create an ingress resource. | `true` |
-| webClient.ingress.labels | object | webClient.ingress.labels defines labels to add to the ingress resource. | `{}` |
-| webClient.ingress.tls | list | webClient.ingress.tls defines the TLS configuration for the ingress. | `[]` |
-| webClient.livenessProbe | object | webClient.livenessProbe defines the liveness probe configuration. | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| webClient.livenessProbe.enabled | bool | webClient.livenessProbe.enabled determines whether to enable the liveness probe. | `true` |
-| webClient.livenessProbe.failureThreshold | int | webClient.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy. | `6` |
-| webClient.livenessProbe.httpGet | object | webClient.livenessProbe.httpGet defines the HTTP GET probe configuration. | `{"path":"/","port":8080,"scheme":"HTTP"}` |
-| webClient.livenessProbe.httpGet.path | string | webClient.livenessProbe.httpGet.path is the path to check for liveness. | `"/"` |
-| webClient.livenessProbe.httpGet.port | int | webClient.livenessProbe.httpGet.port is the port to check for liveness. | `8080` |
-| webClient.livenessProbe.httpGet.scheme | string | webClient.livenessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| webClient.livenessProbe.initialDelaySeconds | int | webClient.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
-| webClient.livenessProbe.periodSeconds | int | webClient.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
-| webClient.livenessProbe.successThreshold | int | webClient.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| webClient.livenessProbe.timeoutSeconds | int | webClient.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| webClient.nodeSelector | object | webClient.nodeSelector defines which nodes the web client pods can run on. | `{}` |
-| webClient.podAnnotations | object | webClient.podAnnotations defines annotations to add to the web client pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-web-client: runtime/default | `{}` |
-| webClient.podSecurityContext | object | webClient.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |
-| webClient.podSecurityContext.enabled | bool | webClient.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
-| webClient.readinessProbe | object | webClient.readinessProbe defines the readiness probe configuration. | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/","port":8080,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| webClient.readinessProbe.enabled | bool | webClient.readinessProbe.enabled determines whether to enable the readiness probe. | `true` |
-| webClient.readinessProbe.failureThreshold | int | webClient.readinessProbe.failureThreshold is the number of failures before the container is considered not ready. | `6` |
-| webClient.readinessProbe.httpGet | object | webClient.readinessProbe.httpGet defines the HTTP GET probe configuration. | `{"path":"/","port":8080,"scheme":"HTTP"}` |
-| webClient.readinessProbe.httpGet.path | string | webClient.readinessProbe.httpGet.path is the path to check for readiness. | `"/"` |
-| webClient.readinessProbe.httpGet.port | int | webClient.readinessProbe.httpGet.port is the port to check for readiness. | `8080` |
-| webClient.readinessProbe.httpGet.scheme | string | webClient.readinessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| webClient.readinessProbe.initialDelaySeconds | int | webClient.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `15` |
-| webClient.readinessProbe.periodSeconds | int | webClient.readinessProbe.periodSeconds is how often to perform the probe. | `15` |
-| webClient.readinessProbe.successThreshold | int | webClient.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| webClient.readinessProbe.timeoutSeconds | int | webClient.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| webClient.replicaCount | int | webClient.replicaCount is the number of replicas for the Web Client deployment. | `1` |
-| webClient.resources | object | webClient.resources defines the resource limits and requests for the web client. | `{}` |
-| webClient.securityContext | object | webClient.securityContext defines the security settings for the web client container. | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
-| webClient.securityContext.allowPrivilegeEscalation | bool | webClient.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
-| webClient.securityContext.capabilities | object | webClient.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
-| webClient.securityContext.capabilities.drop | list | webClient.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
-| webClient.securityContext.enabled | bool | webClient.securityContext.enabled determines whether to enable the security context. | `true` |
-| webClient.securityContext.runAsNonRoot | bool | webClient.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
-| webClient.service | object | webClient.service defines how the web client service is exposed within the cluster. | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` |
-| webClient.service.port | int | webClient.service.port is the port number for the service. | `80` |
-| webClient.service.targetPort | int | webClient.service.targetPort is the target port in the container. | `8080` |
-| webClient.service.type | string | webClient.service.type is the type of Kubernetes service. | `"ClusterIP"` |
-| webClient.serviceAccount | object | webClient.serviceAccount defines the Kubernetes service account used by the web client pod. | `{"annotations":{},"create":false,"name":""}` |
-| webClient.serviceAccount.annotations | object | webClient.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
-| webClient.serviceAccount.create | bool | webClient.serviceAccount.create determines whether to create a new service account. | `false` |
-| webClient.serviceAccount.name | string | webClient.serviceAccount.name is the name of the service account to use. | `""` |
-| webClient.tolerations | list | webClient.tolerations defines tolerations for the web client pods. | `[]` |
+| tag | string | tag specifies image tag for Studio (unified studio image; Studio ≥ 2.0.0). Placeholder until the first published unified tag is confirmed for promotion. | `"2.0.0-latest"` |
+| webClient.environmentVariables | object | webClient.environmentVariables feeds the SPA config.js ConfigMap mounted at /usr/src/app/spa/config.js on the app pod. Values are not secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL, CURRENT_VERSION_NUMBER, etc. Breaking: web-client Deployment/Service/Ingress/image removed in chart 3.0.0. | `{}` |

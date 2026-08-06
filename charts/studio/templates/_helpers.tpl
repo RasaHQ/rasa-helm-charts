@@ -54,21 +54,13 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for Nginx Proxy
+Create the name of the app service account to use for Studio App
 */}}
-{{- define "nginx.selectorLabels" -}}
-app.kubernetes.io/name: nginx-reverse-proxy
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Create the name of the backend service account to use for Backend
-*/}}
-{{- define "studio.backend.serviceAccountName" -}}
-{{- if .Values.backend.serviceAccount.create }}
-{{- default (printf "%s-backend" (include "studio.fullname" .)) .Values.backend.serviceAccount.name }}
+{{- define "studio.app.serviceAccountName" -}}
+{{- if .Values.app.serviceAccount.create }}
+{{- default (printf "%s-app" (include "studio.fullname" .)) .Values.app.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.backend.serviceAccount.name }}
+{{- default "default" .Values.app.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -77,20 +69,20 @@ Create the name of the eventIngestion service account to use for Event Ingestion
 */}}
 {{- define "studio.eventIngestion.serviceAccountName" -}}
 {{- if .Values.eventIngestion.serviceAccount.create }}
-{{- default (printf "%s-event-ingestion" (include "studio.fullname" .)) .Values.eventIngestion.serviceAccount.name }}
+{{- default (printf "%s-app-ingestion" (include "studio.fullname" .)) .Values.eventIngestion.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.eventIngestion.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
 {{/*
-Create the name of the backend migration service account to use for Database Migration Job
+Create the name of the app migration service account to use for Database Migration Job
 */}}
-{{- define "studio.backend.migration.serviceAccountName" -}}
-{{- if .Values.backend.migration.serviceAccount.create }}
-{{- default (printf "%s-db-migration" (include "studio.fullname" .)) .Values.backend.migration.serviceAccount.name }}
+{{- define "studio.app.migration.serviceAccountName" -}}
+{{- if .Values.app.migration.serviceAccount.create }}
+{{- default (printf "%s-app-migration" (include "studio.fullname" .)) .Values.app.migration.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.backend.migration.serviceAccount.name }}
+{{- default "default" .Values.app.migration.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -102,17 +94,6 @@ Create the name of the keycloak service account to use for Keycloak
 {{- default (printf "%s-keycloak" (include "studio.fullname" .)) .Values.keycloak.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.keycloak.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the frontend service account to use for Web Client
-*/}}
-{{- define "studio.webClient.serviceAccountName" -}}
-{{- if .Values.webClient.serviceAccount.create }}
-{{- default (printf "%s-web-client" (include "studio.fullname" .)) .Values.webClient.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.webClient.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -130,12 +111,12 @@ Return DNS policy depends on host network configuration
 {{- end }}
 
 {{/*
-Return annotations for deployment, combining global and per-deployment annotations for Backend
+Return annotations for deployment, combining global and per-deployment annotations for Studio App
 */}}
-{{- define "backend.deployment.annotations" -}}
+{{- define "app.deployment.annotations" -}}
 {{- $global := .Values.deploymentAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.backend.annotations | default dict }}
-{{- $annotations := merge $global $additional -}}
+{{- $additional := .Values.app.annotations | default dict | deepCopy }}
+{{- $annotations := mergeOverwrite $additional $global -}}
 {{- if $annotations -}}
 annotations:
   {{- toYaml $annotations | nindent 2 }}
@@ -169,25 +150,12 @@ annotations:
 {{- end }}
 
 {{/*
-Return annotations for deployment, combining global and per-deployment annotations for Web Client
+Return annotations for ingress, combining global and per-service annotations for Studio App
 */}}
-{{- define "webclient.deployment.annotations" -}}
-{{- $global := .Values.deploymentAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.webClient.annotations | default dict }}
-{{- $annotations := merge $global $additional -}}
-{{- if $annotations -}}
-annotations:
-  {{- toYaml $annotations | nindent 2 }}
-{{- end -}}
-{{- end }}
-
-{{/*
-Return annotations for ingress, combining global and per-service annotations for Backend
-*/}}
-{{- define "backend.ingress.annotations" -}}
+{{- define "app.ingress.annotations" -}}
 {{- $global := .Values.config.ingressAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.backend.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional -}}
+{{- $additional := .Values.app.ingress.additionalAnnotations | default dict | deepCopy }}
+{{- $annotations := mergeOverwrite $additional $global -}}
 {{- if $annotations -}}
 annotations:
   {{- toYaml $annotations | nindent 2 }}
@@ -208,48 +176,24 @@ annotations:
 {{- end }}
 
 {{/*
-Return annotations for ingress, combining global and per-service annotations for Web Client
+Return image repository with tag and image name for Studio App
 */}}
-{{- define "webclient.ingress.annotations" -}}
-{{- $global := .Values.config.ingressAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.webClient.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional -}}
-{{- if $annotations -}}
-annotations:
-  {{- toYaml $annotations | nindent 2 }}
-{{- end -}}
-{{- end }}
-
-{{/*
-Return image repository with tag and image name for Backend
-*/}}
-{{- define "studio.backend.image" -}}
+{{- define "studio.app.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.backend.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.app.image.name }}:{{ .Values.tag }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.backend.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.app.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
 
 {{/*
-Return image repository with tag and image name for Backend migration
+Return image repository with tag and image name for Studio App migration
 */}}
 {{- define "studio.migration.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.backend.migration.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.app.migration.image.name }}:{{ .Values.tag }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.backend.migration.image.name }}:{{ .Values.tag }}"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Return image repository with tag and image name for Web Client
-*/}}
-{{- define "studio.webClient.image" -}}
-{{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.webClient.image.name }}:{{ .Values.tag }}"
-{{- else -}}
-"{{ .Values.repository }}/{{ .Values.webClient.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.app.migration.image.name }}:{{ .Values.tag }}"
 {{- end -}}
 {{- end -}}
 
@@ -276,56 +220,29 @@ Return image repository with tag and image name for Keycloak
 {{- end -}}
 
 {{/*
-Backend pod scheduling configuration
+Studio App pod scheduling configuration
 */}}
-{{- define "studio.backend.scheduling" -}}
+{{- define "studio.app.scheduling" -}}
 {{- if .Values.config.nodeSelector }}
 nodeSelector:
   {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
-{{- else if .Values.backend.nodeSelector }}
+{{- else if .Values.app.nodeSelector }}
 nodeSelector:
-  {{- .Values.backend.nodeSelector | toYaml | nindent 2 }}
+  {{- .Values.app.nodeSelector | toYaml | nindent 2 }}
 {{- end }}
 {{- if .Values.config.affinity }}
 affinity:
   {{- .Values.config.affinity | toYaml | nindent 2 }}
-{{- else if .Values.backend.affinity }}
+{{- else if .Values.app.affinity }}
 affinity:
-  {{- .Values.backend.affinity | toYaml | nindent 2 }}
+  {{- .Values.app.affinity | toYaml | nindent 2 }}
 {{- end }}
 {{- if .Values.config.tolerations }}
 tolerations:
   {{- .Values.config.tolerations | toYaml | nindent 2 }}
-{{- else if .Values.backend.tolerations }}
+{{- else if .Values.app.tolerations }}
 tolerations:
-  {{- .Values.backend.tolerations | toYaml | nindent 2 }}
-{{- end }}
-{{- end }}
-
-{{/*
-Web Client pod scheduling configuration
-*/}}
-{{- define "studio.webClient.scheduling" -}}
-{{- if .Values.config.nodeSelector }}
-nodeSelector:
-  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
-{{- else if .Values.webClient.nodeSelector }}
-nodeSelector:
-  {{- .Values.webClient.nodeSelector | toYaml | nindent 2 }}
-{{- end }}
-{{- if .Values.config.affinity }}
-affinity:
-  {{- .Values.config.affinity | toYaml | nindent 2 }}
-{{- else if .Values.webClient.affinity }}
-affinity:
-  {{- .Values.webClient.affinity | toYaml | nindent 2 }}
-{{- end }}
-{{- if .Values.config.tolerations }}
-tolerations:
-  {{- .Values.config.tolerations | toYaml | nindent 2 }}
-{{- else if .Values.webClient.tolerations }}
-tolerations:
-  {{- .Values.webClient.tolerations | toYaml | nindent 2 }}
+  {{- .Values.app.tolerations | toYaml | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -384,29 +301,29 @@ tolerations:
 {{- end }}
 
 {{/*
-Backend migration pod scheduling configuration
+Studio App migration pod scheduling configuration
 */}}
-{{- define "studio.backend.migration.scheduling" -}}
+{{- define "studio.app.migration.scheduling" -}}
 {{- if .Values.config.nodeSelector }}
 nodeSelector:
   {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
-{{- else if .Values.backend.migration.nodeSelector }}
+{{- else if .Values.app.migration.nodeSelector }}
 nodeSelector:
-  {{- .Values.backend.migration.nodeSelector | toYaml | nindent 2 }}
+  {{- .Values.app.migration.nodeSelector | toYaml | nindent 2 }}
 {{- end }}
 {{- if .Values.config.affinity }}
 affinity:
   {{- .Values.config.affinity | toYaml | nindent 2 }}
-{{- else if .Values.backend.migration.affinity }}
+{{- else if .Values.app.migration.affinity }}
 affinity:
-  {{- .Values.backend.migration.affinity | toYaml | nindent 2 }}
+  {{- .Values.app.migration.affinity | toYaml | nindent 2 }}
 {{- end }}
 {{- if .Values.config.tolerations }}
 tolerations:
   {{- .Values.config.tolerations | toYaml | nindent 2 }}
-{{- else if .Values.backend.migration.tolerations }}
+{{- else if .Values.app.migration.tolerations }}
 tolerations:
-  {{- .Values.backend.migration.tolerations | toYaml | nindent 2 }}
+  {{- .Values.app.migration.tolerations | toYaml | nindent 2 }}
 {{- end }}
 {{- end }}
 
@@ -449,12 +366,65 @@ Model service URL for RASA_MODEL_SERVER_BASE_URL
 {{- end -}}
 
 {{/*
-Web client external URL for CORS_ORIGINS
+Validate event-ingestion topology configuration.
+*/}}
+{{- define "studio.eventIngestion.validate" -}}
+{{- if hasKey .Values.eventIngestion "enabled" -}}
+{{- fail "eventIngestion.enabled was removed; use eventIngestion.mode: colocated|separate|disabled" -}}
+{{- end -}}
+{{- $mode := .Values.eventIngestion.mode | default "colocated" -}}
+{{- if not (has $mode (list "colocated" "separate" "disabled")) -}}
+{{- fail (printf "eventIngestion.mode must be one of colocated|separate|disabled, got %q" $mode) -}}
+{{- end -}}
+{{- $colocated := eq $mode "colocated" -}}
+{{- $separate := eq $mode "separate" -}}
+{{- if and $colocated $separate -}}
+{{- fail "invalid eventIngestion.mode: colocated and separate cannot both be active" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Return the event-ingestion mode.
+*/}}
+{{- define "studio.eventIngestion.mode" -}}
+{{- .Values.eventIngestion.mode | default "colocated" -}}
+{{- end -}}
+
+{{/*
+Report whether event ingestion is co-located with the Studio App.
+*/}}
+{{- define "studio.eventIngestion.isColocated" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+{{- end -}}
+
+{{/*
+Report whether event ingestion runs in a separate deployment.
+*/}}
+{{- define "studio.eventIngestion.isSeparate" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "separate" -}}
+{{- end -}}
+
+{{/*
+Report whether event ingestion is disabled.
+*/}}
+{{- define "studio.eventIngestion.isDisabled" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+{{- end -}}
+
+{{/*
+Resolve the Studio App ingress host.
+*/}}
+{{- define "studio.appHost" -}}
+{{- if .Values.app.ingress.hostName -}}
+{{- .Values.app.ingress.hostName -}}
+{{- else -}}
+{{- .Values.config.ingressHost -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Studio App external URL for CORS_ORIGINS.
 */}}
 {{- define "studio.webClientUrl" -}}
-{{- if .Values.webClient.ingress.hostName -}}
-{{- printf "%s://%s" .Values.config.connectionType .Values.webClient.ingress.hostName -}}
-{{- else -}}
-{{- printf "%s://%s" .Values.config.connectionType .Values.config.ingressHost -}}
-{{- end -}}
+{{- printf "%s://%s" .Values.config.connectionType (include "studio.appHost" .) -}}
 {{- end -}}

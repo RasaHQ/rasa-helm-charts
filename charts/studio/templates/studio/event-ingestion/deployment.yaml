@@ -1,11 +1,12 @@
-{{- if .Values.eventIngestion.enabled }}
+{{- include "studio.eventIngestion.validate" . -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "separate" }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "studio.fullname" . }}-event-ingestion
+  name: {{ include "studio.fullname" . }}-app-ingestion
   labels:
     {{- include "studio.labels" . | nindent 4 -}}
-    app.kubernetes.io/component: studio-event-ingestion
+    app.kubernetes.io/component: studio-app-ingestion
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
     {{- end }}
@@ -17,7 +18,7 @@ spec:
   selector:
     matchLabels:
       {{- include "studio.selectorLabels" . | nindent 6 }}
-      app.kubernetes.io/component: studio-event-ingestion
+      app.kubernetes.io/component: studio-app-ingestion
   template:
     metadata:
       {{- with .Values.eventIngestion.podAnnotations }}
@@ -26,7 +27,7 @@ spec:
       {{- end }}
       labels:
         {{- include "studio.selectorLabels" . | nindent 8 }}
-        app.kubernetes.io/component: studio-event-ingestion
+        app.kubernetes.io/component: studio-app-ingestion
         {{- if .Values.podLabels }}
           {{ toYaml .Values.podLabels | nindent 8 }}
         {{- end }}
@@ -61,7 +62,9 @@ spec:
             {{- toYaml .Values.eventIngestion.volumeMounts | nindent 12 }}
           {{- end }}
           env:
-            {{- include "studio.backend.env" . | nindent 12 }}
+            {{- include "studio.app.env" . | nindent 12 }}
+            - name: STUDIO_ROLE
+              value: "ingestion"
             - name: KAFKA_CLIENT_ID
               {{- if .Values.eventIngestion.kafkaClientId }}
               value: {{ .Values.eventIngestion.kafkaClientId | quote }}

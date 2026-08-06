@@ -236,8 +236,8 @@
               "description": "Database name for Keycloak. Must be a plain string (used in JDBC URL construction).",
               "type": "string"
             },
-            "backendDatabaseName": {
-              "description": "Database name for Studio backend — plain string or secret reference",
+            "databaseName": {
+              "description": "Database name for Studio app — plain string or secret reference",
               "$ref": "#/definitions/secretRefOrString"
             },
             "queryParams": {
@@ -287,7 +287,7 @@
               "type": "string"
             },
             "clientId": {
-              "description": "Keycloak client ID for Studio backend",
+              "description": "Keycloak client ID for Studio app",
               "type": "string"
             },
             "apiClientId": {
@@ -318,17 +318,17 @@
         }
       }
     },
-    "backend": {
-      "description": "Studio Backend component configuration",
+    "app": {
+      "description": "Studio App component configuration",
       "type": "object",
       "properties": {
         "replicaCount": {
-          "description": "Number of backend replicas",
+          "description": "Number of app replicas",
           "type": "integer",
           "minimum": 1
         },
         "authSecret": {
-          "description": "Secret used by backend to sign sessions and tokens (min 32 chars) — secret reference. Required.",
+          "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
         },
         "image": {
@@ -361,47 +361,24 @@
       }
     },
     "webClient": {
-      "description": "Studio Web Client component configuration",
+      "description": "Studio web client runtime configuration",
       "type": "object",
       "properties": {
-        "replicaCount": {
-          "description": "Number of web client replicas",
-          "type": "integer",
-          "minimum": 1
-        },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
-        },
-        "ingress": {
-          "$ref": "#/definitions/ingressConfig"
-        },
-        "serviceAccount": {
-          "$ref": "#/definitions/serviceAccount"
-        },
-        "resources": {
-          "$ref": "#/definitions/resourceRequirements"
-        },
-        "nodeSelector": {
-          "type": "object"
-        },
-        "affinity": {
-          "type": "object"
-        },
-        "tolerations": {
-          "type": "array"
+        "environmentVariables": {
+          "type": "object",
+          "additionalProperties": true
         }
-      }
+      },
+      "additionalProperties": false
     },
     "eventIngestion": {
       "description": "Studio Event Ingestion component configuration",
       "type": "object",
       "properties": {
-        "enabled": {
-          "description": "Deploy the event ingestion component",
-          "type": "boolean"
+        "mode": {
+          "description": "Where to run event ingestion",
+          "type": "string",
+          "enum": ["colocated", "separate", "disabled"]
         },
         "replicaCount": {
           "description": "Number of event ingestion replicas",

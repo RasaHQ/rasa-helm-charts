@@ -1,4 +1,5 @@
-{{- if .Values.eventIngestion.autoscaling.enabled }}
+{{- include "studio.eventIngestion.validate" . -}}
+{{- if and (eq (include "studio.eventIngestion.mode" .) "separate") .Values.eventIngestion.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -9,7 +10,7 @@ spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "studio.fullname" . }}-event-ingestion
+    name: {{ include "studio.fullname" . }}-app-ingestion
   minReplicas: {{ .Values.eventIngestion.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.eventIngestion.autoscaling.maxReplicas }}
   metrics:

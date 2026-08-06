@@ -6,68 +6,35 @@ By installing and using this software, you agree to be bound by the terms and co
 
 ** Please be patient while the chart is being installed. **
 
-1. Access your Studio Backend installation:
+1. Access Studio:
 
-{{- if .Values.backend.ingress.enabled }}
-{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/api
-{{- else if contains "NodePort" .Values.backend.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if contains "LoadBalancer" .Values.backend.service.type }}
-
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.backend.service.port }}
-{{- else if contains "ClusterIP" .Values.backend.service.type }}
-
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:4000 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 4000:$CONTAINER_PORT
+{{- if .Values.app.ingress.enabled }}
+{{ .Values.config.connectionType }}://{{ .Values.app.ingress.hostName | default .Values.config.ingressHost }}
+{{- else }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "studio.fullname" . }}-app 4000:{{ .Values.app.service.port }}
+  echo "Visit http://127.0.0.1:4000 to use Studio"
 {{- end }}
 
-2. Access your Studio Web Client installation:
+2. Breaking changes in chart 3.0.0:
+   - Values key `backend` is now `app`.
+   - Resources `*-backend` are now `*-app`; the migration Job is `*-app-migration`;
+     and separate ingestion resources are `*-app-ingestion`.
+   - Studio uses the unified `studio` image. Chart 3.0.0 requires Studio >= 2.0.0;
+     use the documented tag placeholder until a promoted image tag is available.
 
-{{- if .Values.webClient.ingress.enabled }}
-http{{ if $.Values.webClient.ingress.tls }}s{{ end }}://{{ .Values.config.ingressHost }}
-{{- else if contains "NodePort" .Values.webClient.service.type }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if contains "LoadBalancer" .Values.webClient.service.type }}
+3. Event ingestion modes:
+   - `colocated` (default): runs inside the Studio app pod.
+   - `separate`: deploys a dedicated ingestion workload.
+   - `disabled`: does not run an ingestion consumer.
+   Do not run dual consumers; the chart fails validation when configuration would do so.
 
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.webClient.service.port }}
-{{- else if contains "ClusterIP" .Values.webClient.service.type }}
+4. Authentication:
+   - Better Auth is served by Studio at `/api/auth/*`.
+   - Keycloak remains temporarily available at `/auth` while `keycloak.enabled` is true.
 
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:80 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 80:$CONTAINER_PORT
-{{- end }}
+5. After upgrading, manually remove orphaned resources from the prior topology:
 
-3. Access your Studio Keycloak installation:
-
-{{- if and .Values.keycloak.enabled .Values.keycloak.ingress.enabled }}
-{{ .Values.config.connectionType }}://{{ .Values.config.ingressHost }}/auth
-{{- else if and .Values.keycloak.enabled (contains "NodePort" .Values.keycloak.service.type) }}
-  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "studio.fullname" . }})
-  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
-  echo http://$NODE_IP:$NODE_PORT
-{{- else if and .Values.keycloak.enabled (contains "LoadBalancer" .Values.keycloak.service.type) }}
-
-     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
-           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "studio.fullname" . }}'
-  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "studio.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.keycloak.service.port }}
-{{- else if and .Values.keycloak.enabled (contains "ClusterIP" .Values.keycloak.service.type) }}
-
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "studio.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
-  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
-  echo "Visit http://127.0.0.1:8080 to use your application"
-  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
-{{- end }}
+   kubectl delete deployment,svc,ingress,sa,hpa -l app.kubernetes.io/component=studio-backend -n <ns>
+   kubectl delete deployment,svc,ingress,sa -l app.kubernetes.io/component=studio-web-client -n <ns>
+   kubectl delete deployment,sa,hpa -l app.kubernetes.io/component=studio-event-ingestion -n <ns>
+   # also delete old jobs/sa named *-database-migration / *-db-migration if present

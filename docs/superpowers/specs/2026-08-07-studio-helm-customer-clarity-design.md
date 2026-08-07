@@ -1,7 +1,7 @@
 # Studio Helm Chart — Customer Clarity Fixes (3.0.0-rc)
 
 **Date:** 2026-08-07  
-**Status:** Amended (awaiting re-approval) — customer-clarity items 1, 2, 7, 8 + webClient naming  
+**Status:** Amended (awaiting re-approval) — customer-clarity items 1, 2, 7, 8 + webClient naming + mount path `spa` → `webclient`  
 **Scope:** `charts/studio` docs/values clarity + small template cleanups; implementation follows a separate plan  
 **Related:** `docs/superpowers/specs/2026-08-06-studio-helm-app-rename-design.md`
 
@@ -20,6 +20,7 @@ This doc locks the approved fixes so the implementation plan does not re-litigat
 
 - Make web client config obviously belong to the unified `app` component.
 - Prefer **webClient** / **web client** / **web-client** naming everywhere we control identifiers or prose — avoid "SPA" / "spa" in values, docs, comments, and chart-owned K8s names.
+- Align the ConfigMap mount path with the Studio image’s web client directory (`/usr/src/app/webclient`).
 - Remove dead app-container `MS_API_URL` default and stop documenting it as an app env override.
 - Clarify (docs/comments only) which `eventIngestion` keys apply in colocated vs separate mode.
 - Align `config.connectionType` values comment with README truth.
@@ -32,7 +33,6 @@ This doc locks the approved fixes so the implementation plan does not re-litigat
 - Restructuring `eventIngestion` values keys or nesting Kafka under a sub-object.
 - Implementing chart changes in this doc (plan + implement separately).
 - Changing `charts/rasa` or `charts/op-kits`.
-- Changing container filesystem paths that the Studio image hard-codes (see naming decision exception below).
 
 ## Locked decisions
 
@@ -43,11 +43,12 @@ This doc locks the approved fixes so the implementation plan does not re-litigat
 | Customer-facing docs / README / `# --` comments | "web client" (prose); values paths `app.webClient` |
 | Values key | `app.webClient` (camelCase; already the values key name) |
 | Chart-owned Helm/K8s identifiers we control | Prefer `web-client` style (e.g. volume/volumeMount name `spa-config` → `web-client-config`) |
-| Avoid | "SPA" / "spa" in prose, comments, and chart-owned resource/volume names |
+| Mount path (image-aligned) | `/usr/src/app/webclient/config.js` (was `/usr/src/app/spa/config.js`) |
+| Avoid | "SPA" / "spa" in prose, comments, chart-owned resource/volume names, and mount paths |
 
-**Exception (image-bound — do not rename):** The Studio unified container image expects the runtime config file at `/usr/src/app/spa/config.js`. That **mountPath stays unchanged** unless the Studio image is verified to support another path. The volume/volumeMount **name** is chart-owned and should become `web-client-config`; only the filesystem path under `/usr/src/app/spa/` is constrained by the image.
+**Mount path decision:** The Studio unified container image now serves the web client from `/usr/src/app/webclient` (runtime config at `/usr/src/app/webclient/config.js`). The chart must update `volumeMount.mountPath` from `/usr/src/app/spa/config.js` → `/usr/src/app/webclient/config.js`. The volume/volumeMount **name** is chart-owned and should become `web-client-config`. There is no remaining image-bound exception for the old `spa` filesystem path.
 
-Historical note: older chart/docs used "SPA" for the browser UI; that term is retired in this chart's docs and identifiers.
+Historical note: older chart/docs and the previous image layout used "SPA" / `/usr/src/app/spa/` for the browser UI; that term and path are retired for this chart.
 
 ### 1. Nest web client config: `webClient` → `app.webClient`
 
@@ -58,11 +59,11 @@ Historical note: older chart/docs used "SPA" for the browser UI; that term is re
 | Schema | root `webClient` property | nested under `app.properties.webClient` |
 | README / `# --` / upgrade notes | `webClient.environmentVariables` | `app.webClient.environmentVariables` |
 | Volume / volumeMount name (chart-owned) | `spa-config` | `web-client-config` |
-| Mount path (image-bound) | `/usr/src/app/spa/config.js` | **unchanged** |
+| Mount path (image-aligned) | `/usr/src/app/spa/config.js` | `/usr/src/app/webclient/config.js` |
 
-Rationale: there is no separate web-client workload; `config.js` is mounted on the app pod. Nesting under `app` matches the unified process and stops customers hunting for a removed component. Using webClient naming end-to-end avoids implying a separate SPA product surface.
+Rationale: there is no separate web-client workload; `config.js` is mounted on the app pod. Nesting under `app` matches the unified process and stops customers hunting for a removed component. Using webClient naming end-to-end (including the mount path under `/usr/src/app/webclient/`) avoids implying a separate SPA product surface.
 
-**Upgrade:** Hard-break — no Helm alias from top-level `webClient:` → `app.webClient:`. Document values translation in README upgrade notes (alongside existing `backend` → `app` migration). Renaming the volume name is internal to the chart (no customer values change).
+**Upgrade:** Hard-break — no Helm alias from top-level `webClient:` → `app.webClient:`. Document values translation in README upgrade notes (alongside existing `backend` → `app` migration). Renaming the volume name and updating the mount path are internal to the chart (no customer values change for the path).
 
 ### 2. Drop dead app-container `MS_API_URL`; keep web client `MS_API_URL`
 
@@ -108,10 +109,10 @@ Update the `values.yaml` `# --` comment (and schema description if still wrong) 
 
 | File | Change |
 | --- | --- |
-| `charts/studio/values.yaml` | Move `webClient:` under `app:`; replace SPA wording in `# --` with web client; document mount path constraint (`/usr/src/app/spa/config.js`) without calling the feature "SPA"; fix `connectionType` comment; remove app `MS_API_URL` docs; clarify eventIngestion applicability comments |
+| `charts/studio/values.yaml` | Move `webClient:` under `app:`; replace SPA wording in `# --` with web client; document mount path `/usr/src/app/webclient/config.js`; fix `connectionType` comment; remove app `MS_API_URL` docs; clarify eventIngestion applicability comments |
 | `charts/studio/values.schema.json` | Nest `webClient` under `app`; fix `connectionType` description |
 | `charts/studio/templates/studio/app/configmap.yaml` | `.Values.webClient.*` → `.Values.app.webClient.*` |
-| `charts/studio/templates/studio/app/deployment.yaml` | Drop `MS_API_URL` default dict merge; range `app.environmentVariables` only; rename volume/volumeMount `spa-config` → `web-client-config`; **keep** `mountPath: /usr/src/app/spa/config.js` |
+| `charts/studio/templates/studio/app/deployment.yaml` | Drop `MS_API_URL` default dict merge; range `app.environmentVariables` only; rename volume/volumeMount `spa-config` → `web-client-config`; set `mountPath: /usr/src/app/webclient/config.js` |
 | `charts/studio/README.md.gotmpl` | Nest examples; remove app `MS_API_URL` guidance; web client override under `app.webClient`; replace SPA prose with web client; eventIngestion applicability; upgrade note `webClient` → `app.webClient` |
 | `charts/studio/NOTES.txt` | Only if it mentions `webClient` / app `MS_API_URL` / SPA; touch only if needed for upgrade hints |
 | Helpers | No new helpers expected; existing `studio.modelServiceBaseUrl` / `studio.webClientUrl` stay (names are URL helpers, not values keys) |
@@ -145,7 +146,7 @@ Also remove any `app.environmentVariables.MS_API_URL` (or former `backend.enviro
 - Template sanity: with/without `app.webClient.environmentVariables.MS_API_URL`, confirm ConfigMap emits `window.MS_API_URL` (override vs `studio.modelServiceBaseUrl` default)
 - Confirm app Deployment env list has **no** default `MS_API_URL=http://rasapro`
 - Confirm templates only read `app.webClient` (top-level `webClient` has no effect); schema declares `webClient` under `app` only
-- Confirm volume/volumeMount name is `web-client-config` and mountPath remains `/usr/src/app/spa/config.js`
+- Confirm volume/volumeMount name is `web-client-config` and mountPath is `/usr/src/app/webclient/config.js`
 - Spot-check README/values comments: no customer-facing "SPA"/"spa" for this feature; connectionType and eventIngestion mode applicability correct
 
 ## Out-of-repo follow-up (document only)
@@ -154,9 +155,9 @@ Also remove any `app.environmentVariables.MS_API_URL` (or former `backend.enviro
 
 ## Success criteria
 
-- Implementers treat nesting + webClient naming cleanup + MS_API_URL cleanup + comment fixes as one small clarity PR (or plan tasks), without reopening scope.
+- Implementers treat nesting + webClient naming cleanup + mount path update + MS_API_URL cleanup + comment fixes as one small clarity PR (or plan tasks), without reopening scope.
 - Customer Helm values show web client config under `app.webClient` only.
-- Chart-owned identifiers and docs prefer webClient / web-client / "web client"; image mount path under `/usr/src/app/spa/` remains as required by the container.
+- Chart-owned identifiers and docs prefer webClient / web-client / "web client"; chart mounts config at `/usr/src/app/webclient/config.js`.
 - No documented path suggests setting `MS_API_URL` on the app container.
 - eventIngestion comment surface states colocated vs separate applicability without a values restructure.
 - `connectionType` values comment matches README: external scheme only.

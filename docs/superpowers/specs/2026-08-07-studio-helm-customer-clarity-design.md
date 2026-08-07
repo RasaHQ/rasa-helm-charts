@@ -1,7 +1,7 @@
 # Studio Helm Chart — Customer Clarity Fixes (3.0.0-rc)
 
 **Date:** 2026-08-07  
-**Status:** Amended (awaiting re-approval) — customer-clarity items 1, 2, 7, 8 + webClient naming + mount path `spa` → `webclient`  
+**Status:** Approved — customer-clarity items 1, 2, 7, 8 + webClient naming + mount path `spa` → `webclient`  
 **Scope:** `charts/studio` docs/values clarity + small template cleanups; implementation follows a separate plan  
 **Related:** `docs/superpowers/specs/2026-08-06-studio-helm-app-rename-design.md`
 

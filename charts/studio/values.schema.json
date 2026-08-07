@@ -207,7 +207,7 @@
           "type": "string"
         },
         "connectionType": {
-          "description": "URL scheme for internal service-to-service communication",
+          "description": "URL scheme (http or https) for externally derived URLs; does not change in-cluster service-to-service calls",
           "type": "string",
           "enum": ["http", "https"]
         },
@@ -357,19 +357,19 @@
         },
         "tolerations": {
           "type": "array"
+        },
+        "webClient": {
+          "description": "Browser runtime configuration for the unified Studio app (config.js mounted on the app pod)",
+          "type": "object",
+          "properties": {
+            "environmentVariables": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": false
         }
       }
-    },
-    "webClient": {
-      "description": "Studio web client runtime configuration",
-      "type": "object",
-      "properties": {
-        "environmentVariables": {
-          "type": "object",
-          "additionalProperties": true
-        }
-      },
-      "additionalProperties": false
     },
     "eventIngestion": {
       "description": "Studio Event Ingestion component configuration",

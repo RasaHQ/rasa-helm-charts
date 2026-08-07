@@ -106,9 +106,7 @@ spec:
               {{- end }}
             {{- end }}
             {{- end }}
-            {{- $defaults := dict "MS_API_URL" (dict "value" "http://rasapro") }}
-            {{- $env := mergeOverwrite $defaults .Values.app.environmentVariables }}
-            {{- range $key, $value := $env }}
+            {{- range $key, $value := .Values.app.environmentVariables }}
             - name: {{ $key | upper }}
               {{- if $value.value }}
               value: {{ $value.value | quote }}
@@ -120,8 +118,8 @@ spec:
               {{- end }}
             {{- end }}
           volumeMounts:
-            - name: spa-config
-              mountPath: /usr/src/app/spa/config.js
+            - name: web-client-config
+              mountPath: /usr/src/app/webclient/config.js
               subPath: config.js
               readOnly: true
           {{- if eq $mode "colocated" }}
@@ -142,7 +140,7 @@ spec:
       {{- end }}
       {{- include "studio.app.scheduling" . | nindent 6 }}
       volumes:
-        - name: spa-config
+        - name: web-client-config
           configMap:
             name: studio-web-client-configmap
             items:

@@ -2,15 +2,15 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.13](https://img.shields.io/badge/Version-3.0.0--rc.13-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.14](https://img.shields.io/badge/Version-3.0.0--rc.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
-The Studio chart deploys a unified Studio image. The app serves both the API and SPA; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+The Studio chart deploys a unified Studio image. The app serves both the API and the web client; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
-| **app** | Studio API server and SPA — handles business logic and data persistence | `/api` and `/` | always on |
+| **app** | Studio API server and web client — handles business logic and data persistence | `/api` and `/` | always on |
 | **keycloak** | Temporary legacy identity provider, retained while migrating existing users to Better Auth | `/auth` | `keycloak.enabled` (default: `true`) |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.13
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.14
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.13
+$ helm install my-release rasa/studio --version 3.0.0-rc.14
 ```
 
 ## Quick Start
@@ -140,13 +140,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.13
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.14
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.13
+$ helm pull rasa/studio --version 3.0.0-rc.14
 ```
 
 ## General Configuration
@@ -257,21 +257,13 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
-When `rasa.enabled: false`, point Studio App at your own Rasa Pro instance:
+When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
 app:
-  environmentVariables:
-    MS_API_URL:
-      value: "http://your-rasa-pro-service"
-```
-
-Override the web client model service URL when using an external instance or a custom ingress host:
-
-```yaml
-webClient:
-  environmentVariables:
-    MS_API_URL: "https://studio.example.com"
+  webClient:
+    environmentVariables:
+      MS_API_URL: "https://studio.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -329,7 +321,7 @@ app:
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
 
 - app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
-- the app-served SPA's `API_ENDPOINT`
+- the app-served web client's `API_ENDPOINT`
 - the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
 - `CORS_ORIGINS`
 
@@ -391,6 +383,14 @@ eventIngestion:
 
 Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
 
+**Which keys apply when:**
+
+| Applies when | Keys |
+| --- | --- |
+| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.environmentVariables` |
+| Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
+
 ## Network Policies
 
 The chart ships a default-deny network policy model. Enable it to restrict pod-to-pod traffic:
@@ -444,7 +444,20 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure SPA runtime values under `webClient.environmentVariables`.
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.environmentVariables` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.environmentVariables` — only `app.webClient.environmentVariables.MS_API_URL` affects `window.MS_API_URL`.
+
+```yaml
+# Before
+webClient:
+  environmentVariables:
+    MS_API_URL: "https://studio.example.com"
+
+# After
+app:
+  webClient:
+    environmentVariables:
+      MS_API_URL: "https://studio.example.com"
+```
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 
@@ -468,7 +481,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
 | app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
 | app.image | object | app.image defines the container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
-| app.image.name | string | app.image.name is the unified Studio container image (API + SPA + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
+| app.image.name | string | app.image.name is the unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | app.image.pullPolicy is the container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
 | app.ingress | object | app.ingress defines how the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
 | app.ingress.additionalAnnotations | object | app.ingress.additionalAnnotations defines additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
@@ -538,8 +551,10 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.serviceAccount.create | bool | app.serviceAccount.create determines whether to create a new service account. | `false` |
 | app.serviceAccount.name | string | app.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
 | app.tolerations | list | app.tolerations defines tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
+| app.webClient | object | app.webClient holds browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"environmentVariables":{}}` |
+| app.webClient.environmentVariables | object | app.webClient.environmentVariables feeds the web-client config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Values are not secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. Breaking: nest under app.webClient (was top-level webClient). Web-client Deployment removed in chart 3.0.0. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
-| config.connectionType | string | Define if you will be using https or http with the ingressHost. Valid values are "http" or "https". This setting affects how services communicate with each other. | `"http"` |
+| config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
@@ -572,13 +587,13 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | dnsConfig | object | dnsConfig specifies Pod's DNS config # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
 | dnsPolicy | string | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy | `""` |
 | eventIngestion.additionalContainers | list | eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
-| eventIngestion.affinity | object | eventIngestion.affinity defines affinity rules for the event ingestion pods. | `{}` |
+| eventIngestion.affinity | object | eventIngestion.affinity defines affinity rules for the event ingestion pods. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.annotations | object | eventIngestion.annotations defines annotations to add to all Studio Event Ingestion resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| eventIngestion.autoscaling | object | eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration. | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
-| eventIngestion.autoscaling.enabled | bool | eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling. | `false` |
-| eventIngestion.autoscaling.maxReplicas | int | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
-| eventIngestion.autoscaling.minReplicas | int | eventIngestion.autoscaling.minReplicas is the minimum number of replicas. | `1` |
-| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. | `80` |
+| eventIngestion.autoscaling | object | eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration. Applies only when eventIngestion.mode is separate. | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
+| eventIngestion.autoscaling.enabled | bool | eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling. Applies only when eventIngestion.mode is separate. | `false` |
+| eventIngestion.autoscaling.maxReplicas | int | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. Applies only when eventIngestion.mode is separate. | `100` |
+| eventIngestion.autoscaling.minReplicas | int | eventIngestion.autoscaling.minReplicas is the minimum number of replicas. Applies only when eventIngestion.mode is separate. | `1` |
+| eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. Applies only when eventIngestion.mode is separate. | `80` |
 | eventIngestion.envFrom | list | eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
 | eventIngestion.environmentVariables | object | eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` |
 | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker. | `{"value":""}` |
@@ -595,27 +610,27 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME | object | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication. | `{"value":""}` |
 | eventIngestion.environmentVariables.KAFKA_TOPIC | object | eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events. | `{"value":"rasa-events"}` |
 | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates. | `{"value":""}` |
-| eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
-| eventIngestion.image.name | string | eventIngestion.image.name is the unified studio image for the separate ingestion Deployment. | `"studio"` |
-| eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
-| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics. | `"colocated"` |
-| eventIngestion.nodeSelector | object | eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on. | `{}` |
+| eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
+| eventIngestion.image.name | string | eventIngestion.image.name is the unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
+| eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
+| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.environmentVariables   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
+| eventIngestion.nodeSelector | object | eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | eventIngestion.podAnnotations defines annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | eventIngestion.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |
 | eventIngestion.podSecurityContext.enabled | bool | eventIngestion.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
-| eventIngestion.replicaCount | int | eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment. | `1` |
-| eventIngestion.resources | object | eventIngestion.resources defines the resource limits and requests for the event ingestion service. | `{}` |
+| eventIngestion.replicaCount | int | eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment. Applies only when eventIngestion.mode is separate. | `1` |
+| eventIngestion.resources | object | eventIngestion.resources defines the resource limits and requests for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.securityContext | object | eventIngestion.securityContext defines the security settings for the event ingestion container. | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
 | eventIngestion.securityContext.allowPrivilegeEscalation | bool | eventIngestion.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
 | eventIngestion.securityContext.capabilities | object | eventIngestion.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
 | eventIngestion.securityContext.capabilities.drop | list | eventIngestion.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
 | eventIngestion.securityContext.enabled | bool | eventIngestion.securityContext.enabled determines whether to enable the security context. | `true` |
 | eventIngestion.securityContext.runAsNonRoot | bool | eventIngestion.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
-| eventIngestion.serviceAccount | object | eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod. | `{"annotations":{},"create":false,"name":""}` |
-| eventIngestion.serviceAccount.annotations | object | eventIngestion.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
-| eventIngestion.serviceAccount.create | bool | eventIngestion.serviceAccount.create determines whether to create a new service account. | `false` |
-| eventIngestion.serviceAccount.name | string | eventIngestion.serviceAccount.name is the name of the service account to use. | `""` |
-| eventIngestion.tolerations | list | eventIngestion.tolerations defines tolerations for the event ingestion pods. | `[]` |
+| eventIngestion.serviceAccount | object | eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod. Applies only when eventIngestion.mode is separate. | `{"annotations":{},"create":false,"name":""}` |
+| eventIngestion.serviceAccount.annotations | object | eventIngestion.serviceAccount.annotations defines annotations to add to the service account. Applies only when eventIngestion.mode is separate. | `{}` |
+| eventIngestion.serviceAccount.create | bool | eventIngestion.serviceAccount.create determines whether to create a new service account. Applies only when eventIngestion.mode is separate. | `false` |
+| eventIngestion.serviceAccount.name | string | eventIngestion.serviceAccount.name is the name of the service account to use. Applies only when eventIngestion.mode is separate. | `""` |
+| eventIngestion.tolerations | list | eventIngestion.tolerations defines tolerations for the event ingestion pods. Applies only when eventIngestion.mode is separate. | `[]` |
 | eventIngestion.volumeMounts | list | eventIngestion.volumeMounts defines where to mount the volumes in the Event Ingestion container. Example: - name: config-volume   mountPath: /etc/config   readOnly: true | `[]` |
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
@@ -742,4 +757,3 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasaProServices.enabled | bool |  | `false` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
 | tag | string | tag specifies image tag for Studio (unified studio image; Studio ≥ 2.0.0). Placeholder until the first published unified tag is confirmed for promotion. | `"2.0.0-latest"` |
-| webClient.environmentVariables | object | webClient.environmentVariables feeds the SPA config.js ConfigMap mounted at /usr/src/app/spa/config.js on the app pod. Values are not secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL, CURRENT_VERSION_NUMBER, etc. Breaking: web-client Deployment/Service/Ingress/image removed in chart 3.0.0. | `{}` |

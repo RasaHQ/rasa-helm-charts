@@ -5,11 +5,11 @@
 
 ## Architecture
 
-The Studio chart deploys a unified Studio image. The app serves both the API and SPA; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+The Studio chart deploys a unified Studio image. The app serves both the API and the web client; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
-| **app** | Studio API server and SPA — handles business logic and data persistence | `/api` and `/` | always on |
+| **app** | Studio API server and web client — handles business logic and data persistence | `/api` and `/` | always on |
 | **keycloak** | Temporary legacy identity provider, retained while migrating existing users to Better Auth | `/auth` | `keycloak.enabled` (default: `true`) |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
@@ -256,21 +256,13 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
-When `rasa.enabled: false`, point Studio App at your own Rasa Pro instance:
+When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
 app:
-  environmentVariables:
-    MS_API_URL:
-      value: "http://your-rasa-pro-service"
-```
-
-Override the web client model service URL when using an external instance or a custom ingress host:
-
-```yaml
-webClient:
-  environmentVariables:
-    MS_API_URL: "https://studio.example.com"
+  webClient:
+    environmentVariables:
+      MS_API_URL: "https://studio.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -328,7 +320,7 @@ app:
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
 
 - app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
-- the app-served SPA's `API_ENDPOINT`
+- the app-served web client's `API_ENDPOINT`
 - the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
 - `CORS_ORIGINS`
 
@@ -390,6 +382,14 @@ eventIngestion:
 
 Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
 
+**Which keys apply when:**
+
+| Applies when | Keys |
+| --- | --- |
+| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.environmentVariables` |
+| Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
+
 ## Network Policies
 
 The chart ships a default-deny network policy model. Enable it to restrict pod-to-pod traffic:
@@ -443,7 +443,20 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure SPA runtime values under `webClient.environmentVariables`.
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.environmentVariables` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.environmentVariables` — only `app.webClient.environmentVariables.MS_API_URL` affects `window.MS_API_URL`.
+
+```yaml
+# Before
+webClient:
+  environmentVariables:
+    MS_API_URL: "https://studio.example.com"
+
+# After
+app:
+  webClient:
+    environmentVariables:
+      MS_API_URL: "https://studio.example.com"
+```
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 

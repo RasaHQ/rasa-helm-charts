@@ -17,6 +17,9 @@ By installing and using this software, you agree to be bound by the terms and co
 
 2. Breaking changes in chart 3.0.0:
    - Values key `backend` is now `app`.
+   - Values key `webClient` is now nested under `app.webClient`.
+   - Do not set app container env `MS_API_URL`; use `app.webClient.environmentVariables.MS_API_URL`
+     for the browser model-service URL (`window.MS_API_URL`).
    - Resources `*-backend` are now `*-app`; the migration Job is `*-app-migration`;
      and separate ingestion resources are `*-app-ingestion`.
    - Studio uses the unified `studio` image. Chart 3.0.0 requires Studio >= 2.0.0;

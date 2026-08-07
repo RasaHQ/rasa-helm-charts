@@ -37,8 +37,10 @@ config:
   # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
   ingressClassName: ""
 
-  # -- Define if you will be using https or http with the ingressHost.
-  # Valid values are "http" or "https". This setting affects how services communicate with each other.
+  # -- Define the URL scheme (`http` or `https`) for externally derived URLs
+  # (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service
+  # public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https".
+  # Does not change in-cluster http:// service-to-service calls.
   connectionType: "http"
 
   # -- The postgres database instance details for Studio to connect to.
@@ -187,7 +189,7 @@ app:
   # This section defines the container image settings for the app service.
   # Ref: https://kubernetes.io/docs/concepts/containers/images/
   image:
-    # -- app.image.name is the unified Studio container image (API + SPA + optional co-located ingestion).
+    # -- app.image.name is the unified Studio container image (API + web client + optional co-located ingestion).
     # Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend.
     name: "studio"
     # -- app.image.pullPolicy is the container image pull policy.
@@ -223,10 +225,8 @@ app:
   # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
   # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
   environmentVariables:
-    # -- app.environmentVariables.MS_API_URL is the base URL for Rasa Pro (overrides default). Default is a service name of the Rasa Pro deployment defined as a dependency in the Chart.yaml file.
-    # If you want to change the default, you need to make sure it is a valid URL and that the Rasa Pro deployment is running and accessible.
-    # MS_API_URL:
-    #   value: "http://rasapro"
+    # NOTE: Do not set MS_API_URL here — the Studio API process does not read it.
+    # Override the browser model-service URL via app.webClient.environmentVariables.MS_API_URL.
     # -- app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
     # Conversations older than this value will be deleted by the cleanup cron job.
     # Leave empty to disable automatic conversation cleanup.
@@ -530,13 +530,14 @@ app:
   # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
-# Studio SPA runtime config (no separate Deployment — unified app serves the UI).
-webClient:
-  # -- webClient.environmentVariables feeds the SPA config.js ConfigMap mounted at
-  # /usr/src/app/spa/config.js on the app pod. Values are not secrets (ConfigMap only).
-  # Used for feature flags (FEATURE_FLAG_*), MS_API_URL, CURRENT_VERSION_NUMBER, etc.
-  # Breaking: web-client Deployment/Service/Ingress/image removed in chart 3.0.0.
-  environmentVariables: {}
+  # -- app.webClient holds browser runtime config for the unified app (no separate web-client Deployment).
+  # config.js is mounted into the app pod at /usr/src/app/webclient/config.js.
+  webClient:
+    # -- app.webClient.environmentVariables feeds the web-client config.js ConfigMap mounted at
+    # /usr/src/app/webclient/config.js on the app pod. Values are not secrets (ConfigMap only).
+    # Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc.
+    # Breaking: nest under app.webClient (was top-level webClient). Web-client Deployment removed in chart 3.0.0.
+    environmentVariables: {}
 
 # Studio Event Ingestion component specific configuration
 eventIngestion:
@@ -545,8 +546,17 @@ eventIngestion:
   # separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false.
   # disabled: neither co-located nor separate consumers.
   # Breaking: replaces eventIngestion.enabled. Do not set both semantics.
+  #
+  # Applicability:
+  # - Both colocated and separate: Kafka-related keys under eventIngestion.environmentVariables
+  #   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment).
+  # - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,
+  #   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment.
+  # - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when
+  #   colocated, and to the sibling Deployment when separate.
   mode: colocated
   # -- eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment.
+  # Applies only when eventIngestion.mode is separate.
   replicaCount: 1
 
   # -- eventIngestion.annotations defines annotations to add to all Studio Event Ingestion resources.
@@ -557,10 +567,13 @@ eventIngestion:
   annotations: {}
 
   # -- eventIngestion.image defines the container image settings for the event ingestion service.
+  # Applies only when eventIngestion.mode is separate.
   image:
     # -- eventIngestion.image.name is the unified studio image for the separate ingestion Deployment.
+    # Applies only when eventIngestion.mode is separate.
     name: "studio"
     # -- eventIngestion.image.pullPolicy is the container image pull policy.
+    # Applies only when eventIngestion.mode is separate.
     pullPolicy: IfNotPresent
 
   # -- eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment.
@@ -648,12 +661,16 @@ eventIngestion:
   volumeMounts: []
 
   # -- eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod.
+  # Applies only when eventIngestion.mode is separate.
   serviceAccount:
     # -- eventIngestion.serviceAccount.create determines whether to create a new service account.
+    # Applies only when eventIngestion.mode is separate.
     create: false
     # -- eventIngestion.serviceAccount.annotations defines annotations to add to the service account.
+    # Applies only when eventIngestion.mode is separate.
     annotations: {}
     # -- eventIngestion.serviceAccount.name is the name of the service account to use.
+    # Applies only when eventIngestion.mode is separate.
     name: ""
 
   # -- eventIngestion.podAnnotations defines annotations to add to the event ingestion pod.
@@ -694,6 +711,7 @@ eventIngestion:
     #   type: RuntimeDefault
 
   # -- eventIngestion.resources defines the resource limits and requests for the event ingestion service.
+  # Applies only when eventIngestion.mode is separate.
   resources: {}
     # Example configuration:
     # limits:
@@ -704,25 +722,34 @@ eventIngestion:
     #   memory: 128Mi
 
   # -- eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration.
+  # Applies only when eventIngestion.mode is separate.
   autoscaling:
     # -- eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling.
+    # Applies only when eventIngestion.mode is separate.
     enabled: false
     # -- eventIngestion.autoscaling.minReplicas is the minimum number of replicas.
+    # Applies only when eventIngestion.mode is separate.
     minReplicas: 1
     # -- eventIngestion.autoscaling.maxReplicas is the maximum number of replicas.
+    # Applies only when eventIngestion.mode is separate.
     maxReplicas: 100
     # -- eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage.
+    # Applies only when eventIngestion.mode is separate.
     targetCPUUtilizationPercentage: 80
     # -- eventIngestion.autoscaling.targetMemoryUtilizationPercentage is the target memory utilization percentage.
+    # Applies only when eventIngestion.mode is separate.
     # targetMemoryUtilizationPercentage: 80
 
   # -- eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on.
+  # Applies only when eventIngestion.mode is separate.
   nodeSelector: {}
 
   # -- eventIngestion.tolerations defines tolerations for the event ingestion pods.
+  # Applies only when eventIngestion.mode is separate.
   tolerations: []
 
   # -- eventIngestion.affinity defines affinity rules for the event ingestion pods.
+  # Applies only when eventIngestion.mode is separate.
   affinity: {}
 
 # Studio Keycloak component specific configuration

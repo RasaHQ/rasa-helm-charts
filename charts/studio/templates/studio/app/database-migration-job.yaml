@@ -62,21 +62,7 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          {{- if not .Values.keycloak.enabled }}
-          - name: SKIP_KEYCLOAK
-            value: "true"
-          {{- end }}
-          {{- range $key, $value := .Values.app.migration.environmentVariables }}
-          {{- if not (and (eq $key "SKIP_KEYCLOAK") (not $.Values.keycloak.enabled)) }}
-          - name: {{ $key | upper }}
-            {{- if $value.value }}
-            value: {{ $value.value | quote }}
-            {{- else if $value.secret }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.secret.name }}
-                key: {{ $value.secret.key }}
-            {{- end }}
-          {{- end }}
+          {{- with .Values.app.migration.env }}
+          {{- toYaml . | nindent 10 }}
           {{- end }}
 {{- end }}

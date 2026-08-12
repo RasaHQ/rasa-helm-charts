@@ -416,22 +416,19 @@ app:
     # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
     podAnnotations: {}
 
-    # -- app.migration.environmentVariables defines the environment variables for the migration job.
-    # Example: Specify the string value for variables
-    #   value: my-value
-    # Example: Specify the value for variables sourced from a Secret.
-    #   secret:
-    #     name: my-secret
-    #     key: my-secret-key
-    # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-    environmentVariables:
-      # -- app.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation.
-      # Set to "true" if you have already created the Keycloak database manually.
-      SKIP_KEYCLOAK:
+    # -- app.migration.env defines extra environment variables for the migration
+    # job container, in native Kubernetes EnvVar format (name + value or valueFrom).
+    # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does
+    # not merge lists) — copy the default entries you want to keep.
+    env:
+      # SKIP_KEYCLOAK: set "true" to skip Keycloak database creation. Required
+      # when keycloak.enabled is false, or when you created the Keycloak database
+      # manually. The chart no longer sets this automatically.
+      - name: SKIP_KEYCLOAK
         value: "false"
-      # -- app.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database.
-      # if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database.
-      KC_DEFAULT_DATABASE_CONNECTION_NAME:
+      # KC_DEFAULT_DATABASE_CONNECTION_NAME: database the client connects to when
+      # creating the Keycloak database (change if your server has no `postgres` db).
+      - name: KC_DEFAULT_DATABASE_CONNECTION_NAME
         value: "postgres"
 
     # -- app.migration.nodeSelector defines which nodes the migration job can run on.

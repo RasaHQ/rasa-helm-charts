@@ -362,7 +362,7 @@
           "description": "Browser runtime configuration for the unified Studio app (config.js mounted on the app pod)",
           "type": "object",
           "properties": {
-            "environmentVariables": {
+            "config": {
               "type": "object",
               "additionalProperties": true
             }

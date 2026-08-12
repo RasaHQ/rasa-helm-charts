@@ -527,11 +527,13 @@ app:
   # -- app.webClient holds browser runtime config for the unified app (no separate web-client Deployment).
   # config.js is mounted into the app pod at /usr/src/app/webclient/config.js.
   webClient:
-    # -- app.webClient.environmentVariables feeds the web-client config.js ConfigMap mounted at
-    # /usr/src/app/webclient/config.js on the app pod. Values are not secrets (ConfigMap only).
-    # Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc.
-    # Breaking: nest under app.webClient (was top-level webClient). Web-client Deployment removed in chart 3.0.0.
-    environmentVariables: {}
+    # -- app.webClient.config feeds browser window.* globals rendered into the
+    # config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app
+    # pod. Plain scalar map (KEY: "value") — these are NOT container environment
+    # variables and cannot reference secrets (ConfigMap only).
+    # Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL),
+    # CURRENT_VERSION_NUMBER, VOICE_INSPECTOR_ENABLED, etc.
+    config: {}
 
 # Studio Event Ingestion component specific configuration
 eventIngestion:

@@ -735,4 +735,4 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasa.strategy.type | string |  | `"Recreate"` |
 | rasa.rasaProServices.enabled | bool |  | `false` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
-| tag | string | tag specifies image tag for Studio (unified studio image; Studio ≥ 2.0.0). Placeholder until the first published unified tag is confirmed for promotion. | `"2.0.0-latest"` |
+| tag | string | tag overrides the image tag for all Studio images (unified studio image; Studio ≥ 2.0.0). Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. | `""` |

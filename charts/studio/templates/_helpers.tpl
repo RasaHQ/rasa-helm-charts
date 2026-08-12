@@ -180,9 +180,9 @@ Return image repository with tag and image name for Studio App
 */}}
 {{- define "studio.app.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.app.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.app.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.app.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.app.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- end -}}
 {{- end -}}
 
@@ -191,9 +191,9 @@ Return image repository with tag and image name for Studio App migration
 */}}
 {{- define "studio.migration.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.app.migration.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.app.migration.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.app.migration.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.app.migration.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- end -}}
 {{- end -}}
 
@@ -202,9 +202,9 @@ Return image repository with tag and image name for Event Ingestion
 */}}
 {{- define "studio.eventIngestion.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.eventIngestion.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.eventIngestion.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.eventIngestion.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.eventIngestion.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- end -}}
 {{- end -}}
 
@@ -213,9 +213,9 @@ Return image repository with tag and image name for Keycloak
 */}}
 {{- define "studio.keycloak.image" -}}
 {{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- else -}}
-"{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag }}"
+"{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
 {{- end -}}
 {{- end -}}
 

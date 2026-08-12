@@ -788,28 +788,22 @@ keycloak:
   #     secretName: "studio-secrets"
   #     secretKey: "KEYCLOAK_DATABASE_PASSWORD"
 
-  # -- keycloak.environmentVariables defines the environment variables for the Keycloak deployment.
-  # Example: Specify the string value for variables
-  #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  environmentVariables:
-    # -- keycloak.environmentVariables.KC_HTTP_ENABLED determines the proxy configuration for Keycloak.
-    # Set to "true" to enable HTTP communication between proxy/load balancer and Keycloak.
-    # Useful for secure internal networks where the reverse proxy maintains HTTPS with clients.
-    KC_HTTP_ENABLED:
+  # -- keycloak.env defines extra environment variables for the Keycloak
+  # container, in native Kubernetes EnvVar format (name + value or valueFrom).
+  # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does
+  # not merge lists) — copy the default entries you want to keep.
+  env:
+    # KC_HTTP_ENABLED: enable HTTP between proxy/load balancer and Keycloak.
+    # Useful for secure internal networks where the reverse proxy terminates HTTPS.
+    - name: KC_HTTP_ENABLED
       value: "true"
-    # -- keycloak.environmentVariables.KC_PROXY_HEADERS determines the proxy headers for Keycloak.
-    # Set to "xforwarded" to enable parsing of non-standard X-Forwarded-* headers, such as X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Forwarded-Port.
+    # KC_PROXY_HEADERS: "xforwarded" parses X-Forwarded-* headers.
     # https://www.keycloak.org/server/reverseproxy
-    KC_PROXY_HEADERS:
+    - name: KC_PROXY_HEADERS
       value: "xforwarded"
-    # -- legacy keycloak value to enable HTTP communication between proxy/loadbalancer and Keycloak.
-    # This is deprecated (replaced by KC_HTTP_ENABLED) and will be removed in future releases.
-    KC_PROXY:
+    # KC_PROXY: legacy proxy setting, deprecated (replaced by KC_HTTP_ENABLED);
+    # will be removed in a future release.
+    - name: KC_PROXY
       value: "edge"
 
   # -- keycloak.envFrom defines additional environment variables from ConfigMap or Secret.

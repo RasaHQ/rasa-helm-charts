@@ -1,4 +1,3 @@
-{{- include "studio.env.validateLegacy" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
 {{- $mode := include "studio.eventIngestion.mode" . -}}
 apiVersion: apps/v1

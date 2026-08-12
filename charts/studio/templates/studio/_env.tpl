@@ -138,24 +138,3 @@ Studio App Database Environment Variables
 {{- end }}
 {{- end }}
 {{- end -}}
-
-{{/*
-Fail fast when legacy map-style env values (chart < 3.0.0 shape) are present.
-*/}}
-{{- define "studio.env.validateLegacy" -}}
-{{- if hasKey .Values.app "environmentVariables" -}}
-{{- fail "app.environmentVariables was removed in chart 3.0.0; define native env entries under app.env (list of {name, value|valueFrom})" -}}
-{{- end -}}
-{{- if hasKey .Values.app.migration "environmentVariables" -}}
-{{- fail "app.migration.environmentVariables was removed in chart 3.0.0; define native env entries under app.migration.env (list of {name, value|valueFrom})" -}}
-{{- end -}}
-{{- if hasKey .Values.eventIngestion "environmentVariables" -}}
-{{- fail "eventIngestion.environmentVariables was removed in chart 3.0.0; define native env entries under eventIngestion.env (list of {name, value|valueFrom})" -}}
-{{- end -}}
-{{- if hasKey .Values.keycloak "environmentVariables" -}}
-{{- fail "keycloak.environmentVariables was removed in chart 3.0.0; define native env entries under keycloak.env (list of {name, value|valueFrom})" -}}
-{{- end -}}
-{{- if hasKey .Values.app.webClient "environmentVariables" -}}
-{{- fail "app.webClient.environmentVariables was renamed in chart 3.0.0; set browser window.* values under app.webClient.config (plain KEY: value map)" -}}
-{{- end -}}
-{{- end -}}

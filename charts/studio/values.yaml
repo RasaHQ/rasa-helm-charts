@@ -392,6 +392,12 @@ app:
     # -- app.migration.enabled determines whether to enable the database migration job.
     # Set to false if you want to handle migrations manually.
     enabled: true
+    # -- app.migration.backoffLimit is the number of retries before the migration
+    # Job is marked failed.
+    backoffLimit: 3
+    # -- app.migration.activeDeadlineSeconds is the hard wall-clock bound for the
+    # migration Job; size it to your worst-case migration duration.
+    activeDeadlineSeconds: 900
     # -- app.migration.image defines the image configuration for the migration job.
     image:
       # -- app.migration.image.name uses the same unified studio image with STUDIO_ROLE=migration.

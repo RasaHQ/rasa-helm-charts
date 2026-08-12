@@ -213,32 +213,29 @@ app:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 
-  # -- app.environmentVariables defines the environment variables for the Studio App deployment.
-  # These variables configure the runtime behavior of the app service.
-  # Each variable can be set either directly with a value or from a Kubernetes secret.
-  # Example: Specify the string value for variables
-  #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  # Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/
-  environmentVariables:
-    # NOTE: Do not set MS_API_URL here — the Studio API process does not read it.
-    # Override the browser model-service URL via app.webClient.environmentVariables.MS_API_URL.
-    # -- app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours.
-    # Conversations older than this value will be deleted by the cleanup cron job.
-    # Leave empty to disable automatic conversation cleanup.
-    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/
-    DELETE_CONVERSATIONS_OLDER_THAN_HOURS:
-      value: ""
-    # -- app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job.
-    # Format: "minute hour day-of-month month day-of-week"
-    # Example: "0 * * * *" runs every hour
-    # Default: Runs every hour at minute 0
-    # Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax
-    DELETE_CONVERSATIONS_CRON_EXPRESSION:
+  # -- app.env defines extra environment variables for the Studio App container,
+  # in native Kubernetes EnvVar format (name + value or valueFrom).
+  # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not
+  # merge lists) — copy the default entries you want to keep.
+  # NOTE: Do not set MS_API_URL here — the Studio API process does not read it.
+  # Override the browser model-service URL via app.webClient.config.MS_API_URL.
+  # Example:
+  #   - name: MY_VAR
+  #     value: "my-value"
+  #   - name: MY_SECRET_VAR
+  #     valueFrom:
+  #       secretKeyRef:
+  #         name: my-secret
+  #         key: MY_SECRET_KEY
+  env:
+    # DELETE_CONVERSATIONS_OLDER_THAN_HOURS: conversation data retention period in
+    # hours; conversations older than this are deleted by the cleanup cron job.
+    # Unset (default) disables automatic conversation cleanup.
+    # - name: DELETE_CONVERSATIONS_OLDER_THAN_HOURS
+    #   value: "24"
+    # DELETE_CONVERSATIONS_CRON_EXPRESSION: cron schedule for the conversation
+    # cleanup job ("minute hour day-of-month month day-of-week").
+    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
 
   # -- app.envFrom defines additional environment variables from ConfigMap or Secret.
@@ -576,60 +573,50 @@ eventIngestion:
     # Applies only when eventIngestion.mode is separate.
     pullPolicy: IfNotPresent
 
-  # -- eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment.
-  # Example: Specify the string value for variables
-  #   value: my-value
-  # Example: Specify the value for variables sourced from a Secret.
-  #   secret:
-  #     name: my-secret
-  #     key: my-secret-key
-  # NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided.
-  environmentVariables:
-    # -- eventIngestion.environmentVariables.KAFKA_ENABLE_SSL determines whether to enable SSL for Kafka connections.
-    KAFKA_ENABLE_SSL:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL determines whether to use custom SSL certificates for Kafka.
-    KAFKA_CUSTOM_SSL:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_CA_FILE is the path to the CA certificate file for Kafka SSL.
-    KAFKA_CA_FILE:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_KEY_FILE is the path to the client key file for Kafka SSL.
-    KAFKA_KEY_FILE:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_CERT_FILE is the path to the client certificate file for Kafka SSL.
-    KAFKA_CERT_FILE:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED determines whether to verify server certificates.
-    KAFKA_REJECT_UNAUTHORIZED:
-      value: ""
-    # -- eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates.
-    NODE_TLS_REJECT_UNAUTHORIZED:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM is the SASL mechanism for Kafka authentication.
-    # Supported values: plain, SCRAM-SHA-256, SCRAM-SHA-512
-    KAFKA_SASL_MECHANISM:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication.
-    KAFKA_SASL_USERNAME:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_SASL_PASSWORD is the SASL password for Kafka authentication.
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: "studio-secrets"
-        key: "KAFKA_SASL_PASSWORD"
-    # -- eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker.
-    KAFKA_BROKER_ADDRESS:
-      value: ""
-    # -- eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events.
-    KAFKA_TOPIC:
+  # -- eventIngestion.env defines extra environment variables for the event
+  # ingestion consumers, in native Kubernetes EnvVar format (name + value or
+  # valueFrom). Injected into the app container when mode is colocated, and into
+  # the sibling ingestion Deployment when mode is separate.
+  # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not
+  # merge lists) — copy the default entries you want to keep
+  # (KAFKA_TOPIC, KAFKA_DLQ_TOPIC, KAFKA_GROUP_ID, KAFKA_SASL_PASSWORD).
+  # Optional Kafka settings (add as needed):
+  #   - name: KAFKA_BROKER_ADDRESS      # address of the Kafka broker (required for ingestion)
+  #     value: "kafka.example.com:9092"
+  #   - name: KAFKA_ENABLE_SSL          # enable SSL for Kafka connections
+  #     value: "true"
+  #   - name: KAFKA_CUSTOM_SSL          # use custom SSL certificates for Kafka
+  #     value: "true"
+  #   - name: KAFKA_CA_FILE             # path to the CA certificate file
+  #     value: "/certs/ca.pem"
+  #   - name: KAFKA_KEY_FILE            # path to the client key file
+  #     value: "/certs/key.pem"
+  #   - name: KAFKA_CERT_FILE           # path to the client certificate file
+  #     value: "/certs/cert.pem"
+  #   - name: KAFKA_REJECT_UNAUTHORIZED # verify server certificates
+  #     value: "true"
+  #   - name: NODE_TLS_REJECT_UNAUTHORIZED  # allow untrusted certificates ("0" allows)
+  #     value: "0"
+  #   - name: KAFKA_SASL_MECHANISM      # plain, SCRAM-SHA-256 or SCRAM-SHA-512
+  #     value: "plain"
+  #   - name: KAFKA_SASL_USERNAME
+  #     value: "kafka-user"
+  env:
+    # KAFKA_TOPIC: Kafka topic for Rasa Pro assistant events.
+    - name: KAFKA_TOPIC
       value: "rasa-events"
-    # -- eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC is the Kafka topic for unprocessed events.
-    KAFKA_DLQ_TOPIC:
+    # KAFKA_DLQ_TOPIC: Kafka topic for unprocessed events.
+    - name: KAFKA_DLQ_TOPIC
       value: "rasa-events-dlq"
-    # -- eventIngestion.environmentVariables.KAFKA_GROUP_ID is the Kafka consumer group ID for Studio.
-    KAFKA_GROUP_ID:
+    # KAFKA_GROUP_ID: Kafka consumer group ID for Studio.
+    - name: KAFKA_GROUP_ID
       value: "studio"
+    # KAFKA_SASL_PASSWORD: SASL password for Kafka authentication.
+    - name: KAFKA_SASL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: KAFKA_SASL_PASSWORD
 
   # -- eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret.
   # Example:

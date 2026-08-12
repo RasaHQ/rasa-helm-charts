@@ -71,16 +71,8 @@ spec:
               {{- else }}
               value: "kafka-python-rasa"
               {{- end }}
-            {{- range $key, $value := .Values.eventIngestion.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- with .Values.eventIngestion.env }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- if .Values.eventIngestion.envFrom }}
           envFrom:

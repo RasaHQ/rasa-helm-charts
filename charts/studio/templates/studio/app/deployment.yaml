@@ -58,7 +58,7 @@ spec:
           imagePullPolicy: {{ .Values.app.image.pullPolicy }}
           ports:
             - name: http
-              containerPort: {{ .Values.app.service.port }}
+              containerPort: {{ .Values.app.service.targetPort }}
               protocol: TCP
           {{- if or .Values.app.livenessProbe.enabled }}
           livenessProbe:
@@ -94,28 +94,12 @@ spec:
               {{- else }}
               value: "kafka-python-rasa"
               {{- end }}
-            {{- range $key, $value := .Values.eventIngestion.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- with .Values.eventIngestion.env }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
             {{- end }}
-            {{- range $key, $value := .Values.app.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- with .Values.app.env }}
+            {{- toYaml . | nindent 12 }}
             {{- end }}
           volumeMounts:
             - name: web-client-config
@@ -127,9 +111,9 @@ spec:
               {{- toYaml . | nindent 12 }}
             {{- end }}
           {{- end }}
-          {{- $envFrom := .Values.app.envFrom | default list }}
+          {{- $envFrom := .Values.app.envFrom | default (list) }}
           {{- if eq $mode "colocated" }}
-            {{- $envFrom = concat $envFrom (.Values.eventIngestion.envFrom | default list) }}
+            {{- $envFrom = concat $envFrom (.Values.eventIngestion.envFrom | default (list)) }}
           {{- end }}
           {{- if $envFrom }}
           envFrom:

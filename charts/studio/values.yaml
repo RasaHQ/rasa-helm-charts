@@ -552,7 +552,7 @@ eventIngestion:
   # Breaking: replaces eventIngestion.enabled. Do not set both semantics.
   #
   # Applicability:
-  # - Both colocated and separate: Kafka-related keys under eventIngestion.environmentVariables
+  # - Both colocated and separate: Kafka-related keys under eventIngestion.env
   #   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment).
   # - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,
   #   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment.

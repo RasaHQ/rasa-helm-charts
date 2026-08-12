@@ -262,8 +262,8 @@ When `rasa.enabled: false`, override the **browser** model-service URL via the w
 ```yaml
 app:
   webClient:
-    environmentVariables:
-      MS_API_URL: "https://studio.example.com"
+    config:
+      MS_API_URL: "https://models.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -295,7 +295,7 @@ rasa:
 
 ### Studio App Model Service Environment Variables
 
-The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.environmentVariables`:
+The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.env`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -307,13 +307,13 @@ Example:
 
 ```yaml
 app:
-  environmentVariables:
-    TRAINING_POLLING_INTERVAL_MS:
-      value: "2000"
-    MODEL_POLLING_INTERVAL_MS:
-      value: "5000"
-    MODEL_INACTIVE_AFTER_MS:
-      value: "7200000"  # 2 hours
+  env:
+    - name: TRAINING_POLLING_INTERVAL_MS
+      value: "10000"
+    - name: MODEL_POLLING_INTERVAL_MS
+      value: "60000"
+    - name: MODEL_INACTIVE_AFTER_MS
+      value: "600000"
 ```
 
 ## URL Scheme (`connectionType`)
@@ -340,46 +340,63 @@ The event-ingestion component consumes Rasa Pro conversation events from a Kafka
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_BOOTSTRAP_SERVERS:
+  env:
+    - name: KAFKA_BROKER_ADDRESS
       value: "kafka-broker:9092"
-    KAFKA_TOPIC:
+    - name: KAFKA_TOPIC
       value: "rasa-events"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SASL Authentication
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_SASL_MECHANISM:
-      value: "SCRAM-SHA-256"  # plain | SCRAM-SHA-256 | SCRAM-SHA-512
-    KAFKA_SASL_USERNAME:
-      value: "kafka-user"
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: studio-secrets
-        key: KAFKA_SASL_PASSWORD
+  env:
+    - name: KAFKA_BROKER_ADDRESS
+      value: "kafka.example.com:9092"
+    - name: KAFKA_SASL_MECHANISM
+      value: "SCRAM-SHA-512"
+    - name: KAFKA_SASL_USERNAME
+      value: "studio"
+    - name: KAFKA_SASL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: KAFKA_SASL_PASSWORD
+    - name: KAFKA_TOPIC
+      value: "rasa-events"
+    - name: KAFKA_DLQ_TOPIC
+      value: "rasa-events-dlq"
+    - name: KAFKA_GROUP_ID
+      value: "studio"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SSL/TLS
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_ENABLE_SSL:
+  env:
+    - name: KAFKA_ENABLE_SSL
       value: "true"
-    KAFKA_REJECT_UNAUTHORIZED:
+    - name: KAFKA_CUSTOM_SSL
+      value: "true"
+    - name: KAFKA_REJECT_UNAUTHORIZED
       value: "true"
     # Mount custom certificates via eventIngestion.volumes / eventIngestion.volumeMounts
     # then reference the paths below:
-    KAFKA_CA_FILE:
+    - name: KAFKA_CA_FILE
       value: "/etc/ssl/kafka/ca.crt"
-    KAFKA_CERT_FILE:
+    - name: KAFKA_CERT_FILE
       value: "/etc/ssl/kafka/tls.crt"
-    KAFKA_KEY_FILE:
+    - name: KAFKA_KEY_FILE
       value: "/etc/ssl/kafka/tls.key"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
 
@@ -387,7 +404,7 @@ Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `
 
 | Applies when | Keys |
 | --- | --- |
-| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.environmentVariables` |
+| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
 | Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
 | `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
 
@@ -444,7 +461,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.environmentVariables` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.environmentVariables` — only `app.webClient.environmentVariables.MS_API_URL` affects `window.MS_API_URL`.
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
 
 ```yaml
 # Before
@@ -455,9 +472,30 @@ webClient:
 # After
 app:
   webClient:
-    environmentVariables:
+    config:
       MS_API_URL: "https://studio.example.com"
 ```
+
+Additional breaking changes in 3.0.0:
+
+- Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
+  `app.migration.environmentVariables`, `eventIngestion.environmentVariables` and
+  `keycloak.environmentVariables` were removed — define entries under `app.env`,
+  `app.migration.env`, `eventIngestion.env`, `keycloak.env` as `- name/value` or
+  `- name/valueFrom.secretKeyRef` (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
+  Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
+  list replaces the chart defaults wholesale — copy the defaults you want to keep.
+- `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
+  `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
+  always render as quoted strings in config.js.
+- `SKIP_KEYCLOAK` is fully user-managed via `app.migration.env`. The chart no longer
+  forces `SKIP_KEYCLOAK=true` when `keycloak.enabled=false` — set it yourself when
+  disabling Keycloak.
+- `config.database.host` must be set to a real host; empty values are rejected by the
+  values schema at install time.
+- `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
+  only overrides the appVersion-derived image tag. The migration Job is bounded by
+  `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 
@@ -597,7 +635,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | eventIngestion.image.name is the unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
-| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.environmentVariables   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
+| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
 | eventIngestion.nodeSelector | object | eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | eventIngestion.podAnnotations defines annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | eventIngestion.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |

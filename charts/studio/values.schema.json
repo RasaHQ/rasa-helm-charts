@@ -51,6 +51,9 @@
           "type": "object"
         }
       },
+      "not": {
+        "required": ["value", "valueFrom"]
+      },
       "additionalProperties": false
     },
     "imageConfig": {
@@ -411,8 +414,11 @@
           "type": "object",
           "properties": {
             "config": {
+              "description": "Plain scalar map rendered into config.js as window.* globals",
               "type": "object",
-              "additionalProperties": true
+              "additionalProperties": {
+                "type": ["string", "number", "boolean"]
+              }
             }
           },
           "additionalProperties": false

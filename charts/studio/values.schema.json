@@ -32,6 +32,27 @@
         }
       ]
     },
+    "envVar": {
+      "description": "Kubernetes-native container environment variable",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "description": "Environment variable name",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "description": "Literal value",
+          "type": "string"
+        },
+        "valueFrom": {
+          "description": "Source for the value (secretKeyRef, configMapKeyRef, fieldRef, resourceFieldRef)",
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
     "imageConfig": {
       "description": "Container image configuration",
       "type": "object",
@@ -218,7 +239,8 @@
           "properties": {
             "host": {
               "description": "Database host name or IP address",
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "port": {
               "description": "Database port (default: 5432)",
@@ -331,6 +353,32 @@
           "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
         },
+        "env": {
+          "description": "Extra environment variables for the Studio App container (native EnvVar list)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/envVar" }
+        },
+        "migration": {
+          "description": "Database migration hook Job configuration",
+          "type": "object",
+          "properties": {
+            "env": {
+              "description": "Extra environment variables for the migration Job container (native EnvVar list)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/envVar" }
+            },
+            "backoffLimit": {
+              "description": "Job backoffLimit — retries before the migration Job is marked failed",
+              "type": "integer",
+              "minimum": 0
+            },
+            "activeDeadlineSeconds": {
+              "description": "Job activeDeadlineSeconds — hard wall-clock bound for the migration Job",
+              "type": "integer",
+              "minimum": 1
+            }
+          }
+        },
         "image": {
           "$ref": "#/definitions/imageConfig"
         },
@@ -380,6 +428,11 @@
           "type": "string",
           "enum": ["colocated", "separate", "disabled"]
         },
+        "env": {
+          "description": "Extra environment variables (native EnvVar list)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/envVar" }
+        },
         "replicaCount": {
           "description": "Number of event ingestion replicas",
           "type": "integer",
@@ -418,6 +471,11 @@
         "enabled": {
           "description": "Deploy the bundled Keycloak identity provider",
           "type": "boolean"
+        },
+        "env": {
+          "description": "Extra environment variables (native EnvVar list)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/envVar" }
         },
         "replicaCount": {
           "description": "Number of Keycloak replicas",

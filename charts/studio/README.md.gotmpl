@@ -487,9 +487,10 @@ Additional breaking changes in 3.0.0:
 - `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
   `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
   always render as quoted strings in config.js.
-- `SKIP_KEYCLOAK` is fully user-managed via `app.migration.env`. The chart no longer
-  forces `SKIP_KEYCLOAK=true` when `keycloak.enabled=false` — set it yourself when
-  disabling Keycloak.
+- `SKIP_KEYCLOAK` on the migration Job is derived from `keycloak.enabled`
+  (`"false"` when enabled, `"true"` when disabled). Add a `SKIP_KEYCLOAK` entry to
+  `app.migration.env` only to override the derived value (e.g. the Keycloak
+  database was created manually).
 - `config.database.host` must be set to a real host; empty values are rejected by the
   values schema at install time.
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and

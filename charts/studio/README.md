@@ -488,9 +488,10 @@ Additional breaking changes in 3.0.0:
 - `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
   `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
   always render as quoted strings in config.js.
-- `SKIP_KEYCLOAK` is fully user-managed via `app.migration.env`. The chart no longer
-  forces `SKIP_KEYCLOAK=true` when `keycloak.enabled=false` — set it yourself when
-  disabling Keycloak.
+- `SKIP_KEYCLOAK` on the migration Job is derived from `keycloak.enabled`
+  (`"false"` when enabled, `"true"` when disabled). Add a `SKIP_KEYCLOAK` entry to
+  `app.migration.env` only to override the derived value (e.g. the Keycloak
+  database was created manually).
 - `config.database.host` must be set to a real host; empty values are rejected by the
   values schema at install time.
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
@@ -536,13 +537,13 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[{"name":"SKIP_KEYCLOAK","value":"false"},{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
 | app.migration.activeDeadlineSeconds | int | app.migration.activeDeadlineSeconds is the hard wall-clock bound for the migration Job; size it to your worst-case migration duration. | `900` |
 | app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.migration.backoffLimit | int | app.migration.backoffLimit is the number of retries before the migration Job is marked failed. | `3` |
 | app.migration.enabled | bool | app.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
-| app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. | `[{"name":"SKIP_KEYCLOAK","value":"false"},{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}]` |
+| app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: SKIP_KEYCLOAK is derived from keycloak.enabled automatically ("false" when enabled, "true" when disabled). Add a SKIP_KEYCLOAK entry to this list only to override that behavior (e.g. the Keycloak database was created manually). | `[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}]` |
 | app.migration.image | object | app.migration.image defines the image configuration for the migration job. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.migration.image.name | string | app.migration.image.name uses the same unified studio image with STUDIO_ROLE=migration. | `"studio"` |
 | app.migration.image.pullPolicy | string | app.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |

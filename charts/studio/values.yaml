@@ -428,12 +428,11 @@ app:
     # job container, in native Kubernetes EnvVar format (name + value or valueFrom).
     # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does
     # not merge lists) — copy the default entries you want to keep.
+    # NOTE: SKIP_KEYCLOAK is derived from keycloak.enabled automatically
+    # ("false" when enabled, "true" when disabled). Add a SKIP_KEYCLOAK entry to
+    # this list only to override that behavior (e.g. the Keycloak database was
+    # created manually).
     env:
-      # SKIP_KEYCLOAK: set "true" to skip Keycloak database creation. Required
-      # when keycloak.enabled is false, or when you created the Keycloak database
-      # manually. The chart no longer sets this automatically.
-      - name: SKIP_KEYCLOAK
-        value: "false"
       # KC_DEFAULT_DATABASE_CONNECTION_NAME: database the client connects to when
       # creating the Keycloak database (change if your server has no `postgres` db).
       - name: KC_DEFAULT_DATABASE_CONNECTION_NAME

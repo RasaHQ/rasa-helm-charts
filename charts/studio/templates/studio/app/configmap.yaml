@@ -15,9 +15,6 @@ data:
     window.{{ $key }} = {{ $value | quote }};
     {{- end }}
     {{- end }}
-    window.VOICE_INSPECTOR_ENABLED = {{ .Values.app.webClient.config.VOICE_INSPECTOR_ENABLED | default "false" | quote }};
-    window.SILENCE_TIMEOUT_ENABLED = {{ .Values.app.webClient.config.SILENCE_TIMEOUT_ENABLED | default "false" | quote }};
-    window.EDIT_SYSTEM_RESPONSES_ENABLED = {{ .Values.app.webClient.config.EDIT_SYSTEM_RESPONSES_ENABLED | default "false" | quote }};
     {{- with .Values.app.webClient.config.CURRENT_VERSION_NUMBER }}
     window.CURRENT_VERSION_NUMBER = {{ . | quote | trim }};
     {{- else }}

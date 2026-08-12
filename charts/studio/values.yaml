@@ -539,7 +539,7 @@ app:
     # pod. Plain scalar map (KEY: "value") — these are NOT container environment
     # variables and cannot reference secrets (ConfigMap only).
     # Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL),
-    # CURRENT_VERSION_NUMBER, VOICE_INSPECTOR_ENABLED, etc.
+    # CURRENT_VERSION_NUMBER, etc.
     config: {}
 
 # Studio Event Ingestion component specific configuration

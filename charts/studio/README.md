@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.14](https://img.shields.io/badge/Version-3.0.0--rc.14-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.17](https://img.shields.io/badge/Version-3.0.0--rc.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.14
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.17
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.14
+$ helm install my-release rasa/studio --version 3.0.0-rc.17
 ```
 
 ## Quick Start
@@ -140,13 +140,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.14
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.17
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.14
+$ helm pull rasa/studio --version 3.0.0-rc.17
 ```
 
 ## General Configuration
@@ -262,8 +262,8 @@ When `rasa.enabled: false`, override the **browser** model-service URL via the w
 ```yaml
 app:
   webClient:
-    environmentVariables:
-      MS_API_URL: "https://studio.example.com"
+    config:
+      MS_API_URL: "https://models.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -295,7 +295,7 @@ rasa:
 
 ### Studio App Model Service Environment Variables
 
-The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.environmentVariables`:
+The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.env`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -307,13 +307,13 @@ Example:
 
 ```yaml
 app:
-  environmentVariables:
-    TRAINING_POLLING_INTERVAL_MS:
-      value: "2000"
-    MODEL_POLLING_INTERVAL_MS:
-      value: "5000"
-    MODEL_INACTIVE_AFTER_MS:
-      value: "7200000"  # 2 hours
+  env:
+    - name: TRAINING_POLLING_INTERVAL_MS
+      value: "10000"
+    - name: MODEL_POLLING_INTERVAL_MS
+      value: "60000"
+    - name: MODEL_INACTIVE_AFTER_MS
+      value: "600000"
 ```
 
 ## URL Scheme (`connectionType`)
@@ -340,46 +340,63 @@ The event-ingestion component consumes Rasa Pro conversation events from a Kafka
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_BOOTSTRAP_SERVERS:
+  env:
+    - name: KAFKA_BROKER_ADDRESS
       value: "kafka-broker:9092"
-    KAFKA_TOPIC:
+    - name: KAFKA_TOPIC
       value: "rasa-events"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SASL Authentication
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_SASL_MECHANISM:
-      value: "SCRAM-SHA-256"  # plain | SCRAM-SHA-256 | SCRAM-SHA-512
-    KAFKA_SASL_USERNAME:
-      value: "kafka-user"
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: studio-secrets
-        key: KAFKA_SASL_PASSWORD
+  env:
+    - name: KAFKA_BROKER_ADDRESS
+      value: "kafka.example.com:9092"
+    - name: KAFKA_SASL_MECHANISM
+      value: "SCRAM-SHA-512"
+    - name: KAFKA_SASL_USERNAME
+      value: "studio"
+    - name: KAFKA_SASL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: KAFKA_SASL_PASSWORD
+    - name: KAFKA_TOPIC
+      value: "rasa-events"
+    - name: KAFKA_DLQ_TOPIC
+      value: "rasa-events-dlq"
+    - name: KAFKA_GROUP_ID
+      value: "studio"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SSL/TLS
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_ENABLE_SSL:
+  env:
+    - name: KAFKA_ENABLE_SSL
       value: "true"
-    KAFKA_REJECT_UNAUTHORIZED:
+    - name: KAFKA_CUSTOM_SSL
+      value: "true"
+    - name: KAFKA_REJECT_UNAUTHORIZED
       value: "true"
     # Mount custom certificates via eventIngestion.volumes / eventIngestion.volumeMounts
     # then reference the paths below:
-    KAFKA_CA_FILE:
+    - name: KAFKA_CA_FILE
       value: "/etc/ssl/kafka/ca.crt"
-    KAFKA_CERT_FILE:
+    - name: KAFKA_CERT_FILE
       value: "/etc/ssl/kafka/tls.crt"
-    KAFKA_KEY_FILE:
+    - name: KAFKA_KEY_FILE
       value: "/etc/ssl/kafka/tls.key"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
 
@@ -387,7 +404,7 @@ Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `
 
 | Applies when | Keys |
 | --- | --- |
-| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.environmentVariables` |
+| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
 | Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
 | `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
 
@@ -444,7 +461,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.environmentVariables` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.environmentVariables` — only `app.webClient.environmentVariables.MS_API_URL` affects `window.MS_API_URL`.
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
 
 ```yaml
 # Before
@@ -455,9 +472,31 @@ webClient:
 # After
 app:
   webClient:
-    environmentVariables:
+    config:
       MS_API_URL: "https://studio.example.com"
 ```
+
+Additional breaking changes in 3.0.0:
+
+- Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
+  `app.migration.environmentVariables`, `eventIngestion.environmentVariables` and
+  `keycloak.environmentVariables` were removed — define entries under `app.env`,
+  `app.migration.env`, `eventIngestion.env`, `keycloak.env` as `- name/value` or
+  `- name/valueFrom.secretKeyRef` (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
+  Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
+  list replaces the chart defaults wholesale — copy the defaults you want to keep.
+- `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
+  `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
+  always render as quoted strings in config.js.
+- `SKIP_KEYCLOAK` on the migration Job is derived from `keycloak.enabled`
+  (`"false"` when enabled, `"true"` when disabled). Add a `SKIP_KEYCLOAK` entry to
+  `app.migration.env` only to override the derived value (e.g. the Keycloak
+  database was created manually).
+- `config.database.host` must be set to a real host; empty values are rejected by the
+  values schema at install time.
+- `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
+  only overrides the appVersion-derived image tag. The migration Job is bounded by
+  `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 
@@ -476,10 +515,8 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.autoscaling.maxReplicas | int | app.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
 | app.autoscaling.minReplicas | int | app.autoscaling.minReplicas is the minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | app.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
+| app.env | list | app.env defines extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"}]` |
 | app.envFrom | list | app.envFrom defines additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
-| app.environmentVariables | object | app.environmentVariables defines the environment variables for the Studio App deployment. These variables configure the runtime behavior of the app service. Each variable can be set either directly with a value or from a Kubernetes secret. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. Ref: https://kubernetes.io/docs/tasks/inject-data-application/define-environment-variable-container/ | `{"DELETE_CONVERSATIONS_CRON_EXPRESSION":{"value":"0 * * * *"},"DELETE_CONVERSATIONS_OLDER_THAN_HOURS":{"value":""}}` |
-| app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION | object | app.environmentVariables.DELETE_CONVERSATIONS_CRON_EXPRESSION is the cron schedule for conversation cleanup job. Format: "minute hour day-of-month month day-of-week" Example: "0 * * * *" runs every hour Default: Runs every hour at minute 0 Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/#cron-schedule-syntax | `{"value":"0 * * * *"}` |
-| app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS | object | app.environmentVariables.DELETE_CONVERSATIONS_OLDER_THAN_HOURS is the conversation data retention period in hours. Conversations older than this value will be deleted by the cleanup cron job. Leave empty to disable automatic conversation cleanup. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/cron-jobs/ | `{"value":""}` |
 | app.image | object | app.image defines the container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | app.image.name is the unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | app.image.pullPolicy is the container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
@@ -500,13 +537,13 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration.activeDeadlineSeconds | int | app.migration.activeDeadlineSeconds is the hard wall-clock bound for the migration Job; size it to your worst-case migration duration. | `900` |
 | app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.migration.backoffLimit | int | app.migration.backoffLimit is the number of retries before the migration Job is marked failed. | `3` |
 | app.migration.enabled | bool | app.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
-| app.migration.environmentVariables | object | app.migration.environmentVariables defines the environment variables for the migration job. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}}` |
-| app.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME | object | app.migration.environmentVariables.KC_DEFAULT_DATABASE_CONNECTION_NAME is the name of the database used to client will connect to when creating the keycloak database. if your database does not have a `postgres` database, you can set this to the name of the database you want the client to connect to when creating the keycloak database. | `{"value":"postgres"}` |
-| app.migration.environmentVariables.SKIP_KEYCLOAK | object | app.migration.environmentVariables.SKIP_KEYCLOAK determines whether to skip Keycloak database creation. Set to "true" if you have already created the Keycloak database manually. | `{"value":"false"}` |
+| app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: SKIP_KEYCLOAK is derived from keycloak.enabled automatically ("false" when enabled, "true" when disabled). Add a SKIP_KEYCLOAK entry to this list only to override that behavior (e.g. the Keycloak database was created manually). | `[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}]` |
 | app.migration.image | object | app.migration.image defines the image configuration for the migration job. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.migration.image.name | string | app.migration.image.name uses the same unified studio image with STUDIO_ROLE=migration. | `"studio"` |
 | app.migration.image.pullPolicy | string | app.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
@@ -551,14 +588,14 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.serviceAccount.create | bool | app.serviceAccount.create determines whether to create a new service account. | `false` |
 | app.serviceAccount.name | string | app.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
 | app.tolerations | list | app.tolerations defines tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
-| app.webClient | object | app.webClient holds browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"environmentVariables":{}}` |
-| app.webClient.environmentVariables | object | app.webClient.environmentVariables feeds the web-client config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Values are not secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. Breaking: nest under app.webClient (was top-level webClient). Web-client Deployment removed in chart 3.0.0. | `{}` |
+| app.webClient | object | app.webClient holds browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"config":{}}` |
+| app.webClient.config | object | app.webClient.config feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
-| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
+| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"DATABASE.HOST.NAME","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
-| config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" | `""` |
+| config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" Placeholder value — you MUST set this; an empty value is rejected by the schema. | `"DATABASE.HOST.NAME"` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction. | `"keycloak"` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
@@ -594,26 +631,12 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.autoscaling.maxReplicas | int | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. Applies only when eventIngestion.mode is separate. | `100` |
 | eventIngestion.autoscaling.minReplicas | int | eventIngestion.autoscaling.minReplicas is the minimum number of replicas. Applies only when eventIngestion.mode is separate. | `1` |
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | eventIngestion.autoscaling.targetCPUUtilizationPercentage is the target CPU utilization percentage. Applies only when eventIngestion.mode is separate. | `80` |
+| eventIngestion.env | list | eventIngestion.env defines extra environment variables for the event ingestion consumers, in native Kubernetes EnvVar format (name + value or valueFrom). Injected into the app container when mode is colocated, and into the sibling ingestion Deployment when mode is separate. NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep (KAFKA_TOPIC, KAFKA_DLQ_TOPIC, KAFKA_GROUP_ID, KAFKA_SASL_PASSWORD). Optional Kafka settings (add as needed):   - name: KAFKA_BROKER_ADDRESS      # address of the Kafka broker (required for ingestion)     value: "kafka.example.com:9092"   - name: KAFKA_ENABLE_SSL          # enable SSL for Kafka connections     value: "true"   - name: KAFKA_CUSTOM_SSL          # use custom SSL certificates for Kafka     value: "true"   - name: KAFKA_CA_FILE             # path to the CA certificate file     value: "/certs/ca.pem"   - name: KAFKA_KEY_FILE            # path to the client key file     value: "/certs/key.pem"   - name: KAFKA_CERT_FILE           # path to the client certificate file     value: "/certs/cert.pem"   - name: KAFKA_REJECT_UNAUTHORIZED # verify server certificates     value: "true"   - name: NODE_TLS_REJECT_UNAUTHORIZED  # allow untrusted certificates ("0" allows)     value: "0"   - name: KAFKA_SASL_MECHANISM      # plain, SCRAM-SHA-256 or SCRAM-SHA-512     value: "plain"   - name: KAFKA_SASL_USERNAME     value: "kafka-user" | `[{"name":"KAFKA_TOPIC","value":"rasa-events"},{"name":"KAFKA_DLQ_TOPIC","value":"rasa-events-dlq"},{"name":"KAFKA_GROUP_ID","value":"studio"},{"name":"KAFKA_SASL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}}}]` |
 | eventIngestion.envFrom | list | eventIngestion.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
-| eventIngestion.environmentVariables | object | eventIngestion.environmentVariables defines the environment variables for the Event Ingestion deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KAFKA_BROKER_ADDRESS":{"value":""},"KAFKA_CA_FILE":{"value":""},"KAFKA_CERT_FILE":{"value":""},"KAFKA_CUSTOM_SSL":{"value":""},"KAFKA_DLQ_TOPIC":{"value":"rasa-events-dlq"},"KAFKA_ENABLE_SSL":{"value":""},"KAFKA_GROUP_ID":{"value":"studio"},"KAFKA_KEY_FILE":{"value":""},"KAFKA_REJECT_UNAUTHORIZED":{"value":""},"KAFKA_SASL_MECHANISM":{"value":""},"KAFKA_SASL_PASSWORD":{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}},"KAFKA_SASL_USERNAME":{"value":""},"KAFKA_TOPIC":{"value":"rasa-events"},"NODE_TLS_REJECT_UNAUTHORIZED":{"value":""}}` |
-| eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS | object | eventIngestion.environmentVariables.KAFKA_BROKER_ADDRESS is the address of the Kafka broker. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_CA_FILE | object | eventIngestion.environmentVariables.KAFKA_CA_FILE is the path to the CA certificate file for Kafka SSL. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_CERT_FILE | object | eventIngestion.environmentVariables.KAFKA_CERT_FILE is the path to the client certificate file for Kafka SSL. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL | object | eventIngestion.environmentVariables.KAFKA_CUSTOM_SSL determines whether to use custom SSL certificates for Kafka. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC | object | eventIngestion.environmentVariables.KAFKA_DLQ_TOPIC is the Kafka topic for unprocessed events. | `{"value":"rasa-events-dlq"}` |
-| eventIngestion.environmentVariables.KAFKA_ENABLE_SSL | object | eventIngestion.environmentVariables.KAFKA_ENABLE_SSL determines whether to enable SSL for Kafka connections. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_GROUP_ID | object | eventIngestion.environmentVariables.KAFKA_GROUP_ID is the Kafka consumer group ID for Studio. | `{"value":"studio"}` |
-| eventIngestion.environmentVariables.KAFKA_KEY_FILE | object | eventIngestion.environmentVariables.KAFKA_KEY_FILE is the path to the client key file for Kafka SSL. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED | object | eventIngestion.environmentVariables.KAFKA_REJECT_UNAUTHORIZED determines whether to verify server certificates. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM | object | eventIngestion.environmentVariables.KAFKA_SASL_MECHANISM is the SASL mechanism for Kafka authentication. Supported values: plain, SCRAM-SHA-256, SCRAM-SHA-512 | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_SASL_PASSWORD | object | eventIngestion.environmentVariables.KAFKA_SASL_PASSWORD is the SASL password for Kafka authentication. | `{"secret":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}}` |
-| eventIngestion.environmentVariables.KAFKA_SASL_USERNAME | object | eventIngestion.environmentVariables.KAFKA_SASL_USERNAME is the SASL username for Kafka authentication. | `{"value":""}` |
-| eventIngestion.environmentVariables.KAFKA_TOPIC | object | eventIngestion.environmentVariables.KAFKA_TOPIC is the Kafka topic for Rasa Pro assistant events. | `{"value":"rasa-events"}` |
-| eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED | object | eventIngestion.environmentVariables.NODE_TLS_REJECT_UNAUTHORIZED determines whether to allow untrusted certificates. | `{"value":""}` |
 | eventIngestion.image | object | eventIngestion.image defines the container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | eventIngestion.image.name is the unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | eventIngestion.image.pullPolicy is the container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
-| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.environmentVariables   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
+| eventIngestion.mode | string | eventIngestion.mode controls event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
 | eventIngestion.nodeSelector | object | eventIngestion.nodeSelector defines which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | eventIngestion.podAnnotations defines annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | eventIngestion.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |
@@ -643,11 +666,8 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | keycloak.annotations | object | keycloak.annotations defines annotations to add to all Studio Keycloak resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | keycloak.database | object | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. | `{}` |
 | keycloak.enabled | bool | keycloak.enabled determines whether to deploy the Keycloak authentication service. | `true` |
+| keycloak.env | list | keycloak.env defines extra environment variables for the Keycloak container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. | `[{"name":"KC_HTTP_ENABLED","value":"true"},{"name":"KC_PROXY_HEADERS","value":"xforwarded"},{"name":"KC_PROXY","value":"edge"}]` |
 | keycloak.envFrom | list | keycloak.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
-| keycloak.environmentVariables | object | keycloak.environmentVariables defines the environment variables for the Keycloak deployment. Example: Specify the string value for variables   value: my-value Example: Specify the value for variables sourced from a Secret.   secret:     name: my-secret     key: my-secret-key NOTE: Helm will return an error if environment variable does not have `value` or `secret` provided. | `{"KC_HTTP_ENABLED":{"value":"true"},"KC_PROXY":{"value":"edge"},"KC_PROXY_HEADERS":{"value":"xforwarded"}}` |
-| keycloak.environmentVariables.KC_HTTP_ENABLED | object | keycloak.environmentVariables.KC_HTTP_ENABLED determines the proxy configuration for Keycloak. Set to "true" to enable HTTP communication between proxy/load balancer and Keycloak. Useful for secure internal networks where the reverse proxy maintains HTTPS with clients. | `{"value":"true"}` |
-| keycloak.environmentVariables.KC_PROXY | object | legacy keycloak value to enable HTTP communication between proxy/loadbalancer and Keycloak. This is deprecated (replaced by KC_HTTP_ENABLED) and will be removed in future releases. | `{"value":"edge"}` |
-| keycloak.environmentVariables.KC_PROXY_HEADERS | object | keycloak.environmentVariables.KC_PROXY_HEADERS determines the proxy headers for Keycloak. Set to "xforwarded" to enable parsing of non-standard X-Forwarded-* headers, such as X-Forwarded-For, X-Forwarded-Proto, X-Forwarded-Host, and X-Forwarded-Port. https://www.keycloak.org/server/reverseproxy | `{"value":"xforwarded"}` |
 | keycloak.image | object | keycloak.image defines the container image settings for the Keycloak service. | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` |
 | keycloak.image.name | string | keycloak.image.name is the name of the Keycloak container image. | `"studio-keycloak"` |
 | keycloak.image.pullPolicy | string | keycloak.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
@@ -705,7 +725,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | networkPolicy.enabled | bool | networkPolicy.enabled specifies whether to enable network policies | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes | `[]` |
 | podLabels | object | podLabels defines labels to add to all Studio pod(s) | `{}` |
-| rasa.enabled | bool |  | `true` |
+| rasa.enabled | bool | rasa.enabled deploys the Rasa Pro model server subchart. To run Studio without the model service set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.rasa.command[0] | string |  | `"python"` |
 | rasa.rasa.command[1] | string |  | `"-m"` |
@@ -756,4 +776,4 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasa.strategy.type | string |  | `"Recreate"` |
 | rasa.rasaProServices.enabled | bool |  | `false` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
-| tag | string | tag specifies image tag for Studio (unified studio image; Studio ≥ 2.0.0). Placeholder until the first published unified tag is confirmed for promotion. | `"2.0.0-latest"` |
+| tag | string | tag overrides the image tag for all Studio images (unified studio image; Studio ≥ 2.0.0). Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. | `""` |

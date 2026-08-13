@@ -5,21 +5,20 @@ metadata:
 data:
   windowVariables: |
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}/api";
-    {{- with .Values.app.webClient.environmentVariables.MS_API_URL }}
-    window.MS_API_URL = {{ . | quote }};
-    {{- else }}
+    {{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" }}
+    window.MS_API_URL = {{ .Values.app.webClient.config.MS_API_URL | quote }};
+    {{- else if .Values.rasa.enabled }}
     window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
+    {{- else }}
+    window.MS_API_URL = "";
     {{- end }}
-    {{- range $key, $value := .Values.app.webClient.environmentVariables }}
+    {{- range $key, $value := .Values.app.webClient.config }}
     {{- if hasPrefix "FEATURE_FLAG_" $key }}
-    window.{{ $key }} = {{ if kindIs "map" $value }}{{ ($value.value | default "false") | quote }}{{ else }}{{ $value | quote }}{{ end }};
+    window.{{ $key }} = {{ $value | quote }};
     {{- end }}
     {{- end }}
-    window.VOICE_INSPECTOR_ENABLED = {{ .Values.app.webClient.environmentVariables.VOICE_INSPECTOR_ENABLED | quote | default "false" }};
-    window.SILENCE_TIMEOUT_ENABLED = {{ .Values.app.webClient.environmentVariables.SILENCE_TIMEOUT_ENABLED | quote | default "false" }};
-    window.EDIT_SYSTEM_RESPONSES_ENABLED = {{ .Values.app.webClient.environmentVariables.EDIT_SYSTEM_RESPONSES_ENABLED | quote | default "false" }};
-    {{- with .Values.app.webClient.environmentVariables.CURRENT_VERSION_NUMBER }}
+    {{- with .Values.app.webClient.config.CURRENT_VERSION_NUMBER }}
     window.CURRENT_VERSION_NUMBER = {{ . | quote | trim }};
     {{- else }}
-    window.CURRENT_VERSION_NUMBER = {{ .Values.tag | quote | trim }};
+    window.CURRENT_VERSION_NUMBER = {{ .Values.tag | default .Chart.AppVersion | quote | trim }};
     {{- end }}

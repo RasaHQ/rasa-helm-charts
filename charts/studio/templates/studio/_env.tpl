@@ -1,4 +1,24 @@
 {{/*
+Render a native EnvVar list, stringifying scalar values.
+Values often arrive as YAML/JSON booleans or numbers (Pulumi YAML coerces
+"true"/"false" config strings to booleans; `--set x=true` does the same),
+but Kubernetes requires EnvVar.value to be a string — so scalars are
+stringified and quoted here. valueFrom entries pass through verbatim.
+*/}}
+{{- define "studio.envList" -}}
+{{- range . }}
+- name: {{ .name }}
+  {{- if hasKey . "value" }}
+  value: {{ .value | toString | quote }}
+  {{- end }}
+  {{- with .valueFrom }}
+  valueFrom:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{/*
 Environment Variables for Studio between Keycloak and App
 */}}
 {{- define "studio.shared.env" -}}

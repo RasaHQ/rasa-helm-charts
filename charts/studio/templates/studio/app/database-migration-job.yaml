@@ -15,6 +15,8 @@ metadata:
     {{- toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  backoffLimit: {{ .Values.app.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.app.migration.activeDeadlineSeconds }}
   template:
     metadata:
       {{- with .Values.app.migration.podAnnotations }}
@@ -62,21 +64,17 @@ spec:
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          {{- if not .Values.keycloak.enabled }}
+          {{- $skipKeycloakOverridden := false }}
+          {{- range .Values.app.migration.env }}
+          {{- if eq .name "SKIP_KEYCLOAK" }}
+          {{- $skipKeycloakOverridden = true }}
+          {{- end }}
+          {{- end }}
+          {{- if not $skipKeycloakOverridden }}
           - name: SKIP_KEYCLOAK
-            value: "true"
+            value: {{ ternary "false" "true" .Values.keycloak.enabled | quote }}
           {{- end }}
-          {{- range $key, $value := .Values.app.migration.environmentVariables }}
-          {{- if not (and (eq $key "SKIP_KEYCLOAK") (not $.Values.keycloak.enabled)) }}
-          - name: {{ $key | upper }}
-            {{- if $value.value }}
-            value: {{ $value.value | quote }}
-            {{- else if $value.secret }}
-            valueFrom:
-              secretKeyRef:
-                name: {{ $value.secret.name }}
-                key: {{ $value.secret.key }}
-            {{- end }}
-          {{- end }}
+          {{- with .Values.app.migration.env }}
+          {{- include "studio.envList" . | nindent 10 }}
           {{- end }}
 {{- end }}

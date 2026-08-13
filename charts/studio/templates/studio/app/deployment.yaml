@@ -1,3 +1,4 @@
+{{- include "studio.rasa.validate" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
 {{- $mode := include "studio.eventIngestion.mode" . -}}
 apiVersion: apps/v1
@@ -94,28 +95,12 @@ spec:
               {{- else }}
               value: "kafka-python-rasa"
               {{- end }}
-            {{- range $key, $value := .Values.eventIngestion.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- with .Values.eventIngestion.env }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
             {{- end }}
-            {{- range $key, $value := .Values.app.environmentVariables }}
-            - name: {{ $key | upper }}
-              {{- if $value.value }}
-              value: {{ $value.value | quote }}
-              {{- else if $value.secret }}
-              valueFrom:
-                secretKeyRef:
-                  name: {{ $value.secret.name }}
-                  key: {{ $value.secret.key }}
-              {{- end }}
+            {{- with .Values.app.env }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
           volumeMounts:
             - name: web-client-config

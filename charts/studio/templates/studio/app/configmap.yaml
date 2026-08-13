@@ -4,10 +4,16 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
+    {{- /* With no host configured anywhere, fall back to same-origin relative
+           URLs instead of emitting malformed absolutes like "http:///api". */}}
+    {{- if include "studio.appHost" . }}
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}/api";
+    {{- else }}
+    window.API_ENDPOINT = "/api";
+    {{- end }}
     {{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" }}
     window.MS_API_URL = {{ .Values.app.webClient.config.MS_API_URL | quote }};
-    {{- else if .Values.rasa.enabled }}
+    {{- else if and .Values.rasa.enabled (include "studio.modelServiceHost" .) }}
     window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
     {{- else }}
     window.MS_API_URL = "";

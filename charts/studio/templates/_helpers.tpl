@@ -335,12 +335,10 @@ Resolve the model service ingress host
 {{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
 {{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
 {{- if $globalHost -}}
-{{- /* global wins first: the rasa subchart ingress renders
-       `global.ingressHost | default .host`, so the derived URL must follow
-       the same precedence to match the host actually served. */ -}}
+{{- /* Precedence mirrors the rasa subchart ingress exactly
+       (global.ingressHost | default hosts[*].host), so the derived URL
+       always matches the host actually served. */ -}}
 {{- $globalHost -}}
-{{- else if $ingress.hostName -}}
-{{- $ingress.hostName -}}
 {{- else if $firstHost -}}
 {{- $firstHost -}}
 {{- else -}}

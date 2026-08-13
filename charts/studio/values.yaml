@@ -1097,8 +1097,7 @@ rasa:
         # Empty host = the rasa ingress rule matches all hosts; set
         # global.ingressHost (preferred, single knob) or this host directly
         # to pin an exact host. The model-service URL derivation follows:
-        # global.ingressHost > rasa.rasa.ingress.hostName > this host >
-        # config.ingressHost.
+        # global.ingressHost > this host > config.ingressHost.
         - host: ""
           paths:
             - path: /modelservice

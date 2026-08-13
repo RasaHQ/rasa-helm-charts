@@ -331,10 +331,12 @@ tolerations:
 Resolve the model service ingress host
 */}}
 {{- define "studio.modelServiceHost" -}}
-{{- if .Values.rasa.rasa.ingress.hostName -}}
-{{- .Values.rasa.rasa.ingress.hostName -}}
-{{- else if and .Values.rasa.rasa.ingress.hosts (index .Values.rasa.rasa.ingress.hosts 0).host -}}
-{{- (index .Values.rasa.rasa.ingress.hosts 0).host -}}
+{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
+{{- if $ingress.hostName -}}
+{{- $ingress.hostName -}}
+{{- else if $firstHost -}}
+{{- $firstHost -}}
 {{- else -}}
 {{- .Values.config.ingressHost -}}
 {{- end -}}
@@ -344,8 +346,11 @@ Resolve the model service ingress host
 Model service ingress path prefix
 */}}
 {{- define "studio.modelServiceIngressPath" -}}
-{{- if and .Values.rasa.rasa.ingress.hosts (index .Values.rasa.rasa.ingress.hosts 0).paths (index (index .Values.rasa.rasa.ingress.hosts 0).paths 0).path -}}
-{{- (index (index .Values.rasa.rasa.ingress.hosts 0).paths 0).path -}}
+{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
+{{- $firstPath := dig "path" "" (($firstHost.paths | default list | first) | default dict) -}}
+{{- if $firstPath -}}
+{{- $firstPath -}}
 {{- else -}}
 /modelservice
 {{- end -}}
@@ -363,6 +368,19 @@ Model service URL for RASA_MODEL_SERVER_BASE_URL
 */}}
 {{- define "studio.modelServiceTalkUrl" -}}
 {{- printf "%s://%s%s" .Values.config.connectionType (include "studio.modelServiceHost" .) (include "studio.modelServiceIngressPath" .) -}}
+{{- end -}}
+
+{{/*
+Guard against `rasa: null`. Nulling the key deletes it, which breaks the
+subchart condition (rasa.enabled) and silently re-enables the Rasa Pro
+subchart with its default values. After coalescing, .Values.rasa is
+re-populated from the subchart's own defaults, which never define `enabled`
+— so a missing `enabled` key is the reliable signal of a nulled block.
+*/}}
+{{- define "studio.rasa.validate" -}}
+{{- if not (hasKey (.Values.rasa | default dict) "enabled") -}}
+{{- fail "rasa.enabled is not set — was `rasa: null` used? Nulling the key deletes it and re-enables the Rasa Pro subchart with default values. Disable it with `rasa.enabled: false` instead" -}}
+{{- end -}}
 {{- end -}}
 
 {{/*

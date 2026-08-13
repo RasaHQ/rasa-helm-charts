@@ -1011,6 +1011,11 @@ podLabels: {}
 
 # Define the resources for the Rasa Pro model server
 rasa:
+  # -- rasa.enabled deploys the Rasa Pro model server subchart.
+  # To run Studio without the model service set this to false.
+  # WARNING: never disable with `rasa: null` — deleting the key breaks the
+  # subchart condition and re-enables the subchart with its default values
+  # (the chart fails the render if it detects this).
   enabled: true
   fullnameOverride: rasapro
 

@@ -8,7 +8,11 @@ data:
     {{- with .Values.app.webClient.config.MS_API_URL }}
     window.MS_API_URL = {{ . | quote }};
     {{- else }}
+    {{- if .Values.rasa.enabled }}
     window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
+    {{- else }}
+    window.MS_API_URL = "";
+    {{- end }}
     {{- end }}
     {{- range $key, $value := .Values.app.webClient.config }}
     {{- if hasPrefix "FEATURE_FLAG_" $key }}

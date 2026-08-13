@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.15](https://img.shields.io/badge/Version-3.0.0--rc.15-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.16](https://img.shields.io/badge/Version-3.0.0--rc.16-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.15
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.16
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.15
+$ helm install my-release rasa/studio --version 3.0.0-rc.16
 ```
 
 ## Quick Start
@@ -140,13 +140,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.15
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.16
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.15
+$ helm pull rasa/studio --version 3.0.0-rc.16
 ```
 
 ## General Configuration
@@ -725,7 +725,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | networkPolicy.enabled | bool | networkPolicy.enabled specifies whether to enable network policies | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes | `[]` |
 | podLabels | object | podLabels defines labels to add to all Studio pod(s) | `{}` |
-| rasa.enabled | bool |  | `true` |
+| rasa.enabled | bool | rasa.enabled deploys the Rasa Pro model server subchart. To run Studio without the model service set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.rasa.command[0] | string |  | `"python"` |
 | rasa.rasa.command[1] | string |  | `"-m"` |

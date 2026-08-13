@@ -1,3 +1,4 @@
+{{- include "studio.rasa.validate" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
 {{- $mode := include "studio.eventIngestion.mode" . -}}
 apiVersion: apps/v1

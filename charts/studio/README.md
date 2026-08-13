@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.17](https://img.shields.io/badge/Version-3.0.0--rc.17-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.18](https://img.shields.io/badge/Version-3.0.0--rc.18-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.17
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.18
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.17
+$ helm install my-release rasa/studio --version 3.0.0-rc.18
 ```
 
 ## Quick Start
@@ -140,13 +140,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.17
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.18
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.17
+$ helm pull rasa/studio --version 3.0.0-rc.18
 ```
 
 ## General Configuration
@@ -607,7 +607,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. Can be specified as a plain string value or as a secret reference. Plain value example: username: "studio" Secret reference example: username:   secretName: "my-secret"   secretKey: "DB_USERNAME" | `""` |
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
-| config.ingressHost | string | Defines the host name for all Studio ingress resources. This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart. WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart. If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact. | `"INGRESS.HOST.NAME"` |
+| config.ingressHost | string | Defines the host name for the Studio app and Keycloak ingress resources. For a single-host install (model service served on the same host), setting only this value is enough: the model-service URL falls back to it. To pin the Rasa Pro model-service ingress to an exact host as well, set global.ingressHost — it propagates to the rasa subchart natively and takes precedence in the model-service URL derivation. | `"INGRESS.HOST.NAME"` |
 | config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new app's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
@@ -658,7 +658,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressHost | string |  | `nil` |
+| global.ingressHost | string | global.ingressHost pins the Rasa Pro model-service ingress host and the derived model-service URLs (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL) to one value — Helm propagates it to the rasa subchart natively, whose ingress renders `global.ingressHost | default .host`. Leave unset for split-host installs (explicit rasa.rasa.ingress.hostName/hosts win then). | `nil` |
 | hostNetwork | bool | Controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecret defines repository pull secrets | `[]` |
 | keycloak.additionalContainers | list | keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
@@ -735,7 +735,9 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasa.image.tag | string |  | `"3.16.2-latest"` |
 | rasa.rasa.ingress.annotations | object |  | `{}` |
 | rasa.rasa.ingress.enabled | bool |  | `true` |
-| rasa.rasa.ingress.hosts[0] | object | Please update the below URL with the correct host name of the Studio deployment | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/modelservice","pathType":"Prefix"}]}` |
+| rasa.rasa.ingress.hosts[0].host | string |  | `""` |
+| rasa.rasa.ingress.hosts[0].paths[0].path | string |  | `"/modelservice"` |
+| rasa.rasa.ingress.hosts[0].paths[0].pathType | string |  | `"Prefix"` |
 | rasa.rasa.livenessProbe.enabled | bool |  | `true` |
 | rasa.rasa.livenessProbe.failureThreshold | int |  | `6` |
 | rasa.rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |

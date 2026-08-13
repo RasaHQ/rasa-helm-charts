@@ -19,11 +19,13 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 tag: ""
 
 config:
-  # -- Defines the host name for all Studio ingress resources.
-  # This value is used as an anchor (&dns_hostname) for referencing the host name across multiple places in the Helm chart.
-  # WARNING: Do NOT delete or modify the anchor (&dns_hostname) as it is critical for the proper functioning of the chart.
-  # If you need to update the host name, only change the value (INGRESS.HOST.NAME), keeping the anchor intact.
-  ingressHost: &dns_hostname INGRESS.HOST.NAME
+  # -- Defines the host name for the Studio app and Keycloak ingress resources.
+  # For a single-host install (model service served on the same host), setting
+  # only this value is enough: the model-service URL falls back to it. To pin
+  # the Rasa Pro model-service ingress to an exact host as well, set
+  # global.ingressHost — it propagates to the rasa subchart natively and takes
+  # precedence in the model-service URL derivation.
+  ingressHost: INGRESS.HOST.NAME
 
   # -- Define the ingress annotations to be used for ALL the ingress resources.
   # These annotations will be applied to all ingress resources created by this chart.
@@ -978,6 +980,11 @@ global:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+  # -- global.ingressHost pins the Rasa Pro model-service ingress host and the
+  # derived model-service URLs (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL)
+  # to one value — Helm propagates it to the rasa subchart natively, whose
+  # ingress renders `global.ingressHost | default .host`. Leave unset for
+  # split-host installs (explicit rasa.rasa.ingress.hostName/hosts win then).
   ingressHost:
 
 # -- Controls whether the pod may use the node network namespace
@@ -1083,8 +1090,12 @@ rasa:
       enabled: true
       annotations: {}
       hosts:
-        # -- Please update the below URL with the correct host name of the Studio deployment
-        - host: *dns_hostname
+        # Empty host = the rasa ingress rule matches all hosts; set
+        # global.ingressHost (preferred, single knob) or this host directly
+        # to pin an exact host. The model-service URL derivation follows:
+        # global.ingressHost > rasa.rasa.ingress.hostName > this host >
+        # config.ingressHost.
+        - host: ""
           paths:
             - path: /modelservice
               pathType: Prefix

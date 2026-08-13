@@ -333,7 +333,13 @@ Resolve the model service ingress host
 {{- define "studio.modelServiceHost" -}}
 {{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
-{{- if $ingress.hostName -}}
+{{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
+{{- if $globalHost -}}
+{{- /* global wins first: the rasa subchart ingress renders
+       `global.ingressHost | default .host`, so the derived URL must follow
+       the same precedence to match the host actually served. */ -}}
+{{- $globalHost -}}
+{{- else if $ingress.hostName -}}
 {{- $ingress.hostName -}}
 {{- else if $firstHost -}}
 {{- $firstHost -}}

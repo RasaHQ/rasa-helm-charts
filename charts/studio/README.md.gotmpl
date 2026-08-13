@@ -5,7 +5,7 @@
 
 ## Architecture
 
-The Studio chart deploys a unified Studio image. The app serves both the API and the web client; all components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+The Studio chart deploys a unified Studio image. The app serves both the API and the web client; all components share a single host set via `global.ingressHost` and the `studio-secrets` Kubernetes Secret.
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
@@ -96,8 +96,10 @@ $ helm install my-release rasa/{{ template "chart.name" . }} --version {{ templa
 Minimum `values.yaml` to get Studio running (assumes `studio-secrets` already created):
 
 ```yaml
+global:
+  ingressHost: studio.example.com
+
 config:
-  ingressHost: &dns_hostname studio.example.com
   ingressClassName: nginx
   database:
     host: "postgres.example.com"
@@ -154,20 +156,39 @@ $ helm pull rasa/{{ template "chart.name" . }} --version {{ template "chart.vers
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
-## Important Notes on `ingressHost` Anchor
+## Ingress Host Configuration
 
-The `config.ingressHost` field in the `values.yaml` file is defined with an **anchor** (`&dns_hostname`) to ensure consistency and reusability across the Helm chart. 
+**Single-host install (recommended):** set one value and the Studio app,
+Keycloak and Rasa Pro model-service ingresses — plus every derived URL
+(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
+resolve from it:
 
-### Example:
 ```yaml
-# values.yaml
-config:
-  ingressHost: &dns_hostname INGRESS.HOST.NAME
+global:
+  ingressHost: studio.example.com
 ```
 
-### Guidelines:
-Do *NOT* delete or modify the anchor (`&dns_hostname`).
-If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
+**Split-host install** (model service on its own hostname): leave
+`global.ingressHost` unset — it overrides per-host values when set — and
+configure hosts individually:
+
+```yaml
+config:
+  ingressHost: studio.example.com        # Studio app + Keycloak
+rasa:
+  rasa:
+    ingress:
+      hosts:
+        - host: models.example.com       # model service
+          paths:
+            - path: /modelservice
+              pathType: Prefix
+```
+
+Per-component overrides (`app.ingress.hostName`, `keycloak.ingress.hostName`)
+remain available and take precedence over `config.ingressHost` when
+`global.ingressHost` is unset. No host value is enforced by the schema — an
+install without any host renders empty (match-all) ingress rules.
 
 ## Database Configuration
 
@@ -496,6 +517,14 @@ Additional breaking changes in 3.0.0:
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
   only overrides the appVersion-derived image tag. The migration Job is bounded by
   `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
+- The `&dns_hostname` YAML anchor was removed. For a single-host install set
+  **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
+  ingresses and every derived URL (`window.MS_API_URL`,
+  `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
+  service on its own hostname) leave `global.ingressHost` unset and set
+  `config.ingressHost` (app/Keycloak) plus `rasa.rasa.ingress.hosts[0].host`
+  (model service) — `global.ingressHost` overrides the per-host model-service
+  value when set, so the two are mutually exclusive by design.
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 

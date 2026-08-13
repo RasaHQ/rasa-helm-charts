@@ -333,8 +333,12 @@ Resolve the model service ingress host
 {{- define "studio.modelServiceHost" -}}
 {{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
-{{- if $ingress.hostName -}}
-{{- $ingress.hostName -}}
+{{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
+{{- if $globalHost -}}
+{{- /* Precedence mirrors the rasa subchart ingress exactly
+       (global.ingressHost | default hosts[*].host), so the derived URL
+       always matches the host actually served. */ -}}
+{{- $globalHost -}}
 {{- else if $firstHost -}}
 {{- $firstHost -}}
 {{- else -}}
@@ -433,8 +437,28 @@ Report whether event ingestion is disabled.
 Resolve the Studio App ingress host.
 */}}
 {{- define "studio.appHost" -}}
-{{- if .Values.app.ingress.hostName -}}
+{{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
+{{- if $globalHost -}}
+{{- /* global.ingressHost means "one host for everything" — it wins for the
+       same reason it wins in the rasa subchart ingress (global | default
+       .host): the URL must match the host actually served. */ -}}
+{{- $globalHost -}}
+{{- else if .Values.app.ingress.hostName -}}
 {{- .Values.app.ingress.hostName -}}
+{{- else -}}
+{{- .Values.config.ingressHost -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Resolve the Keycloak ingress host (same precedence as studio.appHost).
+*/}}
+{{- define "studio.keycloakHost" -}}
+{{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
+{{- if $globalHost -}}
+{{- $globalHost -}}
+{{- else if .Values.keycloak.ingress.hostName -}}
+{{- .Values.keycloak.ingress.hostName -}}
 {{- else -}}
 {{- .Values.config.ingressHost -}}
 {{- end -}}

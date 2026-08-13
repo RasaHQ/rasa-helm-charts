@@ -27,7 +27,7 @@ spec:
     {{- end }}
   {{- end }}
   rules:
-    - host: {{ .Values.app.ingress.hostName | default $.Values.config.ingressHost | quote }}
+    - host: {{ include "studio.appHost" $ | quote }}
       http:
         paths:
           - path: /api

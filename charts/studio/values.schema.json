@@ -216,12 +216,11 @@
     "config": {
       "description": "Global configuration shared across all Studio components",
       "type": "object",
-      "required": ["ingressHost", "database"],
+      "required": ["database"],
       "properties": {
         "ingressHost": {
-          "description": "Hostname for all Studio ingress resources. Must be a valid DNS name.",
-          "type": "string",
-          "minLength": 1
+          "description": "Optional host override for the Studio app and Keycloak ingresses (split-host installs). Prefer global.ingressHost for single-host installs.",
+          "type": "string"
         },
         "ingressAnnotations": {
           "description": "Annotations applied to all ingress resources",
@@ -531,7 +530,13 @@
     },
     "global": {
       "description": "Global values passed to subcharts",
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "ingressHost": {
+          "description": "Single-host knob: one hostname for the Studio app, Keycloak and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
+          "type": ["string", "null"]
+        }
+      }
     },
     "hostNetwork": {
       "description": "Allow pods to use the node network namespace",

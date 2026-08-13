@@ -43,8 +43,8 @@
           "minLength": 1
         },
         "value": {
-          "description": "Literal value",
-          "type": "string"
+          "description": "Literal value. Scalars (boolean/number) are accepted and rendered as quoted strings — Kubernetes requires EnvVar values to be strings.",
+          "type": ["string", "number", "boolean"]
         },
         "valueFrom": {
           "description": "Source for the value (secretKeyRef, configMapKeyRef, fieldRef, resourceFieldRef)",

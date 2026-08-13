@@ -72,7 +72,7 @@ spec:
               value: "kafka-python-rasa"
               {{- end }}
             {{- with .Values.eventIngestion.env }}
-            {{- toYaml . | nindent 12 }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
           {{- if .Values.eventIngestion.envFrom }}
           envFrom:

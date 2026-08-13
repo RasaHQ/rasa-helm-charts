@@ -96,11 +96,11 @@ spec:
               value: "kafka-python-rasa"
               {{- end }}
             {{- with .Values.eventIngestion.env }}
-            {{- toYaml . | nindent 12 }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
             {{- end }}
             {{- with .Values.app.env }}
-            {{- toYaml . | nindent 12 }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
           volumeMounts:
             - name: web-client-config

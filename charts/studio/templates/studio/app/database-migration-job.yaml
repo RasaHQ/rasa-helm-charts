@@ -75,6 +75,6 @@ spec:
             value: {{ ternary "false" "true" .Values.keycloak.enabled | quote }}
           {{- end }}
           {{- with .Values.app.migration.env }}
-          {{- toYaml . | nindent 10 }}
+          {{- include "studio.envList" . | nindent 10 }}
           {{- end }}
 {{- end }}

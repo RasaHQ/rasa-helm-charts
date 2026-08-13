@@ -70,7 +70,7 @@ spec:
             {{- include "studio.shared.env" . | nindent 12 }}
             {{- include "studio.keycloak.env" . | nindent 12 }}
             {{- with .Values.keycloak.env }}
-            {{- toYaml . | nindent 12 }}
+            {{- include "studio.envList" . | nindent 12 }}
             {{- end }}
           {{- if .Values.keycloak.envFrom }}
           envFrom:

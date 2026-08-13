@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-studio-backend
+  name: ingress-egress-from-kubelet-to-studio-app
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:
@@ -10,7 +10,7 @@ spec:
     - Egress
   podSelector:
     matchLabels:
-      app.kubernetes.io/component: studio-backend
+      app.kubernetes.io/component: studio-app
   egress:
     - to:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
@@ -19,7 +19,7 @@ spec:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.backend.service.port }}
+        port: {{ .Values.app.service.port }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
@@ -42,26 +42,4 @@ spec:
       ports:
       - protocol: TCP
         port: {{ .Values.keycloak.service.port }}
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: ingress-egress-from-kubelet-to-studio-web-client
-  namespace: {{ .Release.Namespace }}
-spec:
-  policyTypes:
-    - Ingress
-    - Egress
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/component: studio-web-client
-  egress:
-    - to:
-    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
-  ingress:
-    - from:
-    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
-      ports:
-      - protocol: TCP
-        port: {{ .Values.webClient.service.port }}
 {{- end }}

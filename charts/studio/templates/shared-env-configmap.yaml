@@ -1,3 +1,4 @@
+{{- if .Values.rasa.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,3 +7,4 @@ metadata:
 data:
   RASA_MODEL_SERVER_BASE_URL: "{{ include "studio.modelServiceTalkUrl" . }}"
   CORS_ORIGINS: "{{ include "studio.webClientUrl" . }}"
+{{- end }}

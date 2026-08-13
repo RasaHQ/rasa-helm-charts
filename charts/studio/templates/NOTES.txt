@@ -1,0 +1,43 @@
+CHART NAME: {{ .Chart.Name }}
+CHART VERSION: {{ .Chart.Version }}
+
+Thank you for using Studio Helm Chart!
+By installing and using this software, you agree to be bound by the terms and conditions of the End-User License Agreement (EULA) available at https://rasa.com/eula/. Please review the EULA carefully before proceeding.
+
+** Please be patient while the chart is being installed. **
+
+1. Access Studio:
+
+{{- if .Values.app.ingress.enabled }}
+{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}
+{{- else }}
+  kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "studio.fullname" . }}-app 4000:{{ .Values.app.service.port }}
+  echo "Visit http://127.0.0.1:4000 to use Studio"
+{{- end }}
+
+2. Breaking changes in chart 3.0.0:
+   - Values key `backend` is now `app`.
+   - Values key `webClient` is now nested under `app.webClient`.
+   - Do not set app container env `MS_API_URL`; use `app.webClient.config.MS_API_URL`
+     for the browser model-service URL (`window.MS_API_URL`).
+   - Resources `*-backend` are now `*-app`; the migration Job is `*-app-migration`;
+     and separate ingestion resources are `*-app-ingestion`.
+   - Studio uses the unified `studio` image. Chart 3.0.0 requires Studio >= 2.0.0;
+     use the documented tag placeholder until a promoted image tag is available.
+
+3. Event ingestion modes:
+   - `colocated` (default): runs inside the Studio app pod.
+   - `separate`: deploys a dedicated ingestion workload.
+   - `disabled`: does not run an ingestion consumer.
+   Do not run dual consumers; the chart fails validation when configuration would do so.
+
+4. Authentication:
+   - Better Auth is served by Studio at `/api/auth/*`.
+   - Keycloak remains temporarily available at `/auth` while `keycloak.enabled` is true.
+
+5. After upgrading, manually remove orphaned resources from the prior topology:
+
+   kubectl delete deployment,svc,ingress,sa,hpa -l app.kubernetes.io/component=studio-backend -n <ns>
+   kubectl delete deployment,svc,ingress,sa -l app.kubernetes.io/component=studio-web-client -n <ns>
+   kubectl delete deployment,sa,hpa -l app.kubernetes.io/component=studio-event-ingestion -n <ns>
+   # also delete old jobs/sa named *-database-migration / *-db-migration if present

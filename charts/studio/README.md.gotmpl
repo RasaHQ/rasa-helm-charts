@@ -5,14 +5,13 @@
 
 ## Architecture
 
-The Studio chart deploys up to five components. All components share a single `ingressHost` and the `studio-secrets` Kubernetes Secret.
+The Studio chart deploys a unified Studio image. The app serves both the API and the web client; all components share a single host set via `global.ingressHost` and the `studio-secrets` Kubernetes Secret.
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
-| **backend** | Studio API server — handles business logic and data persistence | `/api` | always on |
-| **web-client** | React frontend served by nginx | `/` | always on |
-| **keycloak** | Legacy identity provider, retained to support migrating existing users to the new backend's internal authentication | `/auth` | `keycloak.enabled` (default: `true`) |
-| **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.enabled` (default: `true`) |
+| **app** | Studio API server and web client — handles business logic and data persistence | `/api` and `/` | always on |
+| **keycloak** | Temporary legacy identity provider, retained while migrating existing users to Better Auth | `/auth` | `keycloak.enabled` (default: `true`) |
+| **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
 > **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
@@ -22,7 +21,7 @@ The Studio chart deploys up to five components. All components share a single `i
 - Kubernetes 1.30+
 - Helm 3.8.0+
 - A PostgreSQL instance (version 14+ recommended) accessible from the cluster
-- A Kafka broker (if `eventIngestion.enabled: true`) accessible from the cluster
+- A Kafka broker (unless `eventIngestion.mode: disabled`) accessible from the cluster
 - A Rasa Pro license key
 
 ## Before You Install
@@ -97,18 +96,20 @@ $ helm install my-release rasa/{{ template "chart.name" . }} --version {{ templa
 Minimum `values.yaml` to get Studio running (assumes `studio-secrets` already created):
 
 ```yaml
+global:
+  ingressHost: studio.example.com
+
 config:
-  ingressHost: &dns_hostname studio.example.com
   ingressClassName: nginx
   database:
     host: "postgres.example.com"
     username: "studio"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 
-# Disable event ingestion for a minimal setup — requires Kafka when enabled.
+# Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
 eventIngestion:
-  enabled: false
+  mode: disabled
 ```
 
 ```console
@@ -116,11 +117,11 @@ $ helm dependency build ./charts/studio
 $ helm install my-release rasa/{{ template "chart.name" . }} -f values.yaml
 ```
 
-After install, the backend migration Job runs automatically as a pre-install hook. Monitor progress with:
+After install, the app migration Job runs automatically as a pre-install hook. Monitor progress with:
 
 ```console
 $ kubectl get jobs
-$ kubectl logs job/my-release-studio-database-migration
+$ kubectl logs job/my-release-studio-app-migration
 ```
 
 ## Uninstalling the Chart
@@ -155,28 +156,47 @@ $ helm pull rasa/{{ template "chart.name" . }} --version {{ template "chart.vers
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
 
-## Important Notes on `ingressHost` Anchor
+## Ingress Host Configuration
 
-The `config.ingressHost` field in the `values.yaml` file is defined with an **anchor** (`&dns_hostname`) to ensure consistency and reusability across the Helm chart. 
+**Single-host install (recommended):** set one value and the Studio app,
+Keycloak and Rasa Pro model-service ingresses — plus every derived URL
+(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
+resolve from it:
 
-### Example:
 ```yaml
-# values.yaml
-config:
-  ingressHost: &dns_hostname INGRESS.HOST.NAME
+global:
+  ingressHost: studio.example.com
 ```
 
-### Guidelines:
-Do *NOT* delete or modify the anchor (`&dns_hostname`).
-If you need to change the ingress host, only modify the value (e.g., `INGRESS.HOST.NAME`) while keeping the anchor intact.
+**Split-host install** (model service on its own hostname): leave
+`global.ingressHost` unset — it overrides per-host values when set — and
+configure hosts individually:
+
+```yaml
+config:
+  ingressHost: studio.example.com        # Studio app + Keycloak
+rasa:
+  rasa:
+    ingress:
+      hosts:
+        - host: models.example.com       # model service
+          paths:
+            - path: /modelservice
+              pathType: Prefix
+```
+
+Per-component overrides (`app.ingress.hostName`, `keycloak.ingress.hostName`)
+remain available and take precedence over `config.ingressHost` when
+`global.ingressHost` is unset. No host value is enforced by the schema — an
+install without any host renders empty (match-all) ingress rules.
 
 ## Database Configuration
 
-Studio requires a PostgreSQL database for the backend services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
+Studio requires a PostgreSQL database for the app services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
 
 ### Database Configuration
 
-The `config.database` section defines the database connection settings used by Studio Backend:
+The `config.database` section defines the database connection settings used by the Studio app:
 
 ```yaml
 config:
@@ -187,7 +207,7 @@ config:
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 ```
 
 ### Using Secrets for Sensitive Values
@@ -203,11 +223,11 @@ config:
       secretKey: "DB_USERNAME"
 ```
 
-**Backend database name from secret:**
+**App database name from secret:**
 ```yaml
 config:
   database:
-    backendDatabaseName:
+    databaseName:
       secretName: "my-db-secret"
       secretKey: "DB_NAME"
 ```
@@ -234,7 +254,7 @@ config:
     useAwsIamAuth: "true"
     awsRegion: "us-east-1"
     iamDbUsername: "iam_db_user"
-    backendDatabaseName: "studio"
+    databaseName: "studio"
 ```
 
 **Note:** When `useAwsIamAuth` is set to `"true"`, the password field is not required as authentication is handled via IAM.
@@ -255,23 +275,15 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
-- Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the backend uses internally
+- Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
-When `rasa.enabled: false`, point Studio Backend at your own Rasa Pro instance:
-
-```yaml
-backend:
-  environmentVariables:
-    MS_API_URL:
-      value: "http://your-rasa-pro-service"
-```
-
-Override the web client model service URL when using an external instance or a custom ingress host:
+When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
-webClient:
-  environmentVariables:
-    MS_API_URL: "https://studio.example.com"
+app:
+  webClient:
+    config:
+      MS_API_URL: "https://models.example.com"
 ```
 
 > **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
@@ -301,35 +313,35 @@ rasa:
         value: "aws"
 ```
 
-### Studio Backend Model Service Environment Variables
+### Studio App Model Service Environment Variables
 
-The following environment variables control how Studio Backend polls and manages the Rasa Pro model service, configurable via `backend.environmentVariables`:
+The following environment variables control how Studio App polls and manages the Rasa Pro model service, configurable via `app.env`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `TRAINING_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for training status updates | `1000` |
-| `MODEL_POLLING_INTERVAL_MS` | Interval (ms) at which Studio Backend polls the model service for model status updates | `2000` |
+| `TRAINING_POLLING_INTERVAL_MS` | Interval (ms) at which Studio App polls the model service for training status updates | `1000` |
+| `MODEL_POLLING_INTERVAL_MS` | Interval (ms) at which Studio App polls the model service for model status updates | `2000` |
 | `MODEL_INACTIVE_AFTER_MS` | Time (ms) after which an unused model is marked as inactive | `3600000` (1 hour) |
 
 Example:
 
 ```yaml
-backend:
-  environmentVariables:
-    TRAINING_POLLING_INTERVAL_MS:
-      value: "2000"
-    MODEL_POLLING_INTERVAL_MS:
-      value: "5000"
-    MODEL_INACTIVE_AFTER_MS:
-      value: "7200000"  # 2 hours
+app:
+  env:
+    - name: TRAINING_POLLING_INTERVAL_MS
+      value: "10000"
+    - name: MODEL_POLLING_INTERVAL_MS
+      value: "60000"
+    - name: MODEL_INACTIVE_AFTER_MS
+      value: "600000"
 ```
 
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
 
-- backend `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
-- the web client's `API_ENDPOINT`
+- app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
+- the app-served web client's `API_ENDPOINT`
 - the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
 - `CORS_ORIGINS`
 
@@ -340,7 +352,7 @@ config:
   connectionType: "https"  # default: "http"
 ```
 
-It does **not** affect in-cluster service-to-service calls — those use hardcoded `http://` service names (e.g. backend → Rasa Pro at `http://rasapro`). If your ingress terminates TLS externally while pods communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`.
+It does **not** affect in-cluster service-to-service calls — those use hardcoded `http://` service names (e.g. app → Rasa Pro at `http://rasapro`). If your ingress terminates TLS externally while pods communicate over plain HTTP inside the cluster (the common setup), keep the default `"http"`.
 
 ## Event Ingestion and Kafka
 
@@ -348,48 +360,73 @@ The event-ingestion component consumes Rasa Pro conversation events from a Kafka
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_BOOTSTRAP_SERVERS:
+  env:
+    - name: KAFKA_BROKER_ADDRESS
       value: "kafka-broker:9092"
-    KAFKA_TOPIC:
+    - name: KAFKA_TOPIC
       value: "rasa-events"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SASL Authentication
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_SASL_MECHANISM:
-      value: "SCRAM-SHA-256"  # plain | SCRAM-SHA-256 | SCRAM-SHA-512
-    KAFKA_SASL_USERNAME:
-      value: "kafka-user"
-    KAFKA_SASL_PASSWORD:
-      secret:
-        name: studio-secrets
-        key: KAFKA_SASL_PASSWORD
+  env:
+    - name: KAFKA_BROKER_ADDRESS
+      value: "kafka.example.com:9092"
+    - name: KAFKA_SASL_MECHANISM
+      value: "SCRAM-SHA-512"
+    - name: KAFKA_SASL_USERNAME
+      value: "studio"
+    - name: KAFKA_SASL_PASSWORD
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: KAFKA_SASL_PASSWORD
+    - name: KAFKA_TOPIC
+      value: "rasa-events"
+    - name: KAFKA_DLQ_TOPIC
+      value: "rasa-events-dlq"
+    - name: KAFKA_GROUP_ID
+      value: "studio"
 ```
+
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
 ### SSL/TLS
 
 ```yaml
 eventIngestion:
-  environmentVariables:
-    KAFKA_ENABLE_SSL:
+  env:
+    - name: KAFKA_ENABLE_SSL
       value: "true"
-    KAFKA_REJECT_UNAUTHORIZED:
+    - name: KAFKA_CUSTOM_SSL
+      value: "true"
+    - name: KAFKA_REJECT_UNAUTHORIZED
       value: "true"
     # Mount custom certificates via eventIngestion.volumes / eventIngestion.volumeMounts
     # then reference the paths below:
-    KAFKA_CA_FILE:
+    - name: KAFKA_CA_FILE
       value: "/etc/ssl/kafka/ca.crt"
-    KAFKA_CERT_FILE:
+    - name: KAFKA_CERT_FILE
       value: "/etc/ssl/kafka/tls.crt"
-    KAFKA_KEY_FILE:
+    - name: KAFKA_KEY_FILE
       value: "/etc/ssl/kafka/tls.key"
 ```
 
-To disable event ingestion entirely: `eventIngestion.enabled: false`.
+> **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
+
+Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
+
+**Which keys apply when:**
+
+| Applies when | Keys |
+| --- | --- |
+| Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
+| Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
 
 ## Network Policies
 
@@ -410,24 +447,24 @@ When enabled, three policies are created:
 
 ## Database Migration
 
-The backend runs a `pre-install,pre-upgrade` Helm hook Job that applies database schema migrations before any pods start. On first install this job creates all tables; on upgrades it applies incremental migrations.
+The app runs a `pre-install,pre-upgrade` Helm hook Job that applies database schema migrations before any pods start. On first install this job creates all tables; on upgrades it applies incremental migrations.
 
 Monitor migration progress:
 
 ```console
 $ kubectl get jobs
-$ kubectl logs job/<release-name>-studio-database-migration
+$ kubectl logs job/<release-name>-studio-app-migration
 ```
 
 **If a migration fails**, the job is preserved for debugging — inspect the logs before retrying:
 
 ```console
-$ kubectl logs job/<release-name>-studio-database-migration
+$ kubectl logs job/<release-name>-studio-app-migration
 ```
 
 Once you have identified and resolved the root cause, re-run `helm upgrade`. The failed job is automatically cleaned up before the next migration attempt.
 
-Enable `backend.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
+Enable `app.migration.waitForIt: true` to make the migration job wait for PostgreSQL to be reachable before running. Useful when the database may not be immediately available at deploy time.
 
 ## Upgrading
 
@@ -441,5 +478,56 @@ $ helm upgrade my-release rasa/{{ template "chart.name" . }} --version <new-vers
 ```
 
 Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
+
+### Upgrading to chart 3.0.0
+
+Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
+
+```yaml
+# Before
+webClient:
+  environmentVariables:
+    MS_API_URL: "https://studio.example.com"
+
+# After
+app:
+  webClient:
+    config:
+      MS_API_URL: "https://studio.example.com"
+```
+
+Additional breaking changes in 3.0.0:
+
+- Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
+  `app.migration.environmentVariables`, `eventIngestion.environmentVariables` and
+  `keycloak.environmentVariables` were removed — define entries under `app.env`,
+  `app.migration.env`, `eventIngestion.env`, `keycloak.env` as `- name/value` or
+  `- name/valueFrom.secretKeyRef` (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
+  Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
+  list replaces the chart defaults wholesale — copy the defaults you want to keep.
+- `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
+  `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
+  always render as quoted strings in config.js.
+- `SKIP_KEYCLOAK` on the migration Job is derived from `keycloak.enabled`
+  (`"false"` when enabled, `"true"` when disabled). Add a `SKIP_KEYCLOAK` entry to
+  `app.migration.env` only to override the derived value (e.g. the Keycloak
+  database was created manually).
+- `config.database.host` must be set to a real host; empty values are rejected by the
+  values schema at install time.
+- `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
+  only overrides the appVersion-derived image tag. The migration Job is bounded by
+  `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
+- The `&dns_hostname` YAML anchor was removed. For a single-host install set
+  **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
+  ingresses and every derived URL (`window.MS_API_URL`,
+  `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
+  service on its own hostname) leave `global.ingressHost` unset and set
+  `config.ingressHost` (app/Keycloak) plus `rasa.rasa.ingress.hosts[0].host`
+  (model service) — `global.ingressHost` overrides the per-host model-service
+  value when set, so the two are mutually exclusive by design.
+
+Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
+
+Helm does not delete resources that disappeared from the previous topology. After upgrade, remove the old backend, web-client, and event-ingestion resources as described in the chart release notes (`helm get notes <release-name>`).
 
 {{ template "chart.valuesSection" . }}

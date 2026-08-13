@@ -5,16 +5,16 @@ A guide for AI coding agents working on Rasa Helm Charts.
 ## Project Overview
 
 This repository contains Helm charts for deploying Rasa products on Kubernetes:
-- **Rasa Studio** (`charts/studio/`) - Studio deployment chart
-- **Rasa Pro** (`charts/rasa/`) - Rasa Pro deployment chart  
-- **Operator Kits** (`charts/op-kits/`) - Operator Kits chart for PostgreSQL, Kafka, and related operators
+- **Rasa Studio** (`charts/studio/`) — chart 3.x: unified `app` Deployment (API + web client, Better Auth), optional Keycloak for migration (`keycloak.enabled`), event ingestion via `eventIngestion.mode` (`colocated` | `separate` | `disabled`), optional Rasa Pro OCI subchart (`rasa.enabled`)
+- **Rasa Pro** (`charts/rasa/`) — Rasa Pro server, action-server, duckling, rasa-pro-services
+- **Operator Kits** (`charts/op-kits/`) — CR wrappers for PostgreSQL (CloudNativePG), Kafka (Strimzi), and Valkey; operators must be pre-installed
 
-For user-facing documentation, see [README.md](README.md). For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md).
+For user-facing documentation, see [README.md](README.md). For contribution guidelines, see [CONTRIBUTING.md](CONTRIBUTING.md). For denser agent architecture notes (Helm 4, CI, Studio helpers), see [CLAUDE.md](CLAUDE.md).
 
 ## Prerequisites
 
 - Kubernetes 1.30+
-- Helm 3.2.0+
+- Helm 3.2.0+ (Studio chart documents Helm 3.8.0+)
 - Python 3.11.2 (for pre-commit hooks)
 - [pre-commit](https://pre-commit.com/) tool
 - [helm-docs](https://github.com/norwoodj/helm-docs) tool
@@ -80,7 +80,8 @@ ct list-changed --config ct.yaml
 ### Generate Helm templates
 
 ```bash
-helm template ./charts/<CHART> --output-dir ./output
+# Pass --kube-version so output matches CI (Snyk uses 1.29.0)
+helm template ./charts/<CHART> --output-dir ./output --kube-version 1.29.0
 ```
 
 Useful for debugging and security scanning.
@@ -126,17 +127,23 @@ enabled: false
 
 The `# --` prefix is used by helm-docs to generate README.md documentation.
 
+### Values Schema (`values.schema.json`)
+
+`charts/studio/` and `charts/rasa/` ship `values.schema.json` (op-kits has none). Update the schema when adding values. Schemas use draft-07 with `#/definitions/...` refs (not `$defs`). Defaults must satisfy the schema — `helm lint --strict` validates them.
+
 ### Chart Version Management
 
 - **Always increment** the `version` field in `charts/<CHART>/Chart.yaml` when making changes
 - Use semantic versioning format (e.g., `1.3.2`, `2.2.2`)
-- CI checks prevent release candidate versions (`-rc`) in certain branches
+- On `release/*` branches, use `-rc.X` suffixes (see Version Management below)
+- CI **blocks** `-rc` versions from merging to `main`
 
 ### README Generation
 
 - Each chart has a `README.md.gotmpl` template file
 - README.md files are auto-generated from `README.md.gotmpl` and `values.yaml` comments
 - Always commit generated README.md files after running pre-commit
+- Never manually edit `README.md` — edit `README.md.gotmpl` and `values.yaml` `# --` comments
 
 ## Chart Structure Conventions
 
@@ -146,33 +153,47 @@ Each chart follows this structure:
 charts/<CHART>/
 ├── Chart.yaml          # Chart metadata and dependencies
 ├── values.yaml         # Default values with helm-docs comments
+├── values.schema.json  # Input validation (studio, rasa only)
 ├── README.md.gotmpl    # Template for auto-generated README
 ├── README.md           # Auto-generated documentation
 ├── templates/          # Kubernetes resource templates
-│   ├── _helpers.tpl   # Helper template functions
-│   ├── tests/         # Test templates
+│   ├── _helpers.tpl    # Helper template functions (rasa: templates/helpers/)
+│   ├── tests/          # Test templates
 │   └── network-policy/ # Network policy templates
 └── secrets.yaml        # Secrets template (some charts)
 ```
 
+Studio nests workloads under `templates/studio/{app,keycloak,event-ingestion}/` plus `templates/studio/_env.tpl`. Chart 3.0 notes:
+- `backend` → `app`; no separate web-client Deployment (`app.webClient` ConfigMap mount only)
+- `eventIngestion.enabled` removed — use `eventIngestion.mode`
+- Auth: Better Auth on the app; Keycloak optional for migration
+
 ### Chart Dependencies
 
 - Dependencies are declared in `Chart.yaml` under the `dependencies` section
-- Some charts (like `studio`) have locked dependencies in `Chart.lock`
+- Studio locks its Rasa OCI dependency in `Chart.lock`
 - Run `helm dependency build` after modifying dependencies
+
+## Helm 4 Compatibility
+
+Charts must lint under **both Helm 3 and Helm 4** (CI: Helm 3.15.2 via `ct lint`, Helm 4.2.0 via `helm lint --strict`):
+
+- **Never mutate `.Values`** — Helm 4 makes them read-only; use a local `deepCopy`/`merge` dict
+- **Don't branch on `.Capabilities.KubeVersion` for API versions** — hardcode `networking.k8s.io/v1`
+- Prefer `deepCopy` over `toYaml | fromYaml` when copying values maps
+- OCI release action is still Helm 3.15.2; `helm registry login` takes a domain only in Helm 4
 
 ## Testing Instructions
 
 ### Before Committing
 
-1. Run pre-commit hooks:
+1. Increment chart `version` in `Chart.yaml`
+2. Run `helm lint --strict charts/<CHART>`
+3. Run pre-commit hooks:
    ```bash
    pre-commit run --all-files
    ```
-
-2. Verify README.md files are updated and reflect your changes
-
-3. Commit the generated README.md files along with your changes
+4. Commit the generated README.md files along with your changes
 
 ### Before Creating a Pull Request
 
@@ -194,9 +215,10 @@ charts/<CHART>/
 
 The CI pipeline automatically runs:
 
-- **Chart linting**: `ct lint --config ct.yaml` (only on changed charts)
-- **Snyk IAC scanning**: Security scanning of generated Helm templates
-- **Version checks**: Ensures version increments and prevents RC versions in certain branches
+- **Chart linting (Helm 3)**: `ct lint --config ct.yaml` on changed charts (`check-version-increment: true`)
+- **Chart linting (Helm 4)**: `helm lint --strict` on studio, rasa, and op-kits
+- **Snyk IAC scanning**: renders templates with `--kube-version 1.29.0`, then scans
+- **RC gate** (`check-rc.yaml`): blocks `-rc` chart versions from merging to `main`
 
 ## Version Management
 
@@ -212,10 +234,14 @@ When making changes to a chart:
 
 3. The CI will validate version increments automatically
 
-### Release Candidate Versions
+### Release Candidate Versions (`release/*`)
 
-- CI checks prevent `-rc` versions in certain branches
-- Use standard semantic versioning for releases
+On `release/` branches, increment once and append `-rc.X`:
+- Start: `2.0.2` → `2.0.3-rc.0`
+- Each subsequent push: bump the rc counter (`-rc.1`, `-rc.2`, …)
+- Before merging to `main`: drop the `-rc.X` suffix (final `2.0.3`)
+
+CI blocks `-rc` suffixes on `main`.
 
 ## Contribution Workflow
 
@@ -245,6 +271,8 @@ When making changes to a chart:
 
 7. **Create pull request**
 
+Commit messages follow [Conventional Commits](https://www.conventionalcommits.org/) with chart scope (`studio`, `rasa`, `op-kits`). See [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Important Notes
 
 ### README.md Files
@@ -256,7 +284,7 @@ When making changes to a chart:
 ### Chart Dependencies
 
 - Chart dependencies are managed via the `dependencies` section in `Chart.yaml`
-- Some charts (like `studio`) have locked dependencies in `Chart.lock`
+- Studio has locked dependencies in `Chart.lock`
 - Run `helm dependency build` after modifying dependencies
 
 ### Security Scanning
@@ -270,6 +298,16 @@ When making changes to a chart:
 - Chart-testing (`ct`) is configured in `ct.yaml`
 - Only changed charts are tested to speed up CI
 - Test templates are located in `templates/tests/` directories
+
+### Secret References
+
+```yaml
+password:
+  secretName: "my-secrets"
+  secretKey: "SECRET_KEY"
+```
+
+Studio app auth uses `app.authSecret` the same way (`AUTH_SECRET`).
 
 ## Troubleshooting
 

@@ -19,14 +19,13 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 tag: ""
 
 config:
-  # -- Fallback host name for the Studio app and Keycloak ingress resources.
-  # PREFER global.ingressHost: for a single-host install set that one value
-  # and every ingress and derived URL (app, Keycloak, Rasa Pro model service)
-  # follows it. Set config.ingressHost (instead of global.ingressHost) only
-  # for split-host installs where the model service lives on its own hostname
-  # via rasa.rasa.ingress.hosts[0].host — global.ingressHost must stay unset
-  # in that topology because it overrides the per-host model-service value.
-  ingressHost: INGRESS.HOST.NAME
+  # -- (string) Optional host name override for the Studio app and Keycloak
+  # ingress resources — leave empty and set global.ingressHost instead for a
+  # single-host install (the normal case). Set config.ingressHost (with
+  # global.ingressHost UNSET) only for split-host installs where the model
+  # service lives on its own hostname via rasa.rasa.ingress.hosts[0].host —
+  # global.ingressHost overrides that per-host value when set.
+  ingressHost: ""
 
   # -- Define the ingress annotations to be used for ALL the ingress resources.
   # These annotations will be applied to all ingress resources created by this chart.

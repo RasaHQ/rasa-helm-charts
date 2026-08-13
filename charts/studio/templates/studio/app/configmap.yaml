@@ -5,14 +5,12 @@ metadata:
 data:
   windowVariables: |
     window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}/api";
-    {{- with .Values.app.webClient.config.MS_API_URL }}
-    window.MS_API_URL = {{ . | quote }};
-    {{- else }}
-    {{- if .Values.rasa.enabled }}
+    {{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" }}
+    window.MS_API_URL = {{ .Values.app.webClient.config.MS_API_URL | quote }};
+    {{- else if .Values.rasa.enabled }}
     window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
     {{- else }}
     window.MS_API_URL = "";
-    {{- end }}
     {{- end }}
     {{- range $key, $value := .Values.app.webClient.config }}
     {{- if hasPrefix "FEATURE_FLAG_" $key }}

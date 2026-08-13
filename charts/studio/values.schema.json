@@ -48,7 +48,8 @@
         },
         "valueFrom": {
           "description": "Source for the value (secretKeyRef, configMapKeyRef, fieldRef, resourceFieldRef)",
-          "type": "object"
+          "type": "object",
+          "minProperties": 1
         }
       },
       "not": {

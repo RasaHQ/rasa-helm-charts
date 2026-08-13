@@ -2,21 +2,6 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# Global values are shared with the Rasa Pro subchart (Helm propagates
-# `global.*` to every chart in the dependency tree).
-global:
-  # -- global.ingressHost is the single-host knob: set it once and the Studio
-  # app ingress, Keycloak ingress, Rasa Pro model-service ingress and every
-  # derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL,
-  # WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently
-  # overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host —
-  # leave it UNSET for split-host installs and use config.ingressHost +
-  # rasa.rasa.ingress.* instead.
-  ingressHost:
-  # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
-  # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  additionalDeploymentLabels: {}
-
 # -- (string) Override name of app
 nameOverride: ""
 # -- (string) Override the full qualified app name
@@ -32,6 +17,21 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # Studio ≥ 2.0.0). Empty (default) uses the chart's appVersion. Set an exact,
 # immutable tag to pin deployments independently of chart upgrades.
 tag: ""
+
+# Global values are shared with the Rasa Pro subchart (Helm propagates
+# `global.*` to every chart in the dependency tree).
+global:
+  # -- global.ingressHost is the single-host knob: set it once and the Studio
+  # app ingress, Keycloak ingress, Rasa Pro model-service ingress and every
+  # derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL,
+  # WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently
+  # overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host —
+  # leave it UNSET for split-host installs and use config.ingressHost +
+  # rasa.rasa.ingress.* instead.
+  ingressHost:
+  # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
+  # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+  additionalDeploymentLabels: {}
 
 config:
   # -- (string) Optional host name override for the Studio app and Keycloak

@@ -9,7 +9,7 @@ By installing and using this software, you agree to be bound by the terms and co
 1. Access Studio:
 
 {{- if .Values.app.ingress.enabled }}
-{{ .Values.config.connectionType }}://{{ .Values.app.ingress.hostName | default .Values.config.ingressHost }}
+{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}
 {{- else }}
   kubectl --namespace {{ .Release.Namespace }} port-forward service/{{ include "studio.fullname" . }}-app 4000:{{ .Values.app.service.port }}
   echo "Visit http://127.0.0.1:4000 to use Studio"

@@ -496,6 +496,14 @@ Additional breaking changes in 3.0.0:
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
   only overrides the appVersion-derived image tag. The migration Job is bounded by
   `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
+- The `&dns_hostname` YAML anchor was removed. For a single-host install set
+  **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
+  ingresses and every derived URL (`window.MS_API_URL`,
+  `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
+  service on its own hostname) leave `global.ingressHost` unset and set
+  `config.ingressHost` (app/Keycloak) plus `rasa.rasa.ingress.hosts[0].host`
+  (model service) — `global.ingressHost` overrides the per-host model-service
+  value when set, so the two are mutually exclusive by design.
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 

@@ -19,12 +19,13 @@ repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 tag: ""
 
 config:
-  # -- Defines the host name for the Studio app and Keycloak ingress resources.
-  # For a single-host install (model service served on the same host), setting
-  # only this value is enough: the model-service URL falls back to it. To pin
-  # the Rasa Pro model-service ingress to an exact host as well, set
-  # global.ingressHost — it propagates to the rasa subchart natively and takes
-  # precedence in the model-service URL derivation.
+  # -- Fallback host name for the Studio app and Keycloak ingress resources.
+  # PREFER global.ingressHost: for a single-host install set that one value
+  # and every ingress and derived URL (app, Keycloak, Rasa Pro model service)
+  # follows it. Set config.ingressHost (instead of global.ingressHost) only
+  # for split-host installs where the model service lives on its own hostname
+  # via rasa.rasa.ingress.hosts[0].host — global.ingressHost must stay unset
+  # in that topology because it overrides the per-host model-service value.
   ingressHost: INGRESS.HOST.NAME
 
   # -- Define the ingress annotations to be used for ALL the ingress resources.
@@ -980,11 +981,14 @@ global:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
-  # -- global.ingressHost pins the Rasa Pro model-service ingress host and the
-  # derived model-service URLs (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL)
-  # to one value — Helm propagates it to the rasa subchart natively, whose
-  # ingress renders `global.ingressHost | default .host`. Leave unset for
-  # split-host installs (explicit rasa.rasa.ingress.hostName/hosts win then).
+  # -- global.ingressHost is the single-host knob: set it once and the Studio
+  # app ingress, Keycloak ingress, Rasa Pro model-service ingress (Helm
+  # propagates globals to the subchart natively) and every derived URL
+  # (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS)
+  # resolve from it. WARNING: when set it silently overrides per-component
+  # hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for
+  # split-host installs and use config.ingressHost + rasa.rasa.ingress.*
+  # instead.
   ingressHost:
 
 # -- Controls whether the pod may use the node network namespace

@@ -341,8 +341,6 @@ Resolve the model service ingress host
 {{- $globalHost -}}
 {{- else if $firstHost -}}
 {{- $firstHost -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 
@@ -445,8 +443,6 @@ Resolve the Studio App ingress host.
 {{- $globalHost -}}
 {{- else if .Values.app.ingress.hostName -}}
 {{- .Values.app.ingress.hostName -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 
@@ -459,8 +455,6 @@ Resolve the Keycloak ingress host (same precedence as studio.appHost).
 {{- $globalHost -}}
 {{- else if .Values.keycloak.ingress.hostName -}}
 {{- .Values.keycloak.ingress.hostName -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 

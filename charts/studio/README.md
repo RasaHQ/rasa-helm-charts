@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.20](https://img.shields.io/badge/Version-3.0.0--rc.20-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.21](https://img.shields.io/badge/Version-3.0.0--rc.21-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.20
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.21
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.20
+$ helm install my-release rasa/studio --version 3.0.0-rc.21
 ```
 
 ## Quick Start
@@ -142,13 +142,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.20
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.21
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.20
+$ helm pull rasa/studio --version 3.0.0-rc.21
 ```
 
 ## General Configuration
@@ -174,8 +174,12 @@ global:
 configure hosts individually:
 
 ```yaml
-config:
-  ingressHost: studio.example.com        # Studio app + Keycloak
+app:
+  ingress:
+    hostName: studio.example.com         # Studio app
+keycloak:
+  ingress:
+    hostName: studio.example.com         # Keycloak (while enabled)
 rasa:
   rasa:
     ingress:
@@ -186,10 +190,11 @@ rasa:
               pathType: Prefix
 ```
 
-Per-component overrides (`app.ingress.hostName`, `keycloak.ingress.hostName`)
-remain available and take precedence over `config.ingressHost` when
-`global.ingressHost` is unset. No host value is enforced by the schema — an
-install without any host renders empty (match-all) ingress rules.
+Host resolution is two-level: `global.ingressHost` wins when set; otherwise
+each ingress uses its own host (`app.ingress.hostName`,
+`keycloak.ingress.hostName`, `rasa.rasa.ingress.hosts[0].host`). No host value
+is enforced by the schema — an install without any host renders empty
+(match-all) ingress rules and relative browser URLs.
 
 ## Database Configuration
 
@@ -518,14 +523,17 @@ Additional breaking changes in 3.0.0:
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
   only overrides the appVersion-derived image tag. The migration Job is bounded by
   `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
-- The `&dns_hostname` YAML anchor was removed. For a single-host install set
+- The `&dns_hostname` YAML anchor and its `config.ingressHost` key were
+  **removed** — a value still set there is silently ignored, so move it
+  before upgrading. For a single-host install set
   **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
   ingresses and every derived URL (`window.MS_API_URL`,
   `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
   service on its own hostname) leave `global.ingressHost` unset and set
-  `config.ingressHost` (app/Keycloak) plus `rasa.rasa.ingress.hosts[0].host`
-  (model service) — `global.ingressHost` overrides the per-host model-service
-  value when set, so the two are mutually exclusive by design.
+  `app.ingress.hostName` (plus `keycloak.ingress.hostName` while Keycloak is
+  enabled) and `rasa.rasa.ingress.hosts[0].host` (model service) —
+  `global.ingressHost` overrides the per-host values when set, so the two
+  are mutually exclusive by design.
 
 Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 
@@ -636,7 +644,6 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. Can be specified as a plain string value or as a secret reference. Plain value example: username: "studio" Secret reference example: username:   secretName: "my-secret"   secretKey: "DB_USERNAME" | `""` |
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
-| config.ingressHost | string | Optional host name override for the Studio app and Keycloak ingress resources — leave empty and set global.ingressHost instead for a single-host install (the normal case). Set config.ingressHost (with global.ingressHost UNSET) only for split-host installs where the model service lives on its own hostname via rasa.rasa.ingress.hosts[0].host — global.ingressHost overrides that per-host value when set. | `""` |
 | config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new app's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
 | config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
@@ -687,7 +694,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress, Keycloak ingress, Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use config.ingressHost + rasa.rasa.ingress.* instead. | `nil` |
+| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress, Keycloak ingress, Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, keycloak.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecret defines repository pull secrets | `[]` |
 | keycloak.additionalContainers | list | keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |

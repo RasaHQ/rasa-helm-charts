@@ -26,22 +26,15 @@ global:
   # derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL,
   # WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently
   # overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host —
-  # leave it UNSET for split-host installs and use config.ingressHost +
-  # rasa.rasa.ingress.* instead.
+  # leave it UNSET for split-host installs and use the per-ingress hosts
+  # (app.ingress.hostName, keycloak.ingress.hostName,
+  # rasa.rasa.ingress.hosts[0].host) instead.
   ingressHost:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
 
 config:
-  # -- (string) Optional host name override for the Studio app and Keycloak
-  # ingress resources — leave empty and set global.ingressHost instead for a
-  # single-host install (the normal case). Set config.ingressHost (with
-  # global.ingressHost UNSET) only for split-host installs where the model
-  # service lives on its own hostname via rasa.rasa.ingress.hosts[0].host —
-  # global.ingressHost overrides that per-host value when set.
-  ingressHost: ""
-
   # -- Define the ingress annotations to be used for ALL the ingress resources.
   # These annotations will be applied to all ingress resources created by this chart.
   # Example:
@@ -1097,7 +1090,7 @@ rasa:
         # Empty host = the rasa ingress rule matches all hosts; set
         # global.ingressHost (preferred, single knob) or this host directly
         # to pin an exact host. The model-service URL derivation follows:
-        # global.ingressHost > this host > config.ingressHost.
+        # global.ingressHost > this host.
         - host: ""
           paths:
             - path: /modelservice

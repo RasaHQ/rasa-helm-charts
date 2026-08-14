@@ -218,10 +218,6 @@
       "type": "object",
       "required": ["database"],
       "properties": {
-        "ingressHost": {
-          "description": "Optional host override for the Studio app and Keycloak ingresses (split-host installs). Prefer global.ingressHost for single-host installs.",
-          "type": "string"
-        },
         "ingressAnnotations": {
           "description": "Annotations applied to all ingress resources",
           "type": "object"

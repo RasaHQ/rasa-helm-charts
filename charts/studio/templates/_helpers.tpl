@@ -386,17 +386,6 @@ re-populated from the subchart's own defaults, which never define `enabled`
 {{- end -}}
 
 {{/*
-Fail fast on the removed legacy config.ingressHost key. Only a non-empty
-value fails: the empty-string default shipped in earlier 3.0 RCs, so a
-lingering `ingressHost: ""` in a copied values file is a harmless no-op.
-*/}}
-{{- define "studio.config.validate" -}}
-{{- if dig "ingressHost" "" (.Values.config | default dict) -}}
-{{- fail "config.ingressHost was removed; set global.ingressHost (one host for everything) or per-ingress hosts (app.ingress.hostName / keycloak.ingress.hostName / rasa.rasa.ingress.hosts[0].host) for split-host installs" -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
 Validate event-ingestion topology configuration.
 */}}
 {{- define "studio.eventIngestion.validate" -}}

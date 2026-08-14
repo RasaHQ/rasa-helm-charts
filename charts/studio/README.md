@@ -524,8 +524,8 @@ Additional breaking changes in 3.0.0:
   only overrides the appVersion-derived image tag. The migration Job is bounded by
   `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
 - The `&dns_hostname` YAML anchor and its `config.ingressHost` key were
-  **removed** — templates fail with a migration message if a non-empty
-  `config.ingressHost` is still set. For a single-host install set
+  **removed** — a value still set there is silently ignored, so move it
+  before upgrading. For a single-host install set
   **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
   ingresses and every derived URL (`window.MS_API_URL`,
   `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model

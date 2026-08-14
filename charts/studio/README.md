@@ -174,8 +174,12 @@ global:
 configure hosts individually:
 
 ```yaml
-config:
-  ingressHost: studio.example.com        # Studio app + Keycloak
+app:
+  ingress:
+    hostName: studio.example.com         # Studio app
+keycloak:
+  ingress:
+    hostName: studio.example.com         # Keycloak (while enabled)
 rasa:
   rasa:
     ingress:

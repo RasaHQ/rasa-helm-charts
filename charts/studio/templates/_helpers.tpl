@@ -341,8 +341,6 @@ Resolve the model service ingress host
 {{- $globalHost -}}
 {{- else if $firstHost -}}
 {{- $firstHost -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 
@@ -384,6 +382,17 @@ re-populated from the subchart's own defaults, which never define `enabled`
 {{- define "studio.rasa.validate" -}}
 {{- if not (hasKey (.Values.rasa | default dict) "enabled") -}}
 {{- fail "rasa.enabled is not set — was `rasa: null` used? Nulling the key deletes it and re-enables the Rasa Pro subchart with default values. Disable it with `rasa.enabled: false` instead" -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Fail fast on the removed legacy config.ingressHost key. Only a non-empty
+value fails: the empty-string default shipped in earlier 3.0 RCs, so a
+lingering `ingressHost: ""` in a copied values file is a harmless no-op.
+*/}}
+{{- define "studio.config.validate" -}}
+{{- if dig "ingressHost" "" (.Values.config | default dict) -}}
+{{- fail "config.ingressHost was removed; set global.ingressHost (one host for everything) or per-ingress hosts (app.ingress.hostName / keycloak.ingress.hostName / rasa.ingress.hosts[0].host) for split-host installs" -}}
 {{- end -}}
 {{- end -}}
 
@@ -445,8 +454,6 @@ Resolve the Studio App ingress host.
 {{- $globalHost -}}
 {{- else if .Values.app.ingress.hostName -}}
 {{- .Values.app.ingress.hostName -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 
@@ -459,8 +466,6 @@ Resolve the Keycloak ingress host (same precedence as studio.appHost).
 {{- $globalHost -}}
 {{- else if .Values.keycloak.ingress.hostName -}}
 {{- .Values.keycloak.ingress.hostName -}}
-{{- else -}}
-{{- .Values.config.ingressHost -}}
 {{- end -}}
 {{- end -}}
 

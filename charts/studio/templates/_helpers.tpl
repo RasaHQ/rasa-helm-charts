@@ -392,7 +392,7 @@ lingering `ingressHost: ""` in a copied values file is a harmless no-op.
 */}}
 {{- define "studio.config.validate" -}}
 {{- if dig "ingressHost" "" (.Values.config | default dict) -}}
-{{- fail "config.ingressHost was removed; set global.ingressHost (one host for everything) or per-ingress hosts (app.ingress.hostName / keycloak.ingress.hostName / rasa.ingress.hosts[0].host) for split-host installs" -}}
+{{- fail "config.ingressHost was removed; set global.ingressHost (one host for everything) or per-ingress hosts (app.ingress.hostName / keycloak.ingress.hostName / rasa.rasa.ingress.hosts[0].host) for split-host installs" -}}
 {{- end -}}
 {{- end -}}
 

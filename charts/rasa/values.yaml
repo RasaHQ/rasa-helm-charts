@@ -341,7 +341,7 @@ rasa:
           - path: /api
             pathType: Prefix
         extraPaths: []
-    # -- ingress.tls specifies the TLS configuration for ingress
+    # -- ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover.
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:

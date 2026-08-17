@@ -704,6 +704,21 @@ global:
 
 All three apply to the Rasa Pro server ingress only. `actionServer.ingress` and `duckling.ingress` are unaffected and must be configured through their own blocks.
 
+`global.ingressHost` sets the ingress rule host and nothing else. TLS is a separate list that the chart does not derive from it, so a single-host deployment repeats the hostname under `rasa.ingress.tls`:
+
+```yaml
+global:
+  ingressHost: rasa.example.com
+rasa:
+  ingress:
+    tls:
+      - secretName: rasa-tls
+        hosts:
+          - rasa.example.com
+```
+
+Keep the two in sync. If `global.ingressHost` changes and `rasa.ingress.tls[*].hosts` is left behind, the chart still renders and applies without complaint: the ingress serves the new host while the TLS section claims the old one, so the controller finds no certificate matching the host it serves and falls back to its default. The symptom is a browser certificate warning rather than a Helm error, which makes it easy to miss.
+
 Because Helm propagates `global` down the dependency tree after user overrides are merged, a parent chart that bundles this one can set these under its own `global` block and have them reach this chart. That is how Rasa Studio drives the host of the model-service ingress.
 
 ### Resources and Autoscaling

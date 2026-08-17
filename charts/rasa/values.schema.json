@@ -245,7 +245,8 @@
         },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "rasaProServices": {
@@ -322,7 +323,8 @@
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "duckling": {
@@ -363,7 +365,8 @@
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "actionServer": {
@@ -404,7 +407,8 @@
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     }
   }

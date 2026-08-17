@@ -120,4 +120,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      {{- with .Values.actionServer.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "rasa.topologySpreadConstraints" (dict "constraints" . "selectorLabels" (include "rasa.actionServer.selectorLabels" $)) | nindent 8 }}
+      {{- end }}
 {{- end }}

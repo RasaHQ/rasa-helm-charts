@@ -228,6 +228,9 @@ rasa:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- rasa.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
@@ -306,6 +309,16 @@ rasa:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
+
+  # -- rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
 
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -542,6 +555,9 @@ rasaProServices:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) rasaProServices.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- rasaProServices.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
@@ -613,6 +629,16 @@ rasaProServices:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
+
+  # -- rasaProServices.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa Pro Services container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
 
   # -- rasaProServices.resources specifies the resources limits and requests
   resources: {}
@@ -792,6 +818,9 @@ duckling:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) duckling.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- duckling.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/duckling: runtime/default
@@ -871,6 +900,16 @@ duckling:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
+
+  # -- duckling.lifecycle defines container lifecycle hooks (postStart / preStop) for the Duckling container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
 
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
@@ -1027,6 +1066,9 @@ actionServer:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) actionServer.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- actionServer.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/action-server: runtime/default
@@ -1111,6 +1153,16 @@ actionServer:
     timeoutSeconds: 5
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
+
+  # -- actionServer.lifecycle defines container lifecycle hooks (postStart / preStop) for the Action Server container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
 
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/

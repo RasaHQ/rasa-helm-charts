@@ -362,6 +362,40 @@ rasa:
 
 > **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the URL scheme and port in the `curl` command if you have changed `rasa.settings.scheme` or `rasa.settings.port` from their defaults.
 
+### Graceful Shutdown and Lifecycle Hooks
+
+Every component (`rasa`, `rasaProServices`, `actionServer`, `duckling`) accepts a pod-level `terminationGracePeriodSeconds` and a container-level `lifecycle` block. Both are unset by default, so the rendered manifests are unchanged unless you opt in.
+
+When Kubernetes deletes a pod it removes the pod from Service endpoints and sends `SIGTERM` at the same time, so in-flight requests can still arrive for a short window. A `preStop` sleep holds the container open long enough for the endpoint removal to propagate:
+
+```yaml
+rasa:
+  lifecycle:
+    preStop:
+      exec:
+        command: ["/bin/sh", "-c", "sleep 10"]
+  terminationGracePeriodSeconds: 60
+```
+
+Two rules of thumb when picking values:
+
+- Make the `preStop` sleep at least as long as `readinessProbe.periodSeconds` so load balancers have a full probe cycle to notice the pod is going away.
+- Keep `terminationGracePeriodSeconds` larger than the `preStop` duration plus the time your application needs to finish in-flight work. The `preStop` hook runs *inside* the grace period, so a hook longer than the grace period gets cut short by `SIGKILL`.
+
+Leaving `terminationGracePeriodSeconds` unset falls back to the Kubernetes default of 30 seconds.
+
+The `lifecycle` block is passed through verbatim, so any hook handler Kubernetes supports (`exec`, `httpGet`, `sleep`) works. `postStart` is available as well:
+
+```yaml
+actionServer:
+  lifecycle:
+    postStart:
+      exec:
+        command: ["/bin/sh", "-c", "echo action server starting"]
+```
+
+> **Note:** The hook applies to the component's main container only. Containers you supply through `initContainers` or `additionalContainers` can carry their own `lifecycle` block directly.
+
 ### Configuring Credentials and Endpoints via ConfigMap
 
 The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.

@@ -54,6 +54,9 @@ spec:
       securityContext:
         {{- omit .Values.duckling.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.duckling.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.duckling.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.duckling.initContainers }}
       initContainers:
         {{- toYaml .Values.duckling.initContainers | nindent 8 }}
@@ -87,6 +90,10 @@ spec:
           {{- if .Values.duckling.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.duckling.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.duckling.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.duckling.resources | nindent 12 }}

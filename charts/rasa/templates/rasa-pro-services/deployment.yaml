@@ -54,6 +54,9 @@ spec:
       securityContext:
         {{- omit .Values.rasaProServices.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.rasaProServices.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.rasaProServices.terminationGracePeriodSeconds }}
+      {{- end }}
       containers:
         - name: rasa-pro-services
           {{- if .Values.rasaProServices.containerSecurityContext.enabled }}
@@ -87,6 +90,10 @@ spec:
           {{- if .Values.rasaProServices.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.rasaProServices.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.rasaProServices.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.rasaProServices.resources | nindent 12 }}

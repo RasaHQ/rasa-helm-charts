@@ -54,6 +54,9 @@ spec:
       securityContext:
         {{- omit .Values.actionServer.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.actionServer.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.actionServer.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.actionServer.initContainers }}
       initContainers:
         {{- toYaml .Values.actionServer.initContainers | nindent 8 }}
@@ -87,6 +90,10 @@ spec:
           {{- if .Values.actionServer.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.actionServer.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.actionServer.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.actionServer.resources | nindent 12 }}

@@ -55,6 +55,9 @@ spec:
       securityContext:
         {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.rasa.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.rasa.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.rasa.initContainers }}
       initContainers:
         {{- toYaml .Values.rasa.initContainers | nindent 8 }}
@@ -103,6 +106,10 @@ spec:
           {{- if .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
             {{- omit .Values.rasa.readinessProbe "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          {{- with .Values.rasa.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.rasa.resources | nindent 12 }}

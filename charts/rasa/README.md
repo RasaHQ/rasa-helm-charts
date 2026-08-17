@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.5.0-rc.0](https://img.shields.io/badge/Version-2.5.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.5.0-rc.1](https://img.shields.io/badge/Version-2.5.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.5.0-rc.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.5.0-rc.1
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +90,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.5.0-rc.0
+helm install my-release rasa/rasa --version 2.5.0-rc.1
 ```
 
 ## Upgrading the Chart
@@ -438,7 +438,7 @@ Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 2.5.0-rc.0 \
+  --version 2.5.0-rc.1 \
   --set-file rasa.settings.endpointsRaw=./endpoints.yml \
   --set-file rasa.settings.credentialsRaw=./credentials.yml
 ```
@@ -450,7 +450,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 2.5.0-rc.0
+      targetRevision: 2.5.0-rc.1
       helm:
         fileParameters:
           - name: rasa.settings.endpointsRaw
@@ -687,6 +687,26 @@ rasa:
 
 The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
 
+#### Shared ingress settings
+
+The `global` block carries three ingress settings so an ingress class, a set of annotations and a host can be declared once instead of being repeated:
+
+```yaml
+global:
+  ingressClassName: nginx
+  ingressAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  ingressHost: rasa.example.com
+```
+
+`global.ingressClassName` and `global.ingressAnnotations` are defaults that `rasa.ingress` overrides. A non-empty `rasa.ingress.className` wins outright, and `rasa.ingress.annotations` wins per key while non-conflicting global annotations still merge in.
+
+> **Note:** `global.ingressHost` behaves differently. It overrides `rasa.ingress.hosts[*].host` instead of falling back to it, so leave it unset if you need per-host values.
+
+All three apply to the Rasa Pro server ingress only. `actionServer.ingress` and `duckling.ingress` are unaffected and must be configured through their own blocks.
+
+Because Helm propagates `global` down the dependency tree after user overrides are merged, a parent chart that bundles this one can set these under its own `global` block and have them reach this chart. That is how Rasa Studio drives the host of the model-service ingress.
+
 ### Resources and Autoscaling
 
 No resource requests or limits are set by default. For production, always set these explicitly:
@@ -908,7 +928,9 @@ The following table lists all configurable parameters for this chart and their d
 | duckling.volumes | list | duckling.volumes specify additional volumes to mount in the Duckling container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
 | fullnameOverride | string | fullnameOverride overrides the fully-qualified name prefix used for all chart resources. | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects. See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressHost | string |  | `nil` |
+| global.ingressAnnotations | object | global.ingressAnnotations defines annotations added to the Rasa Pro server ingress. Merged with rasa.ingress.annotations, which wins on key conflicts. Applies only to the rasa component. | `{}` |
+| global.ingressClassName | string | global.ingressClassName defines the ingress class for the Rasa Pro server ingress. Used only when rasa.ingress.className is empty. Applies only to the rasa component. | `""` |
+| global.ingressHost | string | global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component. | `nil` |
 | hostAliases | list | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable | `[]` |
 | hostNetwork | bool | hostNetwork controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecrets contains references to Secrets for pulling images from private registries. Applied to all components unless overridden at the component level. | `[]` |

@@ -143,7 +143,9 @@
       "additionalProperties": true,
       "properties": {
         "additionalDeploymentLabels": { "type": "object" },
-        "ingressHost": { "type": ["string", "null"] }
+        "ingressHost": { "type": ["string", "null"] },
+        "ingressAnnotations": { "type": ["object", "null"] },
+        "ingressClassName": { "type": ["string", "null"] }
       }
     },
     "networkPolicy": {

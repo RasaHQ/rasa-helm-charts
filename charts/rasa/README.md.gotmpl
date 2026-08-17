@@ -686,6 +686,26 @@ rasa:
 
 The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
 
+#### Shared ingress settings
+
+The `global` block carries three ingress settings so an ingress class, a set of annotations and a host can be declared once instead of being repeated:
+
+```yaml
+global:
+  ingressClassName: nginx
+  ingressAnnotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  ingressHost: rasa.example.com
+```
+
+`global.ingressClassName` and `global.ingressAnnotations` are defaults that `rasa.ingress` overrides. A non-empty `rasa.ingress.className` wins outright, and `rasa.ingress.annotations` wins per key while non-conflicting global annotations still merge in.
+
+> **Note:** `global.ingressHost` behaves differently. It overrides `rasa.ingress.hosts[*].host` instead of falling back to it, so leave it unset if you need per-host values.
+
+All three apply to the Rasa Pro server ingress only. `actionServer.ingress` and `duckling.ingress` are unaffected and must be configured through their own blocks.
+
+Because Helm propagates `global` down the dependency tree after user overrides are merged, a parent chart that bundles this one can set these under its own `global` block and have them reach this chart. That is how Rasa Studio drives the host of the model-service ingress.
+
 ### Resources and Autoscaling
 
 No resource requests or limits are set by default. For production, always set these explicitly:

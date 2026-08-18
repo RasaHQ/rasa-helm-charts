@@ -1057,7 +1057,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.image.tag | string | image.tag specifies image tag | `"3.17.0-latest"` |
+| rasa.image.tag | string | image.tag specifies image tag | `"3.18.3-latest"` |
 | rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |

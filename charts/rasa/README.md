@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.5.0-rc.3](https://img.shields.io/badge/Version-2.5.0--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.5.0](https://img.shields.io/badge/Version-2.5.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.5.0-rc.3
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.5.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +90,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.5.0-rc.3
+helm install my-release rasa/rasa --version 2.5.0
 ```
 
 ## Upgrading the Chart
@@ -373,9 +373,19 @@ When Kubernetes deletes a pod it removes the pod from Service endpoints and send
 rasa:
   lifecycle:
     preStop:
+      sleep:
+        seconds: 10
+  terminationGracePeriodSeconds: 60
+```
+
+The native `sleep` handler needs no shell or `sleep` binary in the image, which matters for images you do not build yourself. It has been enabled by default since Kubernetes 1.30, the minimum this chart supports, so no feature gate is required. The equivalent `exec` form remains available if you would rather run a real drain command than simply wait:
+
+```yaml
+rasa:
+  lifecycle:
+    preStop:
       exec:
         command: ["/bin/sh", "-c", "sleep 10"]
-  terminationGracePeriodSeconds: 60
 ```
 
 Two rules of thumb when picking values:
@@ -438,7 +448,7 @@ Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 2.5.0-rc.3 \
+  --version 2.5.0 \
   --set-file rasa.settings.endpointsRaw=./endpoints.yml \
   --set-file rasa.settings.credentialsRaw=./credentials.yml
 ```
@@ -450,7 +460,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 2.5.0-rc.3
+      targetRevision: 2.5.0
       helm:
         fileParameters:
           - name: rasa.settings.endpointsRaw

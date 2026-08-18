@@ -372,9 +372,19 @@ When Kubernetes deletes a pod it removes the pod from Service endpoints and send
 rasa:
   lifecycle:
     preStop:
+      sleep:
+        seconds: 10
+  terminationGracePeriodSeconds: 60
+```
+
+The native `sleep` handler needs no shell or `sleep` binary in the image, which matters for images you do not build yourself. It has been enabled by default since Kubernetes 1.30, the minimum this chart supports, so no feature gate is required. The equivalent `exec` form remains available if you would rather run a real drain command than simply wait:
+
+```yaml
+rasa:
+  lifecycle:
+    preStop:
       exec:
         command: ["/bin/sh", "-c", "sleep 10"]
-  terminationGracePeriodSeconds: 60
 ```
 
 Two rules of thumb when picking values:

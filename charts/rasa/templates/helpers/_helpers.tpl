@@ -78,6 +78,25 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
+Render topologySpreadConstraints, defaulting each entry's labelSelector to the
+component's own selector labels. A constraint with no labelSelector matches no
+pods, so the skew is always zero and the constraint would never bind.
+Usage: include "rasa.topologySpreadConstraints" (dict "constraints" <list> "selectorLabels" (include "rasa.<component>.selectorLabels" $))
+*/}}
+{{- define "rasa.topologySpreadConstraints" -}}
+{{- $selector := dict "matchLabels" (fromYaml .selectorLabels) -}}
+{{- $out := list -}}
+{{- range .constraints -}}
+{{- $constraint := deepCopy . -}}
+{{- if not (hasKey $constraint "labelSelector") -}}
+{{- $_ := set $constraint "labelSelector" $selector -}}
+{{- end -}}
+{{- $out = append $out $constraint -}}
+{{- end -}}
+{{- toYaml $out -}}
+{{- end }}
+
+{{/*
 Create the name of the service account to use
 */}}
 {{- define "rasa.serviceAccountName" -}}

@@ -54,6 +54,9 @@ spec:
       securityContext:
         {{- omit .Values.rasaProServices.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.rasaProServices.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.rasaProServices.terminationGracePeriodSeconds }}
+      {{- end }}
       containers:
         - name: rasa-pro-services
           {{- if .Values.rasaProServices.containerSecurityContext.enabled }}
@@ -88,6 +91,10 @@ spec:
           readinessProbe:
             {{- omit .Values.rasaProServices.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
+          {{- with .Values.rasaProServices.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.rasaProServices.resources | nindent 12 }}
           {{- if .Values.rasaProServices.volumeMounts }}
@@ -112,5 +119,9 @@ spec:
       {{- with .Values.rasaProServices.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.rasaProServices.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "rasa.topologySpreadConstraints" (dict "constraints" . "selectorLabels" (include "rasa.rasaProServices.selectorLabels" $)) | nindent 8 }}
       {{- end }}
 {{- end }}

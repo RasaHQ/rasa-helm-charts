@@ -54,6 +54,9 @@ spec:
       securityContext:
         {{- omit .Values.actionServer.podSecurityContext "enabled" | toYaml | nindent 8 }}
       {{- end }}
+      {{- if not (kindIs "invalid" .Values.actionServer.terminationGracePeriodSeconds) }}
+      terminationGracePeriodSeconds: {{ .Values.actionServer.terminationGracePeriodSeconds }}
+      {{- end }}
       {{- if .Values.actionServer.initContainers }}
       initContainers:
         {{- toYaml .Values.actionServer.initContainers | nindent 8 }}
@@ -88,6 +91,10 @@ spec:
           readinessProbe:
             {{- omit .Values.actionServer.readinessProbe "enabled" | toYaml | nindent 12 }}
           {{- end }}
+          {{- with .Values.actionServer.lifecycle }}
+          lifecycle:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.actionServer.resources | nindent 12 }}
           {{- if .Values.actionServer.volumeMounts }}
@@ -112,5 +119,9 @@ spec:
       {{- with .Values.actionServer.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.actionServer.topologySpreadConstraints }}
+      topologySpreadConstraints:
+        {{- include "rasa.topologySpreadConstraints" (dict "constraints" . "selectorLabels" (include "rasa.actionServer.selectorLabels" $)) | nindent 8 }}
       {{- end }}
 {{- end }}

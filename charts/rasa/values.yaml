@@ -29,7 +29,7 @@ rasa:
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.17.0-latest"
+    tag: "3.18.3-latest"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
@@ -228,6 +228,9 @@ rasa:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- rasa.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
@@ -307,6 +310,16 @@ rasa:
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
 
+  # -- rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
+
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -328,7 +341,7 @@ rasa:
           - path: /api
             pathType: Prefix
         extraPaths: []
-    # -- ingress.tls specifies the TLS configuration for ingress
+    # -- ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover.
     tls: []
     #  - secretName: chart-example-tls
     #    hosts:
@@ -384,6 +397,10 @@ rasa:
   # -- rasa.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+  # -- rasa.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
 
 # Settings for Rasa Pro Services
 rasaProServices:
@@ -542,6 +559,9 @@ rasaProServices:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) rasaProServices.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- rasaProServices.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
@@ -614,6 +634,16 @@ rasaProServices:
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
 
+  # -- rasaProServices.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa Pro Services container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
+
   # -- rasaProServices.resources specifies the resources limits and requests
   resources: {}
     # We usually recommend not to specify default resources and to leave this as a conscious
@@ -652,6 +682,10 @@ rasaProServices:
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
 
+  # -- rasaProServices.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
+
 # Network policy settings
 networkPolicy:
   # -- networkPolicy.enabled enables Kubernetes NetworkPolicy resources for all components. When true, only explicitly allowed traffic is permitted.
@@ -668,7 +702,12 @@ global:
   # -- global.additionalDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects.
   # See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
+  # -- global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component.
   ingressHost:
+  # -- global.ingressAnnotations defines annotations added to the Rasa Pro server ingress. Merged with rasa.ingress.annotations, which wins on key conflicts. Applies only to the rasa component.
+  ingressAnnotations: {}
+  # -- global.ingressClassName defines the ingress class for the Rasa Pro server ingress. Used only when rasa.ingress.className is empty. Applies only to the rasa component.
+  ingressClassName: ""
 
 # -- hostNetwork controls whether the pod may use the node network namespace
 hostNetwork: false
@@ -792,6 +831,9 @@ duckling:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) duckling.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- duckling.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/duckling: runtime/default
@@ -872,6 +914,16 @@ duckling:
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
 
+  # -- duckling.lifecycle defines container lifecycle hooks (postStart / preStop) for the Duckling container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
+
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -936,6 +988,10 @@ duckling:
   # -- duckling.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+  # -- duckling.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []
 
 actionServer:
   # -- actionServer.enabled enables Action Server deployment
@@ -1027,6 +1083,9 @@ actionServer:
     # If not set and create is true, a name is generated using the fullname template
     name: ""
 
+  # -- (int) actionServer.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
+  terminationGracePeriodSeconds:
+
   # -- actionServer.podAnnotations defines annotations to add to the pod
   podAnnotations: {}
     # container.apparmor.security.beta.kubernetes.io/action-server: runtime/default
@@ -1112,6 +1171,16 @@ actionServer:
     # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
     failureThreshold: 6
 
+  # -- actionServer.lifecycle defines container lifecycle hooks (postStart / preStop) for the Action Server container
+  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+  lifecycle: {}
+    # preStop:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "sleep 10"]
+    # postStart:
+    #   exec:
+    #     command: ["/bin/sh", "-c", "echo started"]
+
   # Configure the ingress resource that allows you to access the deployment installation.
   ## ref: http://kubernetes.io/docs/user-guide/ingress/
   ingress:
@@ -1176,3 +1245,7 @@ actionServer:
   # -- actionServer.affinity allows the deployment to schedule using affinity rules
   ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
   affinity: {}
+
+  # -- actionServer.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods.
+  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+  topologySpreadConstraints: []

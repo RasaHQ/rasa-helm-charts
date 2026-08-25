@@ -5,7 +5,7 @@ A guide for AI coding agents working on Rasa Helm Charts.
 ## Project Overview
 
 This repository contains Helm charts for deploying Rasa products on Kubernetes:
-- **Rasa Studio** (`charts/studio/`) — chart 3.x: unified `app` Deployment (API + web client, Better Auth), optional Keycloak for migration (`keycloak.enabled`), event ingestion via `eventIngestion.mode` (`colocated` | `separate` | `disabled`), optional Rasa Pro OCI subchart (`rasa.enabled`)
+- **Rasa Studio** (`charts/studio/`) — chart 3.x: unified `app` Deployment (API + web client, Better Auth), event ingestion via `eventIngestion.mode` (`colocated` | `separate` | `disabled`), optional Rasa Pro OCI subchart (`rasa.enabled`)
 - **Rasa Pro** (`charts/rasa/`) — Rasa Pro server, action-server, duckling, rasa-pro-services
 - **Operator Kits** (`charts/op-kits/`) — CR wrappers for PostgreSQL (CloudNativePG), Kafka (Strimzi), and Valkey; operators must be pre-installed
 
@@ -163,10 +163,10 @@ charts/<CHART>/
 └── secrets.yaml        # Secrets template (some charts)
 ```
 
-Studio nests workloads under `templates/studio/{app,keycloak,event-ingestion}/` plus `templates/studio/_env.tpl`. Chart 3.0 notes:
+Studio nests workloads under `templates/studio/{app,event-ingestion}/` plus `templates/studio/_env.tpl`. Chart 3.0 notes:
 - `backend` → `app`; no separate web-client Deployment (`app.webClient` ConfigMap mount only)
 - `eventIngestion.enabled` removed — use `eventIngestion.mode`
-- Auth: Better Auth on the app; Keycloak optional for migration
+- Auth: Better Auth on the app
 
 ### Chart Dependencies
 

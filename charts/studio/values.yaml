@@ -22,13 +22,12 @@ tag: ""
 # `global.*` to every chart in the dependency tree).
 global:
   # -- global.ingressHost is the single-host knob: set it once and the Studio
-  # app ingress, Keycloak ingress, Rasa Pro model-service ingress and every
+  # app ingress and Rasa Pro model-service ingress and every
   # derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL,
   # WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently
   # overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host —
   # leave it UNSET for split-host installs and use the per-ingress hosts
-  # (app.ingress.hostName, keycloak.ingress.hostName,
-  # rasa.rasa.ingress.hosts[0].host) instead.
+  # (app.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead.
   ingressHost:
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
@@ -78,10 +77,6 @@ config:
     password:
       secretName: "studio-secrets"
       secretKey: "DATABASE_PASSWORD"
-    # -- The database name for Keycloak user management service.
-    # This is used by Keycloak to store its user management data.
-    # Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction.
-    keycloakDatabaseName: "keycloak"
     # -- The database name for Studio app services.
     # This is used by Studio to store its data.
     # Can be specified as a plain string value or as a secret reference.
@@ -108,40 +103,6 @@ config:
     # -- The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database.
     iamDbUsername: ""
 
-  # -- config.keycloak defines the Keycloak configuration settings.
-  # This section configures the authentication and authorization service.
-  # Note: Keycloak is retained to support migration of existing data to the new app's internal authentication.
-  keycloak:
-    # -- config.keycloak.url overrides the default service endpoint for Keycloak.
-    # Format is `http(s)://<ingressHost>/auth`.
-    # Required only if your cluster redirects internal HTTP traffic to HTTPS.
-    url: ""
-    # -- config.keycloak.adminUsername is the admin username for Keycloak.
-    # This username is used to login to the Keycloak admin console.
-    adminUsername: "kcadmin"
-    # -- config.keycloak.adminPassword defines the admin password for Keycloak.
-    # This password is used to login to the Keycloak admin console.
-    # The password is stored in a Kubernetes secret.
-    adminPassword:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_ADMIN_PASSWORD"
-    # -- config.keycloak.realm is the realm name for Keycloak.
-    # This realm is used by Studio to manage users and clients.
-    realm: "rasa-studio"
-    # -- config.keycloak.clientId is the client ID for Keycloak.
-    # This client is used by Studio to authenticate with Keycloak.
-    clientId: "rasa-studio-backend"
-    # -- config.keycloak.apiClientId is the client ID for Keycloak API.
-    # This client is used by Studio App to authenticate with Keycloak.
-    apiClientId: "admin-cli"
-    # -- config.keycloak.apiUsername is the username for Keycloak API.
-    # This username is used by Studio App to authenticate with Keycloak.
-    apiUsername: "realmadmin"
-    # -- config.keycloak.apiPassword is the password for Keycloak API.
-    # This password is used by Studio App to authenticate with Keycloak.
-    apiPassword:
-      secretName: "studio-secrets"
-      secretKey: "KEYCLOAK_API_PASSWORD"
 
   # -- Common pod scheduling configuration for all deployments.
   # These settings can be overridden by component-specific configurations.
@@ -438,15 +399,7 @@ app:
     # job container, in native Kubernetes EnvVar format (name + value or valueFrom).
     # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does
     # not merge lists) — copy the default entries you want to keep.
-    # NOTE: SKIP_KEYCLOAK is derived from keycloak.enabled automatically
-    # ("false" when enabled, "true" when disabled). Add a SKIP_KEYCLOAK entry to
-    # this list only to override that behavior (e.g. the Keycloak database was
-    # created manually).
-    env:
-      # KC_DEFAULT_DATABASE_CONNECTION_NAME: database the client connects to when
-      # creating the Keycloak database (change if your server has no `postgres` db).
-      - name: KC_DEFAULT_DATABASE_CONNECTION_NAME
-        value: "postgres"
+    env: []
 
     # -- app.migration.nodeSelector defines which nodes the migration job can run on.
     # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector
@@ -753,224 +706,6 @@ eventIngestion:
 
   # -- eventIngestion.affinity defines affinity rules for the event ingestion pods.
   # Applies only when eventIngestion.mode is separate.
-  affinity: {}
-
-# Studio Keycloak component specific configuration
-# Keycloak is retained to support migration of existing data to the new app's internal authentication.
-keycloak:
-  # -- keycloak.enabled determines whether to deploy the Keycloak authentication service.
-  enabled: true
-  # -- keycloak.replicaCount is the number of replicas for the Keycloak deployment.
-  replicaCount: 1
-
-  # -- keycloak.annotations defines annotations to add to all Studio Keycloak resources.
-  # These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict).
-  # Example:
-  #   custom.annotation/key: value
-  # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-  annotations: {}
-
-  # -- keycloak.image defines the container image settings for the Keycloak service.
-  image:
-    # -- keycloak.image.name is the name of the Keycloak container image.
-    name: "studio-keycloak"
-    # -- keycloak.image.pullPolicy is the container image pull policy.
-    pullPolicy: IfNotPresent
-
-  # -- The postgres database instance details for Keycloak to connect to.
-  # This section configures the database connection parameters for Keycloak.
-  # If not all fields are provided, the same values in the database section will be
-  # used, including the keycloakDatabaseName for the database name.
-  database: {}
-  #   # -- The database host name or IP address where PostgreSQL is running.
-  #   # Example: "postgres.example.com" or "10.0.0.1"
-  #   host: ""
-  #   # -- The database port number for PostgreSQL.
-  #   # Default PostgreSQL port is 5432
-  #   port: "5432"
-  #   # -- The database name for Keycloak user management service.
-  #   # This is used by Keycloak to store its user management data.
-  #   # Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction.
-  #   databaseName: "keycloak"
-  #   # -- The database username for Keycloak to connect with.
-  #   # This user should have appropriate permissions on the database.
-  #   # Can be specified as a plain string value or as a secret reference.
-  #   # Plain value example: username: "keycloak"
-  #   # Secret reference example:
-  #   username:
-  #    secretName: "studio-secrets"
-  #    secretKey: "DB_USERNAME"
-  #   username: ""
-  #   # -- The database password configuration.
-  #   # This references a Kubernetes secret containing the database password.
-  #   password:
-  #     secretName: "studio-secrets"
-  #     secretKey: "KEYCLOAK_DATABASE_PASSWORD"
-
-  # -- keycloak.env defines extra environment variables for the Keycloak
-  # container, in native Kubernetes EnvVar format (name + value or valueFrom).
-  # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does
-  # not merge lists) — copy the default entries you want to keep.
-  env:
-    # KC_HTTP_ENABLED: enable HTTP between proxy/load balancer and Keycloak.
-    # Useful for secure internal networks where the reverse proxy terminates HTTPS.
-    - name: KC_HTTP_ENABLED
-      value: "true"
-    # KC_PROXY_HEADERS: "xforwarded" parses X-Forwarded-* headers.
-    # https://www.keycloak.org/server/reverseproxy
-    - name: KC_PROXY_HEADERS
-      value: "xforwarded"
-    # KC_PROXY: legacy proxy setting, deprecated (replaced by KC_HTTP_ENABLED);
-    # will be removed in a future release.
-    - name: KC_PROXY
-      value: "edge"
-
-  # -- keycloak.envFrom defines additional environment variables from ConfigMap or Secret.
-  # Example:
-  # - configMapRef:
-  #     name: my-configmap
-  # - secretRef:
-  #     name: my-secret
-  envFrom: []
-
-  # -- keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container.
-  # Example:
-  # - name: sidecar
-  #   image: busybox
-  #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
-  additionalContainers: []
-
-  # -- keycloak.serviceAccount defines the Kubernetes service account used by the Keycloak pod.
-  serviceAccount:
-    # -- keycloak.serviceAccount.create determines whether to create a new service account.
-    create: false
-    # -- keycloak.serviceAccount.annotations defines annotations to add to the service account.
-    annotations: {}
-    # -- keycloak.serviceAccount.name is the name of the service account to use.
-    name: ""
-
-  # -- keycloak.podAnnotations defines annotations to add to the Keycloak pod.
-  # Example:
-  #   container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default
-  podAnnotations: {}
-
-  # -- keycloak.podSecurityContext defines the security settings for the entire pod.
-  podSecurityContext:
-    # -- keycloak.podSecurityContext.enabled determines whether to enable the pod security context.
-    enabled: true
-    # -- keycloak.podSecurityContext.fsGroup is the group ID to run the container as.
-    # fsGroup: 2000
-
-  # -- keycloak.securityContext defines the security settings for the Keycloak container.
-  securityContext:
-    # -- keycloak.securityContext.enabled determines whether to enable the security context.
-    enabled: true
-    # -- keycloak.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
-    allowPrivilegeEscalation: false
-    # -- keycloak.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
-    runAsNonRoot: true
-    # -- keycloak.securityContext.capabilities defines the Linux capabilities configuration.
-    capabilities:
-      # -- keycloak.securityContext.capabilities.drop defines capabilities to drop from the container.
-      drop:
-        - ALL
-      # -- keycloak.securityContext.capabilities.add defines capabilities to add to the container.
-      # add: ['NET_BIND_SERVICE', 'NET_RAW']
-    # -- keycloak.securityContext.privileged determines whether to run the container in privileged mode.
-    # privileged: false
-    # -- keycloak.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
-    # readOnlyRootFilesystem: true
-    # -- keycloak.securityContext.runAsUser is the user ID to run the container as.
-    # runAsUser: 1000
-    # -- keycloak.securityContext.seccompProfile defines the seccomp profile configuration.
-    # seccompProfile:
-    #   type: RuntimeDefault
-
-  # -- keycloak.service defines how the Keycloak service is exposed within the cluster.
-  service:
-    # -- keycloak.service.type is the type of Kubernetes service.
-    type: ClusterIP
-    # -- keycloak.service.port is the port number for the service.
-    port: 80
-    # -- keycloak.service.targetPort is the target port in the container.
-    targetPort: 8080
-
-  # -- keycloak.livenessProbe defines the liveness probe configuration.
-  livenessProbe:
-    # -- keycloak.livenessProbe.enabled determines whether to enable the liveness probe.
-    enabled: true
-    # -- keycloak.livenessProbe.httpGet defines the HTTP GET probe configuration.
-    httpGet:
-      # -- keycloak.livenessProbe.httpGet.path is the path to check for liveness.
-      path: /auth
-      # -- keycloak.livenessProbe.httpGet.port is the port to check for liveness.
-      port: 8080
-      # -- keycloak.livenessProbe.httpGet.scheme is the protocol to use for the check.
-      scheme: HTTP
-    # -- keycloak.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
-    initialDelaySeconds: 30
-    # -- keycloak.livenessProbe.periodSeconds is how often to perform the probe.
-    periodSeconds: 15
-    # -- keycloak.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
-    successThreshold: 1
-    # -- keycloak.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out.
-    timeoutSeconds: 5
-    # -- keycloak.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy.
-    failureThreshold: 6
-
-  # -- keycloak.readinessProbe defines the readiness probe configuration.
-  readinessProbe:
-    # -- keycloak.readinessProbe.enabled determines whether to enable the readiness probe.
-    enabled: true
-    # -- keycloak.readinessProbe.httpGet defines the HTTP GET probe configuration.
-    httpGet:
-      # -- keycloak.readinessProbe.httpGet.path is the path to check for readiness.
-      path: /auth
-      # -- keycloak.readinessProbe.httpGet.port is the port to check for readiness.
-      port: 8080
-      # -- keycloak.readinessProbe.httpGet.scheme is the protocol to use for the check.
-      scheme: HTTP
-    # -- keycloak.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe.
-    initialDelaySeconds: 30
-    # -- keycloak.readinessProbe.periodSeconds is how often to perform the probe.
-    periodSeconds: 15
-    # -- keycloak.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful.
-    successThreshold: 1
-    # -- keycloak.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out.
-    timeoutSeconds: 5
-    # -- keycloak.readinessProbe.failureThreshold is the number of failures before the container is considered not ready.
-    failureThreshold: 6
-
-  # -- keycloak.ingress defines how the Keycloak service is exposed externally.
-  ingress:
-    # -- keycloak.ingress.enabled determines whether to create an ingress resource.
-    enabled: true
-    # -- keycloak.ingress.className is the ingress class name.
-    className: ""
-    # -- keycloak.ingress.labels defines labels to add to the ingress resource.
-    labels: {}
-    # -- keycloak.ingress.additionalAnnotations defines additional annotations for the ingress resource.
-    additionalAnnotations: {}
-    # -- keycloak.ingress.tls defines the TLS configuration for the ingress.
-    tls: []
-
-  # -- keycloak.resources defines the resource limits and requests for the Keycloak service.
-  resources: {}
-    # Example configuration:
-    # limits:
-    #   cpu: 500m
-    #   memory: 512Mi
-    # requests:
-    #   cpu: 500m
-    #   memory: 512Mi
-
-  # -- keycloak.nodeSelector defines which nodes the Keycloak pods can run on.
-  nodeSelector: {}
-
-  # -- keycloak.tolerations defines tolerations for the Keycloak pods.
-  tolerations: []
-
-  # -- keycloak.affinity defines affinity rules for the Keycloak pods.
   affinity: {}
 
 # Network policy settings

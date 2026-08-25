@@ -86,16 +86,6 @@ Create the name of the app migration service account to use for Database Migrati
 {{- end }}
 {{- end }}
 
-{{/*
-Create the name of the keycloak service account to use for Keycloak
-*/}}
-{{- define "studio.keycloak.serviceAccountName" -}}
-{{- if .Values.keycloak.serviceAccount.create }}
-{{- default (printf "%s-keycloak" (include "studio.fullname" .)) .Values.keycloak.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.keycloak.serviceAccount.name }}
-{{- end }}
-{{- end }}
 
 {{/*
 Return DNS policy depends on host network configuration
@@ -136,18 +126,6 @@ annotations:
 {{- end -}}
 {{- end }}
 
-{{/*
-Return annotations for deployment, combining global and per-deployment annotations for Keycloak
-*/}}
-{{- define "keycloak.deployment.annotations" -}}
-{{- $global := .Values.deploymentAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.keycloak.annotations | default dict }}
-{{- $annotations := merge $global $additional -}}
-{{- if $annotations -}}
-annotations:
-  {{- toYaml $annotations | nindent 2 }}
-{{- end -}}
-{{- end }}
 
 {{/*
 Return annotations for ingress, combining global and per-service annotations for Studio App
@@ -162,18 +140,6 @@ annotations:
 {{- end -}}
 {{- end }}
 
-{{/*
-Return annotations for ingress, along with per service annotations for Keycloak
-*/}}
-{{- define "keycloak.ingress.annotations" -}}
-{{- $global := .Values.config.ingressAnnotations | default dict | deepCopy }}
-{{- $additional := .Values.keycloak.ingress.additionalAnnotations | default dict }}
-{{- $annotations := merge $global $additional -}}
-{{- if $annotations -}}
-annotations:
-  {{- toYaml $annotations | nindent 2 }}
-{{- end -}}
-{{- end }}
 
 {{/*
 Return image repository with tag and image name for Studio App
@@ -208,16 +174,6 @@ Return image repository with tag and image name for Event Ingestion
 {{- end -}}
 {{- end -}}
 
-{{/*
-Return image repository with tag and image name for Keycloak
-*/}}
-{{- define "studio.keycloak.image" -}}
-{{- if hasSuffix "/" .Values.repository -}}
-"{{ .Values.repository }}{{ .Values.keycloak.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
-{{- else -}}
-"{{ .Values.repository }}/{{ .Values.keycloak.image.name }}:{{ .Values.tag | default .Chart.AppVersion }}"
-{{- end -}}
-{{- end -}}
 
 {{/*
 Studio App pod scheduling configuration
@@ -273,32 +229,6 @@ tolerations:
 {{- end }}
 {{- end }}
 
-{{/*
-Keycloak pod scheduling configuration
-*/}}
-{{- define "studio.keycloak.scheduling" -}}
-{{- if .Values.config.nodeSelector }}
-nodeSelector:
-  {{- .Values.config.nodeSelector | toYaml | nindent 2 }}
-{{- else if .Values.keycloak.nodeSelector }}
-nodeSelector:
-  {{- .Values.keycloak.nodeSelector | toYaml | nindent 2 }}
-{{- end }}
-{{- if .Values.config.affinity }}
-affinity:
-  {{- .Values.config.affinity | toYaml | nindent 2 }}
-{{- else if .Values.keycloak.affinity }}
-affinity:
-  {{- .Values.keycloak.affinity | toYaml | nindent 2 }}
-{{- end }}
-{{- if .Values.config.tolerations }}
-tolerations:
-  {{- .Values.config.tolerations | toYaml | nindent 2 }}
-{{- else if .Values.keycloak.tolerations }}
-tolerations:
-  {{- .Values.keycloak.tolerations | toYaml | nindent 2 }}
-{{- end }}
-{{- end }}
 
 {{/*
 Studio App migration pod scheduling configuration
@@ -446,17 +376,6 @@ Resolve the Studio App ingress host.
 {{- end -}}
 {{- end -}}
 
-{{/*
-Resolve the Keycloak ingress host (same precedence as studio.appHost).
-*/}}
-{{- define "studio.keycloakHost" -}}
-{{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
-{{- if $globalHost -}}
-{{- $globalHost -}}
-{{- else if .Values.keycloak.ingress.hostName -}}
-{{- .Values.keycloak.ingress.hostName -}}
-{{- end -}}
-{{- end -}}
 
 {{/*
 Studio App external URL for CORS_ORIGINS.

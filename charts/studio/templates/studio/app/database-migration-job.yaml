@@ -57,23 +57,12 @@ spec:
         imagePullPolicy: {{ .Values.app.migration.image.pullPolicy }}
         env:
           {{- include "studio.app.env" . | nindent 10 }}
-          {{- include "studio.keycloak.env" . | nindent 10 }}
           - name: STUDIO_ROLE
             value: "migration"
           - name: DB_SSL
             value: {{ .Values.config.database.preferSSL | quote }}
           - name: DB_REJECT_UNAUTHORIZED
             value: {{ .Values.config.database.rejectUnauthorized | quote }}
-          {{- $skipKeycloakOverridden := false }}
-          {{- range .Values.app.migration.env }}
-          {{- if eq .name "SKIP_KEYCLOAK" }}
-          {{- $skipKeycloakOverridden = true }}
-          {{- end }}
-          {{- end }}
-          {{- if not $skipKeycloakOverridden }}
-          - name: SKIP_KEYCLOAK
-            value: {{ ternary "false" "true" .Values.keycloak.enabled | quote }}
-          {{- end }}
           {{- with .Values.app.migration.env }}
           {{- include "studio.envList" . | nindent 10 }}
           {{- end }}

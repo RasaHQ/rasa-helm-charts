@@ -18,95 +18,9 @@ stringified and quoted here. valueFrom entries pass through verbatim.
 {{- end }}
 {{- end -}}
 
-{{/*
-Environment Variables for Studio between Keycloak and App
-*/}}
-{{- define "studio.shared.env" -}}
-- name: KEYCLOAK_ADMIN
-  value: {{ .Values.config.keycloak.adminUsername | quote }}
-- name: KEYCLOAK_ADMIN_USERNAME
-  value: {{ .Values.config.keycloak.adminUsername | quote }}
-# -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.
-- name: KEYCLOAK_ADMIN_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.keycloak.adminPassword.secretName | quote }}
-      key: {{ .Values.config.keycloak.adminPassword.secretKey | quote }}
-{{- end -}}
 
-{{/*
-Environment Variables for Keycloak Containers
-*/}}
-{{- define "studio.keycloak.env" -}}
-- name: KC_DB_USERNAME
-  {{- if not (empty .Values.keycloak.database.username) }}
-    {{- if kindIs "map" .Values.keycloak.database.username }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.keycloak.database.username.secretName | quote }}
-      key: {{ .Values.keycloak.database.username.secretKey | quote }}
-    {{- else }}
-  value: {{ .Values.keycloak.database.username | quote }}
-    {{- end }}
-  {{- else }}
-    {{- if kindIs "map" .Values.config.database.username }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.database.username.secretName | quote }}
-      key: {{ .Values.config.database.username.secretKey | quote }}
-    {{- else }}
-  value: {{ .Values.config.database.username | quote }}
-    {{- end }}
-  {{- end }}
-- name: KC_DB_PASSWORD
-  {{- if not (empty .Values.keycloak.database.password) }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.keycloak.database.password.secretName | quote }}
-      key: {{ .Values.keycloak.database.password.secretKey | quote }}  
-  {{- else }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.database.password.secretName | quote }}
-      key: {{ .Values.config.database.password.secretKey | quote }}
-  {{- end }}
-- name: KC_DB_URL
-  value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
-{{- end -}}
 
-{{/*
-Keycloak URL - UNUSED - might get reused for Keyclaok -> Better Auth migration job
-*/}}
-{{- define "studio.keycloak.url" -}}
-{{- if not (empty .Values.config.keycloak.url ) -}}
-- name: KEYCLOAK_URL
-  value: {{ .Values.config.keycloak.url }}
-{{- else -}}
-- name: KEYCLOAK_URL
-  value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
-{{- end -}}
-{{- end -}}
 
-{{/*
-Studio App Keycloak env - UNUSED - might get reused for Keyclaok -> Better Auth migration job
-*/}}
-{{- define "studio.app.keycloak" -}}
-{{- with .Values.config.keycloak }}
-- name: KEYCLOAK_REALM
-  value: {{ .realm | quote }}
-- name: KEYCLOAK_CLIENT_ID
-  value: {{ .backendClientId | quote }}
-- name: KEYCLOAK_API_CLIENT_ID
-  value: {{ .apiClientId | quote }}
-- name: KEYCLOAK_API_USERNAME
-  value: {{ .apiUsername | quote }}
-- name: KEYCLOAK_API_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ .apiPassword.secretName | quote }}
-      key: {{ .apiPassword.secretKey | quote }}
-{{- end }}
-{{- end -}}
 
 {{/*
 Studio App Database Environment Variables

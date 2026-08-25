@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.22](https://img.shields.io/badge/Version-3.0.0--rc.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.23](https://img.shields.io/badge/Version-3.0.0--rc.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -74,7 +74,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.22
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.23
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -89,7 +89,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.22
+$ helm install my-release rasa/studio --version 3.0.0-rc.23
 ```
 
 ## Quick Start
@@ -142,13 +142,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.22
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.23
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.22
+$ helm pull rasa/studio --version 3.0.0-rc.23
 ```
 
 ## General Configuration
@@ -575,13 +575,13 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
 | app.migration.activeDeadlineSeconds | int | app.migration.activeDeadlineSeconds is the hard wall-clock bound for the migration Job; size it to your worst-case migration duration. | `900` |
 | app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.migration.backoffLimit | int | app.migration.backoffLimit is the number of retries before the migration Job is marked failed. | `3` |
 | app.migration.enabled | bool | app.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
-| app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: SKIP_KEYCLOAK is derived from keycloak.enabled automatically ("false" when enabled, "true" when disabled). Add a SKIP_KEYCLOAK entry to this list only to override that behavior (e.g. the Keycloak database was created manually). | `[{"name":"KC_DEFAULT_DATABASE_CONNECTION_NAME","value":"postgres"}]` |
+| app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. | `[]` |
 | app.migration.image | object | app.migration.image defines the image configuration for the migration job. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.migration.image.name | string | app.migration.image.name uses the same unified studio image with STUDIO_ROLE=migration. | `"studio"` |
 | app.migration.image.pullPolicy | string | app.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
@@ -630,12 +630,11 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.webClient.config | object | app.webClient.config feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
-| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"DATABASE.HOST.NAME","iamDbUsername":"","keycloakDatabaseName":"keycloak","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
+| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"DATABASE.HOST.NAME","iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
 | config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" Placeholder value — you MUST set this; an empty value is rejected by the schema. | `"DATABASE.HOST.NAME"` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
-| config.database.keycloakDatabaseName | string | The database name for Keycloak user management service. This is used by Keycloak to store its user management data. Note: This must be a plain string value (not a secret reference) as it's used in JDBC URL construction. | `"keycloak"` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
 | config.database.port | string | The database port number for PostgreSQL. Default PostgreSQL port is 5432 | `"5432"` |
 | config.database.preferSSL | string | Set to true if you want to use SSL for database connection. When enabled, Studio will attempt to establish an encrypted connection to the database. | `"true"` |
@@ -645,15 +644,6 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. Can be specified as a plain string value or as a secret reference. Plain value example: username: "studio" Secret reference example: username:   secretName: "my-secret"   secretKey: "DB_USERNAME" | `""` |
 | config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
-| config.keycloak | object | config.keycloak defines the Keycloak configuration settings. This section configures the authentication and authorization service. Note: Keycloak is retained to support migration of existing data to the new app's internal authentication. | `{"adminPassword":{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"},"adminUsername":"kcadmin","apiClientId":"admin-cli","apiPassword":{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"},"apiUsername":"realmadmin","clientId":"rasa-studio-backend","realm":"rasa-studio","url":""}` |
-| config.keycloak.adminPassword | object | config.keycloak.adminPassword defines the admin password for Keycloak. This password is used to login to the Keycloak admin console. The password is stored in a Kubernetes secret. | `{"secretKey":"KEYCLOAK_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
-| config.keycloak.adminUsername | string | config.keycloak.adminUsername is the admin username for Keycloak. This username is used to login to the Keycloak admin console. | `"kcadmin"` |
-| config.keycloak.apiClientId | string | config.keycloak.apiClientId is the client ID for Keycloak API. This client is used by Studio App to authenticate with Keycloak. | `"admin-cli"` |
-| config.keycloak.apiPassword | object | config.keycloak.apiPassword is the password for Keycloak API. This password is used by Studio App to authenticate with Keycloak. | `{"secretKey":"KEYCLOAK_API_PASSWORD","secretName":"studio-secrets"}` |
-| config.keycloak.apiUsername | string | config.keycloak.apiUsername is the username for Keycloak API. This username is used by Studio App to authenticate with Keycloak. | `"realmadmin"` |
-| config.keycloak.clientId | string | config.keycloak.clientId is the client ID for Keycloak. This client is used by Studio to authenticate with Keycloak. | `"rasa-studio-backend"` |
-| config.keycloak.realm | string | config.keycloak.realm is the realm name for Keycloak. This realm is used by Studio to manage users and clients. | `"rasa-studio"` |
-| config.keycloak.url | string | config.keycloak.url overrides the default service endpoint for Keycloak. Format is `http(s)://<ingressHost>/auth`. Required only if your cluster redirects internal HTTP traffic to HTTPS. | `""` |
 | config.nodeSelector | object | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. | `{}` |
 | config.tolerations | list | Pod tolerations for all deployments. These settings can be overridden by component-specific configurations. | `[]` |
 | deploymentAnnotations | object | deploymentAnnotations defines annotations to add to all Studio resources. These annotations are applied globally to all resources (Deployments, Services, Ingresses, Jobs, HPAs, ConfigMaps, ServiceAccounts). Component-specific annotations can override these values if keys conflict. Example:   key: "value" Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
@@ -695,68 +685,9 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress, Keycloak ingress, Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, keycloak.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead. | `nil` |
+| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecret defines repository pull secrets | `[]` |
-| keycloak.additionalContainers | list | keycloak.additionalContainers defines additional containers to run alongside the main Keycloak container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
-| keycloak.affinity | object | keycloak.affinity defines affinity rules for the Keycloak pods. | `{}` |
-| keycloak.annotations | object | keycloak.annotations defines annotations to add to all Studio Keycloak resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| keycloak.database | object | The postgres database instance details for Keycloak to connect to. This section configures the database connection parameters for Keycloak. If not all fields are provided, the same values in the database section will be used, including the keycloakDatabaseName for the database name. | `{}` |
-| keycloak.enabled | bool | keycloak.enabled determines whether to deploy the Keycloak authentication service. | `true` |
-| keycloak.env | list | keycloak.env defines extra environment variables for the Keycloak container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. | `[{"name":"KC_HTTP_ENABLED","value":"true"},{"name":"KC_PROXY_HEADERS","value":"xforwarded"},{"name":"KC_PROXY","value":"edge"}]` |
-| keycloak.envFrom | list | keycloak.envFrom defines additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
-| keycloak.image | object | keycloak.image defines the container image settings for the Keycloak service. | `{"name":"studio-keycloak","pullPolicy":"IfNotPresent"}` |
-| keycloak.image.name | string | keycloak.image.name is the name of the Keycloak container image. | `"studio-keycloak"` |
-| keycloak.image.pullPolicy | string | keycloak.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
-| keycloak.ingress | object | keycloak.ingress defines how the Keycloak service is exposed externally. | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
-| keycloak.ingress.additionalAnnotations | object | keycloak.ingress.additionalAnnotations defines additional annotations for the ingress resource. | `{}` |
-| keycloak.ingress.className | string | keycloak.ingress.className is the ingress class name. | `""` |
-| keycloak.ingress.enabled | bool | keycloak.ingress.enabled determines whether to create an ingress resource. | `true` |
-| keycloak.ingress.labels | object | keycloak.ingress.labels defines labels to add to the ingress resource. | `{}` |
-| keycloak.ingress.tls | list | keycloak.ingress.tls defines the TLS configuration for the ingress. | `[]` |
-| keycloak.livenessProbe | object | keycloak.livenessProbe defines the liveness probe configuration. | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| keycloak.livenessProbe.enabled | bool | keycloak.livenessProbe.enabled determines whether to enable the liveness probe. | `true` |
-| keycloak.livenessProbe.failureThreshold | int | keycloak.livenessProbe.failureThreshold is the number of failures before the container is considered unhealthy. | `6` |
-| keycloak.livenessProbe.httpGet | object | keycloak.livenessProbe.httpGet defines the HTTP GET probe configuration. | `{"path":"/auth","port":8080,"scheme":"HTTP"}` |
-| keycloak.livenessProbe.httpGet.path | string | keycloak.livenessProbe.httpGet.path is the path to check for liveness. | `"/auth"` |
-| keycloak.livenessProbe.httpGet.port | int | keycloak.livenessProbe.httpGet.port is the port to check for liveness. | `8080` |
-| keycloak.livenessProbe.httpGet.scheme | string | keycloak.livenessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| keycloak.livenessProbe.initialDelaySeconds | int | keycloak.livenessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `30` |
-| keycloak.livenessProbe.periodSeconds | int | keycloak.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
-| keycloak.livenessProbe.successThreshold | int | keycloak.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| keycloak.livenessProbe.timeoutSeconds | int | keycloak.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| keycloak.nodeSelector | object | keycloak.nodeSelector defines which nodes the Keycloak pods can run on. | `{}` |
-| keycloak.podAnnotations | object | keycloak.podAnnotations defines annotations to add to the Keycloak pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-keycloak: runtime/default | `{}` |
-| keycloak.podSecurityContext | object | keycloak.podSecurityContext defines the security settings for the entire pod. | `{"enabled":true}` |
-| keycloak.podSecurityContext.enabled | bool | keycloak.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
-| keycloak.readinessProbe | object | keycloak.readinessProbe defines the readiness probe configuration. | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/auth","port":8080,"scheme":"HTTP"},"initialDelaySeconds":30,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
-| keycloak.readinessProbe.enabled | bool | keycloak.readinessProbe.enabled determines whether to enable the readiness probe. | `true` |
-| keycloak.readinessProbe.failureThreshold | int | keycloak.readinessProbe.failureThreshold is the number of failures before the container is considered not ready. | `6` |
-| keycloak.readinessProbe.httpGet | object | keycloak.readinessProbe.httpGet defines the HTTP GET probe configuration. | `{"path":"/auth","port":8080,"scheme":"HTTP"}` |
-| keycloak.readinessProbe.httpGet.path | string | keycloak.readinessProbe.httpGet.path is the path to check for readiness. | `"/auth"` |
-| keycloak.readinessProbe.httpGet.port | int | keycloak.readinessProbe.httpGet.port is the port to check for readiness. | `8080` |
-| keycloak.readinessProbe.httpGet.scheme | string | keycloak.readinessProbe.httpGet.scheme is the protocol to use for the check. | `"HTTP"` |
-| keycloak.readinessProbe.initialDelaySeconds | int | keycloak.readinessProbe.initialDelaySeconds is the number of seconds to wait before starting probe. | `30` |
-| keycloak.readinessProbe.periodSeconds | int | keycloak.readinessProbe.periodSeconds is how often to perform the probe. | `15` |
-| keycloak.readinessProbe.successThreshold | int | keycloak.readinessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
-| keycloak.readinessProbe.timeoutSeconds | int | keycloak.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| keycloak.replicaCount | int | keycloak.replicaCount is the number of replicas for the Keycloak deployment. | `1` |
-| keycloak.resources | object | keycloak.resources defines the resource limits and requests for the Keycloak service. | `{}` |
-| keycloak.securityContext | object | keycloak.securityContext defines the security settings for the Keycloak container. | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
-| keycloak.securityContext.allowPrivilegeEscalation | bool | keycloak.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
-| keycloak.securityContext.capabilities | object | keycloak.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
-| keycloak.securityContext.capabilities.drop | list | keycloak.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
-| keycloak.securityContext.enabled | bool | keycloak.securityContext.enabled determines whether to enable the security context. | `true` |
-| keycloak.securityContext.runAsNonRoot | bool | keycloak.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
-| keycloak.service | object | keycloak.service defines how the Keycloak service is exposed within the cluster. | `{"port":80,"targetPort":8080,"type":"ClusterIP"}` |
-| keycloak.service.port | int | keycloak.service.port is the port number for the service. | `80` |
-| keycloak.service.targetPort | int | keycloak.service.targetPort is the target port in the container. | `8080` |
-| keycloak.service.type | string | keycloak.service.type is the type of Kubernetes service. | `"ClusterIP"` |
-| keycloak.serviceAccount | object | keycloak.serviceAccount defines the Kubernetes service account used by the Keycloak pod. | `{"annotations":{},"create":false,"name":""}` |
-| keycloak.serviceAccount.annotations | object | keycloak.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
-| keycloak.serviceAccount.create | bool | keycloak.serviceAccount.create determines whether to create a new service account. | `false` |
-| keycloak.serviceAccount.name | string | keycloak.serviceAccount.name is the name of the service account to use. | `""` |
-| keycloak.tolerations | list | keycloak.tolerations defines tolerations for the Keycloak pods. | `[]` |
 | nameOverride | string | Override name of app | `""` |
 | networkPolicy.denyAll | bool | networkPolicy.denyAll defines whether to apply denyAll network policy | `false` |
 | networkPolicy.enabled | bool | networkPolicy.enabled specifies whether to enable network policies | `false` |

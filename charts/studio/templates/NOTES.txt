@@ -33,7 +33,11 @@ By installing and using this software, you agree to be bound by the terms and co
 
 4. Authentication:
    - Better Auth is served by Studio at `/api/auth/*`.
-   - Keycloak remains temporarily available at `/auth` while `keycloak.enabled` is true.
+   - Bundled Keycloak is removed in this chart. After upgrade, delete leftover
+     Keycloak resources if they remain:
+     kubectl delete deployment,svc,ingress,sa -l app.kubernetes.io/component=studio-keycloak -n <ns>
+   - Do not drop the Keycloak Postgres database until you have confirmed users
+     exist in Better Auth.
 
 5. After upgrading, manually remove orphaned resources from the prior topology:
 

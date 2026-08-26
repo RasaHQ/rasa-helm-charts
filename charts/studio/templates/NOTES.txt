@@ -24,6 +24,9 @@ By installing and using this software, you agree to be bound by the terms and co
      and separate ingestion resources are `*-app-ingestion`.
    - Studio uses the unified `studio` image. Chart 3.0.0 requires Studio >= 2.0.0;
      use the documented tag placeholder until a promoted image tag is available.
+   - Bundled Keycloak is removed. Login is Better Auth at `/api/auth/*`.
+     `keycloak`, `config.keycloak`, and `config.database.keycloakDatabaseName`
+     are ignored if still present in values — drop them from your values file.
 
 3. Event ingestion modes:
    - `colocated` (default): runs inside the Studio app pod.
@@ -32,8 +35,13 @@ By installing and using this software, you agree to be bound by the terms and co
    Do not run dual consumers; the chart fails validation when configuration would do so.
 
 4. Authentication:
-   - Better Auth is served by Studio at `/api/auth/*`.
-   - Keycloak remains temporarily available at `/auth` while `keycloak.enabled` is true.
+   - Better Auth is served by Studio at `/api/auth/*`. There is no `/auth` IdP.
+   - Helm removes Keycloak resources that were part of the previous release.
+     If any remain (label mismatch or a non-Helm install), delete them:
+     kubectl delete deployment,svc,ingress,sa,networkpolicy -l app.kubernetes.io/component=studio-keycloak -n {{ .Release.Namespace }}
+   - Remove unused `KEYCLOAK_*` keys from `studio-secrets` after upgrade.
+   - Do not drop the Keycloak Postgres database until you have confirmed users
+     exist in Better Auth.
 
 5. After upgrading, manually remove orphaned resources from the prior topology:
 

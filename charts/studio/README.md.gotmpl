@@ -9,8 +9,7 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 
 | Component | Description | Ingress path | Toggle |
 |-----------|-------------|--------------|--------|
-| **app** | Studio API server and web client — handles business logic and data persistence | `/api` and `/` | always on |
-| **keycloak** | Temporary legacy identity provider, retained while migrating existing users to Better Auth | `/auth` | `keycloak.enabled` (default: `true`) |
+| **app** | Studio API server and web client — handles business logic and data persistence with Better Auth | `/api` and `/` | always on |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
@@ -51,16 +50,12 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
-    --from-literal=KEYCLOAK_ADMIN_PASSWORD="<keycloak-admin-pw>" \
-    --from-literal=KEYCLOAK_API_PASSWORD="<keycloak-api-pw>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
-
-> **Note:** `KEYCLOAK_ADMIN_PASSWORD` and `KEYCLOAK_API_PASSWORD` are only required while the bundled Keycloak (`keycloak.enabled: true`) is deployed for migration. Once you disable Keycloak, they can be removed.
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -158,8 +153,8 @@ $ helm pull rasa/{{ template "chart.name" . }} --version {{ template "chart.vers
 
 ## Ingress Host Configuration
 
-**Single-host install (recommended):** set one value and the Studio app,
-Keycloak and Rasa Pro model-service ingresses — plus every derived URL
+**Single-host install (recommended):** set one value and the Studio app
+and Rasa Pro model-service ingresses — plus every derived URL
 (`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
 resolve from it:
 
@@ -176,9 +171,6 @@ configure hosts individually:
 app:
   ingress:
     hostName: studio.example.com         # Studio app
-keycloak:
-  ingress:
-    hostName: studio.example.com         # Keycloak (while enabled)
 rasa:
   rasa:
     ingress:
@@ -191,13 +183,13 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`keycloak.ingress.hostName`, `rasa.rasa.ingress.hosts[0].host`). No host value
+`rasa.rasa.ingress.hosts[0].host`). No host value
 is enforced by the schema — an install without any host renders empty
 (match-all) ingress rules and relative browser URLs.
 
 ## Database Configuration
 
-Studio requires a PostgreSQL database for the app services. While the bundled Keycloak is deployed for migration (`keycloak.enabled: true`), it additionally uses the database named by `config.database.keycloakDatabaseName`.
+Studio requires a PostgreSQL database for the app services.
 
 ### Database Configuration
 
@@ -504,20 +496,23 @@ app:
 
 Additional breaking changes in 3.0.0:
 
+- Bundled Keycloak is **removed**. Authentication is Better Auth on the app at
+  `/api/auth/*` only — there is no `/auth` ingress or Keycloak Deployment.
+  Delete leftover `keycloak`, `config.keycloak`, and
+  `config.database.keycloakDatabaseName` from values (they are ignored). After
+  upgrade, Helm prunes Keycloak resources that belonged to the release; remove
+  unused `KEYCLOAK_*` secret keys, and do not drop the Keycloak Postgres
+  database until users exist in Better Auth. See `helm get notes <release>`.
 - Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
-  `app.migration.environmentVariables`, `eventIngestion.environmentVariables` and
-  `keycloak.environmentVariables` were removed — define entries under `app.env`,
-  `app.migration.env`, `eventIngestion.env`, `keycloak.env` as `- name/value` or
-  `- name/valueFrom.secretKeyRef` (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
+  `app.migration.environmentVariables`, and `eventIngestion.environmentVariables` 
+  were removed — define entries under `app.env`, `app.migration.env`, and
+  `eventIngestion.env` as `- name/value` or `- name/valueFrom.secretKeyRef` 
+  (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
   Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
   list replaces the chart defaults wholesale — copy the defaults you want to keep.
 - `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
   `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
   always render as quoted strings in config.js.
-- `SKIP_KEYCLOAK` on the migration Job is derived from `keycloak.enabled`
-  (`"false"` when enabled, `"true"` when disabled). Add a `SKIP_KEYCLOAK` entry to
-  `app.migration.env` only to override the derived value (e.g. the Keycloak
-  database was created manually).
 - `config.database.host` must be set to a real host; empty values are rejected by the
   values schema at install time.
 - `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
@@ -526,16 +521,15 @@ Additional breaking changes in 3.0.0:
 - The `&dns_hostname` YAML anchor and its `config.ingressHost` key were
   **removed** — a value still set there is silently ignored, so move it
   before upgrading. For a single-host install set
-  **`global.ingressHost`** once — the app, Keycloak and Rasa Pro model-service
+  **`global.ingressHost`** once — the app and Rasa Pro model-service
   ingresses and every derived URL (`window.MS_API_URL`,
   `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
   service on its own hostname) leave `global.ingressHost` unset and set
-  `app.ingress.hostName` (plus `keycloak.ingress.hostName` while Keycloak is
-  enabled) and `rasa.rasa.ingress.hosts[0].host` (model service) —
+  `app.ingress.hostName` and `rasa.rasa.ingress.hosts[0].host` (model service) —
   `global.ingressHost` overrides the per-host values when set, so the two
   are mutually exclusive by design.
 
-Better Auth is served by the app at `/api/auth/*`. Keycloak is temporary and remains available at `/auth` while enabled. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
+Better Auth is served by the app at `/api/auth/*`. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
 
 Helm does not delete resources that disappeared from the previous topology. After upgrade, remove the old backend, web-client, and event-ingestion resources as described in the chart release notes (`helm get notes <release-name>`).
 

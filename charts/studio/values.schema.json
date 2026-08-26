@@ -253,10 +253,6 @@
               "description": "Database password — always a secret reference",
               "$ref": "#/definitions/secretRef"
             },
-            "keycloakDatabaseName": {
-              "description": "Database name for Keycloak. Must be a plain string (used in JDBC URL construction).",
-              "type": "string"
-            },
             "databaseName": {
               "description": "Database name for Studio app — plain string or secret reference",
               "$ref": "#/definitions/secretRefOrString"
@@ -284,44 +280,6 @@
             "iamDbUsername": {
               "description": "IAM database username for AWS RDS IAM authentication",
               "type": "string"
-            }
-          }
-        },
-        "keycloak": {
-          "description": "Keycloak authentication service configuration. Retained to support migration of existing data to Better Auth.",
-          "type": "object",
-          "properties": {
-            "url": {
-              "description": "Override Keycloak endpoint URL. Leave empty to use the default service URL.",
-              "type": "string"
-            },
-            "adminUsername": {
-              "description": "Keycloak admin console username",
-              "type": "string"
-            },
-            "adminPassword": {
-              "description": "Keycloak admin console password — secret reference",
-              "$ref": "#/definitions/secretRef"
-            },
-            "realm": {
-              "description": "Keycloak realm name",
-              "type": "string"
-            },
-            "clientId": {
-              "description": "Keycloak client ID for Studio app",
-              "type": "string"
-            },
-            "apiClientId": {
-              "description": "Keycloak API client ID",
-              "type": "string"
-            },
-            "apiUsername": {
-              "description": "Keycloak API username",
-              "type": "string"
-            },
-            "apiPassword": {
-              "description": "Keycloak API password — secret reference",
-              "$ref": "#/definitions/secretRef"
             }
           }
         },
@@ -466,50 +424,6 @@
         }
       }
     },
-    "keycloak": {
-      "description": "Bundled Keycloak identity provider configuration. Retained to support migration of existing data to Better Auth.",
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "description": "Deploy the bundled Keycloak identity provider",
-          "type": "boolean"
-        },
-        "env": {
-          "description": "Extra environment variables (native EnvVar list)",
-          "type": "array",
-          "items": { "$ref": "#/definitions/envVar" }
-        },
-        "replicaCount": {
-          "description": "Number of Keycloak replicas",
-          "type": "integer",
-          "minimum": 1
-        },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
-        },
-        "ingress": {
-          "$ref": "#/definitions/ingressConfig"
-        },
-        "serviceAccount": {
-          "$ref": "#/definitions/serviceAccount"
-        },
-        "resources": {
-          "$ref": "#/definitions/resourceRequirements"
-        },
-        "nodeSelector": {
-          "type": "object"
-        },
-        "affinity": {
-          "type": "object"
-        },
-        "tolerations": {
-          "type": "array"
-        }
-      }
-    },
     "networkPolicy": {
       "description": "Kubernetes NetworkPolicy configuration",
       "type": "object",
@@ -529,7 +443,7 @@
       "type": "object",
       "properties": {
         "ingressHost": {
-          "description": "Single-host knob: one hostname for the Studio app, Keycloak and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
+          "description": "Single-host knob: one hostname for the Studio app and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
           "type": ["string", "null"]
         }
       }

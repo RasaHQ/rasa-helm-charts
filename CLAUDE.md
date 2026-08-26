@@ -5,7 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Repository Overview
 
 Helm charts for deploying Rasa products on Kubernetes (chart versions live in each `Chart.yaml`, not here — they drift):
-- **`charts/studio/`** - Rasa Studio (chart 3.x): unified `app` Deployment (API + web client in one `studio` image, Better Auth at `/api/auth/*`), optional temporary Keycloak (`keycloak.enabled`, migration to Better Auth), event ingestion via `eventIngestion.mode` (`colocated` | `separate` | `disabled`), and optional `rasa` OCI subchart (`rasa.enabled`).
+- **`charts/studio/`** - Rasa Studio (chart 3.x): unified `app` Deployment (API + web client in one `studio` image, Better Auth at `/api/auth/*`), event ingestion via `eventIngestion.mode` (`colocated` | `separate` | `disabled`), and optional `rasa` OCI subchart (`rasa.enabled`).
 - **`charts/rasa/`** - Rasa Pro: main Rasa Pro server, action-server, duckling, rasa-pro-services
 - **`charts/op-kits/`** - Operator Kits: thin CRD-wrapper chart that creates custom resources for PostgreSQL (CloudNativePG), Kafka (Strimzi), and Valkey. The operators themselves must be **pre-installed** in the cluster — this chart only emits CRs (`postgresql.cnpg.io/v1`, `kafka.strimzi.io/v1`, `hyperspike.io/v1`), gated by `<component>.enabled` flags.
 
@@ -100,14 +100,13 @@ password:
 ### Component Enablement
 Most components use `<component>.enabled` flags. Studio specifics:
 - `rasa.enabled` — optional Rasa Pro OCI subchart
-- `keycloak.enabled` — temporary Keycloak Deployment for user migration (default `true`)
 - `eventIngestion.mode` — `colocated` (default; consumers on the app pod), `separate` (sibling `{release}-app-ingestion` Deployment), or `disabled`. **`eventIngestion.enabled` was removed** — templates fail if it is set.
 
 ## Architecture Notes
 
 - Each chart's `_helpers.tpl` defines naming helpers (`fullname`, `labels`, `selectorLabels`, `serviceAccountName`, `image`). Studio's is at `templates/_helpers.tpl`; rasa's is at `templates/helpers/_helpers.tpl`.
-- Studio templates live under `templates/studio/{app,keycloak,event-ingestion}/`. There is **no** separate web-client Deployment — browser config is `app.webClient.environmentVariables` → ConfigMap mounted at `/usr/src/app/webclient/config.js` on the app pod.
-- Studio env helpers are in `templates/studio/_env.tpl`: `studio.shared.env`, `studio.app.env`, `studio.keycloak.env` (plus unused Keycloak→Better Auth migration stubs). App auth uses `app.authSecret` → `AUTH_SECRET` / `BETTER_AUTH_BASE_URL` on the app Deployment.
+- Studio templates live under `templates/studio/{app,event-ingestion}/`. There is **no** separate web-client Deployment — browser config is `app.webClient.environmentVariables` → ConfigMap mounted at `/usr/src/app/webclient/config.js` on the app pod.
+- Studio env helpers are in `templates/studio/_env.tpl`: `studio.app.env`. App auth uses `app.authSecret` → `AUTH_SECRET` / `BETTER_AUTH_BASE_URL` on the app Deployment.
 - Top-level `repository` + `tag` feed the unified Studio image; `app.image.name` / `eventIngestion.image.name` default to `studio` (chart 3.0 requires Studio ≥ 2.0.0). Formerly `backend` / `studio-backend`.
 - `templates/shared-env-configmap.yaml` emits shared `CORS_ORIGINS` and model-service URL for in-cluster consumers.
 - Network policies follow a default-deny pattern: each chart includes `deny-all.yaml`, `allow-dns-access.yaml`, and `ingress-egress-from-kubelet.yaml` (rasa adds `allow-egress-http-https.yaml`). All hardcode `apiVersion: networking.k8s.io/v1`.

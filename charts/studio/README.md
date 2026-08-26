@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.23](https://img.shields.io/badge/Version-3.0.0--rc.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.24](https://img.shields.io/badge/Version-3.0.0--rc.24-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -69,7 +69,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.23
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.24
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -84,7 +84,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.23
+$ helm install my-release rasa/studio --version 3.0.0-rc.24
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.23
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.24
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.23
+$ helm pull rasa/studio --version 3.0.0-rc.24
 ```
 
 ## General Configuration
@@ -497,6 +497,13 @@ app:
 
 Additional breaking changes in 3.0.0:
 
+- Bundled Keycloak is **removed**. Authentication is Better Auth on the app at
+  `/api/auth/*` only — there is no `/auth` ingress or Keycloak Deployment.
+  Delete leftover `keycloak`, `config.keycloak`, and
+  `config.database.keycloakDatabaseName` from values (they are ignored). After
+  upgrade, Helm prunes Keycloak resources that belonged to the release; remove
+  unused `KEYCLOAK_*` secret keys, and do not drop the Keycloak Postgres
+  database until users exist in Better Auth. See `helm get notes <release>`.
 - Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
   `app.migration.environmentVariables`, and `eventIngestion.environmentVariables`
   were removed — define entries under `app.env`, `app.migration.env`, and

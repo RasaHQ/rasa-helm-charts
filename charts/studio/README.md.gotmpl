@@ -496,6 +496,13 @@ app:
 
 Additional breaking changes in 3.0.0:
 
+- Bundled Keycloak is **removed**. Authentication is Better Auth on the app at
+  `/api/auth/*` only — there is no `/auth` ingress or Keycloak Deployment.
+  Delete leftover `keycloak`, `config.keycloak`, and
+  `config.database.keycloakDatabaseName` from values (they are ignored). After
+  upgrade, Helm prunes Keycloak resources that belonged to the release; remove
+  unused `KEYCLOAK_*` secret keys, and do not drop the Keycloak Postgres
+  database until users exist in Better Auth. See `helm get notes <release>`.
 - Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
   `app.migration.environmentVariables`, and `eventIngestion.environmentVariables` 
   were removed — define entries under `app.env`, `app.migration.env`, and

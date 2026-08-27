@@ -131,7 +131,7 @@ annotations:
 Return annotations for ingress, combining global and per-service annotations for Studio App
 */}}
 {{- define "app.ingress.annotations" -}}
-{{- $global := dig "ingressAnnotations" (dict) (.Values.global | default dict) | deepCopy }}
+{{- $global := dig "ingressAnnotations" (dict) (.Values.global | default dict) | default dict | deepCopy }}
 {{- $additional := .Values.app.ingress.additionalAnnotations | default dict | deepCopy }}
 {{- /* Component wins on key conflicts: global.ingressAnnotations is a baseline
        applied to every ingress, per-ingress annotations are local exceptions.

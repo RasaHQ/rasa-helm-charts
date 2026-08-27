@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.24](https://img.shields.io/badge/Version-3.0.0--rc.24-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.25](https://img.shields.io/badge/Version-3.0.0--rc.25-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -69,7 +69,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.24
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.25
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -84,7 +84,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.24
+$ helm install my-release rasa/studio --version 3.0.0-rc.25
 ```
 
 ## Quick Start
@@ -94,9 +94,9 @@ Minimum `values.yaml` to get Studio running (assumes `studio-secrets` already cr
 ```yaml
 global:
   ingressHost: studio.example.com
+  ingressClassName: nginx
 
 config:
-  ingressClassName: nginx
   database:
     host: "postgres.example.com"
     username: "studio"
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.24
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.25
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.24
+$ helm pull rasa/studio --version 3.0.0-rc.25
 ```
 
 ## General Configuration
@@ -636,8 +636,6 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | config.database.rejectUnauthorized | string | If true, the server will reject database connections which are not present in the list of supplied CAs. This provides additional security by ensuring only trusted certificates are accepted. | `""` |
 | config.database.useAwsIamAuth | string | Set to true if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.username | string | The database username for Studio to connect with. This user should have appropriate permissions on the database. Can be specified as a plain string value or as a secret reference. Plain value example: username: "studio" Secret reference example: username:   secretName: "my-secret"   secretKey: "DB_USERNAME" | `""` |
-| config.ingressAnnotations | object | Define the ingress annotations to be used for ALL the ingress resources. These annotations will be applied to all ingress resources created by this chart. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
-| config.ingressClassName | string | Define the ingress class name to be used for ALL the ingress resources. This value will be applied to all ingress resources created by this chart. Example: "nginx", "istio", "traefik" Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | config.nodeSelector | object | Common pod scheduling configuration for all deployments. These settings can be overridden by component-specific configurations. Not possible to combine with component-specific configurations for each scheduling option. | `{}` |
 | config.tolerations | list | Pod tolerations for all deployments. These settings can be overridden by component-specific configurations. | `[]` |
 | deploymentAnnotations | object | deploymentAnnotations defines annotations to add to all Studio resources. These annotations are applied globally to all resources (Deployments, Services, Ingresses, Jobs, HPAs, ConfigMaps, ServiceAccounts). Component-specific annotations can override these values if keys conflict. Example:   key: "value" Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
@@ -679,6 +677,8 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
+| global.ingressAnnotations | object | global.ingressAnnotations are annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.additionalAnnotations, rasa.rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
+| global.ingressClassName | string | global.ingressClassName is the ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.rasa.ingress.className) wins when set. | `""` |
 | global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecret defines repository pull secrets | `[]` |
@@ -694,7 +694,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasa.command[2] | string |  | `"rasa.model_service"` |
 | rasa.rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.rasa.image.tag | string |  | `"3.16.2-latest"` |
+| rasa.rasa.image.tag | string |  | `"3.17.7-latest"` |
 | rasa.rasa.ingress.annotations | object |  | `{}` |
 | rasa.rasa.ingress.enabled | bool |  | `true` |
 | rasa.rasa.ingress.hosts[0].host | string |  | `""` |

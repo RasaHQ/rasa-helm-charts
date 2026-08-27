@@ -93,9 +93,9 @@ Minimum `values.yaml` to get Studio running (assumes `studio-secrets` already cr
 ```yaml
 global:
   ingressHost: studio.example.com
+  ingressClassName: nginx
 
 config:
-  ingressClassName: nginx
   database:
     host: "postgres.example.com"
     username: "studio"

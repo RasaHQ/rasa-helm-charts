@@ -29,24 +29,22 @@ global:
   # leave it UNSET for split-host installs and use the per-ingress hosts
   # (app.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead.
   ingressHost:
+  # -- global.ingressClassName is the ingress class for the Studio app ingress
+  # and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress
+  # className (app.ingress.className, rasa.rasa.ingress.className) wins when set.
+  ingressClassName: ""
+  # -- global.ingressAnnotations are annotations added to the Studio app ingress
+  # and the Rasa Pro model-service ingress. Merged with per-ingress annotations
+  # (app.ingress.additionalAnnotations, rasa.rasa.ingress.annotations), which win
+  # on key conflicts.
+  # Example:
+  #   cert-manager.io/cluster-issuer: letsencrypt-prod
+  ingressAnnotations: {}
   # -- global.additionalDeploymentLabels can be used to map organizational structures onto system objects
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   additionalDeploymentLabels: {}
 
 config:
-  # -- Define the ingress annotations to be used for ALL the ingress resources.
-  # These annotations will be applied to all ingress resources created by this chart.
-  # Example:
-  #   kubernetes.io/ingress.class: nginx
-  #   cert-manager.io/cluster-issuer: letsencrypt-prod
-  ingressAnnotations: {}
-
-  # -- Define the ingress class name to be used for ALL the ingress resources.
-  # This value will be applied to all ingress resources created by this chart.
-  # Example: "nginx", "istio", "traefik"
-  # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class
-  ingressClassName: ""
-
   # -- Define the URL scheme (`http` or `https`) for externally derived URLs
   # (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service
   # public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https".
@@ -762,7 +760,7 @@ rasa:
     replicaCount: 1
     image:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-      tag: "3.16.2-latest"
+      tag: "3.17.7-latest"
 
     strategy:
       type: Recreate

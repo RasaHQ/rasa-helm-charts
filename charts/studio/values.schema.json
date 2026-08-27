@@ -218,14 +218,6 @@
       "type": "object",
       "required": ["database"],
       "properties": {
-        "ingressAnnotations": {
-          "description": "Annotations applied to all ingress resources",
-          "type": "object"
-        },
-        "ingressClassName": {
-          "description": "Ingress class name applied to all ingress resources",
-          "type": "string"
-        },
         "connectionType": {
           "description": "URL scheme (http or https) for externally derived URLs; does not change in-cluster service-to-service calls",
           "type": "string",
@@ -445,6 +437,14 @@
         "ingressHost": {
           "description": "Single-host knob: one hostname for the Studio app and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
           "type": ["string", "null"]
+        },
+        "ingressClassName": {
+          "description": "Ingress class for the Studio app and Rasa Pro model-service ingresses. Fallback: a per-ingress className wins when set.",
+          "type": ["string", "null"]
+        },
+        "ingressAnnotations": {
+          "description": "Annotations added to the Studio app and Rasa Pro model-service ingresses. Merged with per-ingress annotations, which win on key conflicts.",
+          "type": ["object", "null"]
         }
       }
     },

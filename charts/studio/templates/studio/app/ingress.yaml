@@ -12,7 +12,7 @@ metadata:
     {{- end }}
   {{- include "app.ingress.annotations" . | nindent 2 }}
 spec:
-  {{- $className := .Values.app.ingress.className | default .Values.config.ingressClassName }}
+  {{- $className := .Values.app.ingress.className | default (dig "ingressClassName" "" (.Values.global | default dict)) }}
   {{- if $className }}
   ingressClassName: {{ $className }}
   {{- end }}

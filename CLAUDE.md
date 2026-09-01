@@ -47,6 +47,11 @@ Both schemas declare draft-07 and use the `definitions` keyword with `#/definiti
 
 When adding new values to a chart that ships a schema, update `values.schema.json` accordingly. `helm lint --strict` validates the schema against default values, so defaults must satisfy the schema.
 
+### Chart Version Bumps
+- Patch (`1.3.2` → `1.3.3`): bug fixes
+- Minor (`1.3.2` → `1.4.0`): new features
+- Major (`1.3.2` → `2.0.0`): breaking changes
+
 ### Release Branch Versioning (`release/*`)
 On `release/` branches, increment the version once and append `-rc.X`:
 - Start: `2.0.2` → `2.0.3-rc.0`

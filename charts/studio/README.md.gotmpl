@@ -334,6 +334,31 @@ app:
       value: "600000"
 ```
 
+### Per-user analytics attribution (`USER_ID_TRACKING_ENABLED`)
+
+When Segment analytics is enabled for a deployment, Studio attributes events to a
+real user id by default. Customers that must disable per-user attribution (for
+example a bank or a works-council requirement) can turn it off without a code
+change:
+
+```yaml
+app:
+  env:
+    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
+      value: "0 * * * *"
+    - name: USER_ID_TRACKING_ENABLED
+      value: "false"
+```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `USER_ID_TRACKING_ENABLED` | When `"true"`, Segment events use the authenticated user id. When `"false"`, every event uses a shared constant identity instead of a real user id. | `"true"` |
+
+> **Note:** A custom `app.env` list replaces the chart default list wholesale.
+> Keep the default entries you still need (including
+> `DELETE_CONVERSATIONS_CRON_EXPRESSION` and `USER_ID_TRACKING_ENABLED`) when
+> overriding.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:

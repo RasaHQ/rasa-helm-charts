@@ -208,6 +208,12 @@ app:
     # cleanup job ("minute hour day-of-month month day-of-week").
     - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
+    # USER_ID_TRACKING_ENABLED: when Segment analytics is enabled, controls whether
+    # events attribute a real per-user id. Default "true". Set to "false" for
+    # deployments that must disable per-user attribution (e.g. works-council /
+    # banking requirements); events then use a shared constant identity instead.
+    - name: USER_ID_TRACKING_ENABLED
+      value: "true"
 
   # -- app.envFrom defines additional environment variables from ConfigMap or Secret.
   # These will be mounted as environment variables in the container.

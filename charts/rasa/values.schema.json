@@ -143,7 +143,9 @@
       "additionalProperties": true,
       "properties": {
         "additionalDeploymentLabels": { "type": "object" },
-        "ingressHost": { "type": ["string", "null"] }
+        "ingressHost": { "type": ["string", "null"] },
+        "ingressAnnotations": { "type": ["object", "null"] },
+        "ingressClassName": { "type": ["string", "null"] }
       }
     },
     "networkPolicy": {
@@ -213,12 +215,14 @@
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
         "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
+        "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
         "podAnnotations": { "type": "object" },
         "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "service": { "$ref": "#/definitions/serviceConfig" },
         "livenessProbe": { "$ref": "#/definitions/probeConfig" },
         "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "lifecycle": { "type": "object" },
         "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
@@ -241,7 +245,8 @@
         },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "rasaProServices": {
@@ -306,17 +311,20 @@
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
         "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
+        "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
         "podAnnotations": { "type": "object" },
         "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "service": { "$ref": "#/definitions/serviceConfig" },
         "livenessProbe": { "$ref": "#/definitions/probeConfig" },
         "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "lifecycle": { "type": "object" },
         "resources": { "type": "object" },
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "duckling": {
@@ -344,18 +352,21 @@
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
         "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
+        "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
         "podAnnotations": { "type": "object" },
         "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "service": { "$ref": "#/definitions/serviceConfig" },
         "livenessProbe": { "$ref": "#/definitions/probeConfig" },
         "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "lifecycle": { "type": "object" },
         "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     },
     "actionServer": {
@@ -383,18 +394,21 @@
         "volumes": { "type": "array" },
         "volumeMounts": { "type": "array" },
         "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
+        "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
         "podAnnotations": { "type": "object" },
         "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "service": { "$ref": "#/definitions/serviceConfig" },
         "livenessProbe": { "$ref": "#/definitions/probeConfig" },
         "readinessProbe": { "$ref": "#/definitions/probeConfig" },
+        "lifecycle": { "type": "object" },
         "ingress": { "$ref": "#/definitions/ingressConfig" },
         "resources": { "type": "object" },
         "autoscaling": { "$ref": "#/definitions/autoscalingConfig" },
         "nodeSelector": { "type": "object" },
         "tolerations": { "type": "array" },
-        "affinity": { "type": "object" }
+        "affinity": { "type": "object" },
+        "topologySpreadConstraints": { "type": "array", "items": { "type": "object" } }
       }
     }
   }

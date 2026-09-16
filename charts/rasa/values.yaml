@@ -25,11 +25,13 @@ rasa:
   # rasa.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    # repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+    repository: "public.ecr.aws/f7b7r5o7/rasa/rasa-private-dev"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
-    tag: "3.18.3-latest"
+    # tag: "3.18.3-latest"
+    tag: "pr-7004-c0b5e47"
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

@@ -26,7 +26,7 @@ rasa:
   # rasa.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro"
+    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-marketplace"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
@@ -177,7 +177,7 @@ rasa:
     - name: RASA_AWS_MARKETPLACE_ENABLED # DO NOT REMOVE
       value: "true"
     - name: RASA_AWS_MARKETPLACE_PRODUCT_ID # DO NOT REMOVE
-      value: "prod-gmp3hw75wk2gk"
+      value: "prod-65cnepv53qloe"
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"
     # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
@@ -410,7 +410,7 @@ rasaProServices:
   # rasaProServices.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-services"
+    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-services-marketplace"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
@@ -723,7 +723,7 @@ duckling:
   # duckling.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/duckling"
+    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/duckling-marketplace"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag
@@ -954,7 +954,7 @@ actionServer:
   # actionServer.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-sdk"
+    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-sdk-marketplace"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag

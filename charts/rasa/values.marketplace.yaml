@@ -26,7 +26,7 @@ rasa:
   # rasa.image defines image settings
   image:
     # -- image.repository specifies image repository
-    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-marketplace"
+    repository: "709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-marketplace"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
     # -- image.tag specifies image tag

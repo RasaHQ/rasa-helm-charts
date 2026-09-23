@@ -23,7 +23,9 @@ jobs:
         id: set-charts
         shell: bash
         run: |
-          CHART_LIST=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^charts/[^/]+/' | cut -d'/' -f2 | sort -u)
+          # grep exits 1 when nothing matches; without '|| true' that aborts the step under
+          # 'set -e -o pipefail' and the empty-list branch below is never reached.
+          CHART_LIST=$(git diff --name-only origin/${{ github.base_ref }}...HEAD | grep -E '^charts/[^/]+/' | cut -d'/' -f2 | sort -u || true)
           if [ -z "$CHART_LIST" ]; then
             echo "No chart directories changed"
             echo 'charts=[]' >> $GITHUB_OUTPUT

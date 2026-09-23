@@ -79,7 +79,7 @@ jobs:
         helm lint --strict charts/rasa
         helm lint --strict charts/op-kits
 
-  snyk:
+  kube-linter:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-24.04
 
@@ -90,30 +90,23 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 0
-
-      - name: Fetch history
-        run: git fetch --prune
 
       - name: Install Helm 3
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
           version: v3.22.0
 
+      # Required: kube-linter renders the chart itself, but without the vendored
+      # subchart it silently skips the subchart's objects (studio drops 38 -> 27).
       - name: Update dependencies
         run: helm dependency build ./charts/${{ matrix.charts }}
 
-      - name: Generate Helm template
-        run: helm template ./charts/${{ matrix.charts }} --output-dir ./output --kube-version 1.29.0
-
-      - name: Scan chart with Snyk IAC
-        uses: snyk/actions/iac@9adf32b1121593767fc3c057af55b55db032dc04 # master
-        env:
-          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      - name: Scan chart with kube-linter
+        uses: stackrox/kube-linter-action@87802a2f4e01abebb3ee3c67a3002fea71f6eae5 # v1.0.7
         with:
-          command: test
-          file: ./output/
-          args: --report --severity-threshold=high
+          directory: charts/${{ matrix.charts }}
+          config: .kube-linter.yaml
+          # renovate: datasource=github-releases depName=stackrox/kube-linter
+          version: v0.8.3
 
       

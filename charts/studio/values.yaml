@@ -426,44 +426,56 @@ backend:
           type: RuntimeDefault
 
     # -- backend.migration.podSecurityContext defines the security settings for the entire migration job pod.
-    # Defaults satisfy the restricted Pod Security Standard. Note that pod-level settings such as
-    # runAsNonRoot also apply to init containers, so a root waitForIt image needs this context
-    # relaxed too, not only backend.migration.waitForItContainer.securityContext.
-    # Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+    # The restricted Pod Security Standard is already satisfied by the container-level contexts, so the
+    # pod-level equivalents are left commented out, matching the other Studio components.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     podSecurityContext:
       # -- backend.migration.podSecurityContext.enabled determines whether to enable the pod security context.
       enabled: true
-      # -- backend.migration.podSecurityContext.runAsNonRoot determines whether to run the pod as a non-root user.
-      runAsNonRoot: true
-      # -- backend.migration.podSecurityContext.seccompProfile defines the seccomp profile configuration.
-      seccompProfile:
-        # -- backend.migration.podSecurityContext.seccompProfile.type is the seccomp profile type.
-        type: RuntimeDefault
       # -- backend.migration.podSecurityContext.fsGroup is the group ID to run the pod as.
       # fsGroup: 2000
+      # -- backend.migration.podSecurityContext.runAsNonRoot determines whether to run the pod as a non-root user.
+      # NOTE: pod-level settings also apply to init containers, so enabling this requires a waitForIt
+      # image that runs as non-root, or runAsUser set on that container.
+      # runAsNonRoot: true
+      # -- backend.migration.podSecurityContext.seccompProfile defines the seccomp profile configuration.
+      # seccompProfile:
+      #   type: RuntimeDefault
 
     # -- backend.migration.securityContext defines the security settings for the migration container.
-    # The waitForIt init container has its own context under
-    # backend.migration.waitForItContainer.securityContext.
-    # Defaults satisfy the restricted Pod Security Standard.
-    # Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+    # The waitForIt init container has its own context under backend.migration.waitForItContainer.securityContext.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
     securityContext:
       # -- backend.migration.securityContext.enabled determines whether to enable the security context.
       enabled: true
       # -- backend.migration.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
+      # Should be false for security best practices.
       allowPrivilegeEscalation: false
       # -- backend.migration.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
+      # Should be true for security best practices.
       runAsNonRoot: true
       # -- backend.migration.securityContext.capabilities defines the Linux capabilities configuration.
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
       capabilities:
         # -- backend.migration.securityContext.capabilities.drop defines capabilities to drop from the container.
+        # ALL drops all capabilities for maximum security.
         drop:
           - ALL
+        # -- backend.migration.securityContext.capabilities.add defines capabilities to add to the container.
+        # Uncomment and modify if specific capabilities are needed.
+        # add: ['NET_BIND_SERVICE', 'NET_RAW']
       # -- backend.migration.securityContext.seccompProfile defines the seccomp profile configuration.
+      # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
+      # pod-level one above is commented out.
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container
       seccompProfile:
         # -- backend.migration.securityContext.seccompProfile.type is the seccomp profile type.
         type: RuntimeDefault
+      # -- backend.migration.securityContext.privileged determines whether to run the container in privileged mode.
+      # Should be false for security best practices.
+      # privileged: false
       # -- backend.migration.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
+      # Can be enabled for additional security.
       # readOnlyRootFilesystem: true
       # -- backend.migration.securityContext.runAsUser is the user ID to run the container as.
       # runAsUser: 1000

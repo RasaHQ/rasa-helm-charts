@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.7.0-rc.2](https://img.shields.io/badge/Version-2.7.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.7.0-rc.3](https://img.shields.io/badge/Version-2.7.0--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.2
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.7.0-rc.2
+$ helm install my-release rasa/studio --version 2.7.0-rc.3
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.2
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.3
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.7.0-rc.2
+$ helm pull rasa/studio --version 2.7.0-rc.3
 ```
 
 ## General Configuration
@@ -527,7 +527,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | backend.livenessProbe.periodSeconds | int | backend.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | backend.livenessProbe.successThreshold | int | backend.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | backend.livenessProbe.timeoutSeconds | int | backend.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| backend.migration | object | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}}` |
+| backend.migration | object | backend.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"affinity":{},"annotations":{},"enabled":true,"environmentVariables":{"KC_DEFAULT_DATABASE_CONNECTION_NAME":{"value":"postgres"},"SKIP_KEYCLOAK":{"value":"false"}},"image":{"name":"studio-database-migration","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}}` |
 | backend.migration.affinity | object | backend.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | backend.migration.annotations | object | backend.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | backend.migration.enabled | bool | backend.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
@@ -539,18 +539,15 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | backend.migration.image.pullPolicy | string | backend.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
 | backend.migration.nodeSelector | object | backend.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
 | backend.migration.podAnnotations | object | backend.migration.podAnnotations defines annotations to add to the migration job pod. Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| backend.migration.podSecurityContext | object | backend.migration.podSecurityContext defines the security settings for the entire migration job pod. Defaults satisfy the restricted Pod Security Standard. Note that pod-level settings such as runAsNonRoot also apply to init containers, so a root waitForIt image needs this context relaxed too, not only backend.migration.waitForItContainer.securityContext. Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted | `{"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| backend.migration.podSecurityContext | object | backend.migration.podSecurityContext defines the security settings for the entire migration job pod. The restricted Pod Security Standard is already satisfied by the container-level contexts, so the pod-level equivalents are left commented out, matching the other Studio components. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
 | backend.migration.podSecurityContext.enabled | bool | backend.migration.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
-| backend.migration.podSecurityContext.runAsNonRoot | bool | backend.migration.podSecurityContext.runAsNonRoot determines whether to run the pod as a non-root user. | `true` |
-| backend.migration.podSecurityContext.seccompProfile | object | backend.migration.podSecurityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
-| backend.migration.podSecurityContext.seccompProfile.type | string | backend.migration.podSecurityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
-| backend.migration.securityContext | object | backend.migration.securityContext defines the security settings for the migration container. The waitForIt init container has its own context under backend.migration.waitForItContainer.securityContext. Defaults satisfy the restricted Pod Security Standard. Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
-| backend.migration.securityContext.allowPrivilegeEscalation | bool | backend.migration.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
-| backend.migration.securityContext.capabilities | object | backend.migration.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
-| backend.migration.securityContext.capabilities.drop | list | backend.migration.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
+| backend.migration.securityContext | object | backend.migration.securityContext defines the security settings for the migration container. The waitForIt init container has its own context under backend.migration.waitForItContainer.securityContext. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| backend.migration.securityContext.allowPrivilegeEscalation | bool | backend.migration.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. Should be false for security best practices. | `false` |
+| backend.migration.securityContext.capabilities | object | backend.migration.securityContext.capabilities defines the Linux capabilities configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container | `{"drop":["ALL"]}` |
+| backend.migration.securityContext.capabilities.drop | list | backend.migration.securityContext.capabilities.drop defines capabilities to drop from the container. ALL drops all capabilities for maximum security. | `["ALL"]` |
 | backend.migration.securityContext.enabled | bool | backend.migration.securityContext.enabled determines whether to enable the security context. | `true` |
-| backend.migration.securityContext.runAsNonRoot | bool | backend.migration.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
-| backend.migration.securityContext.seccompProfile | object | backend.migration.securityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
+| backend.migration.securityContext.runAsNonRoot | bool | backend.migration.securityContext.runAsNonRoot determines whether to run the container as a non-root user. Should be true for security best practices. | `true` |
+| backend.migration.securityContext.seccompProfile | object | backend.migration.securityContext.seccompProfile defines the seccomp profile configuration. Kept active because the restricted Pod Security Standard requires a seccomp profile, and the pod-level one above is commented out. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container | `{"type":"RuntimeDefault"}` |
 | backend.migration.securityContext.seccompProfile.type | string | backend.migration.securityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | backend.migration.serviceAccount | object | backend.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. | `{"annotations":{},"create":false,"name":""}` |
 | backend.migration.serviceAccount.annotations | object | backend.migration.serviceAccount.annotations defines annotations to add to the service account. | `{}` |

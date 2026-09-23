@@ -1,0 +1,83 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Scope is deliberately limited to CI: action pins in .github/workflows and .github/actions, plus the tool versions those actions install.",
+    "Helm charts are managed separately: enabling the helmv3/helm-values managers would raise PRs that change charts/** without bumping Chart.yaml, which ct lint rejects."
+  ],
+  "ignorePaths": ["charts/**"],
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests",
+    ":semanticCommits"
+  ],
+  "timezone": "Europe/Berlin",
+  "schedule": ["before 6am on monday"],
+  "labels": ["automated"],
+  "enabledManagers": ["github-actions", "custom.regex"],
+  "github-actions": {
+    "pinDigests": true
+  },
+  "prConcurrentLimit": 3,
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Tool versions passed as action inputs (helm, git-cliff, python). These are invisible to the github-actions manager, which only tracks 'uses:' digests - annotate a pin with '# renovate: datasource=X depName=Y' to have it watched.",
+      "fileMatch": [
+        "^\\.github/workflows/.+\\.ya?ml$",
+        "^\\.github/actions/.+/action\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[\\w-]+: [\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    }
+  ],
+  "packageRules": [
+    {
+      "description": "Group non-major action updates into a single PR",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["minor", "patch", "digest"],
+      "groupName": "github actions (non-major)",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci"
+    },
+    {
+      "description": "Majors get their own PR and must be approved on the dependency dashboard first, so input-schema and runtime changes are reviewed deliberately",
+      "matchManagers": ["github-actions"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci",
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "azure/setup-helm controls which Helm binary CI runs. The OCI release action passes a full https:// URL to 'helm registry login', which only works on Helm 3, so this must never be bumped without checking the pinned 'version:' inputs.",
+      "matchManagers": ["github-actions"],
+      "matchPackageNames": ["azure/setup-helm"],
+      "dependencyDashboardApproval": true,
+      "addLabels": ["needs-manual-review"]
+    },
+    {
+      "description": "Group non-major tool version bumps (helm, git-cliff, python)",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["minor", "patch"],
+      "groupName": "ci tool versions (non-major)",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci"
+    },
+    {
+      "description": "Major tool version bumps are reviewed deliberately",
+      "matchManagers": ["custom.regex"],
+      "matchUpdateTypes": ["major"],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci",
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Helm 3 pins must stay on Helm 3. The OCI release action runs 'helm registry login https://...', and Helm 4 accepts a bare domain only - moving these to 4.x breaks chart publishing until REGISTRY_URL drops the scheme. The lint-helm4 job's v4 pin is unaffected by this rule.",
+      "matchManagers": ["custom.regex"],
+      "matchDepNames": ["helm/helm"],
+      "matchCurrentValue": "/^v3\\./",
+      "allowedVersions": "<4.0.0"
+    }
+  ]
+}

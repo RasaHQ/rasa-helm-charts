@@ -1056,8 +1056,8 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.enabled | bool | rasa.enabled enables the Rasa Pro server deployment. Set to false to deploy only Rasa Pro Services (analytics pipeline). | `true` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
-| rasa.image.repository | string | image.repository specifies image repository repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" | `"public.ecr.aws/f7b7r5o7/rasa/rasa-private-dev"` |
-| rasa.image.tag | string | image.tag specifies image tag tag: "3.18.3-latest" | `"pr-7004-c0b5e47"` |
+| rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
+| rasa.image.tag | string | image.tag specifies image tag | `"3.18.3-latest"` |
 | rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |

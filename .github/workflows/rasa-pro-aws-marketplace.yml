@@ -4,7 +4,7 @@ on:
   push:
     branches:
       - main
-      - INFRA-2166
+      - INFRA-2166 # TODO: remove this before merging PR
     paths:
       - 'charts/rasa/**'
       - '!charts/studio/**'
@@ -112,8 +112,7 @@ jobs:
       matrix:
         include:
           - name: rasa-pro
-          # source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-            source: public.ecr.aws/f7b7r5o7/rasa/rasa-private-dev
+            source: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
             target: 709825985650.dkr.ecr.us-east-1.amazonaws.com/rasa/rasa-pro-marketplace
             tag: ${{ needs.read-chart.outputs.rasa_pro_tag }}
           - name: rasa-pro-services

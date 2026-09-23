@@ -77,6 +77,9 @@ jobs:
         uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          version: v2.14.2
           args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
         env:
           OUTPUT: charts/studio/RELEASE_NOTES.md
@@ -86,6 +89,9 @@ jobs:
         uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          version: v2.14.2
           args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
         env:
           OUTPUT: charts/rasa/RELEASE_NOTES.md
@@ -95,6 +101,9 @@ jobs:
         uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          version: v2.14.2
           args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}
         env:
           OUTPUT: charts/op-kits/RELEASE_NOTES.md

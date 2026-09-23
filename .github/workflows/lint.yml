@@ -7,7 +7,7 @@ on:
 jobs:
   lint:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
     - name: Checkout repository
@@ -53,7 +53,7 @@ jobs:
 
   lint-helm4:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     steps:
     - name: Checkout repository
@@ -81,7 +81,7 @@ jobs:
 
   kube-linter:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
 
     strategy:
       matrix:

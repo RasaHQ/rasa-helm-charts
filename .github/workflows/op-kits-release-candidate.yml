@@ -14,7 +14,7 @@ on:
 jobs:
   release-candidate:
     name: Op-Kits Release Candidate
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       op-kits-version: ${{ steps.check-rc.outputs.chart-version }}
       release-candidate: ${{ steps.check-rc.outputs.is-rc }}

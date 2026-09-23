@@ -1,5 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "description": [
+    "Scope is deliberately limited to GitHub Actions in .github/workflows and .github/actions.",
+    "Helm charts are managed separately: enabling the helmv3/helm-values managers would raise PRs that change charts/** without bumping Chart.yaml, which ct lint rejects."
+  ],
+  "ignorePaths": ["charts/**"],
   "extends": [
     "config:recommended",
     "helpers:pinGitHubActionDigests",

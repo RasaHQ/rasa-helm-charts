@@ -20,7 +20,8 @@
     "automated"
   ],
   "enabledManagers": [
-    "github-actions"
+    "github-actions",
+    "custom.regex"
   ],
   "github-actions": {
     "pinDigests": true
@@ -86,6 +87,45 @@
         "uses-with"
       ],
       "pinDigests": false
+    },
+    {
+      "description": "Group non-major tool version bumps from the custom manager",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "groupName": "ci tool versions (non-major)",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci"
+    },
+    {
+      "description": "Major tool version bumps are reviewed deliberately",
+      "matchManagers": [
+        "custom.regex"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "ci",
+      "dependencyDashboardApproval": true
+    }
+  ],
+  "customManagers": [
+    {
+      "customType": "regex",
+      "description": "Tool versions passed as action inputs to actions Renovate does not know natively (orhun/git-cliff-action). The github-actions manager extracts 'uses-with' versions only for known actions such as azure/setup-helm, actions/setup-python and helm/chart-releaser-action - it does not read '# renovate:' comments.",
+      "fileMatch": [
+        "^\\.github/workflows/.+\\.ya?ml$",
+        "^\\.github/actions/.+/action\\.ya?ml$"
+      ],
+      "matchStrings": [
+        "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[\\w-]+: [\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
     }
   ]
 }

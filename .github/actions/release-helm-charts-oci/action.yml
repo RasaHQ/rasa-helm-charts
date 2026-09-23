@@ -76,7 +76,6 @@ runs:
     - name: Install Helm
       uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
       with:
-        # renovate: datasource=github-releases depName=helm/helm
         version: v3.22.0
 
     - name: Generate access token

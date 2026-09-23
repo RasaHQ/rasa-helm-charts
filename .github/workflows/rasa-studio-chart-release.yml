@@ -12,7 +12,7 @@ on:
 jobs:
   release:
     name: Release Rasa Studio Helm Chart
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     outputs:
       studio-version: ${{ steps.chart-info.outputs.version }}
     

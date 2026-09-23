@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 2.7.0-rc.1](https://img.shields.io/badge/Version-2.7.0--rc.1-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 2.7.0-rc.2](https://img.shields.io/badge/Version-2.7.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.1
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.2
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 2.7.0-rc.1
+$ helm install my-release rasa/studio --version 2.7.0-rc.2
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.1
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 2.7.0-rc.2
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 2.7.0-rc.1
+$ helm pull rasa/studio --version 2.7.0-rc.2
 ```
 
 ## General Configuration
@@ -760,7 +760,7 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 | rasa.rasa.command[2] | string |  | `"rasa.model_service"` |
 | rasa.rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.rasa.image.tag | string |  | `"3.16.2-latest"` |
+| rasa.rasa.image.tag | string |  | `"3.17.11-latest"` |
 | rasa.rasa.ingress.annotations | object |  | `{}` |
 | rasa.rasa.ingress.enabled | bool |  | `true` |
 | rasa.rasa.ingress.hosts[0] | object | Please update the below URL with the correct host name of the Studio deployment | `{"host":"INGRESS.HOST.NAME","paths":[{"path":"/talk","pathType":"Prefix"}]}` |

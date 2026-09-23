@@ -63,6 +63,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
+          # renovate: datasource=github-releases depName=helm/helm
           version: v3.22.0
 
       # Resolve the most recent tag per chart to scope the changelog range
@@ -79,6 +80,7 @@ jobs:
           config: cliff.toml
           # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
           # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
           version: v2.14.2
           args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
         env:
@@ -91,6 +93,7 @@ jobs:
           config: cliff.toml
           # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
           # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
           version: v2.14.2
           args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
         env:
@@ -103,6 +106,7 @@ jobs:
           config: cliff.toml
           # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
           # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
           version: v2.14.2
           args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}
         env:

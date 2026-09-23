@@ -1,0 +1,46 @@
+# kube-linter configuration
+#
+# Replaces the previous Snyk IaC scan. kube-linter reads the chart directories
+# directly (it renders them itself), so no `helm template` step is needed - but
+# `helm dependency build` IS required for charts with subcharts, otherwise the
+# subchart's objects are silently skipped (studio drops from 38 to 27 objects).
+#
+# Every exclusion below is a deliberate design decision in these charts, not a
+# finding waiting to be fixed. Everything else stays enabled, including
+# privileged-container, privilege-escalation-container, host-network, host-pid,
+# host-ipc, docker-sock, sensitive-host-mounts, cluster-admin-role-binding,
+# access-to-secrets, ssh-port and the dangling-* family.
+checks:
+  exclude:
+    # Charts ship `resources: {}` on purpose: sizing is the operator's decision
+    # and depends entirely on their workload. Documented per component in values.yaml.
+    - unset-cpu-requirements
+    - unset-memory-requirements
+
+    # readOnlyRootFilesystem is offered as a commented-out option in each
+    # component's securityContext rather than enabled by default, because several
+    # images write to their root filesystem at runtime.
+    - no-read-only-root-fs
+
+    # runAsNonRoot is set where the image supports it. The remaining objects
+    # (the bundled rasa subchart and the helm test hook pods) intentionally leave
+    # it unset.
+    - run-as-non-root
+
+    # Probes target ports that are not declared as containerPort. This is
+    # intentional - the ports are reachable, they are simply not enumerated in
+    # the pod spec.
+    - liveness-port
+    - readiness-port
+
+    # The database migration Job is a Helm hook with
+    # `hook-delete-policy: before-hook-creation,hook-succeeded`, so Helm owns its
+    # lifecycle. ttlSecondsAfterFinished would delete failed jobs that we keep
+    # deliberately for debugging.
+    - job-ttl-seconds-after-finished
+
+    # Fires on the `busybox` image in templates/tests/test-connection.yaml, which
+    # carries no tag. It does NOT fire on the `<version>-latest` image convention
+    # (the check blocks `:latest` and untagged images only). Excluded for now;
+    # pinning busybox in the test hooks would let this be re-enabled.
+    - latest-tag

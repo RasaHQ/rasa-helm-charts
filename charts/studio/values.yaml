@@ -208,11 +208,15 @@ app:
     # cleanup job ("minute hour day-of-month month day-of-week").
     - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
-    # USER_ID_TRACKING_ENABLED: when Segment analytics is enabled, controls whether
+    # STUDIO_TELEMETRY_ENABLED: master switch for Segment product telemetry.
+    # Default "false". Set to "true" only when SEGMENT_TRACKING_KEY is also set.
+    - name: STUDIO_TELEMETRY_ENABLED
+      value: "false"
+    # STUDIO_USER_ID_TELEMETRY_ENABLED: when telemetry is enabled, controls whether
     # events attribute a real per-user id. Default "true". Set to "false" for
     # deployments that must disable per-user attribution (e.g. works-council /
     # banking requirements); events then use a shared constant identity instead.
-    - name: USER_ID_TRACKING_ENABLED
+    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
       value: "true"
 
   # -- app.envFrom defines additional environment variables from ConfigMap or Secret.

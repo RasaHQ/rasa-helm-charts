@@ -16,7 +16,7 @@ imagePullSecrets:
 repository: "europe-west3-docker.pkg.dev/rasa-releases/studio/"
 # -- tag specifies image tag for Studio
 ## Overrides the image tag whose default is the chart appVersion.
-tag: "1.17.0-latest"
+tag: "1.17.5-latest"
 
 config:
   # -- Defines the host name for all Studio ingress resources.
@@ -398,7 +398,87 @@ backend:
     waitForIt: false
     # -- backend.migration.waitForItContainer defines the configuration for the wait-for-it container.
     waitForItContainer:
-      image: postgres:17.2
+      # -- backend.migration.waitForItContainer.image is the image used by the waitForIt init container.
+      # Only `pg_isready` is invoked from it, so this version does not need to match the database server version.
+      image: postgres:18.6
+      # -- backend.migration.waitForItContainer.securityContext defines the security settings for the
+      # waitForIt init container. Defaults satisfy the restricted Pod Security Standard.
+      # NOTE: `runAsUser` is required because this image is configured to run as root; 999 is its
+      # built-in `postgres` user. Adjust it if you point `image` at a different waitForIt image.
+      # Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+      securityContext:
+        # -- backend.migration.waitForItContainer.securityContext.enabled determines whether to enable the security context.
+        enabled: true
+        # -- backend.migration.waitForItContainer.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
+        allowPrivilegeEscalation: false
+        # -- backend.migration.waitForItContainer.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
+        runAsNonRoot: true
+        # -- backend.migration.waitForItContainer.securityContext.runAsUser is the user ID to run the container as.
+        runAsUser: 999
+        # -- backend.migration.waitForItContainer.securityContext.capabilities defines the Linux capabilities configuration.
+        capabilities:
+          # -- backend.migration.waitForItContainer.securityContext.capabilities.drop defines capabilities to drop from the container.
+          drop:
+            - ALL
+        # -- backend.migration.waitForItContainer.securityContext.seccompProfile defines the seccomp profile configuration.
+        seccompProfile:
+          # -- backend.migration.waitForItContainer.securityContext.seccompProfile.type is the seccomp profile type.
+          type: RuntimeDefault
+
+    # -- backend.migration.podSecurityContext defines the security settings for the entire migration job pod.
+    # The restricted Pod Security Standard is already satisfied by the container-level contexts, so the
+    # pod-level equivalents are left commented out, matching the other Studio components.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    podSecurityContext:
+      # -- backend.migration.podSecurityContext.enabled determines whether to enable the pod security context.
+      enabled: true
+      # -- backend.migration.podSecurityContext.fsGroup is the group ID to run the pod as.
+      # fsGroup: 2000
+      # -- backend.migration.podSecurityContext.runAsNonRoot determines whether to run the pod as a non-root user.
+      # NOTE: pod-level settings also apply to init containers, so enabling this requires a waitForIt
+      # image that runs as non-root, or runAsUser set on that container.
+      # runAsNonRoot: true
+      # -- backend.migration.podSecurityContext.seccompProfile defines the seccomp profile configuration.
+      # seccompProfile:
+      #   type: RuntimeDefault
+
+    # -- backend.migration.securityContext defines the security settings for the migration container.
+    # The waitForIt init container has its own context under backend.migration.waitForItContainer.securityContext.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/
+    securityContext:
+      # -- backend.migration.securityContext.enabled determines whether to enable the security context.
+      enabled: true
+      # -- backend.migration.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
+      # Should be false for security best practices.
+      allowPrivilegeEscalation: false
+      # -- backend.migration.securityContext.runAsNonRoot determines whether to run the container as a non-root user.
+      # Should be true for security best practices.
+      runAsNonRoot: true
+      # -- backend.migration.securityContext.capabilities defines the Linux capabilities configuration.
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
+      capabilities:
+        # -- backend.migration.securityContext.capabilities.drop defines capabilities to drop from the container.
+        # ALL drops all capabilities for maximum security.
+        drop:
+          - ALL
+        # -- backend.migration.securityContext.capabilities.add defines capabilities to add to the container.
+        # Uncomment and modify if specific capabilities are needed.
+        # add: ['NET_BIND_SERVICE', 'NET_RAW']
+      # -- backend.migration.securityContext.seccompProfile defines the seccomp profile configuration.
+      # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
+      # pod-level one above is commented out.
+      # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container
+      seccompProfile:
+        # -- backend.migration.securityContext.seccompProfile.type is the seccomp profile type.
+        type: RuntimeDefault
+      # -- backend.migration.securityContext.privileged determines whether to run the container in privileged mode.
+      # Should be false for security best practices.
+      # privileged: false
+      # -- backend.migration.securityContext.readOnlyRootFilesystem determines whether to mount the root filesystem as read-only.
+      # Can be enabled for additional security.
+      # readOnlyRootFilesystem: true
+      # -- backend.migration.securityContext.runAsUser is the user ID to run the container as.
+      # runAsUser: 1000
 
     # -- backend.migration.annotations defines annotations to add to the migration job resource.
     # These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence).
@@ -1158,7 +1238,7 @@ rasa:
     replicaCount: 1
     image:
       repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-      tag: "3.16.2-latest"
+      tag: "3.17.11-latest"
 
     strategy:
       type: Recreate

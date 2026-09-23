@@ -70,12 +70,12 @@ CI blocks `-rc` suffixes on `main`.
 
 ## Helm 4 Compatibility
 
-Charts must lint and render cleanly under **both Helm 3 and Helm 4**. CI enforces this: `lint.yml` runs a `lint` job (Helm 3.15.2 via `ct lint`) and a parallel `lint-helm4` job (Helm 4.2.0 via `helm lint --strict`) on every PR. When writing or editing templates:
+Charts must lint and render cleanly under **both Helm 3 and Helm 4**. CI enforces this: `lint.yml` runs a `lint` job (Helm 3.22.0 via `ct lint`) and a parallel `lint-helm4` job (Helm 4.3.0 via `helm lint --strict`) on every PR. When writing or editing templates:
 
 - **Never mutate `.Values`.** Helm 4 makes `.Values` read-only at render time, so `{{- $_ := set .Values.foo ... }}` breaks. Build a local dict (`merge`/`deepCopy`) instead.
 - **Don't branch on `.Capabilities.KubeVersion` for API versions.** All supported clusters are ≥1.19; ingress templates hardcode `networking.k8s.io/v1` with `pathType` and the `service:`/`port:` backend form. The old `extensions/v1beta1` / `networking.k8s.io/v1beta1` fallbacks were removed.
 - **Prefer `deepCopy` over `toYaml | fromYaml`** for deep-copying a values map before `merge`.
-- **`helm registry login` takes a domain only in Helm 4** (no `https://` prefix). The OCI release action (`.github/actions/release-helm-charts-oci`) still passes a full URL and is pinned to Helm 3.15.2 — it must be updated before that action moves to Helm 4.
+- **`helm registry login` takes a domain only in Helm 4** (no `https://` prefix). The OCI release action (`.github/actions/release-helm-charts-oci`) still passes a full URL and is pinned to Helm 3.22.0 — it must be updated before that action moves to Helm 4.
 
 ## CI / Release Pipeline
 

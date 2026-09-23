@@ -411,6 +411,26 @@ entries:
     version: 0.1.5
   rasa:
   - apiVersion: v2
+    created: "2026-09-23T09:27:02.656670449Z"
+    description: A Rasa Pro Helm chart for Kubernetes
+    digest: a015e2c46e112c8145f87107c876701e71affe048b9760772856794fa83546c4
+    home: https://rasa.com
+    keywords:
+    - Kubernetes
+    - Rasa
+    - Rasa Pro
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: rasa
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-2.6.0/rasa-2.6.0.tgz
+    version: 2.6.0
+  - apiVersion: v2
     created: "2026-08-18T11:51:01.487592676Z"
     description: A Rasa Pro Helm chart for Kubernetes
     digest: ad37e877517ae3dbe5f76d3c969a9e423804b62cb106d1259aaba885ec99d8ad
@@ -731,6 +751,31 @@ entries:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/rasa-1.2.7/rasa-1.2.7.tgz
     version: 1.2.7
   studio:
+  - apiVersion: v2
+    created: "2026-09-23T10:32:40.642334854Z"
+    dependencies:
+    - condition: rasa.enabled
+      name: rasa
+      repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
+      version: 2.6.0
+    description: A Rasa Studio Helm chart for Kubernetes
+    digest: 0e480fdc8707440e953870085b6d0b0d735d2abb9330f7fcd0eb5e3f23b616a2
+    home: https://helm.rasa.com
+    keywords:
+    - Kubernetes
+    - Studio
+    - CALM
+    maintainers:
+    - email: support@rasa.com
+      name: Rasa Infrastructure and Security Team
+      url: https://github.com/RasaHQ/rasa-helm-charts
+    name: studio
+    sources:
+    - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/studio
+    type: application
+    urls:
+    - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.7.0/studio-2.7.0.tgz
+    version: 2.7.0
   - apiVersion: v2
     created: "2026-07-08T09:11:51.221650584Z"
     dependencies:
@@ -1117,4 +1162,4 @@ entries:
     urls:
     - https://github.com/RasaHQ/rasa-helm-charts/releases/download/studio-2.1.9/studio-2.1.9.tgz
     version: 2.1.9
-generated: "2026-08-18T11:51:01.487780406Z"
+generated: "2026-09-23T10:32:40.642511583Z"

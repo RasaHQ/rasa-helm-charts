@@ -68,15 +68,15 @@ runs:
   using: composite
   steps:
     - name: Checkout Helm chart repo
-      uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+      uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       with:
         repository: ${{ inputs.github-repo }}
         ref: ${{ inputs.github-ref }}
 
     - name: Install Helm
-      uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+      uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
       with:
-        version: v3.15.2
+        version: v3.22.0
 
     - name: Generate access token
       id: google-auth
@@ -90,7 +90,7 @@ runs:
       id: get-chart-name
       env:
         CHART_PATH: ${{ inputs.chart-path }}
-      uses: mikefarah/yq@5a7e72a743649b1b3a47d1a1d8214f3453173c51 # v4.52.4
+      uses: mikefarah/yq@c14f446382944492701b16c1ddb48bb9dbe683e3 # v4.53.6
       with:
         cmd: |
           export CHART_NAME=$(yq ".name" "${CHART_PATH}/Chart.yaml")
@@ -100,7 +100,7 @@ runs:
       id: get-chart-version
       env:
         CHART_PATH: ${{ inputs.chart-path }}
-      uses: mikefarah/yq@5a7e72a743649b1b3a47d1a1d8214f3453173c51 # v4.52.4
+      uses: mikefarah/yq@c14f446382944492701b16c1ddb48bb9dbe683e3 # v4.53.6
       with:
         cmd: |
           export CHART_VERSION=$(yq ".version" "${CHART_PATH}/Chart.yaml")

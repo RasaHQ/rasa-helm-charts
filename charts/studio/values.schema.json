@@ -167,6 +167,16 @@
         }
       }
     },
+    "securityContextConfig": {
+      "description": "Pod- or container-level security context. `enabled` is a chart-level toggle stripped before rendering; all other keys are passed through to Kubernetes verbatim",
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "schedulingConfig": {
       "description": "Pod scheduling configuration (nodeSelector, affinity, tolerations)",
       "type": "object",
@@ -330,6 +340,27 @@
         },
         "image": {
           "$ref": "#/definitions/imageConfig"
+        },
+        "migration": {
+          "description": "Database migration job configuration",
+          "type": "object",
+          "properties": {
+            "podSecurityContext": {
+              "$ref": "#/definitions/securityContextConfig"
+            },
+            "securityContext": {
+              "$ref": "#/definitions/securityContextConfig"
+            },
+            "waitForItContainer": {
+              "description": "waitForIt init container configuration",
+              "type": "object",
+              "properties": {
+                "securityContext": {
+                  "$ref": "#/definitions/securityContextConfig"
+                }
+              }
+            }
+          }
         },
         "autoscaling": {
           "$ref": "#/definitions/autoscaling"

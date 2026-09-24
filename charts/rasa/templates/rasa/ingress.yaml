@@ -10,13 +10,15 @@ metadata:
     {{- if .Values.rasa.ingress.labels }}
 {{ toYaml .Values.rasa.ingress.labels | indent 4 }}
     {{- end }}
-  {{- with .Values.rasa.ingress.annotations }}
+  {{- $annotations := merge (.Values.rasa.ingress.annotations | default dict | deepCopy) (.Values.global.ingressAnnotations | default dict) }}
+  {{- with $annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- if .Values.rasa.ingress.className }}
-  ingressClassName: {{ .Values.rasa.ingress.className }}
+  {{- $className := .Values.rasa.ingress.className | default .Values.global.ingressClassName }}
+  {{- if $className }}
+  ingressClassName: {{ $className }}
   {{- end }}
   {{- if .Values.rasa.ingress.tls }}
   tls:

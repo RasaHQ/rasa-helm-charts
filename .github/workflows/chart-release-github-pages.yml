@@ -17,11 +17,11 @@ env:
 
 jobs:
   release-charts:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-26.04
 
     steps:
       - name: Checkout (full history)
-        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
           token: ${{ secrets.CHART_RELEASER_PAT }}
@@ -61,9 +61,9 @@ jobs:
           fi
 
       - name: Set up Helm
-        uses: azure/setup-helm@1a275c3b69536ee54be43f2070a358922e12c8d4 # v4.3.1
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
         with:
-          version: v3.15.2
+          version: v3.22.0
 
       # Resolve the most recent tag per chart to scope the changelog range
       - name: Get previous chart tags
@@ -74,27 +74,39 @@ jobs:
           echo "op_kits=$(git tag --sort=-version:refname | grep '^op-kits-' | head -1 || true)" >> $GITHUB_OUTPUT
 
       - name: Generate Studio release notes
-        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
+          version: v2.14.2
           args: --include-path "charts/studio/**" ${{ steps.prev-tags.outputs.studio != '' && format('{0}..HEAD', steps.prev-tags.outputs.studio) || '' }}
         env:
           OUTPUT: charts/studio/RELEASE_NOTES.md
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Generate Rasa Pro release notes
-        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
+          version: v2.14.2
           args: --include-path "charts/rasa/**" ${{ steps.prev-tags.outputs.rasa != '' && format('{0}..HEAD', steps.prev-tags.outputs.rasa) || '' }}
         env:
           OUTPUT: charts/rasa/RELEASE_NOTES.md
           GITHUB_REPO: ${{ github.repository }}
 
       - name: Generate op-kits release notes
-        uses: orhun/git-cliff-action@c93ef52f3d0ddcdcc9bd5447d98d458a11cd4f72 # v4.7.1
+        uses: orhun/git-cliff-action@a9a95522b26fe6403f7bb24031f21fb573d0f5ff # v4.9.1
         with:
           config: cliff.toml
+          # Pinned: git-cliff 2.12.0 (the action's default) ignores the commit
+          # range when --include-path is set, emitting the whole history.
+          # renovate: datasource=github-releases depName=orhun/git-cliff
+          version: v2.14.2
           args: --include-path "charts/op-kits/**" ${{ steps.prev-tags.outputs.op_kits != '' && format('{0}..HEAD', steps.prev-tags.outputs.op_kits) || '' }}
         env:
           OUTPUT: charts/op-kits/RELEASE_NOTES.md
@@ -107,7 +119,7 @@ jobs:
 
       # Package charts, upload to Releases, and write charts/index.yaml to ci/helm-index
       - name: Run chart-releaser (packages + index → ${PAGES_BRANCH})
-        uses: helm/chart-releaser-action@a0d2dc62c5e491af8ef6ba64a2e02bcf3fb33aa1 # v1.7.0
+        uses: helm/chart-releaser-action@cae68fefc6b5f367a0275617c9f83181ba54714f # v1.7.0
         with:
           charts_dir: charts
           config: .cr.yaml
@@ -132,7 +144,7 @@ jobs:
       # Open/update a PR into main with only charts/index.yaml
       - name: Create PR for index.yaml
         if: steps.fetch_index.outputs.no_index != 'true'
-        uses: peter-evans/create-pull-request@c0f553fe549906ede9cf27b5156039d195d2ece0 # v8.1.0
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
         with:
           token: ${{ secrets.CHART_RELEASER_PAT }}
           commit-message: "chore(helm): update ${INDEX_PATH}"

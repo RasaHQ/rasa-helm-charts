@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.26](https://img.shields.io/badge/Version-3.0.0--rc.26-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.27](https://img.shields.io/badge/Version-3.0.0--rc.27-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -69,7 +69,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.26
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.27
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -84,7 +84,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.26
+$ helm install my-release rasa/studio --version 3.0.0-rc.27
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.26
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.27
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.26
+$ helm pull rasa/studio --version 3.0.0-rc.27
 ```
 
 ## General Configuration
@@ -569,7 +569,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:17.2"}}` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}}` |
 | app.migration.activeDeadlineSeconds | int | app.migration.activeDeadlineSeconds is the hard wall-clock bound for the migration Job; size it to your worst-case migration duration. | `900` |
 | app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
@@ -581,13 +581,33 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.migration.image.pullPolicy | string | app.migration.image.pullPolicy is the container image pull policy. | `"IfNotPresent"` |
 | app.migration.nodeSelector | object | app.migration.nodeSelector defines which nodes the migration job can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
 | app.migration.podAnnotations | object | app.migration.podAnnotations defines annotations to add to the migration job pod. Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.migration.podSecurityContext | object | app.migration.podSecurityContext defines the security settings for the entire migration job pod. The restricted Pod Security Standard is already satisfied by the container-level contexts, so the pod-level equivalents are left commented out, matching the other Studio components. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
+| app.migration.podSecurityContext.enabled | bool | app.migration.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
+| app.migration.securityContext | object | app.migration.securityContext defines the security settings for the migration container. The waitForIt init container has its own context under app.migration.waitForItContainer.securityContext. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| app.migration.securityContext.allowPrivilegeEscalation | bool | app.migration.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. Should be false for security best practices. | `false` |
+| app.migration.securityContext.capabilities | object | app.migration.securityContext.capabilities defines the Linux capabilities configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container | `{"drop":["ALL"]}` |
+| app.migration.securityContext.capabilities.drop | list | app.migration.securityContext.capabilities.drop defines capabilities to drop from the container. ALL drops all capabilities for maximum security. | `["ALL"]` |
+| app.migration.securityContext.enabled | bool | app.migration.securityContext.enabled determines whether to enable the security context. | `true` |
+| app.migration.securityContext.runAsNonRoot | bool | app.migration.securityContext.runAsNonRoot determines whether to run the container as a non-root user. Should be true for security best practices. | `true` |
+| app.migration.securityContext.seccompProfile | object | app.migration.securityContext.seccompProfile defines the seccomp profile configuration. Kept active because the restricted Pod Security Standard requires a seccomp profile, and the pod-level one above is commented out. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container | `{"type":"RuntimeDefault"}` |
+| app.migration.securityContext.seccompProfile.type | string | app.migration.securityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | app.migration.serviceAccount | object | app.migration.serviceAccount defines the Kubernetes service account used by the migration job pod. | `{"annotations":{},"create":false,"name":""}` |
 | app.migration.serviceAccount.annotations | object | app.migration.serviceAccount.annotations defines annotations to add to the service account. | `{}` |
 | app.migration.serviceAccount.create | bool | app.migration.serviceAccount.create determines whether to create a new service account. | `false` |
 | app.migration.serviceAccount.name | string | app.migration.serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname + "-db-migration" suffix. | `""` |
 | app.migration.tolerations | list | app.migration.tolerations defines tolerations for the migration job. This allows the job to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | app.migration.waitForIt | bool | app.migration.waitForIt determines whether to wait for the database to be ready before running migrations. | `false` |
-| app.migration.waitForItContainer | object | app.migration.waitForItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:17.2"}` |
+| app.migration.waitForItContainer | object | app.migration.waitForItContainer defines the configuration for the wait-for-it container. | `{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}` |
+| app.migration.waitForItContainer.image | string | app.migration.waitForItContainer.image is the image used by the waitForIt init container. Only `pg_isready` is invoked from it, so this version does not need to match the database server version. | `"postgres:18.6"` |
+| app.migration.waitForItContainer.securityContext | object | app.migration.waitForItContainer.securityContext defines the security settings for the waitForIt init container. Defaults satisfy the restricted Pod Security Standard. NOTE: `runAsUser` is required because this image is configured to run as root; 999 is its built-in `postgres` user. Adjust it if you point `image` at a different waitForIt image. Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| app.migration.waitForItContainer.securityContext.allowPrivilegeEscalation | bool | app.migration.waitForItContainer.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
+| app.migration.waitForItContainer.securityContext.capabilities | object | app.migration.waitForItContainer.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
+| app.migration.waitForItContainer.securityContext.capabilities.drop | list | app.migration.waitForItContainer.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
+| app.migration.waitForItContainer.securityContext.enabled | bool | app.migration.waitForItContainer.securityContext.enabled determines whether to enable the security context. | `true` |
+| app.migration.waitForItContainer.securityContext.runAsNonRoot | bool | app.migration.waitForItContainer.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
+| app.migration.waitForItContainer.securityContext.runAsUser | int | app.migration.waitForItContainer.securityContext.runAsUser is the user ID to run the container as. | `999` |
+| app.migration.waitForItContainer.securityContext.seccompProfile | object | app.migration.waitForItContainer.securityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
+| app.migration.waitForItContainer.securityContext.seccompProfile.type | string | app.migration.waitForItContainer.securityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | app.nodeSelector | object | app.nodeSelector defines which nodes the app pods can run on. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#nodeselector | `{}` |
 | app.podAnnotations | object | app.podAnnotations defines annotations to add to the app pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app: runtime/default Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.podSecurityContext | object | app.podSecurityContext defines the security settings for the entire pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
@@ -694,7 +714,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | rasa.rasa.command[2] | string |  | `"rasa.model_service"` |
 | rasa.rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.rasa.image.tag | string |  | `"3.17.7-latest"` |
+| rasa.rasa.image.tag | string |  | `"3.17.11-latest"` |
 | rasa.rasa.ingress.annotations | object |  | `{}` |
 | rasa.rasa.ingress.enabled | bool |  | `true` |
 | rasa.rasa.ingress.hosts[0].host | string |  | `""` |

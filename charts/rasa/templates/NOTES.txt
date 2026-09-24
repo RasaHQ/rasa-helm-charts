@@ -32,3 +32,36 @@ By installing and using this software, you agree to be bound by the terms and co
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
+
+2. Breaking changes in chart 3.0.0:
+   - rasaProServices.enabled now defaults to false. The analytics pipeline needs a
+     connected analytics database, which this chart does not provision, so it is now
+     opt-in. Set rasaProServices.enabled=true to keep deploying it.
+   - rasa.containerSecurityContext now defaults to the restricted Pod Security Standard:
+     allowPrivilegeEscalation: false, capabilities.drop: [ALL], runAsNonRoot: true and
+     seccompProfile.type: RuntimeDefault. No runAsUser is set, so the effective uid is
+     still whatever the image declares.
+   - rasa.automountServiceAccountToken now defaults to false, so no Kubernetes API token
+     is mounted. Rasa Pro does not call the Kubernetes API and this chart grants no RBAC.
+     Set it to true if you add a sidecar via rasa.additionalContainers that needs one.
+   - Chart.yaml declares appVersion again, tracking the Rasa Pro release the chart
+     targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
+     upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
+     the image independently. actionServer, duckling and rasaProServices version
+     independently and keep explicit tags.
+   - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
+     so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
+   The securityContext changes apply to the rasa component and the test hook Pod;
+   actionServer and duckling are unchanged.
+{{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
+{{- if and .Values.rasa.containerSecurityContext.enabled .Values.rasa.containerSecurityContext.runAsNonRoot (ne .Values.rasa.image.repository $defaultRepo) }}
+
+   WARNING: you are running a custom Rasa Pro image:
+     {{ .Values.rasa.image.repository }}
+   runAsNonRoot: true requires an image whose USER is a NUMERIC non-root uid. The stock
+   image is USER 1001. If yours runs as root, or declares USER by name, the pod fails with
+   CreateContainerConfigError and never starts. Check your image with:
+     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}
+   To opt out (the pod will then not satisfy the restricted Pod Security Standard):
+     --set rasa.containerSecurityContext.runAsNonRoot=false
+{{- end }}

@@ -51,6 +51,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "rasa.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.rasa.automountServiceAccountToken }}
       {{- if .Values.rasa.podSecurityContext.enabled }}
       securityContext:
         {{- omit .Values.rasa.podSecurityContext "enabled" | toYaml | nindent 8 }}
@@ -68,7 +69,7 @@ spec:
           securityContext:
             {{- omit .Values.rasa.containerSecurityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
-          image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}"
+          image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}
           {{- if .Values.rasa.args }}
           args:

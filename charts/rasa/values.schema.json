@@ -217,6 +217,7 @@
         "serviceAccount": { "$ref": "#/definitions/serviceAccountConfig" },
         "terminationGracePeriodSeconds": { "type": ["integer", "null"], "minimum": 0 },
         "podAnnotations": { "type": "object" },
+        "automountServiceAccountToken": { "type": "boolean" },
         "podSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "containerSecurityContext": { "$ref": "#/definitions/securityContextConfig" },
         "service": { "$ref": "#/definitions/serviceConfig" },

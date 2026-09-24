@@ -240,6 +240,12 @@ app:
     # If not set and create is true, a name is generated using the fullname template.
     name: ""
 
+  # -- app.automountServiceAccountToken determines whether the app pod is given a Kubernetes
+  # API token at /var/run/secrets/kubernetes.io/serviceaccount. Studio never calls the
+  # Kubernetes API, so the token is left out; set it to true if you add a sidecar that needs one.
+  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+  automountServiceAccountToken: false
+
   # -- app.podAnnotations defines annotations to add to the app pod.
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-app: runtime/default
@@ -285,9 +291,12 @@ app:
     # -- app.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
     # -- app.securityContext.seccompProfile defines the seccomp profile configuration.
+    # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
+    # pod-level one above is commented out.
     # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container
-    # seccompProfile:
-    #   type: RuntimeDefault
+    seccompProfile:
+      # -- app.securityContext.seccompProfile.type is the seccomp profile type.
+      type: RuntimeDefault
 
   # -- app.service defines how the app service is exposed within the cluster.
   # Ref: https://kubernetes.io/docs/concepts/services-networking/service/
@@ -503,6 +512,10 @@ app:
       # If not set and create is true, a name is generated using the fullname + "-db-migration" suffix.
       name: ""
 
+    # -- app.migration.automountServiceAccountToken determines whether the migration Job pod is
+    # given a Kubernetes API token. The migration only talks to PostgreSQL.
+    automountServiceAccountToken: false
+
   # -- app.ingress defines how the app service is exposed externally.
   # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/
   ingress:
@@ -707,6 +720,11 @@ eventIngestion:
     # Applies only when eventIngestion.mode is separate.
     name: ""
 
+  # -- eventIngestion.automountServiceAccountToken determines whether the event ingestion pod is
+  # given a Kubernetes API token. Ingestion only talks to Kafka and PostgreSQL.
+  # Applies only when eventIngestion.mode is separate.
+  automountServiceAccountToken: false
+
   # -- eventIngestion.podAnnotations defines annotations to add to the event ingestion pod.
   # Example:
   #   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default
@@ -741,8 +759,12 @@ eventIngestion:
     # -- eventIngestion.securityContext.runAsUser is the user ID to run the container as.
     # runAsUser: 1000
     # -- eventIngestion.securityContext.seccompProfile defines the seccomp profile configuration.
-    # seccompProfile:
-    #   type: RuntimeDefault
+    # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
+    # pod-level one above is commented out.
+    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container
+    seccompProfile:
+      # -- eventIngestion.securityContext.seccompProfile.type is the seccomp profile type.
+      type: RuntimeDefault
 
   # -- eventIngestion.resources defines the resource limits and requests for the event ingestion service.
   # Applies only when eventIngestion.mode is separate.

@@ -43,6 +43,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       serviceAccountName: {{ include "studio.eventIngestion.serviceAccountName" . }}
+      automountServiceAccountToken: {{ .Values.eventIngestion.automountServiceAccountToken }}
       {{- if .Values.eventIngestion.podSecurityContext.enabled }}
       securityContext:
         {{- omit .Values.eventIngestion.podSecurityContext "enabled" | toYaml | nindent 8 }}

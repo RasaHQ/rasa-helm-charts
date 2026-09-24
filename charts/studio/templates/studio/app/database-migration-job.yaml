@@ -33,6 +33,7 @@ spec:
       {{- if .Values.app.migration.serviceAccount.create }}
       serviceAccountName: {{ include "studio.app.migration.serviceAccountName" . }}
       {{- end }}
+      automountServiceAccountToken: {{ .Values.app.migration.automountServiceAccountToken }}
       restartPolicy: Never
       {{- if .Values.app.migration.podSecurityContext.enabled }}
       securityContext:

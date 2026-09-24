@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.27](https://img.shields.io/badge/Version-3.0.0--rc.27-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.28](https://img.shields.io/badge/Version-3.0.0--rc.28-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -69,7 +69,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.27
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.28
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -84,7 +84,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.27
+$ helm install my-release rasa/studio --version 3.0.0-rc.28
 ```
 
 ## Quick Start
@@ -137,13 +137,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.27
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.28
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.27
+$ helm pull rasa/studio --version 3.0.0-rc.28
 ```
 
 ## General Configuration
@@ -542,6 +542,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.affinity | object | app.affinity defines affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.annotations | object | app.annotations defines annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.authSecret | object | app.authSecret is the secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
+| app.automountServiceAccountToken | bool | app.automountServiceAccountToken determines whether the app pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Studio never calls the Kubernetes API, so the token is left out; set it to true if you add a sidecar that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | app.autoscaling | object | app.autoscaling defines the Horizontal Pod Autoscaling configuration. This enables automatic scaling of the app deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
 | app.autoscaling.enabled | bool | app.autoscaling.enabled determines whether to enable horizontal pod autoscaling. | `false` |
 | app.autoscaling.maxReplicas | int | app.autoscaling.maxReplicas is the maximum number of replicas. | `100` |
@@ -569,10 +570,11 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.livenessProbe.periodSeconds | int | app.livenessProbe.periodSeconds is how often to perform the probe. | `15` |
 | app.livenessProbe.successThreshold | int | app.livenessProbe.successThreshold is the minimum consecutive successes for the probe to be considered successful. | `1` |
 | app.livenessProbe.timeoutSeconds | int | app.livenessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
-| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"backoffLimit":3,"enabled":true,"env":[],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}}` |
+| app.migration | object | app.migration defines the database migration job configuration. This section controls the database schema migration process. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/job/ | `{"activeDeadlineSeconds":900,"affinity":{},"annotations":{},"automountServiceAccountToken":false,"backoffLimit":3,"enabled":true,"env":[],"image":{"name":"studio","pullPolicy":"IfNotPresent"},"nodeSelector":{},"podAnnotations":{},"podSecurityContext":{"enabled":true},"securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}},"serviceAccount":{"annotations":{},"create":false,"name":""},"tolerations":[],"waitForIt":false,"waitForItContainer":{"image":"postgres:18.6","securityContext":{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"runAsUser":999,"seccompProfile":{"type":"RuntimeDefault"}}}}` |
 | app.migration.activeDeadlineSeconds | int | app.migration.activeDeadlineSeconds is the hard wall-clock bound for the migration Job; size it to your worst-case migration duration. | `900` |
 | app.migration.affinity | object | app.migration.affinity defines affinity rules for the migration job. This controls where the job can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.migration.annotations | object | app.migration.annotations defines annotations to add to the migration job resource. These annotations will be merged with deploymentAnnotations and helm hook annotations (helm hooks take precedence). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.migration.automountServiceAccountToken | bool | app.migration.automountServiceAccountToken determines whether the migration Job pod is given a Kubernetes API token. The migration only talks to PostgreSQL. | `false` |
 | app.migration.backoffLimit | int | app.migration.backoffLimit is the number of retries before the migration Job is marked failed. | `3` |
 | app.migration.enabled | bool | app.migration.enabled determines whether to enable the database migration job. Set to false if you want to handle migrations manually. | `true` |
 | app.migration.env | list | app.migration.env defines extra environment variables for the migration job container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. | `[]` |
@@ -625,12 +627,14 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.readinessProbe.timeoutSeconds | int | app.readinessProbe.timeoutSeconds is the number of seconds after which the probe times out. | `5` |
 | app.replicaCount | int | app.replicaCount is the number of replicas for the Studio App deployment. Increase this value for high availability and better load distribution. Ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#replicas | `1` |
 | app.resources | object | app.resources defines the resource limits and requests for Studio App. This controls the compute resources allocated to the app container. Ref: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/ | `{}` |
-| app.securityContext | object | app.securityContext defines the security settings for the app container. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
+| app.securityContext | object | app.securityContext defines the security settings for the app container. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | app.securityContext.allowPrivilegeEscalation | bool | app.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. Should be false for security best practices. | `false` |
 | app.securityContext.capabilities | object | app.securityContext.capabilities defines the Linux capabilities configuration. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container | `{"drop":["ALL"]}` |
 | app.securityContext.capabilities.drop | list | app.securityContext.capabilities.drop defines capabilities to drop from the container. ALL drops all capabilities for maximum security. | `["ALL"]` |
 | app.securityContext.enabled | bool | app.securityContext.enabled determines whether to enable the security context. | `true` |
 | app.securityContext.runAsNonRoot | bool | app.securityContext.runAsNonRoot determines whether to run the container as a non-root user. Should be true for security best practices. | `true` |
+| app.securityContext.seccompProfile | object | app.securityContext.seccompProfile defines the seccomp profile configuration. Kept active because the restricted Pod Security Standard requires a seccomp profile, and the pod-level one above is commented out. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container | `{"type":"RuntimeDefault"}` |
+| app.securityContext.seccompProfile.type | string | app.securityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | app.service | object | app.service defines how the app service is exposed within the cluster. Ref: https://kubernetes.io/docs/concepts/services-networking/service/ | `{"port":80,"targetPort":4000,"type":"ClusterIP"}` |
 | app.service.port | int | app.service.port is the port number for the service. | `80` |
 | app.service.targetPort | int | app.service.targetPort is the target port in the container. This should match the port your application listens on. | `4000` |
@@ -665,6 +669,7 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.additionalContainers | list | eventIngestion.additionalContainers defines additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
 | eventIngestion.affinity | object | eventIngestion.affinity defines affinity rules for the event ingestion pods. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.annotations | object | eventIngestion.annotations defines annotations to add to all Studio Event Ingestion resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| eventIngestion.automountServiceAccountToken | bool | eventIngestion.automountServiceAccountToken determines whether the event ingestion pod is given a Kubernetes API token. Ingestion only talks to Kafka and PostgreSQL. Applies only when eventIngestion.mode is separate. | `false` |
 | eventIngestion.autoscaling | object | eventIngestion.autoscaling defines the Horizontal Pod Autoscaling configuration. Applies only when eventIngestion.mode is separate. | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
 | eventIngestion.autoscaling.enabled | bool | eventIngestion.autoscaling.enabled determines whether to enable horizontal pod autoscaling. Applies only when eventIngestion.mode is separate. | `false` |
 | eventIngestion.autoscaling.maxReplicas | int | eventIngestion.autoscaling.maxReplicas is the maximum number of replicas. Applies only when eventIngestion.mode is separate. | `100` |
@@ -682,12 +687,14 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.podSecurityContext.enabled | bool | eventIngestion.podSecurityContext.enabled determines whether to enable the pod security context. | `true` |
 | eventIngestion.replicaCount | int | eventIngestion.replicaCount is the number of replicas for the Event Ingestion deployment. Applies only when eventIngestion.mode is separate. | `1` |
 | eventIngestion.resources | object | eventIngestion.resources defines the resource limits and requests for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{}` |
-| eventIngestion.securityContext | object | eventIngestion.securityContext defines the security settings for the event ingestion container. | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true}` |
+| eventIngestion.securityContext | object | eventIngestion.securityContext defines the security settings for the event ingestion container. | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
 | eventIngestion.securityContext.allowPrivilegeEscalation | bool | eventIngestion.securityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
 | eventIngestion.securityContext.capabilities | object | eventIngestion.securityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
 | eventIngestion.securityContext.capabilities.drop | list | eventIngestion.securityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
 | eventIngestion.securityContext.enabled | bool | eventIngestion.securityContext.enabled determines whether to enable the security context. | `true` |
 | eventIngestion.securityContext.runAsNonRoot | bool | eventIngestion.securityContext.runAsNonRoot determines whether to run the container as a non-root user. | `true` |
+| eventIngestion.securityContext.seccompProfile | object | eventIngestion.securityContext.seccompProfile defines the seccomp profile configuration. Kept active because the restricted Pod Security Standard requires a seccomp profile, and the pod-level one above is commented out. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-seccomp-profile-for-a-container | `{"type":"RuntimeDefault"}` |
+| eventIngestion.securityContext.seccompProfile.type | string | eventIngestion.securityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | eventIngestion.serviceAccount | object | eventIngestion.serviceAccount defines the Kubernetes service account used by the event ingestion pod. Applies only when eventIngestion.mode is separate. | `{"annotations":{},"create":false,"name":""}` |
 | eventIngestion.serviceAccount.annotations | object | eventIngestion.serviceAccount.annotations defines annotations to add to the service account. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.serviceAccount.create | bool | eventIngestion.serviceAccount.create determines whether to create a new service account. Applies only when eventIngestion.mode is separate. | `false` |

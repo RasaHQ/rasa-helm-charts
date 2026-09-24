@@ -128,6 +128,8 @@ Opt out with `rasa.containerSecurityContext.runAsNonRoot: false`, which leaves t
 
 **If you add a sidecar** via `rasa.additionalContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
 
+`Chart.yaml` declares `appVersion` again, tracking the Rasa Pro release the chart targets, and it now appears as the `app.kubernetes.io/version` label on chart-managed objects. `rasa.image.tag` defaults to `""` and falls back to `appVersion`, so **a chart upgrade now moves the Rasa Pro image with it**. Set `rasa.image.tag` to an exact tag to pin the image independently of chart upgrades. `actionServer`, `duckling` and `rasaProServices` version independently and keep explicit tags.
+
 ## Uninstalling the Chart
 
 To uninstall/delete the `my-release` deployment:

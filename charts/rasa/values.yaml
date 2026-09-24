@@ -28,8 +28,11 @@ rasa:
     repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
     # -- image.pullPolicy specifies image pull policy
     pullPolicy: IfNotPresent
-    # -- image.tag specifies image tag
-    tag: "3.20.0-latest"
+    # -- image.tag overrides the Rasa Pro image tag. Empty (default) uses the chart's
+    # appVersion. Set an exact, immutable tag to pin deployments independently of chart
+    # upgrades. Only the rasa component tracks appVersion; actionServer, duckling and
+    # rasaProServices version independently and keep explicit tags.
+    tag: ""
 
   # -- rasa.strategy specifies deployment strategy type
   ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy

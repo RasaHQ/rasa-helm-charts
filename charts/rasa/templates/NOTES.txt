@@ -44,6 +44,11 @@ By installing and using this software, you agree to be bound by the terms and co
    - rasa.automountServiceAccountToken now defaults to false, so no Kubernetes API token
      is mounted. Rasa Pro does not call the Kubernetes API and this chart grants no RBAC.
      Set it to true if you add a sidecar via rasa.additionalContainers that needs one.
+   - Chart.yaml declares appVersion again, tracking the Rasa Pro release the chart
+     targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
+     upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
+     the image independently. actionServer, duckling and rasaProServices version
+     independently and keep explicit tags.
    The security changes apply to the rasa component only; actionServer and duckling are
    unchanged.
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}

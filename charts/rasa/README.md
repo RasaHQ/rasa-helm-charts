@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.0](https://img.shields.io/badge/Version-3.0.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.0](https://img.shields.io/badge/Version-3.0.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -128,6 +128,8 @@ docker image inspect --format '{{.Config.User}}' <your-image>
 Opt out with `rasa.containerSecurityContext.runAsNonRoot: false`, which leaves the pod outside the restricted standard.
 
 **If you add a sidecar** via `rasa.additionalContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
+
+`Chart.yaml` declares `appVersion` again, tracking the Rasa Pro release the chart targets, and it now appears as the `app.kubernetes.io/version` label on chart-managed objects. `rasa.image.tag` defaults to `""` and falls back to `appVersion`, so **a chart upgrade now moves the Rasa Pro image with it**. Set `rasa.image.tag` to an exact tag to pin the image independently of chart upgrades. `actionServer`, `duckling` and `rasaProServices` version independently and keep explicit tags.
 
 ## Uninstalling the Chart
 
@@ -1083,7 +1085,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.image.tag | string | image.tag specifies image tag | `"3.20.0-latest"` |
+| rasa.image.tag | string | image.tag overrides the Rasa Pro image tag. Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. Only the rasa component tracks appVersion; actionServer, duckling and rasaProServices version independently and keep explicit tags. | `""` |
 | rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 2.6.0](https://img.shields.io/badge/Version-2.6.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.0](https://img.shields.io/badge/Version-3.0.0--rc.0-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -75,7 +75,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 2.6.0
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.0
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -90,7 +90,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 2.6.0
+helm install my-release rasa/rasa --version 3.0.0-rc.0
 ```
 
 ## Upgrading the Chart
@@ -109,6 +109,25 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 ```
 
 > **Note:** Always check the [release notes](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading across major versions.
+
+### Upgrading to 3.0.0
+
+`rasaProServices.enabled` now defaults to **`false`**. The analytics pipeline requires a connected analytics database that this chart does not provision, so an enabled-by-default deployment could not function without extra configuration. Set `rasaProServices.enabled: true` to keep deploying it.
+
+Chart 3.0.0 also hardens the **`rasa` component only** to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted). `actionServer`, `duckling` and `rasaProServices` are unchanged.
+
+- `rasa.containerSecurityContext` now defaults to `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` and `seccompProfile.type: RuntimeDefault`. No `runAsUser` is set, so the effective uid is unchanged and existing model volumes keep their ownership.
+- `rasa.automountServiceAccountToken` now defaults to `false`.
+
+**If you override `rasa.image.repository`,** check your image before upgrading. `runAsNonRoot: true` requires a numeric non-root `USER`; the stock image is `USER 1001`. An image that runs as root, or that declares `USER` by name, fails with `CreateContainerConfigError`:
+
+```console
+docker image inspect --format '{{.Config.User}}' <your-image>
+```
+
+Opt out with `rasa.containerSecurityContext.runAsNonRoot: false`, which leaves the pod outside the restricted standard.
+
+**If you add a sidecar** via `rasa.additionalContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
 
 ## Uninstalling the Chart
 
@@ -448,7 +467,7 @@ Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 2.6.0 \
+  --version 3.0.0-rc.0 \
   --set-file rasa.settings.endpointsRaw=./endpoints.yml \
   --set-file rasa.settings.credentialsRaw=./credentials.yml
 ```
@@ -460,7 +479,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 2.6.0
+      targetRevision: 3.0.0-rc.0
       helm:
         fileParameters:
           - name: rasa.settings.endpointsRaw
@@ -1047,12 +1066,19 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.additionalEnv | list | rasa.additionalEnv adds additional environment variables | `[]` |
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | rasa.args | list | rasa.args overrides the default arguments for the container | `[]` |
+| rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.additionalContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
 | rasa.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
 | rasa.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
 | rasa.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
 | rasa.command | list | rasa.command overrides the default command for the container | `[]` |
-| rasa.containerSecurityContext | object | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
+| rasa.containerSecurityContext | object | rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context The defaults below satisfy the restricted Pod Security Standard. Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted | `{"allowPrivilegeEscalation":false,"capabilities":{"drop":["ALL"]},"enabled":true,"runAsNonRoot":true,"seccompProfile":{"type":"RuntimeDefault"}}` |
+| rasa.containerSecurityContext.allowPrivilegeEscalation | bool | rasa.containerSecurityContext.allowPrivilegeEscalation determines whether to allow privilege escalation. | `false` |
+| rasa.containerSecurityContext.capabilities | object | rasa.containerSecurityContext.capabilities defines the Linux capabilities configuration. | `{"drop":["ALL"]}` |
+| rasa.containerSecurityContext.capabilities.drop | list | rasa.containerSecurityContext.capabilities.drop defines capabilities to drop from the container. | `["ALL"]` |
+| rasa.containerSecurityContext.runAsNonRoot | bool | rasa.containerSecurityContext.runAsNonRoot determines whether to run the container as a non-root user. REQUIRES an image whose USER is a numeric non-root uid. The stock rasa-pro image is USER 1001 and satisfies this. If you point rasa.image.repository at a custom image that runs as root, or whose USER is a name rather than a number, the pod will fail with CreateContainerConfigError. Fix the image, or set this to false — in which case the deployment will not satisfy the restricted Pod Security Standard. | `true` |
+| rasa.containerSecurityContext.seccompProfile | object | rasa.containerSecurityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
+| rasa.containerSecurityContext.seccompProfile.type | string | rasa.containerSecurityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | rasa.enabled | bool | rasa.enabled enables the Rasa Pro server deployment. Set to false to deploy only Rasa Pro Services (analytics pipeline). | `true` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
@@ -1147,7 +1173,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasaProServices.database.sslMode | string | database.sslMode specifies the SSL mode for the data lake to store analytics data in. Required if enableAwsRdsIam is true. | `""` |
 | rasaProServices.database.url | string | database.url specifies the URL of the data lake to store analytics data in. Use `hostname` if you use IAM authentication. To pass the URL from an existing secret instead, leave this empty and set urlExistingSecretName and urlExistingSecretKey:   urlExistingSecretName: my-secret   urlExistingSecretKey: analyticsDbUrl | `""` |
 | rasaProServices.database.username | string | database.username specifies the username for the data lake to store analytics data in. Required if enableAwsRdsIam is true. To pass the username from an existing secret instead, leave this empty and set usernameExistingSecretName and usernameExistingSecretKey:   usernameExistingSecretName: my-secret   usernameExistingSecretKey: analyticsDbUsername | `""` |
-| rasaProServices.enabled | bool | rasaProServices.enabled enables the Rasa Pro Services deployment (analytics pipeline). Requires a connected analytics database. | `true` |
+| rasaProServices.enabled | bool | rasaProServices.enabled enables the Rasa Pro Services deployment (analytics pipeline). Disabled by default: the pipeline requires a connected analytics database, which this chart does not provision, so an enabled-by-default deployment cannot function without additional configuration. Set to true once your analytics database is reachable. | `false` |
 | rasaProServices.envFrom | list | rasaProServices.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasaProServices.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasaProServices.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro-services"` |

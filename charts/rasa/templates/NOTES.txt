@@ -27,7 +27,7 @@ By installing and using this software, you agree to be bound by the terms and co
   echo http://$SERVICE_IP:{{ .Values.rasa.service.port }}
 
 {{- else if contains "ClusterIP" .Values.rasa.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "rasa.fullname" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "rasa.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
@@ -61,9 +61,15 @@ By installing and using this software, you agree to be bound by the terms and co
    - app.kubernetes.io/name is now the chart name ("rasa") instead of the release
      fullname. This label is part of Deployment.spec.selector, which Kubernetes does
      not allow you to change, so `helm upgrade` FAILS on an existing release. Delete
-     the old Deployment first, which means downtime:
-       kubectl delete deployment <release>-rasa -n <namespace> --cascade=orphan
-     Use --cascade=orphan to keep the pods serving while the new Deployment adopts them.
+     the old Deployment first and accept the downtime:
+       kubectl delete deployment <release>-rasa -n <namespace>
+       helm upgrade <release> ...
+     Do NOT use --cascade=orphan here. The orphaned ReplicaSet keeps the old labels,
+     which the new selector cannot match, so nothing ever adopts it: the old pods
+     outlive the release, survive `helm uninstall` and are never garbage collected.
+     They also leave the Service the moment its selector flips, so orphaning buys no
+     continuity. To avoid downtime, install alongside under a second release name and
+     cut traffic over yourself.
    - NetworkPolicy objects are now named after the release and select only this
      release's pods. Previously deny-all and allow-dns-access selected EVERY pod in
      the namespace, and allow-dns-access was a fixed name that collided between
@@ -87,7 +93,8 @@ By installing and using this software, you agree to be bound by the terms and co
      --set rasa.settings.authToken.secretName=rasa-secrets \
      --set rasa.settings.authToken.secretKey=authToken
    Or disable the API with --set rasa.settings.enableApi=false
-   Enabling rasa.ingress in this state is refused outright; override that with
+   Exposing it outside the cluster in this state is refused outright - that means an
+   ingress, a non-ClusterIP service type, or hostNetwork. Override with
    --set rasa.settings.allowUnauthenticatedApi=true only if something in front of the
    chart already authenticates callers.
 {{- end }}

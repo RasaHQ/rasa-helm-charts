@@ -1,4 +1,9 @@
-{{- if .Values.networkPolicy.enabled }}
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.egressPorts }}
+{{- /*
+Gated on the list being non-empty: an egress rule with no ports and no `to`
+matches all ports to all destinations, so an empty egressPorts would invert
+this policy into allow-all-egress.
+*/}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:

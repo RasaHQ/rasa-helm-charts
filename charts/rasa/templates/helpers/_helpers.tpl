@@ -124,12 +124,16 @@ rasa.args, disabling settings.useDefaultArgs, or replacing the process with
 rasa.command all leave enableApi describing nothing. Rasa Studio consumes this
 chart exactly that way.
 
+This mirrors the condition deployment.yaml uses to emit the default arguments.
+Note that rasa.command does NOT belong here: command and args render
+independently, so overriding the entrypoint still leaves --enable-api in args.
+
 Caveat: arguments you supply yourself are opaque to the chart. If your own
 rasa.args or rasa.additionalArgs contain --enable-api, this reports nothing
 and the exposure checks below do not fire.
 */}}
 {{- define "rasa.apiServed" -}}
-{{- if and .Values.rasa.settings.enableApi .Values.rasa.settings.useDefaultArgs (not .Values.rasa.args) (not .Values.rasa.command) -}}
+{{- if and .Values.rasa.settings.enableApi .Values.rasa.settings.useDefaultArgs (not .Values.rasa.args) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -140,9 +144,20 @@ Report whether an API credential actually reaches the container.
 Configuring settings.authToken is not sufficient: rasa.overrideEnv replaces the
 generated environment block wholesale, so AUTH_TOKEN and JWT_SECRET never
 render. A token that does not reach the pod is not authentication.
+
+The converse also holds, so this counts every route that delivers one: an
+AUTH_TOKEN or JWT_SECRET entry in additionalEnv or overrideEnv, and any
+envFrom source. envFrom contents are opaque at render time, so its presence
+is treated as authentication rather than blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
-{{- if and (or .Values.rasa.settings.authToken .Values.rasa.settings.jwtSecret) (not .Values.rasa.overrideEnv) -}}
+{{- $named := false -}}
+{{- range concat (.Values.rasa.additionalEnv | default list) (.Values.rasa.overrideEnv | default list) -}}
+{{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
+{{-     $named = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.settings.authToken .Values.rasa.settings.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -153,7 +168,7 @@ any Service type other than ClusterIP puts the API in front of traffic the
 cluster does not mediate.
 */}}
 {{- define "rasa.apiExposed" -}}
-{{- if or .Values.rasa.ingress.enabled (ne (.Values.rasa.service.type | default "ClusterIP") "ClusterIP") -}}
+{{- if or .Values.rasa.ingress.enabled .Values.hostNetwork (ne (.Values.rasa.service.type | default "ClusterIP") "ClusterIP") -}}
 true
 {{- end -}}
 {{- end -}}
@@ -165,7 +180,7 @@ route, not only when an ingress happens to render.
 */}}
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiServed" .) (include "rasa.apiExposed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.settings.allowUnauthenticatedApi) -}}
-{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Set rasa.settings.authToken or rasa.settings.jwtSecret (and note that rasa.overrideEnv discards them), or set rasa.settings.enableApi=false, or acknowledge the risk with rasa.settings.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
+{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Supply a credential with rasa.settings.authToken or rasa.settings.jwtSecret (note that rasa.overrideEnv discards those), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.additionalEnv or rasa.overrideEnv, or through rasa.envFrom. Alternatively set rasa.settings.enableApi=false, or acknowledge the risk with rasa.settings.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 

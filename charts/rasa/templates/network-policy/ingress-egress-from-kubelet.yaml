@@ -10,7 +10,7 @@ spec:
     - Egress
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "rasa.name" . }}
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
   egress:
     - to:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}

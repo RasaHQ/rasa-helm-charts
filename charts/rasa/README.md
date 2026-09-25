@@ -137,7 +137,7 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 >       secretKey: authToken
 > ```
 >
-> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render an ingress** in that state — enabling `rasa.ingress` puts an unauthenticated API in front of real traffic. Override that only when something ahead of the chart authenticates callers:
+> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render at all** once that API is reachable from outside the cluster — an ingress, a `service.type` other than `ClusterIP`, or `hostNetwork: true`. Override that only when something ahead of the chart authenticates callers:
 >
 > ```yaml
 > rasa:
@@ -148,10 +148,15 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 **`app.kubernetes.io/name` is now the chart name**, not the release fullname — `rasa` rather than `my-release-rasa`. The label is part of `Deployment.spec.selector`, which Kubernetes treats as immutable, so **`helm upgrade` fails on an existing release**. Delete the old Deployment first:
 
 ```console
-kubectl delete deployment my-release-rasa -n my-namespace --cascade=orphan
+kubectl delete deployment my-release-rasa -n my-namespace
+helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa -n my-namespace
 ```
 
-`--cascade=orphan` leaves the pods running so they keep serving until the new Deployment adopts them. This was worth the disruption in a major: the old value broke the chart's own kubelet NetworkPolicy (it selected zero pods) and made the release impossible to target with a cluster-wide `ServiceMonitor` or policy exception.
+> **Warning:** do **not** reach for `--cascade=orphan` to avoid the downtime. The orphaned ReplicaSet keeps the old `app.kubernetes.io/name` value, so the new Deployment's selector cannot match it and nothing ever adopts it — the old ReplicaSet and its pods outlive the release, are not removed by `helm uninstall`, and are never garbage collected. They also drop out of the Service as soon as its selector flips, so you get the stranded workload without the continuity.
+
+If you cannot take the downtime, install the new version alongside the old one under a second release name and cut traffic over yourself.
+
+The change was worth the disruption in a major: the old value broke the chart's own kubelet NetworkPolicy (it selected zero pods) and made the release impossible to target with a cluster-wide `ServiceMonitor` or policy exception.
 
 **NetworkPolicies are release-scoped now.** They are named after the release and select only its pods. `deny-all` and `allow-dns-access` previously selected *every pod in the namespace*, and `allow-dns-access` used a fixed name that collided between two releases in one namespace. Three new keys came with the rework — `dnsNamespace`, `egressPorts` and `allowIngressFrom` — and you need them: see [Network Policies](#network-policies).
 
@@ -900,7 +905,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
 | rasa.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
 | rasa.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
-| rasa.settings.allowUnauthenticatedApi | bool | settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API behind an ingress. Rendering an ingress fails when settings.enableApi is true and neither authToken nor jwtSecret is set; set this to true when something in front of the chart already authenticates callers. | `false` |
+| rasa.settings.allowUnauthenticatedApi | bool | settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
 | rasa.settings.authToken | string | settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default: with settings.enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests. | `nil` |
 | rasa.settings.cors | string | settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
 | rasa.settings.credentials | object | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |

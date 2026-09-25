@@ -58,7 +58,7 @@ rasa:
     jwtSecret:
       # secretName: "rasa-secrets"
       # secretKey: "jwtSecret"
-    # -- settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API behind an ingress. Rendering an ingress fails when settings.enableApi is true and neither authToken nor jwtSecret is set; set this to true when something in front of the chart already authenticates callers.
+    # -- settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers.
     allowUnauthenticatedApi: false
     # -- settings.jwtMethod is JWT algorithm to be used
     jwtMethod: HS256

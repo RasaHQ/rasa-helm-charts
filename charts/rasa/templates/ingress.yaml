@@ -1,4 +1,4 @@
-{{- if and .Values.rasa.enabled .Values.rasa.ingress.enabled -}}
+{{- if .Values.rasa.ingress.enabled -}}
 {{- $fullName := include "rasa.fullname" . -}}
 {{- $svcPort := .Values.rasa.service.port -}}
 apiVersion: networking.k8s.io/v1
@@ -29,6 +29,13 @@ spec:
         {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
+  {{- end }}
+  {{- if not .Values.rasa.ingress.hosts }}
+  {{- /*
+  An ingress with no rules routes nothing. Fail rather than emit `rules: null`,
+  which the API server accepts and silently does nothing with.
+  */}}
+  {{- fail "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Add at least one host and path, or set rasa.ingress.enabled=false and manage routing yourself." }}
   {{- end }}
   rules:
     {{- range .Values.rasa.ingress.hosts }}

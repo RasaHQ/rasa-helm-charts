@@ -2,11 +2,12 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: allow-dns-access
+  name: {{ include "rasa.fullname" . }}-allow-dns-access
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
-    matchLabels: {}
+    matchLabels:
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
   policyTypes:
   - Egress
   egress:
@@ -16,7 +17,12 @@ spec:
     - protocol: TCP
       port: 53
     to:
+    {{- /*
+    kubernetes.io/metadata.name is applied automatically by the API server on
+    every namespace. The previous selector used `name: kube-system`, a label
+    neither EKS nor GKE sets, so DNS egress was denied on a stock cluster.
+    */}}
     - namespaceSelector:
         matchLabels:
-          name: kube-system
+          kubernetes.io/metadata.name: {{ .Values.networkPolicy.dnsNamespace }}
 {{- end }}

@@ -1,4 +1,4 @@
-{{- if .Values.rasa.enabled }}
+{{- include "rasa.validateApiExposure" . }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -26,7 +26,7 @@ spec:
   template:
     metadata:
       annotations:
-        checksum/config: {{ include (print $.Template.BasePath "/rasa/configmap.yaml") . | sha256sum }}
+        checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
       {{- if .Values.rasa.podAnnotations }}
         {{- toYaml .Values.rasa.podAnnotations | nindent 8 }}
       {{- end }}
@@ -71,14 +71,21 @@ spec:
           {{- end }}
           image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}
-          {{- if .Values.rasa.args }}
+          {{- /*
+          Tests for args being absent, not falsy: `args: []` and an unset args are
+          both falsy but mean different things: an empty list renders no args key at
+          all, leaving the image CMD, versus generating them.
+          */}}
+          {{- if not (kindIs "invalid" .Values.rasa.args) }}
+          {{- with .Values.rasa.args }}
           args:
-            {{- toYaml .Values.rasa.args | nindent 12 }}
-          {{- else if .Values.rasa.settings.useDefaultArgs }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
           args:
             {{- include "rasa.defaultArgs" . | nindent 12 }}
-          {{- if .Values.rasa.additionalArgs }}
-            {{- toYaml .Values.rasa.additionalArgs | nindent 12 }}
+          {{- if .Values.rasa.extraArgs }}
+            {{- toYaml .Values.rasa.extraArgs | nindent 12 }}
           {{- end }}
           {{- end }}
           {{- if .Values.rasa.command }}
@@ -87,11 +94,11 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: {{ .Values.rasa.service.port }}
+              containerPort: {{ .Values.rasa.port }}
               protocol: TCP
-          {{- if .Values.rasa.overrideEnv }}
+          {{- if .Values.rasa.env }}
           env:
-            {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
+            {{- toYaml .Values.rasa.env | nindent 12 }}
           {{- else }}
           env:
             {{- include "rasa.containers.env" . | trim | nindent 12 }}
@@ -102,11 +109,25 @@ spec:
           {{- end }}
           {{- if .Values.rasa.livenessProbe.enabled }}
           livenessProbe:
-            {{- omit .Values.rasa.livenessProbe "enabled" | toYaml | nindent 12 }}
+            {{- $probe := omit .Values.rasa.livenessProbe "enabled" | deepCopy }}
+            {{- if and $probe.httpGet (not $probe.httpGet.port) }}
+            {{- $_ := set $probe.httpGet "port" $.Values.rasa.port }}
+            {{- end }}
+            {{- if and $probe.tcpSocket (not $probe.tcpSocket.port) }}
+            {{- $_ := set $probe.tcpSocket "port" $.Values.rasa.port }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- if .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
-            {{- omit .Values.rasa.readinessProbe "enabled" | toYaml | nindent 12 }}
+            {{- $probe := omit .Values.rasa.readinessProbe "enabled" | deepCopy }}
+            {{- if and $probe.httpGet (not $probe.httpGet.port) }}
+            {{- $_ := set $probe.httpGet "port" $.Values.rasa.port }}
+            {{- end }}
+            {{- if and $probe.tcpSocket (not $probe.tcpSocket.port) }}
+            {{- $_ := set $probe.tcpSocket "port" $.Values.rasa.port }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- with .Values.rasa.lifecycle }}
           lifecycle:
@@ -114,18 +135,28 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.rasa.resources | nindent 12 }}
+          {{- $volumeMounts := include "rasa.containers.volumeMounts" . | trim }}
+          {{- if or $volumeMounts .Values.rasa.extraVolumeMounts }}
           volumeMounts:
-            {{- include "rasa.containers.volumeMounts" . | trim | nindent 12 }}
-          {{- if .Values.rasa.volumeMounts }}
-            {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
+            {{- with $volumeMounts }}
+            {{- . | nindent 12 }}
+            {{- end }}
+          {{- if .Values.rasa.extraVolumeMounts }}
+            {{- toYaml .Values.rasa.extraVolumeMounts | nindent 12 }}
           {{- end }}
-      {{- if .Values.rasa.additionalContainers }}
-        {{- toYaml .Values.rasa.additionalContainers | nindent 8 }}
+          {{- end }}
+      {{- if .Values.rasa.extraContainers }}
+        {{- toYaml .Values.rasa.extraContainers | nindent 8 }}
       {{- end }}
+      {{- $volumes := include "rasa.containers.volumes" . | trim }}
+      {{- if or $volumes .Values.rasa.extraVolumes }}
       volumes:
-        {{- include "rasa.containers.volumes" . | trim | nindent 8 }}
-      {{- if .Values.rasa.volumes }}
-        {{- toYaml .Values.rasa.volumes | nindent 8 }}
+        {{- with $volumes }}
+        {{- . | nindent 8 }}
+        {{- end }}
+      {{- if .Values.rasa.extraVolumes }}
+        {{- toYaml .Values.rasa.extraVolumes | nindent 8 }}
+      {{- end }}
       {{- end }}
       {{- with .Values.rasa.nodeSelector }}
       nodeSelector:
@@ -143,4 +174,3 @@ spec:
       topologySpreadConstraints:
         {{- include "rasa.topologySpreadConstraints" (dict "constraints" . "selectorLabels" (include "rasa.selectorLabels" $)) | nindent 8 }}
       {{- end }}
-{{- end }}

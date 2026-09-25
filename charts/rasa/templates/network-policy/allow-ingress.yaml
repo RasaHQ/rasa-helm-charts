@@ -20,5 +20,5 @@ spec:
     {{- toYaml .Values.networkPolicy.allowIngressFrom | nindent 4 }}
     ports:
     - protocol: TCP
-      port: {{ .Values.rasa.settings.port }}
+      port: {{ .Values.rasa.port }}
 {{- end }}

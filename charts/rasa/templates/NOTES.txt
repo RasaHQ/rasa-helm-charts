@@ -38,10 +38,10 @@ By installing and using this software, you agree to be bound by the terms and co
      This chart now deploys the Rasa Pro server only. Their values keys are ignored
      rather than rejected, so an existing values file still installs.
    - Action servers are bring-your-own. Deploy one yourself and point
-     rasa.settings.endpoints.action_endpoint.url at it. If you were using the
+     rasa.endpoints.action_endpoint.url at it. If you were using the
      chart-managed action server, do this BEFORE upgrading: the pod starts either
      way and the failure only appears on the first custom-action call.
-   - RASA_DUCKLING_HTTP_URL is no longer set, and rasa.settings.ducklingHttpUrl is
+   - RASA_DUCKLING_HTTP_URL is no longer set, and rasa.ducklingHttpUrl is
      gone. Set the variable yourself via rasa.additionalEnv if you run Duckling.
    - rasa.containerSecurityContext now defaults to the restricted Pod Security Standard:
      allowPrivilegeEscalation: false, capabilities.drop: [ALL], runAsNonRoot: true and
@@ -54,7 +54,7 @@ By installing and using this software, you agree to be bound by the terms and co
      targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
      upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
      the image independently.
-   - rasa.settings.authToken and rasa.settings.jwtSecret are now unset by default, so a
+   - rasa.authToken and rasa.jwtSecret are now unset by default, so a
      default install no longer needs authToken and jwtSecret keys in its Secret. If you
      relied on the old defaults without setting them explicitly, this upgrade REMOVES
      AUTH_TOKEN and JWT_SECRET from the pod and leaves the HTTP API unauthenticated.
@@ -81,27 +81,30 @@ By installing and using this software, you agree to be bound by the terms and co
      allowIngressFrom or its traffic is dropped.
    - rasa.ingress.hosts is now empty by default instead of carrying a placeholder
      host with a /api path. Enabling the ingress without hosts is refused.
-   - rasa.settings.scheme is gone. Nothing read it.
-   - rasa.settings.cors is a plain string again. It was typed as "string or secret
+   - Rasa settings live directly under rasa.*
+   - rasa.enabled was removed. The chart deploys one workload, so there is nothing
+     to toggle: install to deploy, uninstall to remove.
+   - rasa.scheme is gone. Nothing read it.
+   - rasa.cors is a plain string again. It was typed as "string or secret
      reference"; the secret form was never read and rendered map[...] into --cors.
    - The container port, the Service targetPort and the NetworkPolicy ports all follow
-     rasa.settings.port now instead of rasa.service.port, so they cannot drift from the
+     rasa.port now instead of rasa.service.port, so they cannot drift from the
      port Rasa actually binds. service.targetPort defaults to empty and follows
-     settings.port; set it only to target a different or named container port.
+     port; set it only to target a different or named container port.
    - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
      so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
 {{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) }}
 
    WARNING: the Rasa HTTP API is enabled and NOT authenticated.
-   settings.enableApi is true but neither settings.authToken nor settings.jwtSecret is set,
+   enableApi is true but neither authToken nor jwtSecret is set,
    so anything that can reach the Service inside the cluster can call the API. Set one of
    them before exposing this deployment more widely:
-     --set rasa.settings.authToken.secretName=rasa-secrets \
-     --set rasa.settings.authToken.secretKey=authToken
-   Or disable the API with --set rasa.settings.enableApi=false
+     --set rasa.authToken.secretName=rasa-secrets \
+     --set rasa.authToken.secretKey=authToken
+   Or disable the API with --set rasa.enableApi=false
    Exposing it outside the cluster in this state is refused outright - that means an
    ingress, a non-ClusterIP service type, or hostNetwork. Override with
-   --set rasa.settings.allowUnauthenticatedApi=true only if something in front of the
+   --set rasa.allowUnauthenticatedApi=true only if something in front of the
    chart already authenticates callers.
 {{- end }}
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}

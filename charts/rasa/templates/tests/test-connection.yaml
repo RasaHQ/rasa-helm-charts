@@ -1,4 +1,3 @@
-{{- if .Values.rasa.enabled }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -28,4 +27,3 @@ spec:
       # uid 65534, so the test would fail even against a healthy service.
       args: ['-O-', '{{ include "rasa.fullname" . }}:{{ .Values.rasa.service.port }}']
   restartPolicy: Never
-{{- end }}

@@ -17,9 +17,6 @@ rasaProLicense:
 
 # Rasa Pro Image
 rasa:
-  # -- rasa.enabled enables the Rasa Pro server deployment.
-  enabled: true
-
   # -- rasa.replicaCount specifies number of replicas
   replicaCount: 1
   # rasa.image defines image settings
@@ -41,130 +38,129 @@ rasa:
   #     maxSurge: 1
   #     maxUnavailable: 0
 
-  settings:
-    # -- settings.debugMode enables debug mode
-    debugMode: false
-    # -- settings.port defines port on which Rasa runs
-    port: 5005
-    # -- settings.enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod).
-    enableApi: true
-    # -- settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
-    # Unset by default: with settings.enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests.
-    authToken:
-      # secretName: "rasa-secrets"
-      # secretKey: "authToken"
-    # -- settings.jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
-    # Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token.
-    jwtSecret:
-      # secretName: "rasa-secrets"
-      # secretKey: "jwtSecret"
-    # -- settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers.
-    allowUnauthenticatedApi: false
-    # -- settings.jwtMethod is JWT algorithm to be used
-    jwtMethod: HS256
-    # -- settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
-    cors: '*'
-    # -- settings.useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio.
-    useDefaultArgs: true
-    # -- settings.mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container.
-    # When false, credentials and endpoints must be available at /.config or baked into the image.
-    mountDefaultConfigmap: true
-    # -- settings.mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models.
-    # When false, models must be available at /app/models or baked into the image.
-    mountModelsVolume: true
-    # -- settings.credentials enables credentials configuration for channel connectors
-    ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels
-    credentials: {}
-      # rest:
-      # facebook:
-      #   verify: "rasa"
-      #   secret: "<SECRET>"
-      #   page-access-token: "<PAGE-ACCESS-TOKEN>"
+  # -- debugMode enables debug mode
+  debugMode: false
+  # -- port defines port on which Rasa runs
+  port: 5005
+  # -- enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod).
+  enableApi: true
+  # -- authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
+  # Unset by default: with enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests.
+  authToken:
+    # secretName: "rasa-secrets"
+    # secretKey: "authToken"
+  # -- jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
+  # Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token.
+  jwtSecret:
+    # secretName: "rasa-secrets"
+    # secretKey: "jwtSecret"
+  # -- allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers.
+  allowUnauthenticatedApi: false
+  # -- jwtMethod is JWT algorithm to be used
+  jwtMethod: HS256
+  # -- cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
+  cors: '*'
+  # -- useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio.
+  useDefaultArgs: true
+  # -- mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container.
+  # When false, credentials and endpoints must be available at /.config or baked into the image.
+  mountDefaultConfigmap: true
+  # -- mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models.
+  # When false, models must be available at /app/models or baked into the image.
+  mountModelsVolume: true
+  # -- credentials enables credentials configuration for channel connectors
+  ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels
+  credentials: {}
+    # rest:
+    # facebook:
+    #   verify: "rasa"
+    #   secret: "<SECRET>"
+    #   page-access-token: "<PAGE-ACCESS-TOKEN>"
 
-    # -- settings.credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file)
-    # that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts.
-    # Intended for `helm install --set-file rasa.settings.credentialsRaw=./credentials.yml`
-    # or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`.
-    # Leave unset/empty to disable. Malformed YAML fails the template render.
-    credentialsRaw: ""
+  # -- credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file)
+  # that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts.
+  # Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml`
+  # or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`.
+  # Leave unset/empty to disable. Malformed YAML fails the template render.
+  credentialsRaw: ""
 
-    # See: https://rasa.com/docs/rasa/telemetry/telemetry/
-    telemetry:
-      # -- telemetry.enabled allow Rasa to collect anonymous usage details
-      enabled: true
-      # -- telemetry.debug prints telemetry data to stdout
-      debug: false
+  # See: https://rasa.com/docs/rasa/telemetry/telemetry/
+  telemetry:
+    # -- telemetry.enabled allow Rasa to collect anonymous usage details
+    enabled: true
+    # -- telemetry.debug prints telemetry data to stdout
+    debug: false
 
-    # Not all parameters are mandatory
-    # -- settings.endpoints enables endpoints configuration for the Rasa deployment.
-    # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
-    endpoints: {}
-      # -- endpoints.models is where the models are pulled from.
-      # See: https://rasa.com/docs/reference/integrations/model-storage
-      # models:
-      #   url: http://my-server.com/models/default_core@latest
-        # wait_time_between_pulls:  10   # [optional](default: 100)
+  # Not all parameters are mandatory
+  # -- endpoints enables endpoints configuration for the Rasa deployment.
+  # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
+  endpoints: {}
+    # -- endpoints.models is where the models are pulled from.
+    # See: https://rasa.com/docs/reference/integrations/model-storage
+    # models:
+    #   url: http://my-server.com/models/default_core@latest
+      # wait_time_between_pulls:  10   # [optional](default: 100)
 
-    # -- settings.endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file)
-    # that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts,
-    # so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence
-    # over the same keys in the raw file.
-    # Intended for `helm install --set-file rasa.settings.endpointsRaw=./endpoints.yml`
-    # or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`.
-    # Leave unset/empty to disable. Malformed YAML fails the template render.
-    endpointsRaw: ""
+  # -- endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file)
+  # that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts,
+  # so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence
+  # over the same keys in the raw file.
+  # Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml`
+  # or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`.
+  # Leave unset/empty to disable. Malformed YAML fails the template render.
+  endpointsRaw: ""
 
-      # --endpoints.action_endpoint is a server which runs your custom actions.
-      # See: https://rasa.com/docs/reference/integrations/action-server/actions
-      # action_endpoint:
-      #   actions_module: "actions"
+    # --endpoints.action_endpoint is a server which runs your custom actions.
+    # See: https://rasa.com/docs/reference/integrations/action-server/actions
+    # action_endpoint:
+    #   actions_module: "actions"
 
-      # -- endpoints.tracker_store is used to store the conversations.
-      # By default the conversations are stored in memory.
-      # See: https://rasa.com/docs/reference/integrations/tracker-stores
-      # tracker_store:
-      #    type: redis
-      #    url: <host of the redis instance, e.g. localhost>
-      #    port: <port of your redis instance, usually 6379>
-      #    db: <number of your database within redis, e.g. 0>
-      #    password: <password used for authentication>
-      #    use_ssl: <whether or not the communication is encrypted, default false>
+    # -- endpoints.tracker_store is used to store the conversations.
+    # By default the conversations are stored in memory.
+    # See: https://rasa.com/docs/reference/integrations/tracker-stores
+    # tracker_store:
+    #    type: redis
+    #    url: <host of the redis instance, e.g. localhost>
+    #    port: <port of your redis instance, usually 6379>
+    #    db: <number of your database within redis, e.g. 0>
+    #    password: <password used for authentication>
+    #    use_ssl: <whether or not the communication is encrypted, default false>
 
-      # -- endpoints.event_broker allows you to connect your running assistant to other services that process the data which all conversation events should be streamed to
-      # See: https://rasa.com/docs/reference/integrations/event-brokers
-      # event_broker:
-      #   type: kafka
-      #   url: localhost:9095
-      #   sasl_mechanism: SCRAM-SHA-512
-      #   security_protocol: SASL_PLAINTEXT
-      #   sasl_username: testuser
-      #   sasl_password: testpass123
-      #   partition_by_sender: true
-      #   client_id: rasa-broker
+    # -- endpoints.event_broker allows you to connect your running assistant to other services that process the data which all conversation events should be streamed to
+    # See: https://rasa.com/docs/reference/integrations/event-brokers
+    # event_broker:
+    #   type: kafka
+    #   url: localhost:9095
+    #   sasl_mechanism: SCRAM-SHA-512
+    #   security_protocol: SASL_PLAINTEXT
+    #   sasl_username: testuser
+    #   sasl_password: testpass123
+    #   partition_by_sender: true
+    #   client_id: rasa-broker
 
-      # -- endpoints.model_groups is used to define multiple models under a single ID which can be accessed by any component.
-      # Ensure the OPENAI_API_KEY is set to prevent any missing API key errors.
-      # See: https://rasa.com/docs/reference/config/components/llm-configuration#model-groups
-      # model_groups:
-      #   - id: openai-gpt-4o
-      #     models:
-      #       - provider: openai
-      #         model: gpt-4o-2024-11-20
-      #         request_timeout: 7
-      #         max_tokens: 256
-      #   - id: openai-embeddings
-      #     models:
-      #       - provider: openai
-      #         model: text-embedding-3-large
+    # -- endpoints.model_groups is used to define multiple models under a single ID which can be accessed by any component.
+    # Ensure the OPENAI_API_KEY is set to prevent any missing API key errors.
+    # See: https://rasa.com/docs/reference/config/components/llm-configuration#model-groups
+    # model_groups:
+    #   - id: openai-gpt-4o
+    #     models:
+    #       - provider: openai
+    #         model: gpt-4o-2024-11-20
+    #         request_timeout: 7
+    #         max_tokens: 256
+    #   - id: openai-embeddings
+    #     models:
+    #       - provider: openai
+    #         model: text-embedding-3-large
 
-    # -- settings.environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults.
-    environment: development
-    # settings.logging sets log levels for Rasa and external libraries
-    # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
-    logging:
-      # -- logging.logLevel is Rasa Log Level
-      logLevel: info
-  # -- rasa.args overrides the default arguments for the container
+  # -- environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults.
+  environment: development
+  # settings.logging sets log levels for Rasa and external libraries
+  # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
+  logging:
+    # -- logging.logLevel is Rasa Log Level
+    logLevel: info
+# -- rasa.args overrides the default arguments for the container
   args: []
   # -- rasa.additionalArgs adds additional arguments to the default args
   additionalArgs: []
@@ -278,7 +274,7 @@ rasa:
     type: ClusterIP
     # -- service.port is used to specify service port
     port: 5005
-    # -- service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows settings.port, so the two cannot drift. Set it only to target a different container port or a named port.
+    # -- service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows port, so the two cannot drift. Set it only to target a different container port or a named port.
     targetPort:
     # -- service.annotations defines annotations to add to the service
     annotations: {}
@@ -299,7 +295,7 @@ rasa:
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port.
+      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows port.
       port:
       scheme: HTTP
     # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
@@ -322,7 +318,7 @@ rasa:
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port.
+      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows port.
       port:
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe

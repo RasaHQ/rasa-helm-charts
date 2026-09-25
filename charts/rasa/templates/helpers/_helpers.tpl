@@ -101,16 +101,16 @@ Determine rasa server to run with arguments
 */}}
 {{- define "rasa.defaultArgs" -}}
 - run
-{{- if .Values.rasa.settings.enableApi }}
+{{- if .Values.rasa.enableApi }}
 - --enable-api
 {{- end }}
 - --port
-- "{{ .Values.rasa.settings.port }}"
-{{- if .Values.rasa.settings.cors }}
+- "{{ .Values.rasa.port }}"
+{{- if .Values.rasa.cors }}
 - --cors
-- {{ .Values.rasa.settings.cors | quote }}
+- {{ .Values.rasa.cors | quote }}
 {{- end }}
-{{- if .Values.rasa.settings.debugMode }}
+{{- if .Values.rasa.debugMode }}
 - --debug
 {{- end }}
 {{- end -}}
@@ -133,7 +133,7 @@ rasa.args or rasa.additionalArgs contain --enable-api, this reports nothing
 and the exposure checks below do not fire.
 */}}
 {{- define "rasa.apiServed" -}}
-{{- if and .Values.rasa.settings.enableApi .Values.rasa.settings.useDefaultArgs (not .Values.rasa.args) -}}
+{{- if and .Values.rasa.enableApi .Values.rasa.useDefaultArgs (not .Values.rasa.args) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -157,7 +157,7 @@ is treated as authentication rather than blocking a legitimate install.
 {{-     $named = true -}}
 {{-   end -}}
 {{- end -}}
-{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.settings.authToken .Values.rasa.settings.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
+{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -179,8 +179,8 @@ nobody. Included from deployment.yaml so it is evaluated for every exposure
 route, not only when an ingress happens to render.
 */}}
 {{- define "rasa.validateApiExposure" -}}
-{{- if and (include "rasa.apiServed" .) (include "rasa.apiExposed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.settings.allowUnauthenticatedApi) -}}
-{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Supply a credential with rasa.settings.authToken or rasa.settings.jwtSecret (note that rasa.overrideEnv discards those), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.additionalEnv or rasa.overrideEnv, or through rasa.envFrom. Alternatively set rasa.settings.enableApi=false, or acknowledge the risk with rasa.settings.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
+{{- if and (include "rasa.apiServed" .) (include "rasa.apiExposed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
+{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.additionalEnv or rasa.overrideEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 
@@ -207,7 +207,7 @@ Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values..
 {{-   if $trimmed -}}
 {{-     $parsed := fromYaml $trimmed -}}
 {{-     if and (hasKey $parsed "Error") (eq (len $parsed) 1) -}}
-{{-       fail (printf "rasa.settings.%s is not valid YAML (reported while rendering the ConfigMap, which the Deployment checksums, so Helm may name deployment.yaml as the location): %s" .field (index $parsed "Error")) -}}
+{{-       fail (printf "rasa.%s is not valid YAML (reported while rendering the ConfigMap, which the Deployment checksums, so Helm may name deployment.yaml as the location): %s" .field (index $parsed "Error")) -}}
 {{-     end -}}
 {{-     $merged = $parsed -}}
 {{-   end -}}
@@ -224,12 +224,12 @@ Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values..
 Report whether the chart has any endpoints configuration to mount.
 */}}
 {{- define "rasa.hasEndpoints" -}}
-{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.settings.endpoints "raw" .Values.rasa.settings.endpointsRaw "field" "endpointsRaw") -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.endpoints "raw" .Values.rasa.endpointsRaw "field" "endpointsRaw") -}}
 {{- end -}}
 
 {{/*
 Report whether the chart has any credentials configuration to mount.
 */}}
 {{- define "rasa.hasCredentials" -}}
-{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.settings.credentials "raw" .Values.rasa.settings.credentialsRaw "field" "credentialsRaw") -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.credentials "raw" .Values.rasa.credentialsRaw "field" "credentialsRaw") -}}
 {{- end -}}

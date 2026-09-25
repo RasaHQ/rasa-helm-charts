@@ -43,17 +43,16 @@ The table below lists all secret-backed fields:
 
 | Secret key | Feature | values.yaml field |
 |---|---|---|
-| `authToken` | Token-based API authentication | `rasa.settings.authToken` |
-| `jwtSecret` | JWT API authentication | `rasa.settings.jwtSecret` |
+| `authToken` | Token-based API authentication | `rasa.authToken` |
+| `jwtSecret` | JWT API authentication | `rasa.jwtSecret` |
 
 Both are unset by default, so adding the key to the Secret is not enough on its own — point the values field at it as well:
 
 ```yaml
 rasa:
-  settings:
-    authToken:
-      secretName: rasa-secrets
-      secretKey: authToken
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
 ```
 
 Alternatively, create all credentials upfront from a manifest. The chart ships a `secrets.yaml` example that you can use as a starting point — **use `stringData` so Kubernetes base64-encodes the values automatically**:
@@ -120,13 +119,13 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 **The `actionServer`, `duckling` and `rasaProServices` components have been removed.** This chart now deploys the Rasa Pro server only. Their values keys are ignored rather than rejected, so an existing values file still installs — but nothing reads them.
 
-**Action servers are bring-your-own.** Deploy one yourself and point `rasa.settings.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
+**Action servers are bring-your-own.** Deploy one yourself and point `rasa.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
 
-**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.settings.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
+**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
 
-**`rasa.settings.authToken` and `rasa.settings.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
+**`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
 
-> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod and leaves the HTTP API unauthenticated. `rasa.settings.enableApi` still defaults to `true`. Set one of them explicitly before upgrading, or set `rasa.settings.enableApi: false`:
+> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod and leaves the HTTP API unauthenticated. `rasa.enableApi` still defaults to `true`. Set one of them explicitly before upgrading, or set `rasa.enableApi: false`:
 >
 > ```yaml
 > rasa:
@@ -161,11 +160,15 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.ingress.hosts` is empty by default.** It previously shipped a placeholder host `INGRESS.HOST.NAME` with a `/api` path. Enabling the ingress without supplying hosts is now refused at render time rather than producing an ingress for a hostname that does not exist.
 
-**`rasa.settings.scheme` was removed.** No template read it.
+**Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
-**`rasa.settings.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+**`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.
 
-**The pod port now comes from `rasa.settings.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.settings.port`; set it only when you need a different or named container port.
+**`rasa.scheme` was removed.** No template read it.
+
+**`rasa.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+
+**The pod port now comes from `rasa.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.port`; set it only when you need a different or named container port.
 
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
@@ -265,8 +268,7 @@ By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a 
 
 ```yaml
 rasa:
-  settings:
-    mountDefaultConfigmap: false
+  mountDefaultConfigmap: false
 ```
 
 When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
@@ -277,8 +279,7 @@ By default, the chart mounts a models volume to the Rasa deployment at `/app/mod
 
 ```yaml
 rasa:
-  settings:
-    mountModelsVolume: false
+  mountModelsVolume: false
 ```
 
 When disabled, it is expected that the models are mounted to the `/app/models` directory or baked into the image.
@@ -296,10 +297,9 @@ kubectl create secret generic rasa-secrets \
 
 ```yaml
 rasa:
-  settings:
-    authToken:
-      secretName: rasa-secrets
-      secretKey: authToken
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
 ```
 
 **JWT authentication:**
@@ -311,11 +311,10 @@ kubectl create secret generic rasa-secrets \
 
 ```yaml
 rasa:
-  settings:
-    jwtSecret:
-      secretName: rasa-secrets
-      secretKey: jwtSecret
-    jwtMethod: HS256
+  jwtSecret:
+    secretName: rasa-secrets
+    secretKey: jwtSecret
+  jwtMethod: HS256
 ```
 
 See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-rest-api/) for details on API authentication.
@@ -355,7 +354,7 @@ rasa:
     failureThreshold: 6
 ```
 
-> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.settings.port` from its default.
+> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.port` from its default.
 
 ### Graceful Shutdown and Lifecycle Hooks
 
@@ -403,48 +402,46 @@ rasa:
 
 ### Configuring Credentials and Endpoints via ConfigMap
 
-The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.
+The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.mountDefaultConfigmap: true`.
 
 #### Configuring Credentials
 
-The `rasa.settings.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
+The `rasa.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
 
 For example, to configure Facebook Messenger:
 
 ```yaml
 rasa:
-  settings:
-    credentials:
-      facebook:
-        verify: "rasa"
-        secret: "<SECRET>"
-        page-access-token: "<PAGE-ACCESS-TOKEN>"
+  credentials:
+    facebook:
+      verify: "rasa"
+      secret: "<SECRET>"
+      page-access-token: "<PAGE-ACCESS-TOKEN>"
 ```
 
 For REST channel:
 
 ```yaml
 rasa:
-  settings:
-    credentials:
-      rest:
+  credentials:
+    rest:
 ```
 
 See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
 
 #### Sourcing Endpoints and Credentials from Raw YAML Files
 
-In addition to the structured `rasa.settings.endpoints` and `rasa.settings.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.settings.endpointsRaw` and `rasa.settings.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
+In addition to the structured `rasa.endpoints` and `rasa.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.endpointsRaw` and `rasa.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
 
-When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.settings.endpoints` override the same keys in the raw file.
+When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.endpoints` override the same keys in the raw file.
 
 Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/{{ template "chart.name" . }} \
   --version {{ template "chart.version" . }} \
-  --set-file rasa.settings.endpointsRaw=./endpoints.yml \
-  --set-file rasa.settings.credentialsRaw=./credentials.yml
+  --set-file rasa.endpointsRaw=./endpoints.yml \
+  --set-file rasa.credentialsRaw=./credentials.yml
 ```
 
 ArgoCD multi-source `Application` (referencing files from a values repo):
@@ -457,9 +454,9 @@ spec:
       targetRevision: {{ template "chart.version" . }}
       helm:
         fileParameters:
-          - name: rasa.settings.endpointsRaw
+          - name: rasa.endpointsRaw
             path: $values/endpoints.yml
-          - name: rasa.settings.credentialsRaw
+          - name: rasa.credentialsRaw
             path: $values/credentials.yml
     - repoURL: https://github.com/your-org/your-app-repo
       targetRevision: main
@@ -470,7 +467,7 @@ spec:
 
 #### Configuring Endpoints
 
-The `rasa.settings.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
+The `rasa.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
 
 **Action Server Endpoint:**
 
@@ -478,10 +475,9 @@ This chart does not deploy an action server. Run one yourself and point `action_
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      action_endpoint:
-        url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
+  endpoints:
+    action_endpoint:
+      url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
 ```
 
 Alternatively, run your actions in-process by setting `actions_module` instead of `url`.
@@ -490,59 +486,55 @@ Alternatively, run your actions in-process by setting `actions_module` instead o
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      models:
-        url: http://my-server.com/models/default_core@latest
-        wait_time_between_pulls: 10
+  endpoints:
+    models:
+      url: http://my-server.com/models/default_core@latest
+      wait_time_between_pulls: 10
 ```
 
 **Tracker Store (Redis example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      tracker_store:
-        type: redis
-        url: <host of the redis instance>
-        port: 6379
-        db: 0
-        password: <password>
-        use_ssl: false
+  endpoints:
+    tracker_store:
+      type: redis
+      url: <host of the redis instance>
+      port: 6379
+      db: 0
+      password: <password>
+      use_ssl: false
 ```
 
 **Tracker Store (PostgreSQL example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      tracker_store:
-        type: sql
-        dialect: postgresql
-        url: <hostname>
-        db: <database>
-        username: <username>
-        password: <password>
-        port: 5432
+  endpoints:
+    tracker_store:
+      type: sql
+      dialect: postgresql
+      url: <hostname>
+      db: <database>
+      username: <username>
+      password: <password>
+      port: 5432
 ```
 
 **Event Broker (Kafka example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      event_broker:
-        type: kafka
-        url: localhost:9095
-        sasl_mechanism: SCRAM-SHA-512
-        security_protocol: SASL_PLAINTEXT
-        sasl_username: testuser
-        sasl_password: testpass123
-        partition_by_sender: true
-        client_id: rasa-broker
+  endpoints:
+    event_broker:
+      type: kafka
+      url: localhost:9095
+      sasl_mechanism: SCRAM-SHA-512
+      security_protocol: SASL_PLAINTEXT
+      sasl_username: testuser
+      sasl_password: testpass123
+      partition_by_sender: true
+      client_id: rasa-broker
 ```
 
 **Model Groups:**
@@ -562,15 +554,14 @@ rasa:
         secretKeyRef:
           name: openai-secret
           key: apiKey
-  settings:
-    endpoints:
-      model_groups:
-        - id: openai-gpt-4o
-          models:
-            - provider: openai
-              model: gpt-4o-2024-11-20
-              request_timeout: 7
-              max_tokens: 256
+  endpoints:
+    model_groups:
+      - id: openai-gpt-4o
+        models:
+          - provider: openai
+            model: gpt-4o-2024-11-20
+            request_timeout: 7
+            max_tokens: 256
 ```
 
 See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.

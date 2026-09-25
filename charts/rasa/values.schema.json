@@ -47,7 +47,6 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "httpGet": {
           "type": "object",
           "additionalProperties": true,
@@ -69,7 +68,6 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "minReplicas": { "type": "integer", "minimum": 1 },
         "maxReplicas": { "type": "integer", "minimum": 1 },
         "targetCPUUtilizationPercentage": { "type": "integer", "minimum": 1, "maximum": 100 }
@@ -88,7 +86,6 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "className": { "type": "string" },
         "labels": { "type": "object" },
         "annotations": { "type": "object" },
@@ -121,7 +118,6 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "runAsUser": { "type": ["integer", "null"] },
         "runAsGroup": { "type": ["integer", "null"] },
         "fsGroup": { "type": ["integer", "null"] },
@@ -161,7 +157,6 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "denyAll": { "type": "boolean" },
         "nodeCIDR": { "type": "array" },
         "dnsNamespace": { "type": "string", "minLength": 1 },
@@ -173,50 +168,42 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
-        "enabled": { "type": "boolean" },
         "replicaCount": { "type": "integer", "minimum": 0 },
         "image": { "$ref": "#/definitions/imageConfig" },
         "strategy": { "type": "object" },
-        "settings": {
-          "type": "object",
-          "additionalProperties": true,
-          "properties": {
-            "debugMode": { "type": "boolean" },
-            "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
-            "enableApi": { "type": "boolean" },
-            "authToken": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
-            "jwtSecret": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
-            "allowUnauthenticatedApi": { "type": "boolean" },
-            "credentialsRaw": { "type": ["string", "null"] },
-            "endpointsRaw": { "type": ["string", "null"] },
-            "jwtMethod": { "type": "string" },
-            "cors": { "type": ["string", "null"] },
-            "useDefaultArgs": { "type": "boolean" },
-            "mountDefaultConfigmap": { "type": "boolean" },
-            "mountModelsVolume": { "type": "boolean" },
-            "credentials": { "type": "object" },
-            "telemetry": {
-              "type": "object",
-              "additionalProperties": true,
-              "properties": {
-                "enabled": { "type": "boolean" },
-                "debug": { "type": "boolean" }
-              }
-            },
-            "endpoints": { "type": "object" },
-            "environment": { "type": "string" },
-            "logging": {
-              "type": "object",
-              "additionalProperties": true,
-              "properties": {
-                "logLevel": {
-                  "type": "string",
-                  "enum": ["debug", "info", "warning", "error", "DEBUG", "INFO", "WARNING", "ERROR"]
-                }
+          "debugMode": { "type": "boolean" },
+          "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+          "enableApi": { "type": "boolean" },
+          "authToken": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
+          "jwtSecret": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
+          "allowUnauthenticatedApi": { "type": "boolean" },
+          "credentialsRaw": { "type": ["string", "null"] },
+          "endpointsRaw": { "type": ["string", "null"] },
+          "jwtMethod": { "type": "string" },
+          "cors": { "type": ["string", "null"] },
+          "useDefaultArgs": { "type": "boolean" },
+          "mountDefaultConfigmap": { "type": "boolean" },
+          "mountModelsVolume": { "type": "boolean" },
+          "credentials": { "type": "object" },
+          "telemetry": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "debug": { "type": "boolean" }
+            }
+          },
+          "endpoints": { "type": "object" },
+          "environment": { "type": "string" },
+          "logging": {
+            "type": "object",
+            "additionalProperties": true,
+            "properties": {
+              "logLevel": {
+                "type": "string",
+                "enum": ["debug", "info", "warning", "error", "DEBUG", "INFO", "WARNING", "ERROR"]
               }
             }
-          }
-        },
+          },
         "args": { "type": "array" },
         "additionalArgs": { "type": "array" },
         "command": { "type": "array" },

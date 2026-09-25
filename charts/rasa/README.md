@@ -44,17 +44,16 @@ The table below lists all secret-backed fields:
 
 | Secret key | Feature | values.yaml field |
 |---|---|---|
-| `authToken` | Token-based API authentication | `rasa.settings.authToken` |
-| `jwtSecret` | JWT API authentication | `rasa.settings.jwtSecret` |
+| `authToken` | Token-based API authentication | `rasa.authToken` |
+| `jwtSecret` | JWT API authentication | `rasa.jwtSecret` |
 
 Both are unset by default, so adding the key to the Secret is not enough on its own — point the values field at it as well:
 
 ```yaml
 rasa:
-  settings:
-    authToken:
-      secretName: rasa-secrets
-      secretKey: authToken
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
 ```
 
 Alternatively, create all credentials upfront from a manifest. The chart ships a `secrets.yaml` example that you can use as a starting point — **use `stringData` so Kubernetes base64-encodes the values automatically**:
@@ -121,13 +120,13 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 **The `actionServer`, `duckling` and `rasaProServices` components have been removed.** This chart now deploys the Rasa Pro server only. Their values keys are ignored rather than rejected, so an existing values file still installs — but nothing reads them.
 
-**Action servers are bring-your-own.** Deploy one yourself and point `rasa.settings.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
+**Action servers are bring-your-own.** Deploy one yourself and point `rasa.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
 
-**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.settings.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
+**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
 
-**`rasa.settings.authToken` and `rasa.settings.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
+**`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
 
-> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod and leaves the HTTP API unauthenticated. `rasa.settings.enableApi` still defaults to `true`. Set one of them explicitly before upgrading, or set `rasa.settings.enableApi: false`:
+> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod and leaves the HTTP API unauthenticated. `rasa.enableApi` still defaults to `true`. Set one of them explicitly before upgrading, or set `rasa.enableApi: false`:
 >
 > ```yaml
 > rasa:
@@ -162,11 +161,15 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.ingress.hosts` is empty by default.** It previously shipped a placeholder host `INGRESS.HOST.NAME` with a `/api` path. Enabling the ingress without supplying hosts is now refused at render time rather than producing an ingress for a hostname that does not exist.
 
-**`rasa.settings.scheme` was removed.** No template read it.
+**Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
-**`rasa.settings.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+**`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.
 
-**The pod port now comes from `rasa.settings.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.settings.port`; set it only when you need a different or named container port.
+**`rasa.scheme` was removed.** No template read it.
+
+**`rasa.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+
+**The pod port now comes from `rasa.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.port`; set it only when you need a different or named container port.
 
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
@@ -266,8 +269,7 @@ By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a 
 
 ```yaml
 rasa:
-  settings:
-    mountDefaultConfigmap: false
+  mountDefaultConfigmap: false
 ```
 
 When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
@@ -278,8 +280,7 @@ By default, the chart mounts a models volume to the Rasa deployment at `/app/mod
 
 ```yaml
 rasa:
-  settings:
-    mountModelsVolume: false
+  mountModelsVolume: false
 ```
 
 When disabled, it is expected that the models are mounted to the `/app/models` directory or baked into the image.
@@ -297,10 +298,9 @@ kubectl create secret generic rasa-secrets \
 
 ```yaml
 rasa:
-  settings:
-    authToken:
-      secretName: rasa-secrets
-      secretKey: authToken
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
 ```
 
 **JWT authentication:**
@@ -312,11 +312,10 @@ kubectl create secret generic rasa-secrets \
 
 ```yaml
 rasa:
-  settings:
-    jwtSecret:
-      secretName: rasa-secrets
-      secretKey: jwtSecret
-    jwtMethod: HS256
+  jwtSecret:
+    secretName: rasa-secrets
+    secretKey: jwtSecret
+  jwtMethod: HS256
 ```
 
 See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-rest-api/) for details on API authentication.
@@ -356,7 +355,7 @@ rasa:
     failureThreshold: 6
 ```
 
-> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.settings.port` from its default.
+> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.port` from its default.
 
 ### Graceful Shutdown and Lifecycle Hooks
 
@@ -404,48 +403,46 @@ rasa:
 
 ### Configuring Credentials and Endpoints via ConfigMap
 
-The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.settings.mountDefaultConfigmap: true`.
+The chart can automatically create a ConfigMap containing `credentials.yml` and `endpoints.yml` files that are mounted to the Rasa deployment. This is enabled by default via `rasa.mountDefaultConfigmap: true`.
 
 #### Configuring Credentials
 
-The `rasa.settings.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
+The `rasa.credentials` section allows you to configure channel connectors for messaging and voice channels. These credentials are written to the `credentials.yml` file in the ConfigMap.
 
 For example, to configure Facebook Messenger:
 
 ```yaml
 rasa:
-  settings:
-    credentials:
-      facebook:
-        verify: "rasa"
-        secret: "<SECRET>"
-        page-access-token: "<PAGE-ACCESS-TOKEN>"
+  credentials:
+    facebook:
+      verify: "rasa"
+      secret: "<SECRET>"
+      page-access-token: "<PAGE-ACCESS-TOKEN>"
 ```
 
 For REST channel:
 
 ```yaml
 rasa:
-  settings:
-    credentials:
-      rest:
+  credentials:
+    rest:
 ```
 
 See the [Rasa channel documentation](https://rasa.com/docs/reference/channels/messaging-and-voice-channels) for all available channel configurations.
 
 #### Sourcing Endpoints and Credentials from Raw YAML Files
 
-In addition to the structured `rasa.settings.endpoints` and `rasa.settings.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.settings.endpointsRaw` and `rasa.settings.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
+In addition to the structured `rasa.endpoints` and `rasa.credentials` maps, the chart accepts the **raw contents of an `endpoints.yml` or `credentials.yml` file** via `rasa.endpointsRaw` and `rasa.credentialsRaw`. This lets the same file the developer uses locally for `rasa train` / `rasa run` flow directly into the rendered ConfigMap with no wrapper file or pre-commit step.
 
-When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.settings.endpoints` override the same keys in the raw file.
+When both the structured and raw values are provided, they are deep-merged. **The structured value wins on key conflicts** — this is intentional so infrastructure-owned blocks (e.g. `tracker_store`, `event_broker`) defined in `rasa.endpoints` override the same keys in the raw file.
 
 Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
   --version 3.0.0-rc.2 \
-  --set-file rasa.settings.endpointsRaw=./endpoints.yml \
-  --set-file rasa.settings.credentialsRaw=./credentials.yml
+  --set-file rasa.endpointsRaw=./endpoints.yml \
+  --set-file rasa.credentialsRaw=./credentials.yml
 ```
 
 ArgoCD multi-source `Application` (referencing files from a values repo):
@@ -458,9 +455,9 @@ spec:
       targetRevision: 3.0.0-rc.2
       helm:
         fileParameters:
-          - name: rasa.settings.endpointsRaw
+          - name: rasa.endpointsRaw
             path: $values/endpoints.yml
-          - name: rasa.settings.credentialsRaw
+          - name: rasa.credentialsRaw
             path: $values/credentials.yml
     - repoURL: https://github.com/your-org/your-app-repo
       targetRevision: main
@@ -471,7 +468,7 @@ spec:
 
 #### Configuring Endpoints
 
-The `rasa.settings.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
+The `rasa.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
 
 **Action Server Endpoint:**
 
@@ -479,10 +476,9 @@ This chart does not deploy an action server. Run one yourself and point `action_
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      action_endpoint:
-        url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
+  endpoints:
+    action_endpoint:
+      url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
 ```
 
 Alternatively, run your actions in-process by setting `actions_module` instead of `url`.
@@ -491,59 +487,55 @@ Alternatively, run your actions in-process by setting `actions_module` instead o
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      models:
-        url: http://my-server.com/models/default_core@latest
-        wait_time_between_pulls: 10
+  endpoints:
+    models:
+      url: http://my-server.com/models/default_core@latest
+      wait_time_between_pulls: 10
 ```
 
 **Tracker Store (Redis example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      tracker_store:
-        type: redis
-        url: <host of the redis instance>
-        port: 6379
-        db: 0
-        password: <password>
-        use_ssl: false
+  endpoints:
+    tracker_store:
+      type: redis
+      url: <host of the redis instance>
+      port: 6379
+      db: 0
+      password: <password>
+      use_ssl: false
 ```
 
 **Tracker Store (PostgreSQL example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      tracker_store:
-        type: sql
-        dialect: postgresql
-        url: <hostname>
-        db: <database>
-        username: <username>
-        password: <password>
-        port: 5432
+  endpoints:
+    tracker_store:
+      type: sql
+      dialect: postgresql
+      url: <hostname>
+      db: <database>
+      username: <username>
+      password: <password>
+      port: 5432
 ```
 
 **Event Broker (Kafka example):**
 
 ```yaml
 rasa:
-  settings:
-    endpoints:
-      event_broker:
-        type: kafka
-        url: localhost:9095
-        sasl_mechanism: SCRAM-SHA-512
-        security_protocol: SASL_PLAINTEXT
-        sasl_username: testuser
-        sasl_password: testpass123
-        partition_by_sender: true
-        client_id: rasa-broker
+  endpoints:
+    event_broker:
+      type: kafka
+      url: localhost:9095
+      sasl_mechanism: SCRAM-SHA-512
+      security_protocol: SASL_PLAINTEXT
+      sasl_username: testuser
+      sasl_password: testpass123
+      partition_by_sender: true
+      client_id: rasa-broker
 ```
 
 **Model Groups:**
@@ -563,15 +555,14 @@ rasa:
         secretKeyRef:
           name: openai-secret
           key: apiKey
-  settings:
-    endpoints:
-      model_groups:
-        - id: openai-gpt-4o
-          models:
-            - provider: openai
-              model: gpt-4o-2024-11-20
-              request_timeout: 7
-              max_tokens: 256
+  endpoints:
+    model_groups:
+      - id: openai-gpt-4o
+        models:
+          - provider: openai
+            model: gpt-4o-2024-11-20
+            request_timeout: 7
+            max_tokens: 256
 ```
 
 See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.
@@ -844,7 +835,9 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.additionalContainers | list | rasa.additionalContainers allows to specify additional containers for the Rasa Deployment | `[]` |
 | rasa.additionalEnv | list | rasa.additionalEnv adds additional environment variables | `[]` |
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
-| rasa.args | list | rasa.args overrides the default arguments for the container | `[]` |
+| rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
+| rasa.args | list |  | `[]` |
+| rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default: with enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests. | `nil` |
 | rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.additionalContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
 | rasa.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
@@ -858,8 +851,15 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.containerSecurityContext.runAsNonRoot | bool | rasa.containerSecurityContext.runAsNonRoot determines whether to run the container as a non-root user. REQUIRES an image whose USER is a numeric non-root uid. The stock rasa-pro image is USER 1001 and satisfies this. If you point rasa.image.repository at a custom image that runs as root, or whose USER is a name rather than a number, the pod will fail with CreateContainerConfigError. Fix the image, or set this to false — in which case the deployment will not satisfy the restricted Pod Security Standard. | `true` |
 | rasa.containerSecurityContext.seccompProfile | object | rasa.containerSecurityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
 | rasa.containerSecurityContext.seccompProfile.type | string | rasa.containerSecurityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
-| rasa.enabled | bool | rasa.enabled enables the Rasa Pro server deployment. | `true` |
+| rasa.cors | string | cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
+| rasa.credentials | object | credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
+| rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
+| rasa.debugMode | bool | debugMode enables debug mode | `false` |
+| rasa.enableApi | bool | enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod). | `true` |
+| rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
+| rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
+| rasa.environment | string | environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
 | rasa.image.tag | string | image.tag overrides the Rasa Pro image tag. Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. | `""` |
@@ -870,16 +870,21 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.ingress.labels | object | ingress.labels defines labels to add to the ingress | `{}` |
 | rasa.ingress.tls | list | ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover. | `[]` |
 | rasa.initContainers | list | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file | `[]` |
+| rasa.jwtMethod | string | jwtMethod is JWT algorithm to be used | `"HS256"` |
+| rasa.jwtSecret | string | jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token. | `nil` |
 | rasa.lifecycle | object | rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container # Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | `{}` |
 | rasa.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
 | rasa.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
 | rasa.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/","port":null,"scheme":"HTTP"}` |
-| rasa.livenessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port. | `nil` |
+| rasa.livenessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows port. | `nil` |
 | rasa.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
 | rasa.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
 | rasa.livenessProbe.successThreshold | int | livenessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | livenessProbe.terminationGracePeriodSeconds is an optional duration in seconds the pod needs to terminate gracefully after a liveness probe failure | `30` |
 | rasa.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
+| rasa.logging.logLevel | string | logging.logLevel is Rasa Log Level | `"info"` |
+| rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
+| rasa.mountModelsVolume | bool | mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
 | rasa.overrideEnv | list | rasa.overrideEnv overrides all default environment variables | `[]` |
 | rasa.persistence.create | bool |  | `false` |
@@ -889,10 +894,11 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.persistence.storageRequests | string |  | `"1Gi"` |
 | rasa.podAnnotations | object | rasa.podAnnotations defines annotations to add to the pod | `{}` |
 | rasa.podSecurityContext | object | rasa.podSecurityContext defines pod security context | `{"enabled":true}` |
+| rasa.port | int | port defines port on which Rasa runs | `5005` |
 | rasa.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
 | rasa.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
 | rasa.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/","port":null,"scheme":"HTTP"}` |
-| rasa.readinessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port. | `nil` |
+| rasa.readinessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows port. | `nil` |
 | rasa.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
 | rasa.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
 | rasa.readinessProbe.successThreshold | int | readinessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |
@@ -905,35 +911,19 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
 | rasa.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
 | rasa.service.port | int | service.port is used to specify service port | `5005` |
-| rasa.service.targetPort | string | service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows settings.port, so the two cannot drift. Set it only to target a different container port or a named port. | `nil` |
+| rasa.service.targetPort | string | service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows port, so the two cannot drift. Set it only to target a different container port or a named port. | `nil` |
 | rasa.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
 | rasa.serviceAccount | object | rasa.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
 | rasa.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
 | rasa.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
 | rasa.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
-| rasa.settings.allowUnauthenticatedApi | bool | settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
-| rasa.settings.authToken | string | settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default: with settings.enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests. | `nil` |
-| rasa.settings.cors | string | settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
-| rasa.settings.credentials | object | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
-| rasa.settings.credentialsRaw | string | settings.credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.settings.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
-| rasa.settings.debugMode | bool | settings.debugMode enables debug mode | `false` |
-| rasa.settings.enableApi | bool | settings.enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod). | `true` |
-| rasa.settings.endpoints | object | settings.endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
-| rasa.settings.endpointsRaw | string | settings.endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.settings.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
-| rasa.settings.environment | string | settings.environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
-| rasa.settings.jwtMethod | string | settings.jwtMethod is JWT algorithm to be used | `"HS256"` |
-| rasa.settings.jwtSecret | string | settings.jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token. | `nil` |
-| rasa.settings.logging.logLevel | string | logging.logLevel is Rasa Log Level | `"info"` |
-| rasa.settings.mountDefaultConfigmap | bool | settings.mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
-| rasa.settings.mountModelsVolume | bool | settings.mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
-| rasa.settings.port | int | settings.port defines port on which Rasa runs | `5005` |
-| rasa.settings.telemetry.debug | bool | telemetry.debug prints telemetry data to stdout | `false` |
-| rasa.settings.telemetry.enabled | bool | telemetry.enabled allow Rasa to collect anonymous usage details | `true` |
-| rasa.settings.useDefaultArgs | bool | settings.useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio. | `true` |
 | rasa.strategy | object | rasa.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
+| rasa.telemetry.debug | bool | telemetry.debug prints telemetry data to stdout | `false` |
+| rasa.telemetry.enabled | bool | telemetry.enabled allow Rasa to collect anonymous usage details | `true` |
 | rasa.terminationGracePeriodSeconds | int | rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30 | `nil` |
 | rasa.tolerations | list | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
 | rasa.topologySpreadConstraints | list | rasa.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods. # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ | `[]` |
+| rasa.useDefaultArgs | bool | useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio. | `true` |
 | rasa.volumeMounts | list | rasa.volumeMounts specifies additional volumes to mount in the Rasa container | `[]` |
 | rasa.volumes | list | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
 | rasaProLicense | object | rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all Rasa Pro deployments. | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` |

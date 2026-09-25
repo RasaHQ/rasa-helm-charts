@@ -1,4 +1,4 @@
-{{- if and .Values.rasa.enabled .Values.rasa.ingress.enabled -}}
+{{- if .Values.rasa.ingress.enabled -}}
 {{- $fullName := include "rasa.fullname" . -}}
 {{- $svcPort := .Values.rasa.service.port -}}
 apiVersion: networking.k8s.io/v1

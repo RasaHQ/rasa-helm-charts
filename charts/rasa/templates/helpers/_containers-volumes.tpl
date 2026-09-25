@@ -1,5 +1,5 @@
 {{- define "rasa.containers.volumes" -}}
-{{- if .Values.rasa.settings.mountDefaultConfigmap -}}
+{{- if .Values.rasa.mountDefaultConfigmap -}}
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
 {{- $hasCredentials := include "rasa.hasCredentials" . }}
 {{- if or $hasEndpoints $hasCredentials }}
@@ -19,7 +19,7 @@
 {{- end }}
 {{- end }}
 {{- end }}
-{{ if .Values.rasa.settings.mountModelsVolume -}}
+{{ if .Values.rasa.mountModelsVolume -}}
 - name: models
   emptyDir: {}
 {{- end }}
@@ -31,7 +31,7 @@
 {{- end -}}
 
 {{- define "rasa.containers.volumeMounts" -}}
-{{- if .Values.rasa.settings.mountDefaultConfigmap -}}
+{{- if .Values.rasa.mountDefaultConfigmap -}}
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
 {{- $hasCredentials := include "rasa.hasCredentials" . }}
 {{- if or $hasEndpoints $hasCredentials }}
@@ -51,7 +51,7 @@
   readOnly: true
 {{- end }}
 {{- end }}
-{{ if .Values.rasa.settings.mountModelsVolume -}}
+{{ if .Values.rasa.mountModelsVolume -}}
 - name: "models"
   mountPath: "/app/models"
 {{- end }}

@@ -1,4 +1,4 @@
-{{- if .Values.rasa.settings.mountDefaultConfigmap }}
+{{- if .Values.rasa.mountDefaultConfigmap }}
 {{- $credentials := include "rasa.hasCredentials" . }}
 {{- $endpoints := include "rasa.hasEndpoints" . }}
 {{- /*

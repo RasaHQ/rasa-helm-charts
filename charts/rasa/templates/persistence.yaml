@@ -1,9 +1,10 @@
-{{- if and .Values.rasa.persistence.create .Values.rasa.persistence.hostPath.enabled -}}
+{{- if and .Values.rasa.enabled .Values.rasa.persistence.create .Values.rasa.persistence.hostPath.enabled -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: rasa-pro-data-pv-{{ .Release.Namespace }}
   labels:
+    {{- include "rasa.labels" . | nindent 4 }}
     name: rasa-pro-data-pv-{{ .Release.Namespace }}
 spec:
   capacity:
@@ -20,12 +21,15 @@ spec:
     name: rasa-pro-data-pvc-{{ .Release.Namespace }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
+{{- if and .Values.rasa.enabled .Values.rasa.persistence.create }}
 ---
-{{- if and .Values.rasa.persistence.create -}}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: rasa-pro-data-pvc-{{ .Release.Namespace }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce
@@ -33,6 +37,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.rasa.persistence.storageRequests }}
-  storageClassName: {{ .Values.rasa.persistence.storageClassName }} 
----
+  storageClassName: {{ .Values.rasa.persistence.storageClassName }}
 {{- end }}

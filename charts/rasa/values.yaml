@@ -46,8 +46,6 @@ rasa:
     debugMode: false
     # -- settings.port defines port on which Rasa runs
     port: 5005
-    # -- settings.scheme defines scheme by which the service are accessible
-    scheme: http
     # -- settings.enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod).
     enableApi: true
     # -- settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
@@ -360,13 +358,13 @@ rasa:
       {}
       # kubernetes.io/ingress.class: nginx
       # kubernetes.io/tls-acme: "true"
-    # -- ingress.hosts specifies the hosts for this ingress
-    hosts:
-      - host: INGRESS.HOST.NAME
-        paths:
-          - path: /api
-            pathType: Prefix
-        extraPaths: []
+    # -- ingress.hosts specifies the hosts and paths for this ingress. Empty by default: the chart ships no hostname or path opinion, so an ingress you enable is one you fully describe. global.ingressHost overrides the host of every entry but cannot create one.
+    hosts: []
+      # - host: rasa.example.com
+      #   paths:
+      #     - path: /
+      #       pathType: Prefix
+      #   extraPaths: []
     # -- ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover.
     tls: []
     #  - secretName: chart-example-tls
@@ -438,6 +436,19 @@ networkPolicy:
   nodeCIDR: []
     # - ipBlock:
     #     cidr: 0.0.0.0/0
+  # -- networkPolicy.dnsNamespace is the namespace running cluster DNS, matched on the API-server-managed kubernetes.io/metadata.name label.
+  dnsNamespace: kube-system
+  # -- networkPolicy.egressPorts lists the destination ports the Rasa Pro server may reach. The defaults cover HTTPS and HTTP only; add your tracker store, event broker and model storage ports (for example 5432 for PostgreSQL, 9092 for Kafka, 6379 for Valkey) or egress to them is denied.
+  egressPorts:
+    - port: 443
+      protocol: TCP
+    - port: 80
+      protocol: TCP
+  # -- networkPolicy.allowIngressFrom lists NetworkPolicy peers allowed to reach the Rasa Pro server port. Required when networkPolicy.denyAll is true and an ingress controller, service mesh or other pod must reach the service; nodeCIDR only covers kubelet probes.
+  allowIngressFrom: []
+    # - namespaceSelector:
+    #     matchLabels:
+    #       kubernetes.io/metadata.name: ingress-nginx
 
 # Defines global settings for all resources
 global:

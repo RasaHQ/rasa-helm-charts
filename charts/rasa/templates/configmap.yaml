@@ -1,42 +1,13 @@
 {{- if .Values.rasa.settings.mountDefaultConfigmap }}
+{{- $credentials := include "rasa.hasCredentials" . }}
+{{- $endpoints := include "rasa.hasEndpoints" . }}
 {{- /*
-Build the credentials map by deep-merging the structured value with the optional
-raw YAML string (credentialsRaw). The structured value wins on key conflicts.
+Emit nothing when there is no configuration to ship. An empty ConfigMap is
+never referenced by rasa.containers.volumes, so it would only add a dangling
+object to every default install. The same two predicates drive the volume and
+the mount, so the three cannot disagree.
 */ -}}
-{{- $credentialsMerged := dict }}
-{{- if .Values.rasa.settings.credentialsRaw }}
-{{-   $rawTrim := .Values.rasa.settings.credentialsRaw | toString | trim }}
-{{-   if $rawTrim }}
-{{-     $parsed := fromYaml $rawTrim }}
-{{-     if hasKey $parsed "Error" }}
-{{-       fail (printf "rasa.settings.credentialsRaw: invalid YAML: %s" (index $parsed "Error")) }}
-{{-     end }}
-{{-     $credentialsMerged = $parsed }}
-{{-   end }}
-{{- end }}
-{{- if .Values.rasa.settings.credentials }}
-{{-   $credentialsMerged = merge (deepCopy .Values.rasa.settings.credentials) $credentialsMerged }}
-{{- end }}
-{{- $endpointsMerged := dict }}
-{{- if .Values.rasa.settings.endpointsRaw }}
-{{-   $rawTrim := .Values.rasa.settings.endpointsRaw | toString | trim }}
-{{-   if $rawTrim }}
-{{-     $parsed := fromYaml $rawTrim }}
-{{-     if hasKey $parsed "Error" }}
-{{-       fail (printf "rasa.settings.endpointsRaw: invalid YAML: %s" (index $parsed "Error")) }}
-{{-     end }}
-{{-     $endpointsMerged = $parsed }}
-{{-   end }}
-{{- end }}
-{{- if .Values.rasa.settings.endpoints }}
-{{-   $endpointsMerged = merge (deepCopy .Values.rasa.settings.endpoints) $endpointsMerged }}
-{{- end }}
-{{- /*
-Emit nothing when neither credentials nor endpoints have content: a ConfigMap
-with no data is never mounted (see rasa.containers.volumeMounts) and only adds
-a dangling object to every default install.
-*/ -}}
-{{- if or $credentialsMerged $endpointsMerged }}
+{{- if or $credentials $endpoints }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -44,13 +15,13 @@ metadata:
   labels:
     {{- include "rasa.labels" . | nindent 4 }}
 data:
-{{- if $credentialsMerged }}
+{{- if $credentials }}
   credentials: |
-    {{- toYaml $credentialsMerged | nindent 4 }}
+    {{- $credentials | nindent 4 }}
 {{- end }}
-{{- if $endpointsMerged }}
+{{- if $endpoints }}
   endpoints: |
-    {{- toYaml $endpointsMerged | nindent 4 }}
+    {{- $endpoints | nindent 4 }}
 {{- end }}
 {{- end }}
 {{- end }}

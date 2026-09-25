@@ -145,6 +145,20 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 >     allowUnauthenticatedApi: true
 > ```
 
+**`app.kubernetes.io/name` is now the chart name**, not the release fullname — `rasa` rather than `my-release-rasa`. The label is part of `Deployment.spec.selector`, which Kubernetes treats as immutable, so **`helm upgrade` fails on an existing release**. Delete the old Deployment first:
+
+```console
+kubectl delete deployment my-release-rasa -n my-namespace --cascade=orphan
+```
+
+`--cascade=orphan` leaves the pods running so they keep serving until the new Deployment adopts them. This was worth the disruption in a major: the old value broke the chart's own kubelet NetworkPolicy (it selected zero pods) and made the release impossible to target with a cluster-wide `ServiceMonitor` or policy exception.
+
+**NetworkPolicies are release-scoped now.** They are named after the release and select only its pods. `deny-all` and `allow-dns-access` previously selected *every pod in the namespace*, and `allow-dns-access` used a fixed name that collided between two releases in one namespace. Three new keys came with the rework — `dnsNamespace`, `egressPorts` and `allowIngressFrom` — and you need them: see [Network Policies](#network-policies).
+
+**`rasa.ingress.hosts` is empty by default.** It previously shipped a placeholder host `INGRESS.HOST.NAME` with a `/api` path. Enabling the ingress without supplying hosts is now refused at render time rather than producing an ingress for a hostname that does not exist.
+
+**`rasa.settings.scheme` was removed.** No template read it.
+
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
 - `rasa.containerSecurityContext` now defaults to `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` and `seccompProfile.type: RuntimeDefault`. No `runAsUser` is set, so the effective uid is unchanged and existing model volumes keep their ownership.
@@ -333,7 +347,7 @@ rasa:
     failureThreshold: 6
 ```
 
-> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the URL scheme and port in the `curl` command if you have changed `rasa.settings.scheme` or `rasa.settings.port` from their defaults.
+> **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.settings.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.settings.port` from its default.
 
 ### Graceful Shutdown and Lifecycle Hooks
 
@@ -753,18 +767,41 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
 
 ### Network Policies
 
-Network policies are disabled by default. Enable them to restrict traffic to and from the Rasa Pro server:
+Network policies are disabled by default. Every policy the chart emits selects **only this release's pods**, so enabling them in a shared namespace does not affect anything else.
+
+`denyAll` drops all traffic first; everything the pod needs must then be allowed back explicitly. A working configuration needs four things, and omitting any of them leaves the pod running but unreachable or unable to connect:
 
 ```yaml
 networkPolicy:
   enabled: true
   denyAll: true
+
+  # 1. kubelet liveness and readiness probes
   nodeCIDR:
     - ipBlock:
-        cidr: 10.0.0.0/8  # adjust to your node CIDR
+        cidr: 10.0.0.0/8          # adjust to your node CIDR
+
+  # 2. cluster DNS, matched on the API-server-managed namespace label
+  dnsNamespace: kube-system
+
+  # 3. everything the pod dials out to. The defaults cover 443 and 80 ONLY,
+  #    so a tracker store, event broker or model storage on any other port
+  #    is denied until you add it here.
+  egressPorts:
+    - port: 443
+    - port: 80
+    - port: 5432                  # PostgreSQL tracker store
+    - port: 9092                  # Kafka event broker
+
+  # 4. whoever reaches the service. nodeCIDR covers the kubelet only, not an
+  #    ingress controller, which connects from its own pod IP.
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
 ```
 
-> **Note:** When `networkPolicy.denyAll` is true, you must supply `nodeCIDR` so that the kubelet can reach pods for liveness and readiness probes.
+> **Warning:** `denyAll` without `egressPorts` entries for your database and broker will start the pod and then fail every connection to them. `denyAll` without `allowIngressFrom` black-holes your ingress while the pod reports healthy.
 
 ## Configuration Reference
 
@@ -787,7 +824,10 @@ The following table lists all configurable parameters for this chart and their d
 | hostNetwork | bool | hostNetwork controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecrets contains references to Secrets for pulling images from private registries. | `[]` |
 | nameOverride | string | nameOverride overrides the name used for chart resources. Defaults to the chart name. | `""` |
+| networkPolicy.allowIngressFrom | list | networkPolicy.allowIngressFrom lists NetworkPolicy peers allowed to reach the Rasa Pro server port. Required when networkPolicy.denyAll is true and an ingress controller, service mesh or other pod must reach the service; nodeCIDR only covers kubelet probes. | `[]` |
 | networkPolicy.denyAll | bool | networkPolicy.denyAll applies a default-deny NetworkPolicy that blocks all ingress and egress traffic before more specific rules are applied. | `false` |
+| networkPolicy.dnsNamespace | string | networkPolicy.dnsNamespace is the namespace running cluster DNS, matched on the API-server-managed kubernetes.io/metadata.name label. | `"kube-system"` |
+| networkPolicy.egressPorts | list | networkPolicy.egressPorts lists the destination ports the Rasa Pro server may reach. The defaults cover HTTPS and HTTP only; add your tracker store, event broker and model storage ports (for example 5432 for PostgreSQL, 9092 for Kafka, 6379 for Valkey) or egress to them is denied. | `[{"port":443,"protocol":"TCP"},{"port":80,"protocol":"TCP"}]` |
 | networkPolicy.enabled | bool | networkPolicy.enabled enables Kubernetes NetworkPolicy resources for the Rasa Pro server. When true, only explicitly allowed traffic is permitted. | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR specifies node IP ranges allowed to reach pods. Required to allow kubelet liveness and readiness probes when networkPolicy.enabled is true. | `[]` |
 | podLabels | object | podLabels defines labels to add to all Rasa pod(s) | `{}` |
@@ -817,7 +857,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
 | rasa.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
 | rasa.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
-| rasa.ingress.hosts | list | ingress.hosts specifies the hosts for this ingress | `[{"extraPaths":[],"host":"INGRESS.HOST.NAME","paths":[{"path":"/api","pathType":"Prefix"}]}]` |
+| rasa.ingress.hosts | list | ingress.hosts specifies the hosts and paths for this ingress. Empty by default: the chart ships no hostname or path opinion, so an ingress you enable is one you fully describe. global.ingressHost overrides the host of every entry but cannot create one. | `[]` |
 | rasa.ingress.labels | object | ingress.labels defines labels to add to the ingress | `{}` |
 | rasa.ingress.tls | list | ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover. | `[]` |
 | rasa.initContainers | list | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file | `[]` |
@@ -876,7 +916,6 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.settings.mountDefaultConfigmap | bool | settings.mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
 | rasa.settings.mountModelsVolume | bool | settings.mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.settings.port | int | settings.port defines port on which Rasa runs | `5005` |
-| rasa.settings.scheme | string | settings.scheme defines scheme by which the service are accessible | `"http"` |
 | rasa.settings.telemetry.debug | bool | telemetry.debug prints telemetry data to stdout | `false` |
 | rasa.settings.telemetry.enabled | bool | telemetry.enabled allow Rasa to collect anonymous usage details | `true` |
 | rasa.settings.useDefaultArgs | bool | settings.useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio. | `true` |

@@ -21,3 +21,6 @@
 .idea/
 *.tmproj
 .vscode/
+
+# Example manifests, not part of the chart
+secrets.yaml

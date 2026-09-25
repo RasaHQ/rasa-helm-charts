@@ -1,7 +1,7 @@
 {{- define "rasa.containers.volumes" -}}
 {{- if .Values.rasa.settings.mountDefaultConfigmap -}}
-{{- $hasEndpoints := and .Values.rasa.settings.endpoints (ne (len .Values.rasa.settings.endpoints) 0) }}
-{{- $hasCredentials := and .Values.rasa.settings.credentials (ne (len .Values.rasa.settings.credentials) 0) }}
+{{- $hasEndpoints := include "rasa.hasEndpoints" . }}
+{{- $hasCredentials := include "rasa.hasCredentials" . }}
 {{- if or $hasEndpoints $hasCredentials }}
 - name: config-dir
   emptyDir: {}
@@ -32,8 +32,8 @@
 
 {{- define "rasa.containers.volumeMounts" -}}
 {{- if .Values.rasa.settings.mountDefaultConfigmap -}}
-{{- $hasEndpoints := and .Values.rasa.settings.endpoints (ne (len .Values.rasa.settings.endpoints) 0) }}
-{{- $hasCredentials := and .Values.rasa.settings.credentials (ne (len .Values.rasa.settings.credentials) 0) }}
+{{- $hasEndpoints := include "rasa.hasEndpoints" . }}
+{{- $hasCredentials := include "rasa.hasCredentials" . }}
 {{- if or $hasEndpoints $hasCredentials }}
 - name: "config-dir"
   mountPath: "/.config"

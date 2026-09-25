@@ -49,7 +49,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 Selector labels for Rasa OSS/Plus
 */}}
 {{- define "rasa.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}
+app.kubernetes.io/name: {{ include "rasa.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -106,9 +106,111 @@ Determine rasa server to run with arguments
 {{- end }}
 - --port
 - "{{ .Values.rasa.settings.port }}"
+{{- if .Values.rasa.settings.cors }}
 - --cors
-- {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
+- {{ .Values.rasa.settings.cors | quote }}
+{{- end }}
 {{- if .Values.rasa.settings.debugMode }}
 - --debug
 {{- end }}
+{{- end -}}
+
+{{/*
+Report whether this release actually serves the Rasa HTTP API.
+
+settings.enableApi alone does not answer this. The chart only renders
+`--enable-api` when it builds the arguments itself (defaultArgs), so setting
+rasa.args, disabling settings.useDefaultArgs, or replacing the process with
+rasa.command all leave enableApi describing nothing. Rasa Studio consumes this
+chart exactly that way.
+
+Caveat: arguments you supply yourself are opaque to the chart. If your own
+rasa.args or rasa.additionalArgs contain --enable-api, this reports nothing
+and the exposure checks below do not fire.
+*/}}
+{{- define "rasa.apiServed" -}}
+{{- if and .Values.rasa.settings.enableApi .Values.rasa.settings.useDefaultArgs (not .Values.rasa.args) (not .Values.rasa.command) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether an API credential actually reaches the container.
+
+Configuring settings.authToken is not sufficient: rasa.overrideEnv replaces the
+generated environment block wholesale, so AUTH_TOKEN and JWT_SECRET never
+render. A token that does not reach the pod is not authentication.
+*/}}
+{{- define "rasa.apiAuthenticated" -}}
+{{- if and (or .Values.rasa.settings.authToken .Values.rasa.settings.jwtSecret) (not .Values.rasa.overrideEnv) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether the Service is reachable from outside the cluster. An ingress or
+any Service type other than ClusterIP puts the API in front of traffic the
+cluster does not mediate.
+*/}}
+{{- define "rasa.apiExposed" -}}
+{{- if or .Values.rasa.ingress.enabled (ne (.Values.rasa.service.type | default "ClusterIP") "ClusterIP") -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Refuse to render an externally reachable Rasa HTTP API that authenticates
+nobody. Included from deployment.yaml so it is evaluated for every exposure
+route, not only when an ingress happens to render.
+*/}}
+{{- define "rasa.validateApiExposure" -}}
+{{- if and (include "rasa.apiServed" .) (include "rasa.apiExposed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.settings.allowUnauthenticatedApi) -}}
+{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Set rasa.settings.authToken or rasa.settings.jwtSecret (and note that rasa.overrideEnv discards them), or set rasa.settings.enableApi=false, or acknowledge the risk with rasa.settings.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Merge a structured settings map with its raw-YAML counterpart and return the
+result, or nothing when both are empty.
+
+configmap.yaml, rasa.containers.volumes and rasa.containers.volumeMounts must
+all agree on whether there is configuration to ship. They used to disagree:
+the ConfigMap counted the *Raw variants while the volumes did not, so
+endpointsRaw alone produced a ConfigMap that was never mounted and the
+configuration was silently dropped.
+
+Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values... "field" "endpointsRaw")
+*/}}
+{{- define "rasa.mergedConfig" -}}
+{{- $merged := dict -}}
+{{- if .raw -}}
+{{-   $trimmed := .raw | toString | trim -}}
+{{-   if $trimmed -}}
+{{-     $parsed := fromYaml $trimmed -}}
+{{-     if hasKey $parsed "Error" -}}
+{{-       fail (printf "rasa.settings.%s: invalid YAML: %s" .field (index $parsed "Error")) -}}
+{{-     end -}}
+{{-     $merged = $parsed -}}
+{{-   end -}}
+{{- end -}}
+{{- if .structured -}}
+{{-   $merged = merge (deepCopy .structured) $merged -}}
+{{- end -}}
+{{- if $merged -}}
+{{- toYaml $merged -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether the chart has any endpoints configuration to mount.
+*/}}
+{{- define "rasa.hasEndpoints" -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.settings.endpoints "raw" .Values.rasa.settings.endpointsRaw "field" "endpointsRaw") -}}
+{{- end -}}
+
+{{/*
+Report whether the chart has any credentials configuration to mount.
+*/}}
+{{- define "rasa.hasCredentials" -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.settings.credentials "raw" .Values.rasa.settings.credentialsRaw "field" "credentialsRaw") -}}
 {{- end -}}

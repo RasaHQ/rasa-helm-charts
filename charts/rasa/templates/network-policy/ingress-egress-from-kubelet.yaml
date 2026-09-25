@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-rasa
+  name: {{ include "rasa.fullname" . }}-kubelet-access
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:

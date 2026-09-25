@@ -58,9 +58,27 @@ By installing and using this software, you agree to be bound by the terms and co
      default install no longer needs authToken and jwtSecret keys in its Secret. If you
      relied on the old defaults without setting them explicitly, this upgrade REMOVES
      AUTH_TOKEN and JWT_SECRET from the pod and leaves the HTTP API unauthenticated.
+   - app.kubernetes.io/name is now the chart name ("rasa") instead of the release
+     fullname. This label is part of Deployment.spec.selector, which Kubernetes does
+     not allow you to change, so `helm upgrade` FAILS on an existing release. Delete
+     the old Deployment first, which means downtime:
+       kubectl delete deployment <release>-rasa -n <namespace> --cascade=orphan
+     Use --cascade=orphan to keep the pods serving while the new Deployment adopts them.
+   - NetworkPolicy objects are now named after the release and select only this
+     release's pods. Previously deny-all and allow-dns-access selected EVERY pod in
+     the namespace, and allow-dns-access was a fixed name that collided between
+     releases. If you relied on this chart imposing a namespace-wide default-deny,
+     that is now scoped to the chart's own pods.
+   - networkPolicy gained dnsNamespace, egressPorts and allowIngressFrom. Egress is
+     still limited to 443 and 80 by default, so add your tracker store and event
+     broker ports before enabling denyAll, and list your ingress controller in
+     allowIngressFrom or its traffic is dropped.
+   - rasa.ingress.hosts is now empty by default instead of carrying a placeholder
+     host with a /api path. Enabling the ingress without hosts is refused.
+   - rasa.settings.scheme is gone. Nothing read it.
    - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
      so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
-{{- if and .Values.rasa.settings.enableApi (not .Values.rasa.settings.authToken) (not .Values.rasa.settings.jwtSecret) }}
+{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) }}
 
    WARNING: the Rasa HTTP API is enabled and NOT authenticated.
    settings.enableApi is true but neither settings.authToken nor settings.jwtSecret is set,

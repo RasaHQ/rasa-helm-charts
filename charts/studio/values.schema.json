@@ -32,6 +32,31 @@
         }
       ]
     },
+    "envVar": {
+      "description": "Kubernetes-native container environment variable",
+      "type": "object",
+      "required": ["name"],
+      "properties": {
+        "name": {
+          "description": "Environment variable name",
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "description": "Literal value. Scalars (boolean/number) are accepted and rendered as quoted strings — Kubernetes requires EnvVar values to be strings.",
+          "type": ["string", "number", "boolean"]
+        },
+        "valueFrom": {
+          "description": "Source for the value (secretKeyRef, configMapKeyRef, fieldRef, resourceFieldRef)",
+          "type": "object",
+          "minProperties": 1
+        }
+      },
+      "not": {
+        "required": ["value", "valueFrom"]
+      },
+      "additionalProperties": false
+    },
     "imageConfig": {
       "description": "Container image configuration",
       "type": "object",
@@ -201,23 +226,10 @@
     "config": {
       "description": "Global configuration shared across all Studio components",
       "type": "object",
-      "required": ["ingressHost", "database"],
+      "required": ["database"],
       "properties": {
-        "ingressHost": {
-          "description": "Hostname for all Studio ingress resources. Must be a valid DNS name.",
-          "type": "string",
-          "minLength": 1
-        },
-        "ingressAnnotations": {
-          "description": "Annotations applied to all ingress resources",
-          "type": "object"
-        },
-        "ingressClassName": {
-          "description": "Ingress class name applied to all ingress resources",
-          "type": "string"
-        },
         "connectionType": {
-          "description": "URL scheme for internal service-to-service communication",
+          "description": "URL scheme (http or https) for externally derived URLs; does not change in-cluster service-to-service calls",
           "type": "string",
           "enum": ["http", "https"]
         },
@@ -228,7 +240,8 @@
           "properties": {
             "host": {
               "description": "Database host name or IP address",
-              "type": "string"
+              "type": "string",
+              "minLength": 1
             },
             "port": {
               "description": "Database port (default: 5432)",
@@ -242,12 +255,8 @@
               "description": "Database password — always a secret reference",
               "$ref": "#/definitions/secretRef"
             },
-            "keycloakDatabaseName": {
-              "description": "Database name for Keycloak. Must be a plain string (used in JDBC URL construction).",
-              "type": "string"
-            },
-            "backendDatabaseName": {
-              "description": "Database name for Studio backend — plain string or secret reference",
+            "databaseName": {
+              "description": "Database name for Studio app — plain string or secret reference",
               "$ref": "#/definitions/secretRefOrString"
             },
             "queryParams": {
@@ -276,44 +285,6 @@
             }
           }
         },
-        "keycloak": {
-          "description": "Keycloak authentication service configuration",
-          "type": "object",
-          "properties": {
-            "url": {
-              "description": "Override Keycloak endpoint URL. Leave empty to use the default service URL.",
-              "type": "string"
-            },
-            "adminUsername": {
-              "description": "Keycloak admin console username",
-              "type": "string"
-            },
-            "adminPassword": {
-              "description": "Keycloak admin console password — secret reference",
-              "$ref": "#/definitions/secretRef"
-            },
-            "realm": {
-              "description": "Keycloak realm name",
-              "type": "string"
-            },
-            "clientId": {
-              "description": "Keycloak client ID for Studio backend",
-              "type": "string"
-            },
-            "apiClientId": {
-              "description": "Keycloak API client ID",
-              "type": "string"
-            },
-            "apiUsername": {
-              "description": "Keycloak API username",
-              "type": "string"
-            },
-            "apiPassword": {
-              "description": "Keycloak API password — secret reference",
-              "$ref": "#/definitions/secretRef"
-            }
-          }
-        },
         "nodeSelector": {
           "description": "Global node selector applied to all deployments",
           "type": "object"
@@ -328,22 +299,47 @@
         }
       }
     },
-    "backend": {
-      "description": "Studio Backend component configuration",
+    "app": {
+      "description": "Studio App component configuration",
       "type": "object",
       "properties": {
         "replicaCount": {
-          "description": "Number of backend replicas",
+          "description": "Number of app replicas",
           "type": "integer",
           "minimum": 1
         },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
+        "authSecret": {
+          "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
+          "$ref": "#/definitions/secretRef"
+        },
+        "env": {
+          "description": "Extra environment variables for the Studio App container (native EnvVar list)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/envVar" }
         },
         "migration": {
-          "description": "Database migration job configuration",
+          "description": "Database migration hook Job configuration",
           "type": "object",
           "properties": {
+            "env": {
+              "description": "Extra environment variables for the migration Job container (native EnvVar list)",
+              "type": "array",
+              "items": { "$ref": "#/definitions/envVar" }
+            },
+            "backoffLimit": {
+              "description": "Job backoffLimit — retries before the migration Job is marked failed",
+              "type": "integer",
+              "minimum": 0
+            },
+            "activeDeadlineSeconds": {
+              "description": "Job activeDeadlineSeconds — hard wall-clock bound for the migration Job",
+              "type": "integer",
+              "minimum": 1
+            },
+            "automountServiceAccountToken": {
+              "description": "Mount a Kubernetes API token into the migration Job pod",
+              "type": "boolean"
+            },
             "podSecurityContext": {
               "$ref": "#/definitions/securityContextConfig"
             },
@@ -361,6 +357,9 @@
             }
           }
         },
+        "image": {
+          "$ref": "#/definitions/imageConfig"
+        },
         "autoscaling": {
           "$ref": "#/definitions/autoscaling"
         },
@@ -373,40 +372,9 @@
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"
         },
-        "resources": {
-          "$ref": "#/definitions/resourceRequirements"
-        },
-        "nodeSelector": {
-          "type": "object"
-        },
-        "affinity": {
-          "type": "object"
-        },
-        "tolerations": {
-          "type": "array"
-        }
-      }
-    },
-    "webClient": {
-      "description": "Studio Web Client component configuration",
-      "type": "object",
-      "properties": {
-        "replicaCount": {
-          "description": "Number of web client replicas",
-          "type": "integer",
-          "minimum": 1
-        },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
-        },
-        "ingress": {
-          "$ref": "#/definitions/ingressConfig"
-        },
-        "serviceAccount": {
-          "$ref": "#/definitions/serviceAccount"
+        "automountServiceAccountToken": {
+          "description": "Mount a Kubernetes API token into the pod",
+          "type": "boolean"
         },
         "resources": {
           "$ref": "#/definitions/resourceRequirements"
@@ -419,6 +387,20 @@
         },
         "tolerations": {
           "type": "array"
+        },
+        "webClient": {
+          "description": "Browser runtime configuration for the unified Studio app (config.js mounted on the app pod)",
+          "type": "object",
+          "properties": {
+            "config": {
+              "description": "Plain scalar map rendered into config.js as window.* globals",
+              "type": "object",
+              "additionalProperties": {
+                "type": ["string", "number", "boolean"]
+              }
+            }
+          },
+          "additionalProperties": false
         }
       }
     },
@@ -426,9 +408,15 @@
       "description": "Studio Event Ingestion component configuration",
       "type": "object",
       "properties": {
-        "enabled": {
-          "description": "Deploy the event ingestion component",
-          "type": "boolean"
+        "mode": {
+          "description": "Where to run event ingestion",
+          "type": "string",
+          "enum": ["colocated", "separate", "disabled"]
+        },
+        "env": {
+          "description": "Extra environment variables (native EnvVar list)",
+          "type": "array",
+          "items": { "$ref": "#/definitions/envVar" }
         },
         "replicaCount": {
           "description": "Number of event ingestion replicas",
@@ -447,44 +435,9 @@
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"
         },
-        "resources": {
-          "$ref": "#/definitions/resourceRequirements"
-        },
-        "nodeSelector": {
-          "type": "object"
-        },
-        "affinity": {
-          "type": "object"
-        },
-        "tolerations": {
-          "type": "array"
-        }
-      }
-    },
-    "keycloak": {
-      "description": "Bundled Keycloak identity provider configuration",
-      "type": "object",
-      "properties": {
-        "enabled": {
-          "description": "Deploy the bundled Keycloak identity provider",
+        "automountServiceAccountToken": {
+          "description": "Mount a Kubernetes API token into the pod",
           "type": "boolean"
-        },
-        "replicaCount": {
-          "description": "Number of Keycloak replicas",
-          "type": "integer",
-          "minimum": 1
-        },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
-        },
-        "ingress": {
-          "$ref": "#/definitions/ingressConfig"
-        },
-        "serviceAccount": {
-          "$ref": "#/definitions/serviceAccount"
         },
         "resources": {
           "$ref": "#/definitions/resourceRequirements"
@@ -516,7 +469,21 @@
     },
     "global": {
       "description": "Global values passed to subcharts",
-      "type": "object"
+      "type": "object",
+      "properties": {
+        "ingressHost": {
+          "description": "Single-host knob: one hostname for the Studio app and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
+          "type": ["string", "null"]
+        },
+        "ingressClassName": {
+          "description": "Ingress class for the Studio app and Rasa Pro model-service ingresses. Fallback: a per-ingress className wins when set.",
+          "type": ["string", "null"]
+        },
+        "ingressAnnotations": {
+          "description": "Annotations added to the Studio app and Rasa Pro model-service ingresses. Merged with per-ingress annotations, which win on key conflicts.",
+          "type": ["object", "null"]
+        }
+      }
     },
     "hostNetwork": {
       "description": "Allow pods to use the node network namespace",

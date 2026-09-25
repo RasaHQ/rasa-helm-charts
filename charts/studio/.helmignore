@@ -21,3 +21,6 @@
 .idea/
 *.tmproj
 .vscode/
+# Non-runtime files excluded from the packaged chart
+secrets.yaml
+*.gotmpl

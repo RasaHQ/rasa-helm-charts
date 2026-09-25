@@ -32,7 +32,7 @@ When using Rasa Helm Charts, we recommend following these security best practice
 4. **Resource Limits**: Set appropriate resource limits for all containers
 5. **Security Context**: Use security contexts to run containers with minimal privileges
 6. **TLS**: Enable TLS for all external communications
-7. **Authentication**: Use strong authentication mechanisms (e.g., Keycloak)
+7. **Authentication**: Use strong authentication mechanisms (Studio uses Better Auth)
 8. **Authorization**: Implement proper role-based access control (RBAC)
 
 ## Security Features
@@ -43,7 +43,7 @@ Rasa Helm Charts includes several security features:
 - **Network Policies**: Optional network policies to restrict traffic
 - **Secret Management**: Built-in support for Kubernetes secrets
 - **TLS Support**: Configurable TLS for ingress resources
-- **Authentication**: Integration with Keycloak for authentication
+- **Authentication**: Studio uses Better Auth (`/api/auth/*`); keep `AUTH_SECRET` in a Kubernetes Secret
 - **Resource Limits**: Configurable resource limits and requests
 
 ## Security Contacts

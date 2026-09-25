@@ -1,0 +1,82 @@
+{{- if .Values.app.migration.enabled }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "studio.fullname" . }}-app-migration
+  labels:
+    {{- include "studio.labels" . | nindent 4 }}
+  annotations:
+    # This is what defines this resource as a hook. Without this line, the
+    # job is considered part of the release.
+    "helm.sh/hook": pre-install,pre-upgrade
+    "helm.sh/hook-weight": "-1"
+    "helm.sh/hook-delete-policy": before-hook-creation,hook-succeeded
+    {{- with .Values.app.migration.annotations }}
+    {{- toYaml . | nindent 4 }}
+    {{- end }}
+spec:
+  backoffLimit: {{ .Values.app.migration.backoffLimit }}
+  activeDeadlineSeconds: {{ .Values.app.migration.activeDeadlineSeconds }}
+  template:
+    metadata:
+      {{- with .Values.app.migration.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "studio.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.app.migration.serviceAccount.create }}
+      serviceAccountName: {{ include "studio.app.migration.serviceAccountName" . }}
+      {{- end }}
+      automountServiceAccountToken: {{ .Values.app.migration.automountServiceAccountToken }}
+      restartPolicy: Never
+      {{- if .Values.app.migration.podSecurityContext.enabled }}
+      securityContext:
+        {{- omit .Values.app.migration.podSecurityContext "enabled" | toYaml | nindent 8 }}
+      {{- end }}
+      {{- include "studio.app.migration.scheduling" . | nindent 6 }}
+      {{- if .Values.app.migration.waitForIt }}
+      initContainers:
+        - name: wait-for-postgresql
+          {{- if .Values.app.migration.waitForItContainer.securityContext.enabled }}
+          securityContext:
+            {{- omit .Values.app.migration.waitForItContainer.securityContext "enabled" | toYaml | nindent 12 }}
+          {{- end }}
+          image: {{ .Values.app.migration.waitForItContainer.image }}
+          command: ['sh', '-c', 'until pg_isready -h {{ .Values.config.database.host }} -p {{ .Values.config.database.port }} -U "$DB_USER"; do echo waiting for postgresql; sleep 2; done;']
+          env:
+            - name: DB_USER
+              {{- if kindIs "map" .Values.config.database.username }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.username.secretName | quote }}
+                  key: {{ .Values.config.database.username.secretKey | quote }}
+              {{- else }}
+              value: {{ .Values.config.database.username | quote }}
+              {{- end }}
+      {{- end }}
+      containers:
+      - name: {{ .Chart.Name }}-app-migration
+        {{- if .Values.app.migration.securityContext.enabled }}
+        securityContext:
+          {{- omit .Values.app.migration.securityContext "enabled" | toYaml | nindent 10 }}
+        {{- end }}
+        image: {{ include "studio.migration.image" . }}
+        imagePullPolicy: {{ .Values.app.migration.image.pullPolicy }}
+        env:
+          {{- include "studio.app.env" . | nindent 10 }}
+          - name: STUDIO_ROLE
+            value: "migration"
+          - name: DB_SSL
+            value: {{ .Values.config.database.preferSSL | quote }}
+          - name: DB_REJECT_UNAUTHORIZED
+            value: {{ .Values.config.database.rejectUnauthorized | quote }}
+          {{- with .Values.app.migration.env }}
+          {{- include "studio.envList" . | nindent 10 }}
+          {{- end }}
+{{- end }}

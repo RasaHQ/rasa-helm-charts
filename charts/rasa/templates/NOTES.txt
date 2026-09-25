@@ -42,14 +42,14 @@ By installing and using this software, you agree to be bound by the terms and co
      chart-managed action server, do this BEFORE upgrading: the pod starts either
      way and the failure only appears on the first custom-action call.
    - RASA_DUCKLING_HTTP_URL is no longer set, and rasa.ducklingHttpUrl is
-     gone. Set the variable yourself via rasa.additionalEnv if you run Duckling.
+     gone. Set the variable yourself via rasa.extraEnv if you run Duckling.
    - rasa.containerSecurityContext now defaults to the restricted Pod Security Standard:
      allowPrivilegeEscalation: false, capabilities.drop: [ALL], runAsNonRoot: true and
      seccompProfile.type: RuntimeDefault. No runAsUser is set, so the effective uid is
      still whatever the image declares.
    - rasa.automountServiceAccountToken now defaults to false, so no Kubernetes API token
      is mounted. Rasa Pro does not call the Kubernetes API and this chart grants no RBAC.
-     Set it to true if you add a sidecar via rasa.additionalContainers that needs one.
+     Set it to true if you add a sidecar via rasa.extraContainers that needs one.
    - Chart.yaml declares appVersion again, tracking the Rasa Pro release the chart
      targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
      upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin

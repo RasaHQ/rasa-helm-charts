@@ -122,7 +122,7 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 **Action servers are bring-your-own.** Deploy one yourself and point `rasa.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
 
-**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
+**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.ducklingHttpUrl` is gone. Set the variable through `rasa.extraEnv` if you run Duckling yourself.
 
 **`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
 
@@ -220,7 +220,7 @@ docker image inspect --format '{{.Config.User}}' <your-image>
 
 Opt out with `rasa.containerSecurityContext.runAsNonRoot: false`, which leaves the pod outside the restricted standard.
 
-**If you add a sidecar** via `rasa.additionalContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
+**If you add a sidecar** via `rasa.extraContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
 
 `Chart.yaml` declares `appVersion` again, tracking the Rasa Pro release the chart targets, and it now appears as the `app.kubernetes.io/version` label on chart-managed objects. `rasa.image.tag` defaults to `""` and falls back to `appVersion`, so **a chart upgrade now moves the Rasa Pro image with it**. Set `rasa.image.tag` to an exact tag to pin the image independently of chart upgrades.
 
@@ -278,7 +278,7 @@ kubectl create secret generic minio-credentials \
 
 ```yaml
 rasa:
-  additionalEnv:
+  extraEnv:
     - name: AWS_ENDPOINT_URL
       value: "http://minio.example.com"
     - name: AWS_ACCESS_KEY_ID
@@ -435,7 +435,7 @@ rasa:
         command: ["/bin/sh", "-c", "echo rasa pro starting"]
 ```
 
-> **Note:** The hook applies to the component's main container only. Containers you supply through `initContainers` or `additionalContainers` can carry their own `lifecycle` block directly.
+> **Note:** The hook applies to the component's main container only. Containers you supply through `initContainers` or `extraContainers` can carry their own `lifecycle` block directly.
 
 ### Configuring Credentials and Endpoints via ConfigMap
 
@@ -585,7 +585,7 @@ kubectl create secret generic openai-secret \
 
 ```yaml
 rasa:
-  additionalEnv:
+  extraEnv:
     - name: OPENAI_API_KEY
       valueFrom:
         secretKeyRef:
@@ -605,11 +605,11 @@ See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuri
 
 ### Environment Variables
 
-Use `additionalEnv` to inject extra environment variables into any component without replacing the chart-managed ones. Both plain values and Secret/ConfigMap references are supported:
+Use `extraEnv` to inject extra environment variables into any component without replacing the chart-managed ones. Both plain values and Secret/ConfigMap references are supported:
 
 ```yaml
 rasa:
-  additionalEnv:
+  extraEnv:
     - name: MY_VAR
       value: "my-value"
     - name: MY_SECRET_VAR
@@ -755,7 +755,7 @@ Choose `whenUnsatisfiable` to match the replica count: `DoNotSchedule` gives the
 
 A `labelSelector` selects pods, so it can only match labels the pod template actually carries. The chart labels its pods with `app.kubernetes.io/name` and `app.kubernetes.io/instance` (the release name), plus anything added through the chart-level `podLabels`. The selector injected by default is exactly that first pair, which is also what the Deployment uses in `spec.selector.matchLabels` to own its pods.
 
-Labels set through `deploymentLabels` or `global.additionalDeploymentLabels` are attached to the Deployment object rather than to the pods, as are `helm.sh/chart` and `app.kubernetes.io/managed-by`. A selector referring to any of those matches no pods, and the constraint is then quietly ignored.
+Labels set through `deploymentLabels` or `global.extraDeploymentLabels` are attached to the Deployment object rather than to the pods, as are `helm.sh/chart` and `app.kubernetes.io/managed-by`. A selector referring to any of those matches no pods, and the constraint is then quietly ignored.
 
 Writing the selector out explicitly is the same as the default, and is worth doing when you need several constraints with different scopes:
 
@@ -868,7 +868,7 @@ The following table lists all configurable parameters for this chart and their d
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR specifies node IP ranges allowed to reach pods. Required to allow kubelet liveness and readiness probes when networkPolicy.enabled is true. | `[]` |
 | podLabels | object | podLabels defines labels to add to all Rasa pod(s) | `{}` |
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
-| rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
+| rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails whenever enableApi is true and no credential reaches the container, regardless of how the Service is exposed; set this to true when something in front of the chart already authenticates callers. | `false` |
 | rasa.args | string | args replaces the generated container arguments entirely. Unset (default) lets the chart build them from port, cors, enableApi and debugMode, then append extraArgs. An explicit empty list means no arguments at all — use that when rasa.command runs something other than the Rasa server. | `nil` |
 | rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests. | `nil` |
 | rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.extraContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |

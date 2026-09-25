@@ -11,12 +11,6 @@
       },
       "additionalProperties": false
     },
-    "secretRefOrString": {
-      "oneOf": [
-        { "type": "string" },
-        { "$ref": "#/definitions/secretRef" }
-      ]
-    },
     "imagePullPolicy": {
       "type": "string",
       "enum": ["Always", "IfNotPresent", "Never"]

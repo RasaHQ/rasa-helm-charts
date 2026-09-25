@@ -135,8 +135,9 @@ true
 Report whether an API credential reaches the container.
 
 rasa.env replaces the generated environment block, so it decides which list to
-scan: a token in extraEnv is discarded the moment rasa.env is set, and an
-authToken or jwtSecret with it. envFrom is opaque at render time and counts as
+scan: a token in extraEnv is discarded as soon as rasa.env is non-empty, and an
+authToken or jwtSecret with it. The test is truthiness, matching
+deployment.yaml — `rasa.env: []` falls back to the generated block in both. envFrom is opaque at render time and counts as
 authenticated rather than blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}

@@ -161,6 +161,16 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.ingress.hosts` is empty by default.** It previously shipped a placeholder host `INGRESS.HOST.NAME` with a `/api` path. Enabling the ingress without supplying hosts is now refused at render time rather than producing an ingress for a hostname that does not exist.
 
+**`rasa.enableApi` now defaults to `false`.** The Rasa HTTP API — model management, conversation and tracker endpoints — is opt-in. Combined with `authToken`/`jwtSecret` also being unset, a default install exposes no unauthenticated API surface at all. Turn it on for integrations that need it, and set a credential when you do:
+
+```yaml
+rasa:
+  enableApi: true
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
+```
+
 **Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
 **`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.
@@ -837,7 +847,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
 | rasa.args | list |  | `[]` |
-| rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default: with enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests. | `nil` |
+| rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests. | `nil` |
 | rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.additionalContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
 | rasa.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
@@ -855,7 +865,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.credentials | object | credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
 | rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.debugMode | bool | debugMode enables debug mode | `false` |
-| rasa.enableApi | bool | enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod). | `true` |
+| rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it. | `false` |
 | rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
 | rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |

@@ -81,6 +81,9 @@ By installing and using this software, you agree to be bound by the terms and co
      allowIngressFrom or its traffic is dropped.
    - rasa.ingress.hosts is now empty by default instead of carrying a placeholder
      host with a /api path. Enabling the ingress without hosts is refused.
+   - enableApi now defaults to FALSE. The Rasa HTTP API (model management,
+     conversation and tracker endpoints) is opt-in. Set rasa.enableApi=true if your
+     integration needs it, and set authToken or jwtSecret when you do.
    - Rasa settings live directly under rasa.*
    - rasa.enabled was removed. The chart deploys one workload, so there is nothing
      to toggle: install to deploy, uninstall to remove.

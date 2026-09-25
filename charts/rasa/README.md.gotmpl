@@ -160,6 +160,16 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.ingress.hosts` is empty by default.** It previously shipped a placeholder host `INGRESS.HOST.NAME` with a `/api` path. Enabling the ingress without supplying hosts is now refused at render time rather than producing an ingress for a hostname that does not exist.
 
+**`rasa.enableApi` now defaults to `false`.** The Rasa HTTP API — model management, conversation and tracker endpoints — is opt-in. Combined with `authToken`/`jwtSecret` also being unset, a default install exposes no unauthenticated API surface at all. Turn it on for integrations that need it, and set a credential when you do:
+
+```yaml
+rasa:
+  enableApi: true
+  authToken:
+    secretName: rasa-secrets
+    secretKey: authToken
+```
+
 **Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
 **`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.

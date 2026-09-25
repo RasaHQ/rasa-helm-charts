@@ -42,10 +42,10 @@ rasa:
   debugMode: false
   # -- port defines port on which Rasa runs
   port: 5005
-  # -- enableApi enables the Rasa HTTP API in addition to the configured input channel. Required for most integrations. Supports token-based auth (authToken) or JWT auth (jwtSecret + jwtMethod).
-  enableApi: true
+  # -- enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it.
+  enableApi: false
   # -- authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
-  # Unset by default: with enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests.
+  # Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests.
   authToken:
     # secretName: "rasa-secrets"
     # secretKey: "authToken"

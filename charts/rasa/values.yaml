@@ -299,7 +299,8 @@ rasa:
     # -- livenessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      port: 5005
+      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port.
+      port:
       scheme: HTTP
     # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15
@@ -321,7 +322,8 @@ rasa:
     # -- readinessProbe.httpGet is used to define HTTP request
     httpGet:
       path: /
-      port: 5005
+      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port.
+      port:
       scheme: HTTP
     # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
     initialDelaySeconds: 15

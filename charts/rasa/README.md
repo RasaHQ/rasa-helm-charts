@@ -873,7 +873,8 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.lifecycle | object | rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container # Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | `{}` |
 | rasa.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
 | rasa.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
-| rasa.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/","port":5005,"scheme":"HTTP"}` |
+| rasa.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/","port":null,"scheme":"HTTP"}` |
+| rasa.livenessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port. | `nil` |
 | rasa.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
 | rasa.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
 | rasa.livenessProbe.successThreshold | int | livenessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |
@@ -890,7 +891,8 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.podSecurityContext | object | rasa.podSecurityContext defines pod security context | `{"enabled":true}` |
 | rasa.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
 | rasa.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
-| rasa.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/","port":5005,"scheme":"HTTP"}` |
+| rasa.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/","port":null,"scheme":"HTTP"}` |
+| rasa.readinessProbe.httpGet.port | string | httpGet.port is the container port the kubelet probes. Empty (default) follows settings.port. | `nil` |
 | rasa.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
 | rasa.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
 | rasa.readinessProbe.successThreshold | int | readinessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |

@@ -53,7 +53,7 @@
           "additionalProperties": true,
           "properties": {
             "path": { "type": "string" },
-            "port": { "type": ["integer", "string"] },
+            "port": { "type": ["integer", "string", "null"] },
             "scheme": { "type": "string", "enum": ["HTTP", "HTTPS"] }
           }
         },

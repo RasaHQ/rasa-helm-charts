@@ -103,11 +103,25 @@ spec:
           {{- end }}
           {{- if .Values.rasa.livenessProbe.enabled }}
           livenessProbe:
-            {{- omit .Values.rasa.livenessProbe "enabled" | toYaml | nindent 12 }}
+            {{- $probe := omit .Values.rasa.livenessProbe "enabled" | deepCopy }}
+            {{- if and $probe.httpGet (not $probe.httpGet.port) }}
+            {{- $_ := set $probe.httpGet "port" $.Values.rasa.settings.port }}
+            {{- end }}
+            {{- if and $probe.tcpSocket (not $probe.tcpSocket.port) }}
+            {{- $_ := set $probe.tcpSocket "port" $.Values.rasa.settings.port }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- if .Values.rasa.readinessProbe.enabled }}
           readinessProbe:
-            {{- omit .Values.rasa.readinessProbe "enabled" | toYaml | nindent 12 }}
+            {{- $probe := omit .Values.rasa.readinessProbe "enabled" | deepCopy }}
+            {{- if and $probe.httpGet (not $probe.httpGet.port) }}
+            {{- $_ := set $probe.httpGet "port" $.Values.rasa.settings.port }}
+            {{- end }}
+            {{- if and $probe.tcpSocket (not $probe.tcpSocket.port) }}
+            {{- $_ := set $probe.tcpSocket "port" $.Values.rasa.settings.port }}
+            {{- end }}
+            {{- toYaml $probe | nindent 12 }}
           {{- end }}
           {{- with .Values.rasa.lifecycle }}
           lifecycle:

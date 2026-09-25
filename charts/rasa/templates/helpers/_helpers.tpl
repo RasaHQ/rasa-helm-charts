@@ -194,6 +194,10 @@ the ConfigMap counted the *Raw variants while the volumes did not, so
 endpointsRaw alone produced a ConfigMap that was never mounted and the
 configuration was silently dropped.
 
+fromYaml reports a parse failure as a map holding exactly one key, Error, so the
+length is checked too: raw YAML whose own top-level key happens to be "Error"
+must not be misreported as malformed.
+
 Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values... "field" "endpointsRaw")
 */}}
 {{- define "rasa.mergedConfig" -}}
@@ -202,8 +206,8 @@ Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values..
 {{-   $trimmed := .raw | toString | trim -}}
 {{-   if $trimmed -}}
 {{-     $parsed := fromYaml $trimmed -}}
-{{-     if hasKey $parsed "Error" -}}
-{{-       fail (printf "rasa.settings.%s: invalid YAML: %s" .field (index $parsed "Error")) -}}
+{{-     if and (hasKey $parsed "Error") (eq (len $parsed) 1) -}}
+{{-       fail (printf "rasa.settings.%s is not valid YAML (reported while rendering the ConfigMap, which the Deployment checksums, so Helm may name deployment.yaml as the location): %s" .field (index $parsed "Error")) -}}
 {{-     end -}}
 {{-     $merged = $parsed -}}
 {{-   end -}}

@@ -82,6 +82,12 @@ By installing and using this software, you agree to be bound by the terms and co
    - rasa.ingress.hosts is now empty by default instead of carrying a placeholder
      host with a /api path. Enabling the ingress without hosts is refused.
    - rasa.settings.scheme is gone. Nothing read it.
+   - rasa.settings.cors is a plain string again. It was typed as "string or secret
+     reference"; the secret form was never read and rendered map[...] into --cors.
+   - The container port, the Service targetPort and the NetworkPolicy ports all follow
+     rasa.settings.port now instead of rasa.service.port, so they cannot drift from the
+     port Rasa actually binds. service.targetPort defaults to empty and follows
+     settings.port; set it only to target a different or named container port.
    - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
      so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
 {{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) }}

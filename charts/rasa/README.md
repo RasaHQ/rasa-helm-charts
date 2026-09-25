@@ -164,6 +164,10 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.settings.scheme` was removed.** No template read it.
 
+**`rasa.settings.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+
+**The pod port now comes from `rasa.settings.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.settings.port`; set it only when you need a different or named container port.
+
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
 - `rasa.containerSecurityContext` now defaults to `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` and `seccompProfile.type: RuntimeDefault`. No `runAsUser` is set, so the effective uid is unchanged and existing model volumes keep their ownership.
@@ -893,13 +897,13 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
 | rasa.replicaCount | int | rasa.replicaCount specifies number of replicas | `1` |
 | rasa.resources | object | rasa.resources specifies the resources limits and requests | `{}` |
-| rasa.service | object | rasa.service configures the Kubernetes Service exposing the Rasa Pro server. | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":5005,"type":"ClusterIP"}` |
+| rasa.service | object | rasa.service configures the Kubernetes Service exposing the Rasa Pro server. | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5005,"targetPort":null,"type":"ClusterIP"}` |
 | rasa.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
 | rasa.service.externalTrafficPolicy | string | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | `"Cluster"` |
 | rasa.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
 | rasa.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
 | rasa.service.port | int | service.port is used to specify service port | `5005` |
-| rasa.service.targetPort | int | service.targetPort is the container port that Service traffic is forwarded to. Should match settings.port. | `5005` |
+| rasa.service.targetPort | string | service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows settings.port, so the two cannot drift. Set it only to target a different container port or a named port. | `nil` |
 | rasa.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
 | rasa.serviceAccount | object | rasa.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
 | rasa.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |

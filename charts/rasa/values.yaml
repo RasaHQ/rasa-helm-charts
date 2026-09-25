@@ -278,8 +278,8 @@ rasa:
     type: ClusterIP
     # -- service.port is used to specify service port
     port: 5005
-    # -- service.targetPort is the container port that Service traffic is forwarded to. Should match settings.port.
-    targetPort: 5005
+    # -- service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows settings.port, so the two cannot drift. Set it only to target a different container port or a named port.
+    targetPort:
     # -- service.annotations defines annotations to add to the service
     annotations: {}
     # -- service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types

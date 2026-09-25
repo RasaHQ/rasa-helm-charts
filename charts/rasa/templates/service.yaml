@@ -19,7 +19,7 @@ spec:
   {{- end }}
   ports:
     - port: {{ .Values.rasa.service.port }}
-      targetPort: {{ .Values.rasa.service.targetPort }}
+      targetPort: {{ .Values.rasa.service.targetPort | default .Values.rasa.settings.port }}
       protocol: TCP
       name: http
       {{- if and (or (eq .Values.rasa.service.type "NodePort") (eq .Values.rasa.service.type "LoadBalancer")) (not (empty .Values.rasa.service.nodePort)) }}

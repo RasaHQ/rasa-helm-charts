@@ -163,6 +163,10 @@ The change was worth the disruption in a major: the old value broke the chart's 
 
 **`rasa.settings.scheme` was removed.** No template read it.
 
+**`rasa.settings.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.
+
+**The pod port now comes from `rasa.settings.port` alone.** The container port, the Service `targetPort` and the NetworkPolicy ports previously derived from `rasa.service.port`, so setting the two differently produced a Service and policies pointing at a port Rasa was not listening on. `rasa.service.targetPort` is empty by default and follows `rasa.settings.port`; set it only when you need a different or named container port.
+
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
 - `rasa.containerSecurityContext` now defaults to `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` and `seccompProfile.type: RuntimeDefault`. No `runAsUser` is set, so the effective uid is unchanged and existing model volumes keep their ownership.

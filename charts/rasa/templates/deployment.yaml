@@ -88,7 +88,7 @@ spec:
           {{- end }}
           ports:
             - name: http
-              containerPort: {{ .Values.rasa.service.port }}
+              containerPort: {{ .Values.rasa.settings.port }}
               protocol: TCP
           {{- if .Values.rasa.overrideEnv }}
           env:
@@ -115,18 +115,28 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.rasa.resources | nindent 12 }}
+          {{- $volumeMounts := include "rasa.containers.volumeMounts" . | trim }}
+          {{- if or $volumeMounts .Values.rasa.volumeMounts }}
           volumeMounts:
-            {{- include "rasa.containers.volumeMounts" . | trim | nindent 12 }}
+            {{- with $volumeMounts }}
+            {{- . | nindent 12 }}
+            {{- end }}
           {{- if .Values.rasa.volumeMounts }}
             {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
+          {{- end }}
           {{- end }}
       {{- if .Values.rasa.additionalContainers }}
         {{- toYaml .Values.rasa.additionalContainers | nindent 8 }}
       {{- end }}
+      {{- $volumes := include "rasa.containers.volumes" . | trim }}
+      {{- if or $volumes .Values.rasa.volumes }}
       volumes:
-        {{- include "rasa.containers.volumes" . | trim | nindent 8 }}
+        {{- with $volumes }}
+        {{- . | nindent 8 }}
+        {{- end }}
       {{- if .Values.rasa.volumes }}
         {{- toYaml .Values.rasa.volumes | nindent 8 }}
+      {{- end }}
       {{- end }}
       {{- with .Values.rasa.nodeSelector }}
       nodeSelector:

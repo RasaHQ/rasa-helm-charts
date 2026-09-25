@@ -71,14 +71,22 @@ spec:
           {{- end }}
           image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}
-          {{- if .Values.rasa.args }}
+          {{- /*
+          An explicit rasa.args replaces the generated arguments, and an explicit
+          empty list means "no arguments" — which is why this tests for the key
+          being absent rather than falsy: `args: []` and `args` unset are both
+          falsy, and they have to mean different things.
+          */}}
+          {{- if not (kindIs "invalid" .Values.rasa.args) }}
+          {{- with .Values.rasa.args }}
           args:
-            {{- toYaml .Values.rasa.args | nindent 12 }}
-          {{- else if .Values.rasa.useDefaultArgs }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- else }}
           args:
             {{- include "rasa.defaultArgs" . | nindent 12 }}
-          {{- if .Values.rasa.additionalArgs }}
-            {{- toYaml .Values.rasa.additionalArgs | nindent 12 }}
+          {{- if .Values.rasa.extraArgs }}
+            {{- toYaml .Values.rasa.extraArgs | nindent 12 }}
           {{- end }}
           {{- end }}
           {{- if .Values.rasa.command }}
@@ -89,9 +97,9 @@ spec:
             - name: http
               containerPort: {{ .Values.rasa.port }}
               protocol: TCP
-          {{- if .Values.rasa.overrideEnv }}
+          {{- if .Values.rasa.env }}
           env:
-            {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
+            {{- toYaml .Values.rasa.env | nindent 12 }}
           {{- else }}
           env:
             {{- include "rasa.containers.env" . | trim | nindent 12 }}
@@ -129,26 +137,26 @@ spec:
           resources:
             {{- toYaml .Values.rasa.resources | nindent 12 }}
           {{- $volumeMounts := include "rasa.containers.volumeMounts" . | trim }}
-          {{- if or $volumeMounts .Values.rasa.volumeMounts }}
+          {{- if or $volumeMounts .Values.rasa.extraVolumeMounts }}
           volumeMounts:
             {{- with $volumeMounts }}
             {{- . | nindent 12 }}
             {{- end }}
-          {{- if .Values.rasa.volumeMounts }}
-            {{- toYaml .Values.rasa.volumeMounts | nindent 12 }}
+          {{- if .Values.rasa.extraVolumeMounts }}
+            {{- toYaml .Values.rasa.extraVolumeMounts | nindent 12 }}
           {{- end }}
           {{- end }}
-      {{- if .Values.rasa.additionalContainers }}
-        {{- toYaml .Values.rasa.additionalContainers | nindent 8 }}
+      {{- if .Values.rasa.extraContainers }}
+        {{- toYaml .Values.rasa.extraContainers | nindent 8 }}
       {{- end }}
       {{- $volumes := include "rasa.containers.volumes" . | trim }}
-      {{- if or $volumes .Values.rasa.volumes }}
+      {{- if or $volumes .Values.rasa.extraVolumes }}
       volumes:
         {{- with $volumes }}
         {{- . | nindent 8 }}
         {{- end }}
-      {{- if .Values.rasa.volumes }}
-        {{- toYaml .Values.rasa.volumes | nindent 8 }}
+      {{- if .Values.rasa.extraVolumes }}
+        {{- toYaml .Values.rasa.extraVolumes | nindent 8 }}
       {{- end }}
       {{- end }}
       {{- with .Values.rasa.nodeSelector }}

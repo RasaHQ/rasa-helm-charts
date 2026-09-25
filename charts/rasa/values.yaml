@@ -60,8 +60,6 @@ rasa:
   jwtMethod: HS256
   # -- cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
   cors: '*'
-  # -- useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio.
-  useDefaultArgs: true
   # -- mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container.
   # When false, credentials and endpoints must be available at /.config or baked into the image.
   mountDefaultConfigmap: true
@@ -160,16 +158,16 @@ rasa:
   logging:
     # -- logging.logLevel is Rasa Log Level
     logLevel: info
-  # -- rasa.args overrides the default arguments for the container
-  args: []
-  # -- rasa.additionalArgs adds additional arguments to the default args
-  additionalArgs: []
+  # -- args replaces the generated container arguments entirely. Unset (default) lets the chart build them from port, cors, enableApi and debugMode, then append extraArgs. An explicit empty list means no arguments at all — use that when rasa.command runs something other than the Rasa server.
+  args:
+  # -- extraArgs appends arguments to the ones the chart generates. Ignored when args is set.
+  extraArgs: []
   # -- rasa.command overrides the default command for the container
   command: []
-  # -- rasa.overrideEnv overrides all default environment variables
-  overrideEnv: []
-  # -- rasa.additionalEnv adds additional environment variables
-  additionalEnv: []
+  # -- env overrides all default environment variables
+  env: []
+  # -- extraEnv adds additional environment variables
+  extraEnv: []
     # - name: SOME_CUSTOM_ENV_VAR
     #   value: "custom value"
     # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
@@ -196,21 +194,21 @@ rasa:
     #     - mountPath: /app/models
     #       name: models
 
-  # -- rasa.additionalContainers allows to specify additional containers for the Rasa Deployment
-  additionalContainers: []
+  # -- extraContainers allows to specify additional containers for the Rasa Deployment
+  extraContainers: []
     # - name: extra
     #   image: "busybox"
     #   command: ["bash", "-c"]
 
-  # -- rasa.volumes specify additional volumes to mount in the Rasa container
+  # -- extraVolumes specify additional volumes to mount in the Rasa container
   ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-  volumes: []
+  extraVolumes: []
   #   - hostPath:
   #       path: <HOST_PATH>
   #     name: <VOLUME_NAME>
 
-  # -- rasa.volumeMounts specifies additional volumes to mount in the Rasa container
-  volumeMounts: []
+  # -- extraVolumeMounts specifies additional volumes to mount in the Rasa container
+  extraVolumeMounts: []
     # - name: <VOLUME_NAME>
     #   mountPath: <CONTAINER_PATH>
     #   readOnly: true
@@ -240,7 +238,7 @@ rasa:
   # -- rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a
   # Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never
   # calls the Kubernetes API and this chart grants no RBAC, so the token is left out.
-  # Set it to true if you add a sidecar via rasa.additionalContainers that needs one.
+  # Set it to true if you add a sidecar via rasa.extraContainers that needs one.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
   automountServiceAccountToken: false
 
@@ -450,9 +448,9 @@ networkPolicy:
 
 # Defines global settings for all resources
 global:
-  # -- global.additionalDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects.
+  # -- global.extraDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects.
   # See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  additionalDeploymentLabels: {}
+  extraDeploymentLabels: {}
   # -- global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component.
   ingressHost:
   # -- global.ingressAnnotations defines annotations added to the Rasa Pro server ingress. Merged with rasa.ingress.annotations, which wins on key conflicts. Applies only to the rasa component.

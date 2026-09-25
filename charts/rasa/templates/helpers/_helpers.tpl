@@ -40,7 +40,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-{{- with .Values.global.additionalDeploymentLabels }}
+{{- with .Values.global.extraDeploymentLabels }}
 {{ toYaml . -}}
 {{- end }}
 {{- end }}
@@ -120,20 +120,21 @@ Report whether this release actually serves the Rasa HTTP API.
 
 settings.enableApi alone does not answer this. The chart only renders
 `--enable-api` when it builds the arguments itself (defaultArgs), so setting
-rasa.args, disabling settings.useDefaultArgs, or replacing the process with
+rasa.args, or replacing the process with
 rasa.command all leave enableApi describing nothing. Rasa Studio consumes this
 chart exactly that way.
 
-This mirrors the condition deployment.yaml uses to emit the default arguments.
-Note that rasa.command does NOT belong here: command and args render
-independently, so overriding the entrypoint still leaves --enable-api in args.
+This mirrors the condition deployment.yaml uses to emit the default arguments:
+the chart builds them only when rasa.args is absent. Note that rasa.command does
+NOT belong here — command and args render independently, so overriding the
+entrypoint still leaves --enable-api in args.
 
 Caveat: arguments you supply yourself are opaque to the chart. If your own
-rasa.args or rasa.additionalArgs contain --enable-api, this reports nothing
-and the exposure checks below do not fire.
+rasa.args or rasa.extraArgs contain --enable-api, this reports nothing and the
+check below does not fire.
 */}}
 {{- define "rasa.apiServed" -}}
-{{- if and .Values.rasa.enableApi .Values.rasa.useDefaultArgs (not .Values.rasa.args) -}}
+{{- if and .Values.rasa.enableApi (kindIs "invalid" .Values.rasa.args) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -141,50 +142,42 @@ true
 {{/*
 Report whether an API credential actually reaches the container.
 
-Configuring settings.authToken is not sufficient: rasa.overrideEnv replaces the
-generated environment block wholesale, so AUTH_TOKEN and JWT_SECRET never
-render. A token that does not reach the pod is not authentication.
+Configuring rasa.authToken is not sufficient: rasa.env replaces the generated
+environment block wholesale, so AUTH_TOKEN and JWT_SECRET never render. A token
+that does not reach the pod is not authentication.
 
 The converse also holds, so this counts every route that delivers one. Which
-route applies depends on overrideEnv: deployment.yaml emits overrideEnv INSTEAD
-of the generated block, and additionalEnv lives inside that generated block, so
-a token in additionalEnv is discarded the moment overrideEnv is set. This
+route applies depends on rasa.env: deployment.yaml emits it INSTEAD of the
+generated block, and extraEnv lives inside that generated block, so a token in
+extraEnv is discarded the moment rasa.env is set. This
 mirrors that branch rather than scanning both lists. envFrom contents are
 opaque at render time, so its presence counts as authentication rather than
 blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
-{{- $env := .Values.rasa.overrideEnv | default (.Values.rasa.additionalEnv | default list) -}}
+{{- $env := .Values.rasa.env | default (.Values.rasa.extraEnv | default list) -}}
 {{- range $env -}}
 {{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
 {{-     $named = true -}}
 {{-   end -}}
 {{- end -}}
-{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
+{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.env)) -}}
 true
 {{- end -}}
 {{- end -}}
 
 {{/*
-Report whether the Service is reachable from outside the cluster. An ingress or
-any Service type other than ClusterIP puts the API in front of traffic the
-cluster does not mediate.
-*/}}
-{{- define "rasa.apiExposed" -}}
-{{- if or .Values.rasa.ingress.enabled .Values.hostNetwork (ne (.Values.rasa.service.type | default "ClusterIP") "ClusterIP") -}}
-true
-{{- end -}}
-{{- end -}}
+Refuse to render an enabled Rasa HTTP API that authenticates nobody.
 
-{{/*
-Refuse to render an externally reachable Rasa HTTP API that authenticates
-nobody. Included from deployment.yaml so it is evaluated for every exposure
-route, not only when an ingress happens to render.
+This does not ask whether the API is externally reachable. A ClusterIP Service
+is not a security boundary — anything in the cluster can call it, and an
+ingress, a mesh route or a port-forward can be added later without touching
+this chart. Turning the API on is the decision that needs a credential.
 */}}
 {{- define "rasa.validateApiExposure" -}}
-{{- if and (include "rasa.apiServed" .) (include "rasa.apiExposed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
-{{- fail "This release exposes the Rasa HTTP API outside the cluster (rasa.ingress.enabled, or rasa.service.type is not ClusterIP) but no API credential reaches the container, so the API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.additionalEnv or rasa.overrideEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when your ingress or service mesh already authenticates callers." -}}
+{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
+{{- fail "rasa.enableApi is true but no API credential reaches the container, so the Rasa HTTP API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.env discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.env or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 

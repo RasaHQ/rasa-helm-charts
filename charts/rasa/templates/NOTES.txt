@@ -84,6 +84,22 @@ By installing and using this software, you agree to be bound by the terms and co
    - enableApi now defaults to FALSE. The Rasa HTTP API (model management,
      conversation and tracker endpoints) is opt-in. Set rasa.enableApi=true if your
      integration needs it, and set authToken or jwtSecret when you do.
+   - The pass-through keys follow the usual Helm naming now:
+       additionalArgs -> extraArgs        additionalEnv -> extraEnv
+       additionalContainers -> extraContainers
+       volumes -> extraVolumes            volumeMounts -> extraVolumeMounts
+       overrideEnv -> env                 global.additionalDeploymentLabels ->
+                                          global.extraDeploymentLabels
+     The old names are IGNORED, not rejected, so anything left under them is
+     silently dropped. Move them before upgrading.
+   - useDefaultArgs is gone. args now has three states: unset means the chart
+     builds the arguments and appends extraArgs, an explicit list replaces them,
+     and an explicit empty list ([]) means no arguments at all — that last one is
+     what useDefaultArgs=false used to do.
+   - enableApi=true now REQUIRES a credential. The chart refuses to render an
+     enabled API with no authToken, jwtSecret or AUTH_TOKEN/JWT_SECRET reaching
+     the container. A ClusterIP Service is not a boundary, so this no longer waits
+     for an ingress. Set allowUnauthenticatedApi=true to accept the risk.
    - Rasa settings live directly under rasa.*. Anything left under rasa.settings is
      IGNORED, not rejected, so a port, authToken, endpoints or tracker_store left
      there silently reverts to the chart default. Move them before upgrading.

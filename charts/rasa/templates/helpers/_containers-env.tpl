@@ -38,7 +38,7 @@ Environment Variables for Rasa Containers
 - name: "RASA_ENVIRONMENT"
   value: {{ .environment | quote }}
 {{- end }}
-{{- if .Values.rasa.additionalEnv }}
-{{ toYaml .Values.rasa.additionalEnv }}
+{{- if .Values.rasa.extraEnv }}
+{{ toYaml .Values.rasa.extraEnv }}
 {{- end }}
 {{- end -}}

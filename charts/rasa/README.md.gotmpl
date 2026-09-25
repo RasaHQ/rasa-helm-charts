@@ -169,6 +169,33 @@ rasa:
     secretKey: authToken
 ```
 
+**Pass-through keys use the conventional `extra*` names**, and `useDefaultArgs` is gone:
+
+| before | after |
+|---|---|
+| `additionalArgs` | `extraArgs` |
+| `additionalEnv` | `extraEnv` |
+| `additionalContainers` | `extraContainers` |
+| `volumes` / `volumeMounts` | `extraVolumes` / `extraVolumeMounts` |
+| `overrideEnv` | `env` |
+| `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
+| `useDefaultArgs: false` | `args: []` |
+
+`args` now carries three meanings, which is what let `useDefaultArgs` go:
+
+```yaml
+# unset — the chart builds the arguments, then appends extraArgs
+rasa: {}
+
+# a list — replaces the generated arguments entirely
+rasa: {args: ["run", "--custom"]}
+
+# an empty list — no arguments at all, for when command runs something else
+rasa: {args: [], command: ["python", "-m", "rasa.model_service"]}
+```
+
+**`enableApi: true` now requires a credential.** The chart refuses to render an enabled API that authenticates nobody — and it no longer waits for an ingress to say so, because a ClusterIP Service is not a security boundary and a route to it can be added later without touching this chart. Supply `authToken`, `jwtSecret`, or an `AUTH_TOKEN`/`JWT_SECRET` entry through `env`, `extraEnv` or `envFrom` — or set `allowUnauthenticatedApi: true`.
+
 **Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
 **`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.

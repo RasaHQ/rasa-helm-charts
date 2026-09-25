@@ -170,6 +170,33 @@ rasa:
     secretKey: authToken
 ```
 
+**Pass-through keys use the conventional `extra*` names**, and `useDefaultArgs` is gone:
+
+| before | after |
+|---|---|
+| `additionalArgs` | `extraArgs` |
+| `additionalEnv` | `extraEnv` |
+| `additionalContainers` | `extraContainers` |
+| `volumes` / `volumeMounts` | `extraVolumes` / `extraVolumeMounts` |
+| `overrideEnv` | `env` |
+| `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
+| `useDefaultArgs: false` | `args: []` |
+
+`args` now carries three meanings, which is what let `useDefaultArgs` go:
+
+```yaml
+# unset — the chart builds the arguments, then appends extraArgs
+rasa: {}
+
+# a list — replaces the generated arguments entirely
+rasa: {args: ["run", "--custom"]}
+
+# an empty list — no arguments at all, for when command runs something else
+rasa: {args: [], command: ["python", "-m", "rasa.model_service"]}
+```
+
+**`enableApi: true` now requires a credential.** The chart refuses to render an enabled API that authenticates nobody — and it no longer waits for an ingress to say so, because a ClusterIP Service is not a security boundary and a route to it can be added later without touching this chart. Supply `authToken`, `jwtSecret`, or an `AUTH_TOKEN`/`JWT_SECRET` entry through `env`, `extraEnv` or `envFrom` — or set `allowUnauthenticatedApi: true`.
+
 **Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
 **`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.
@@ -825,7 +852,7 @@ The following table lists all configurable parameters for this chart and their d
 | dnsConfig | object | dnsConfig specifies Pod's DNS config # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
 | dnsPolicy | string | dnsPolicy specifies Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy | `""` |
 | fullnameOverride | string | fullnameOverride overrides the fully-qualified name prefix used for all chart resources. | `""` |
-| global.additionalDeploymentLabels | object | global.additionalDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects. See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
+| global.extraDeploymentLabels | object | global.extraDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects. See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | global.ingressAnnotations | object | global.ingressAnnotations defines annotations added to the Rasa Pro server ingress. Merged with rasa.ingress.annotations, which wins on key conflicts. Applies only to the rasa component. | `{}` |
 | global.ingressClassName | string | global.ingressClassName defines the ingress class for the Rasa Pro server ingress. Used only when rasa.ingress.className is empty. Applies only to the rasa component. | `""` |
 | global.ingressHost | string | global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component. | `nil` |
@@ -840,14 +867,11 @@ The following table lists all configurable parameters for this chart and their d
 | networkPolicy.enabled | bool | networkPolicy.enabled enables Kubernetes NetworkPolicy resources for the Rasa Pro server. When true, only explicitly allowed traffic is permitted. | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR specifies node IP ranges allowed to reach pods. Required to allow kubelet liveness and readiness probes when networkPolicy.enabled is true. | `[]` |
 | podLabels | object | podLabels defines labels to add to all Rasa pod(s) | `{}` |
-| rasa.additionalArgs | list | rasa.additionalArgs adds additional arguments to the default args | `[]` |
-| rasa.additionalContainers | list | rasa.additionalContainers allows to specify additional containers for the Rasa Deployment | `[]` |
-| rasa.additionalEnv | list | rasa.additionalEnv adds additional environment variables | `[]` |
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
-| rasa.args | list | rasa.args overrides the default arguments for the container | `[]` |
+| rasa.args | string | args replaces the generated container arguments entirely. Unset (default) lets the chart build them from port, cors, enableApi and debugMode, then append extraArgs. An explicit empty list means no arguments at all — use that when rasa.command runs something other than the Rasa server. | `nil` |
 | rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests. | `nil` |
-| rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.additionalContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
+| rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.extraContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
 | rasa.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
 | rasa.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
@@ -867,8 +891,14 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it. | `false` |
 | rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
 | rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
+| rasa.env | list | env overrides all default environment variables | `[]` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.environment | string | environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
+| rasa.extraArgs | list | extraArgs appends arguments to the ones the chart generates. Ignored when args is set. | `[]` |
+| rasa.extraContainers | list | extraContainers allows to specify additional containers for the Rasa Deployment | `[]` |
+| rasa.extraEnv | list | extraEnv adds additional environment variables | `[]` |
+| rasa.extraVolumeMounts | list | extraVolumeMounts specifies additional volumes to mount in the Rasa container | `[]` |
+| rasa.extraVolumes | list | extraVolumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
 | rasa.image.repository | string | image.repository specifies image repository | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
 | rasa.image.tag | string | image.tag overrides the Rasa Pro image tag. Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. | `""` |
@@ -895,7 +925,6 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
 | rasa.mountModelsVolume | bool | mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
-| rasa.overrideEnv | list | rasa.overrideEnv overrides all default environment variables | `[]` |
 | rasa.persistence.create | bool |  | `false` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |
@@ -932,7 +961,4 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.terminationGracePeriodSeconds | int | rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30 | `nil` |
 | rasa.tolerations | list | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
 | rasa.topologySpreadConstraints | list | rasa.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods. # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ | `[]` |
-| rasa.useDefaultArgs | bool | useDefaultArgs controls whether the chart injects default Rasa startup arguments. Keep true for standalone Rasa Pro deployments. Only disable when deploying as part of Rasa Studio. | `true` |
-| rasa.volumeMounts | list | rasa.volumeMounts specifies additional volumes to mount in the Rasa container | `[]` |
-| rasa.volumes | list | rasa.volumes specify additional volumes to mount in the Rasa container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
 | rasaProLicense | object | rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all Rasa Pro deployments. | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` |

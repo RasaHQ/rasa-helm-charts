@@ -58,7 +58,6 @@ stringData:
   rasaProLicense: "<YOUR_LICENSE_KEY>"    # required for all deployments
   authToken: "<YOUR_AUTH_TOKEN>"          # optional: token-based API auth
   jwtSecret: "<YOUR_JWT_SECRET>"          # optional: JWT auth
-  kafkaSslPassword: "<KAFKA_PASSWORD>"    # optional: Kafka SASL (non-IAM)
 ```
 
 ## Installing the Chart
@@ -144,7 +143,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## General Configuration
 
-- **imagePullSecrets**: If you're pulling from a private registry, provide your pull secret name(s) here. This applies to all components unless overridden at the component level.
+- **imagePullSecrets**: If you're pulling from a private registry, provide your pull secret name(s) here.
 - **rasaProLicense**: All Rasa Pro deployments require a valid license. Provide `secretName` and `secretKey` pointing to the Kubernetes Secret that holds your license value.
 
 > **Note:** For application-specific settings, refer to the [Rasa documentation](https://rasa.com/docs/). The full list of configurable values is at the bottom of this page.
@@ -723,7 +722,7 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
 
 ### Network Policies
 
-Network policies are disabled by default. Enable them to restrict traffic between components:
+Network policies are disabled by default. Enable them to restrict traffic to and from the Rasa Pro server:
 
 ```yaml
 networkPolicy:

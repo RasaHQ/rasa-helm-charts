@@ -59,7 +59,6 @@ stringData:
   rasaProLicense: "<YOUR_LICENSE_KEY>"    # required for all deployments
   authToken: "<YOUR_AUTH_TOKEN>"          # optional: token-based API auth
   jwtSecret: "<YOUR_JWT_SECRET>"          # optional: JWT auth
-  kafkaSslPassword: "<KAFKA_PASSWORD>"    # optional: Kafka SASL (non-IAM)
 ```
 
 ## Installing the Chart
@@ -145,7 +144,7 @@ The command removes all the Kubernetes components associated with the chart and 
 
 ## General Configuration
 
-- **imagePullSecrets**: If you're pulling from a private registry, provide your pull secret name(s) here. This applies to all components unless overridden at the component level.
+- **imagePullSecrets**: If you're pulling from a private registry, provide your pull secret name(s) here.
 - **rasaProLicense**: All Rasa Pro deployments require a valid license. Provide `secretName` and `secretKey` pointing to the Kubernetes Secret that holds your license value.
 
 > **Note:** For application-specific settings, refer to the [Rasa documentation](https://rasa.com/docs/). The full list of configurable values is at the bottom of this page.
@@ -724,7 +723,7 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
 
 ### Network Policies
 
-Network policies are disabled by default. Enable them to restrict traffic between components:
+Network policies are disabled by default. Enable them to restrict traffic to and from the Rasa Pro server:
 
 ```yaml
 networkPolicy:
@@ -756,10 +755,10 @@ The following table lists all configurable parameters for this chart and their d
 | global.ingressHost | string | global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component. | `nil` |
 | hostAliases | list | hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable | `[]` |
 | hostNetwork | bool | hostNetwork controls whether the pod may use the node network namespace | `false` |
-| imagePullSecrets | list | imagePullSecrets contains references to Secrets for pulling images from private registries. Applied to all components unless overridden at the component level. | `[]` |
+| imagePullSecrets | list | imagePullSecrets contains references to Secrets for pulling images from private registries. | `[]` |
 | nameOverride | string | nameOverride overrides the name used for chart resources. Defaults to the chart name. | `""` |
 | networkPolicy.denyAll | bool | networkPolicy.denyAll applies a default-deny NetworkPolicy that blocks all ingress and egress traffic before more specific rules are applied. | `false` |
-| networkPolicy.enabled | bool | networkPolicy.enabled enables Kubernetes NetworkPolicy resources for all components. When true, only explicitly allowed traffic is permitted. | `false` |
+| networkPolicy.enabled | bool | networkPolicy.enabled enables Kubernetes NetworkPolicy resources for the Rasa Pro server. When true, only explicitly allowed traffic is permitted. | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR specifies node IP ranges allowed to reach pods. Required to allow kubelet liveness and readiness probes when networkPolicy.enabled is true. | `[]` |
 | podLabels | object | podLabels defines labels to add to all Rasa pod(s) | `{}` |
 | rasa.additionalArgs | list | rasa.additionalArgs adds additional arguments to the default args | `[]` |

@@ -5,7 +5,7 @@
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaProLicense is license key for Rasa Pro Services.
+# -- rasaProLicense is license key for Rasa Pro.
 rasaProLicense:
   secretName: "rasa-secrets"
   secretKey: "rasaProLicense"
@@ -28,7 +28,7 @@ rasa:
       rest:
     endpoints:
       action_endpoint:
-        url: "/webhook"
+        url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
       tracker_store:
         type: redis
         url: redis-lockstore-master

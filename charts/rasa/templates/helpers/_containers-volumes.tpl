@@ -1,10 +1,10 @@
 {{- define "rasa.containers.volumes" -}}
 {{- if .Values.rasa.settings.mountDefaultConfigmap -}}
-- name: config-dir
-  emptyDir: {}
 {{- $hasEndpoints := and .Values.rasa.settings.endpoints (ne (len .Values.rasa.settings.endpoints) 0) }}
 {{- $hasCredentials := and .Values.rasa.settings.credentials (ne (len .Values.rasa.settings.credentials) 0) }}
 {{- if or $hasEndpoints $hasCredentials }}
+- name: config-dir
+  emptyDir: {}
 - name: "rasa-configuration"
   configMap:
     name: {{ include "rasa.fullname" . }}-configmap

@@ -31,6 +31,12 @@ raw YAML string (credentialsRaw). The structured value wins on key conflicts.
 {{- if .Values.rasa.settings.endpoints }}
 {{-   $endpointsMerged = merge (deepCopy .Values.rasa.settings.endpoints) $endpointsMerged }}
 {{- end }}
+{{- /*
+Emit nothing when neither credentials nor endpoints have content: a ConfigMap
+with no data is never mounted (see rasa.containers.volumeMounts) and only adds
+a dangling object to every default install.
+*/ -}}
+{{- if or $credentialsMerged $endpointsMerged }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -45,5 +51,6 @@ data:
 {{- if $endpointsMerged }}
   endpoints: |
     {{- toYaml $endpointsMerged | nindent 4 }}
+{{- end }}
 {{- end }}
 {{- end }}

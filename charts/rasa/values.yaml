@@ -6,7 +6,7 @@ nameOverride: ""
 # -- fullnameOverride overrides the fully-qualified name prefix used for all chart resources.
 fullnameOverride: ""
 
-# -- imagePullSecrets contains references to Secrets for pulling images from private registries. Applied to all components unless overridden at the component level.
+# -- imagePullSecrets contains references to Secrets for pulling images from private registries.
 imagePullSecrets: []
   # - name: regcred
 
@@ -426,7 +426,7 @@ rasa:
 
 # Network policy settings
 networkPolicy:
-  # -- networkPolicy.enabled enables Kubernetes NetworkPolicy resources for all components. When true, only explicitly allowed traffic is permitted.
+  # -- networkPolicy.enabled enables Kubernetes NetworkPolicy resources for the Rasa Pro server. When true, only explicitly allowed traffic is permitted.
   enabled: false
   # -- networkPolicy.denyAll applies a default-deny NetworkPolicy that blocks all ingress and egress traffic before more specific rules are applied.
   denyAll: false

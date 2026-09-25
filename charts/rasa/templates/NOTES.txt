@@ -54,8 +54,22 @@ By installing and using this software, you agree to be bound by the terms and co
      targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
      upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
      the image independently.
+   - rasa.settings.authToken and rasa.settings.jwtSecret are now unset by default, so a
+     default install no longer needs authToken and jwtSecret keys in its Secret. If you
+     relied on the old defaults without setting them explicitly, this upgrade REMOVES
+     AUTH_TOKEN and JWT_SECRET from the pod and leaves the HTTP API unauthenticated.
    - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
      so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
+{{- if and .Values.rasa.settings.enableApi (not .Values.rasa.settings.authToken) (not .Values.rasa.settings.jwtSecret) }}
+
+   WARNING: the Rasa HTTP API is enabled and NOT authenticated.
+   settings.enableApi is true but neither settings.authToken nor settings.jwtSecret is set,
+   so anything that can reach the service can call the API. Set one of them before exposing
+   this deployment beyond the cluster:
+     --set rasa.settings.authToken.secretName=rasa-secrets \
+     --set rasa.settings.authToken.secretKey=authToken
+   Or disable the API with --set rasa.settings.enableApi=false
+{{- end }}
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
 {{- if and .Values.rasa.containerSecurityContext.enabled .Values.rasa.containerSecurityContext.runAsNonRoot (ne .Values.rasa.image.repository $defaultRepo) }}
 

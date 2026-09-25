@@ -54,14 +54,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for Action Server
-*/}}
-{{- define "rasa.actionServer.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-action-server
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Render topologySpreadConstraints, defaulting each entry's labelSelector to the
 component's own selector labels. A constraint with no labelSelector matches no
 pods, so the skew is always zero and the constraint would never bind.
@@ -88,17 +80,6 @@ Create the name of the service account to use
 {{- default (include "rasa.fullname" .) .Values.rasa.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasa.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.actionServer.serviceAccountName" -}}
-{{- if .Values.actionServer.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-action-server") .Values.actionServer.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.actionServer.serviceAccount.name }}
 {{- end }}
 {{- end }}
 

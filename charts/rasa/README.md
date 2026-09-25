@@ -920,69 +920,6 @@ The following table lists all configurable parameters for this chart and their d
 
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
-| actionServer.additionalContainers | list | actionServer.additionalContainers allows to specify additional containers for the Action Server Deployment | `[]` |
-| actionServer.additionalEnv | list | actionServer.additionalEnv adds additional environment variables | `[]` |
-| actionServer.affinity | object | actionServer.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
-| actionServer.args | list | actionServer.args overrides the default arguments for the container | `[]` |
-| actionServer.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
-| actionServer.autoscaling.maxReplicas | int | autoscaling.maxReplicas specifies the maximum number of replicas | `100` |
-| actionServer.autoscaling.minReplicas | int | autoscaling.minReplicas specifies the minimum number of replicas | `1` |
-| actionServer.autoscaling.targetCPUUtilizationPercentage | int | autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage | `80` |
-| actionServer.command | list | actionServer.command overrides the default command for the container | `[]` |
-| actionServer.containerSecurityContext | object | actionServer.containerSecurityContext defines security context that allows you to overwrite the container-level security context | `{"enabled":true}` |
-| actionServer.enabled | bool | actionServer.enabled enables Action Server deployment | `false` |
-| actionServer.envFrom | list | actionServer.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
-| actionServer.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
-| actionServer.image.repository | string | image.repository specifies image repository | `"rasa/rasa-sdk"` |
-| actionServer.image.tag | string | image.tag specifies image tag | `"3.20.0-latest"` |
-| actionServer.ingress.annotations | object | ingress.annotations defines annotations to add to the ingress | `{}` |
-| actionServer.ingress.className | string | ingress.className specifies the ingress className to be used | `""` |
-| actionServer.ingress.enabled | bool | ingress.enabled specifies whether an ingress service should be created | `false` |
-| actionServer.ingress.hosts | list | ingress.hosts specifies the hosts for this ingress | `[{"extraPaths":[],"host":"chart-example.local","paths":[{"path":"/api","pathType":"Prefix"}]}]` |
-| actionServer.ingress.labels | object | ingress.labels defines labels to add to the ingress | `{}` |
-| actionServer.ingress.tls | list | ingress.tls specifies the TLS configuration for ingress | `[]` |
-| actionServer.initContainers | list | actionServer.initContainers allows to specify init containers for the Action Server deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ | `[]` |
-| actionServer.lifecycle | object | actionServer.lifecycle defines container lifecycle hooks (postStart / preStop) for the Action Server container # Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | `{}` |
-| actionServer.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
-| actionServer.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
-| actionServer.livenessProbe.httpGet | object | livenessProbe.httpGet is used to define HTTP request | `{"path":"/health","port":5055,"scheme":"HTTP"}` |
-| actionServer.livenessProbe.initialDelaySeconds | int | livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
-| actionServer.livenessProbe.periodSeconds | int | livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
-| actionServer.livenessProbe.successThreshold | int | livenessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |
-| actionServer.livenessProbe.terminationGracePeriodSeconds | int | livenessProbe.terminationGracePeriodSeconds is an optional duration in seconds the pod needs to terminate gracefully after a liveness probe failure | `30` |
-| actionServer.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
-| actionServer.nodeSelector | object | actionServer.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
-| actionServer.podAnnotations | object | actionServer.podAnnotations defines annotations to add to the pod | `{}` |
-| actionServer.podSecurityContext | object | actionServer.podSecurityContext defines pod security context | `{"enabled":true}` |
-| actionServer.readinessProbe.enabled | bool | readinessProbe.enabled is used to enable or disable readinessProbe | `true` |
-| actionServer.readinessProbe.failureThreshold | int | readinessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |
-| actionServer.readinessProbe.httpGet | object | readinessProbe.httpGet is used to define HTTP request | `{"path":"/health","port":5055,"scheme":"HTTP"}` |
-| actionServer.readinessProbe.initialDelaySeconds | int | readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe | `15` |
-| actionServer.readinessProbe.periodSeconds | int | readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds | `15` |
-| actionServer.readinessProbe.successThreshold | int | readinessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure | `1` |
-| actionServer.readinessProbe.timeoutSeconds | int | readinessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
-| actionServer.replicaCount | int | actionServer.replicaCount specifies number of replicas | `1` |
-| actionServer.resources | object | actionServer.resources specifies the resources limits and requests | `{}` |
-| actionServer.service | object | actionServer.service define service for Action Server | `{"annotations":{},"externalTrafficPolicy":"Cluster","loadBalancerIP":null,"nodePort":null,"port":5055,"targetPort":5055,"type":"ClusterIP"}` |
-| actionServer.service.annotations | object | service.annotations defines annotations to add to the service | `{}` |
-| actionServer.service.externalTrafficPolicy | string | service.externalTrafficPolicy enables client source IP preservation # Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip | `"Cluster"` |
-| actionServer.service.loadBalancerIP | string | service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer | `nil` |
-| actionServer.service.nodePort | string | service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types # Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport | `nil` |
-| actionServer.service.port | int | service.port is used to specify service port | `5055` |
-| actionServer.service.targetPort | int | service.targetPort is the container port that Service traffic is forwarded to. Should match settings.port. | `5055` |
-| actionServer.service.type | string | service.type is used to specify service type | `"ClusterIP"` |
-| actionServer.serviceAccount | object | actionServer.serviceAccount defines service account | `{"annotations":{},"create":true,"name":""}` |
-| actionServer.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
-| actionServer.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
-| actionServer.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
-| actionServer.settings.port | int | settings.port defines port on which Action Server runs | `5055` |
-| actionServer.settings.scheme | string | settings.scheme is the HTTP scheme (http or https) used to construct internal service URLs | `"http"` |
-| actionServer.strategy | object | actionServer.strategy specifies deployment strategy type # ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy | `{}` |
-| actionServer.terminationGracePeriodSeconds | int | actionServer.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30 | `nil` |
-| actionServer.tolerations | list | actionServer.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
-| actionServer.topologySpreadConstraints | list | actionServer.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods. # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ | `[]` |
-| actionServer.volumeMounts | list | actionServer.volumeMounts specifies additional volumes to mount in the Action Server container | `[]` |
-| actionServer.volumes | list | actionServer.volumes specify additional volumes to mount in the Action Server container # Ref: https://kubernetes.io/docs/concepts/storage/volumes/ | `[]` |
 | deploymentAnnotations | object | deploymentAnnotations defines annotations to add to all Rasa deployments | `{}` |
 | deploymentLabels | object | deploymentLabels defines labels to add to all Rasa deployment | `{}` |
 | dnsConfig | object | dnsConfig specifies Pod's DNS config # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |

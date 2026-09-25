@@ -72,10 +72,8 @@ spec:
           image: "{{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.rasa.image.pullPolicy }}
           {{- /*
-          An explicit rasa.args replaces the generated arguments, and an explicit
-          empty list means "no arguments" — which is why this tests for the key
-          being absent rather than falsy: `args: []` and `args` unset are both
-          falsy, and they have to mean different things.
+          Tests for args being absent, not falsy: `args: []` and an unset args are
+          both falsy but mean different things — no arguments, versus generate them.
           */}}
           {{- if not (kindIs "invalid" .Values.rasa.args) }}
           {{- with .Values.rasa.args }}

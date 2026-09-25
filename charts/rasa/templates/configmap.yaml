@@ -2,10 +2,8 @@
 {{- $credentials := include "rasa.hasCredentials" . }}
 {{- $endpoints := include "rasa.hasEndpoints" . }}
 {{- /*
-Emit nothing when there is no configuration to ship. An empty ConfigMap is
-never referenced by rasa.containers.volumes, so it would only add a dangling
-object to every default install. The same two predicates drive the volume and
-the mount, so the three cannot disagree.
+Emit nothing when there is no configuration to ship: the same two predicates
+drive the volume and the mount, so an empty ConfigMap would never be referenced.
 */ -}}
 {{- if or $credentials $endpoints }}
 apiVersion: v1

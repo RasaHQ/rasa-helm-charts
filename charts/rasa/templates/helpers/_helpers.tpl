@@ -116,22 +116,14 @@ Determine rasa server to run with arguments
 {{- end -}}
 
 {{/*
-Report whether this release actually serves the Rasa HTTP API.
+Report whether the chart itself starts the Rasa HTTP API.
 
-settings.enableApi alone does not answer this. The chart only renders
-`--enable-api` when it builds the arguments itself (defaultArgs), so setting
-rasa.args, or replacing the process with
-rasa.command all leave enableApi describing nothing. Rasa Studio consumes this
-chart exactly that way.
-
-This mirrors the condition deployment.yaml uses to emit the default arguments:
-the chart builds them only when rasa.args is absent. Note that rasa.command does
-NOT belong here — command and args render independently, so overriding the
-entrypoint still leaves --enable-api in args.
-
-Caveat: arguments you supply yourself are opaque to the chart. If your own
-rasa.args or rasa.extraArgs contain --enable-api, this reports nothing and the
-check below does not fire.
+enableApi alone does not answer this: --enable-api is only rendered when the
+chart builds the arguments, which it skips when rasa.args is set. rasa.command
+is deliberately not part of this — command and args render independently, so
+overriding the entrypoint leaves --enable-api in place. Arguments you supply
+yourself are opaque, so an --enable-api inside rasa.args or extraArgs is
+invisible here.
 */}}
 {{- define "rasa.apiServed" -}}
 {{- if and .Values.rasa.enableApi (kindIs "invalid" .Values.rasa.args) -}}
@@ -140,19 +132,12 @@ true
 {{- end -}}
 
 {{/*
-Report whether an API credential actually reaches the container.
+Report whether an API credential reaches the container.
 
-Configuring rasa.authToken is not sufficient: rasa.env replaces the generated
-environment block wholesale, so AUTH_TOKEN and JWT_SECRET never render. A token
-that does not reach the pod is not authentication.
-
-The converse also holds, so this counts every route that delivers one. Which
-route applies depends on rasa.env: deployment.yaml emits it INSTEAD of the
-generated block, and extraEnv lives inside that generated block, so a token in
-extraEnv is discarded the moment rasa.env is set. This
-mirrors that branch rather than scanning both lists. envFrom contents are
-opaque at render time, so its presence counts as authentication rather than
-blocking a legitimate install.
+rasa.env replaces the generated environment block, so it decides which list to
+scan: a token in extraEnv is discarded the moment rasa.env is set, and an
+authToken or jwtSecret with it. envFrom is opaque at render time and counts as
+authenticated rather than blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
@@ -170,10 +155,8 @@ true
 {{/*
 Refuse to render an enabled Rasa HTTP API that authenticates nobody.
 
-This does not ask whether the API is externally reachable. A ClusterIP Service
-is not a security boundary — anything in the cluster can call it, and an
-ingress, a mesh route or a port-forward can be added later without touching
-this chart. Turning the API on is the decision that needs a credential.
+Not gated on being externally reachable: a ClusterIP Service is not a boundary,
+and a route to it can be added without touching this chart.
 */}}
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
@@ -182,20 +165,15 @@ this chart. Turning the API on is the decision that needs a credential.
 {{- end -}}
 
 {{/*
-Merge a structured settings map with its raw-YAML counterpart and return the
-result, or nothing when both are empty.
+Merge a structured map with its raw-YAML counterpart, or return nothing when
+both are empty.
 
-configmap.yaml, rasa.containers.volumes and rasa.containers.volumeMounts must
-all agree on whether there is configuration to ship. They used to disagree:
-the ConfigMap counted the *Raw variants while the volumes did not, so
-endpointsRaw alone produced a ConfigMap that was never mounted and the
-configuration was silently dropped.
+configmap.yaml and both volume defines share this so they cannot disagree about
+whether there is configuration to ship — they once did, and endpointsRaw
+produced a ConfigMap that nothing mounted. fromYaml reports a parse failure as a
+map holding only an Error key, hence the length check.
 
-fromYaml reports a parse failure as a map holding exactly one key, Error, so the
-length is checked too: raw YAML whose own top-level key happens to be "Error"
-must not be misreported as malformed.
-
-Usage: include "rasa.mergedConfig" (dict "structured" .Values... "raw" .Values... "field" "endpointsRaw")
+Usage: include "rasa.mergedConfig" (dict "structured" ... "raw" ... "field" "endpointsRaw")
 */}}
 {{- define "rasa.mergedConfig" -}}
 {{- $merged := dict -}}

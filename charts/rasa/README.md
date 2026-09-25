@@ -46,8 +46,6 @@ The table below lists all secret-backed fields:
 |---|---|---|
 | `authToken` | Token-based API authentication | `rasa.settings.authToken` |
 | `jwtSecret` | JWT API authentication | `rasa.settings.jwtSecret` |
-| `kafkaSslPassword` | Kafka SASL password (non-IAM) | `rasaProServices.kafka.saslPassword` |
-| `analyticsDbUrl` | Analytics database URL (non-IAM) | `rasaProServices.database.urlExistingSecretName` |
 
 Alternatively, create all credentials upfront from a manifest. The chart ships a `secrets.yaml` example that you can use as a starting point — **use `stringData` so Kubernetes base64-encodes the values automatically**:
 
@@ -112,9 +110,13 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 ### Upgrading to 3.0.0
 
-`rasaProServices.enabled` now defaults to **`false`**. The analytics pipeline requires a connected analytics database that this chart does not provision, so an enabled-by-default deployment could not function without extra configuration. Set `rasaProServices.enabled: true` to keep deploying it.
+**The `actionServer`, `duckling` and `rasaProServices` components have been removed.** This chart now deploys the Rasa Pro server only. Their values keys are ignored rather than rejected, so an existing values file still installs — but nothing reads them.
 
-Chart 3.0.0 also hardens the **`rasa` component only** to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted). `actionServer`, `duckling` and `rasaProServices` are unchanged.
+**Action servers are bring-your-own.** Deploy one yourself and point `rasa.settings.endpoints.action_endpoint.url` at it. If you relied on the chart-managed action server, do this **before** upgrading: the chart still renders and the Rasa Pro pod still starts, so the break only surfaces on the first custom-action call.
+
+**`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.settings.ducklingHttpUrl` is gone. Set the variable through `rasa.additionalEnv` if you run Duckling yourself.
+
+Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
 - `rasa.containerSecurityContext` now defaults to `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true` and `seccompProfile.type: RuntimeDefault`. No `runAsUser` is set, so the effective uid is unchanged and existing model volumes keep their ownership.
 - `rasa.automountServiceAccountToken` now defaults to `false`.
@@ -129,7 +131,7 @@ Opt out with `rasa.containerSecurityContext.runAsNonRoot: false`, which leaves t
 
 **If you add a sidecar** via `rasa.additionalContainers` or `rasa.initContainers` that calls the Kubernetes API, set `rasa.automountServiceAccountToken: true`.
 
-`Chart.yaml` declares `appVersion` again, tracking the Rasa Pro release the chart targets, and it now appears as the `app.kubernetes.io/version` label on chart-managed objects. `rasa.image.tag` defaults to `""` and falls back to `appVersion`, so **a chart upgrade now moves the Rasa Pro image with it**. Set `rasa.image.tag` to an exact tag to pin the image independently of chart upgrades. `actionServer`, `duckling` and `rasaProServices` version independently and keep explicit tags.
+`Chart.yaml` declares `appVersion` again, tracking the Rasa Pro release the chart targets, and it now appears as the `app.kubernetes.io/version` label on chart-managed objects. `rasa.image.tag` defaults to `""` and falls back to `appVersion`, so **a chart upgrade now moves the Rasa Pro image with it**. Set `rasa.image.tag` to an exact tag to pin the image independently of chart upgrades.
 
 ## Uninstalling the Chart
 
@@ -148,32 +150,6 @@ The command removes all the Kubernetes components associated with the chart and 
 
 > **Note:** For application-specific settings, refer to the [Rasa documentation](https://rasa.com/docs/). The full list of configurable values is at the bottom of this page.
 
-### Deployment Modes
-
-#### Rasa Pro with Analytics (full stack)
-
-Deploys the Rasa Pro server together with the Rasa Pro Services analytics pipeline. Requires a PostgreSQL-compatible analytics database.
-
-```yaml
-rasa:
-  enabled: true
-rasaProServices:
-  enabled: true
-  database:
-    url: "postgresql://user:password@host:5432/dbname"
-```
-
-#### Rasa Pro only (no analytics)
-
-Deploys only the Rasa Pro server. Use this when you do not need the analytics pipeline.
-
-```yaml
-rasa:
-  enabled: true
-rasaProServices:
-  enabled: false
-```
-
 ### Minimal Working Configuration
 
 The following is the smallest `values.yaml` needed to get Rasa Pro running. It assumes the license secret was created as shown in [Creating Secrets](#creating-secrets):
@@ -187,9 +163,6 @@ rasa:
   enabled: true
   image:
     tag: "3.x.x"  # pin to a specific Rasa Pro version
-
-rasaProServices:
-  enabled: false
 ```
 
 Install with:
@@ -199,57 +172,6 @@ helm install my-release rasa/rasa -f values.yaml
 ```
 
 From there, add sections from the rest of this guide as your deployment grows.
-
-### Rasa Pro Services Database Configuration
-
-The `rasaProServices.database` section configures the analytics data lake connection. There are two ways to provide the database URL.
-
-**Plain value:**
-
-```yaml
-rasaProServices:
-  database:
-    url: "postgresql://user:password@host:5432/dbname"
-```
-
-**From an existing secret** (recommended for production):
-
-Create a Kubernetes secret containing the database URL:
-
-```console
-kubectl create secret generic my-db-secret \
-  --from-literal=analyticsDbUrl="postgresql://user:password@host:5432/dbname"
-```
-
-Then reference it in your values:
-
-```yaml
-rasaProServices:
-  database:
-    urlExistingSecretName: my-db-secret
-    urlExistingSecretKey: analyticsDbUrl
-```
-
-When `urlExistingSecretName` is set it takes precedence over `url`.
-
-**AWS RDS IAM authentication:**
-
-For IAM-based authentication (passwordless, using an IAM role bound to the pod's service account), use `database.enableAwsRdsIam: true` and provide individual connection fields instead of a URL:
-
-```yaml
-rasaProServices:
-  serviceAccount:
-    annotations:
-      eks.amazonaws.com/role-arn: "arn:aws:iam::123456789012:role/rasa-pro-services-role"
-  database:
-    enableAwsRdsIam: true
-    hostname: "my-cluster.cluster-xxxxx.us-east-1.rds.amazonaws.com"
-    port: "5432"
-    username: "rasa_user"
-    databaseName: "rasa_analytics"
-    sslMode: "verify-full"
-    sslCaLocation: "/path/to/rds-ca.pem"
-```
 
 ### Use MinIO instead of S3
 
@@ -386,7 +308,7 @@ rasa:
 
 ### Graceful Shutdown and Lifecycle Hooks
 
-Every component (`rasa`, `rasaProServices`, `actionServer`, `duckling`) accepts a pod-level `terminationGracePeriodSeconds` and a container-level `lifecycle` block. Both are unset by default, so the rendered manifests are unchanged unless you opt in.
+The `rasa` component accepts a pod-level `terminationGracePeriodSeconds` and a container-level `lifecycle` block. Both are unset by default, so the rendered manifests are unchanged unless you opt in.
 
 When Kubernetes deletes a pod it removes the pod from Service endpoints and sends `SIGTERM` at the same time, so in-flight requests can still arrive for a short window. A `preStop` sleep holds the container open long enough for the endpoint removal to propagate:
 
@@ -419,11 +341,11 @@ Leaving `terminationGracePeriodSeconds` unset falls back to the Kubernetes defau
 The `lifecycle` block is passed through verbatim, so any hook handler Kubernetes supports (`exec`, `httpGet`, `sleep`) works. `postStart` is available as well:
 
 ```yaml
-actionServer:
+rasa:
   lifecycle:
     postStart:
       exec:
-        command: ["/bin/sh", "-c", "echo action server starting"]
+        command: ["/bin/sh", "-c", "echo rasa pro starting"]
 ```
 
 > **Note:** The hook applies to the component's main container only. Containers you supply through `initContainers` or `additionalContainers` can carry their own `lifecycle` block directly.
@@ -501,15 +423,17 @@ The `rasa.settings.endpoints` section allows you to configure various endpoints 
 
 **Action Server Endpoint:**
 
-The action endpoint URL must be a full HTTP URL. When using the bundled Action Server component, the service name follows the pattern `<fullname>-action-server`:
+This chart does not deploy an action server. Run one yourself and point `action_endpoint.url` at it as a full HTTP URL:
 
 ```yaml
 rasa:
   settings:
     endpoints:
       action_endpoint:
-        url: "http://my-release-action-server:5055/webhook"
+        url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
 ```
+
+Alternatively, run your actions in-process by setting `actions_module` instead of `url`.
 
 **Model Storage:**
 
@@ -600,49 +524,6 @@ rasa:
 
 See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.
 
-### Action Server
-
-The chart can optionally deploy a [Rasa SDK](https://rasa.com/docs/action-server) Action Server alongside Rasa Pro. You must build and publish your own container image from your actions code — there is no default image provided.
-
-```yaml
-actionServer:
-  enabled: true
-  image:
-    repository: "your-registry/your-actions-image"
-    tag: "latest"
-```
-
-When enabled, configure Rasa Pro to use it via `rasa.settings.endpoints`. The Action Server service name follows the pattern `<release-name>-action-server`:
-
-```yaml
-rasa:
-  settings:
-    endpoints:
-      action_endpoint:
-        url: "http://my-release-action-server:5055/webhook"
-```
-
-### Duckling
-
-[Duckling](https://github.com/facebook/duckling) is a structured entity extraction service. Enable it when your NLU pipeline requires it:
-
-```yaml
-duckling:
-  enabled: true
-```
-
-When `duckling.enabled: true`, the chart automatically sets `RASA_DUCKLING_HTTP_URL` to the in-cluster service URL — no additional configuration is required.
-
-To connect to an **external** Duckling instance instead, leave `duckling.enabled: false` and set the URL explicitly:
-
-```yaml
-duckling:
-  enabled: false
-rasa:
-  settings:
-    ducklingHttpUrl: "http://my-external-duckling:8000"
-```
-
 ### Environment Variables
 
 Use `additionalEnv` to inject extra environment variables into any component without replacing the chart-managed ones. Both plain values and Secret/ConfigMap references are supported:
@@ -674,8 +555,6 @@ rasa:
     - secretRef:
         name: my-secret
 ```
-
-Both `additionalEnv` and `envFrom` are available on all components (`rasa`, `rasaProServices`, `actionServer`, `duckling`).
 
 ### Loading Initial Models
 
@@ -716,8 +595,6 @@ rasa:
           - rasa.example.com
 ```
 
-The Action Server and Duckling components each have their own `ingress` block with the same structure under `actionServer.ingress` and `duckling.ingress`.
-
 #### Shared ingress settings
 
 The `global` block carries three ingress settings so an ingress class, a set of annotations and a host can be declared once instead of being repeated:
@@ -733,8 +610,6 @@ global:
 `global.ingressClassName` and `global.ingressAnnotations` are defaults that `rasa.ingress` overrides. A non-empty `rasa.ingress.className` wins outright, and `rasa.ingress.annotations` wins per key while non-conflicting global annotations still merge in.
 
 > **Note:** `global.ingressHost` behaves differently. It overrides `rasa.ingress.hosts[*].host` instead of falling back to it, so leave it unset if you need per-host values.
-
-All three apply to the Rasa Pro server ingress only. `actionServer.ingress` and `duckling.ingress` are unaffected and must be configured through their own blocks.
 
 `global.ingressHost` sets the ingress rule host and nothing else. TLS is a separate list that the chart does not derive from it, so a single-host deployment repeats the hostname under `rasa.ingress.tls`:
 
@@ -780,8 +655,6 @@ rasa:
     # targetMemoryUtilizationPercentage: 80
 ```
 
-The same `resources` and `autoscaling` blocks are available for `rasaProServices`, `actionServer`, and `duckling`.
-
 ### Pod Topology Spread Constraints
 
 Once a component runs more than one replica, spread its pods across failure domains so a single zone or node outage cannot take all of them down:
@@ -797,15 +670,15 @@ rasa:
 
 A constraint needs a `labelSelector` to decide which pods to count, and one that selects nothing is silently ignored rather than rejected. The chart therefore fills in the component's own selector labels whenever an entry omits `labelSelector`, so the example above means "spread the Rasa Pro server pods across zones" without further configuration. Set `labelSelector` yourself when you want to count a broader set of pods than the one component.
 
-Each component has its own `topologySpreadConstraints` block, and they are deliberately independent rather than shared. `whenUnsatisfiable` in particular should not be applied uniformly: `DoNotSchedule` gives the Rasa Pro server a hard spread guarantee, but the same setting on a component you run at one or two replicas leaves pods `Pending` when a zone has no room. Prefer `ScheduleAnyway` there, or leave the list empty, since a spread constraint over a single replica does nothing.
+Choose `whenUnsatisfiable` to match the replica count: `DoNotSchedule` gives the Rasa Pro server a hard spread guarantee at three or more replicas, but at one or two it leaves pods `Pending` when a zone has no room. Prefer `ScheduleAnyway` there, or leave the list empty, since a spread constraint over a single replica does nothing.
 
 #### Setting labelSelector explicitly
 
-A `labelSelector` selects pods, so it can only match labels the pod template actually carries. Every component labels its pods with `app.kubernetes.io/name`, which is unique per component, and `app.kubernetes.io/instance`, which is the release name and therefore identical across all of them, plus anything added through the chart-level `podLabels`. The selector injected by default is exactly that first pair, which is also what the Deployment uses in `spec.selector.matchLabels` to own its pods.
+A `labelSelector` selects pods, so it can only match labels the pod template actually carries. The chart labels its pods with `app.kubernetes.io/name` and `app.kubernetes.io/instance` (the release name), plus anything added through the chart-level `podLabels`. The selector injected by default is exactly that first pair, which is also what the Deployment uses in `spec.selector.matchLabels` to own its pods.
 
 Labels set through `deploymentLabels` or `global.additionalDeploymentLabels` are attached to the Deployment object rather than to the pods, as are `helm.sh/chart` and `app.kubernetes.io/managed-by`. A selector referring to any of those matches no pods, and the constraint is then quietly ignored.
 
-Writing the selector out explicitly is the same as the default, and is worth doing when one component needs several constraints with different scopes:
+Writing the selector out explicitly is the same as the default, and is worth doing when you need several constraints with different scopes:
 
 ```yaml
 rasa:
@@ -819,22 +692,13 @@ rasa:
           app.kubernetes.io/instance: my-release
 ```
 
-To balance several components as a single pool, so that the Rasa Pro server and the Action Server spread together rather than each on its own, give their pods a shared label and select on it. `podLabels` applies to the pods of every component in this chart:
+To spread the Rasa Pro server together with a workload this chart does not manage — your own action server, for instance — as a single pool rather than each on its own, give both sets of pods a shared label and select on it. `podLabels` applies to the pods this chart creates; label the other workload the same way in its own chart:
 
 ```yaml
 podLabels:
   rasa.com/spread-group: rasa-stack
 
 rasa:
-  topologySpreadConstraints:
-    - maxSkew: 1
-      topologyKey: topology.kubernetes.io/zone
-      whenUnsatisfiable: ScheduleAnyway
-      labelSelector:
-        matchLabels:
-          rasa.com/spread-group: rasa-stack
-
-actionServer:
   topologySpreadConstraints:
     - maxSkew: 1
       topologyKey: topology.kubernetes.io/zone
@@ -855,44 +719,7 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
             operator: In
             values:
               - my-release-rasa
-              - my-release-rasa-action-server
-```
-
-### Rasa Pro Services Kafka Configuration
-
-Rasa Pro Services consumes conversation events from Kafka for the analytics pipeline. Configure the Kafka connection under `rasaProServices.kafka`:
-
-**SASL_SSL (recommended for production):**
-
-```yaml
-rasaProServices:
-  kafka:
-    brokerAddress: "kafka-bootstrap.example.com:9092"
-    topic: "rasa-core-events"
-    dlqTopic: "rasa-analytics-dlq"
-    consumerId: "rasa-analytics-group"
-    securityProtocol: "SASL_SSL"
-    saslMechanism: "SCRAM-SHA-512"
-    saslUsername: "rasa-analytics"
-    saslPassword:
-      secretName: kafka-credentials
-      secretKey: password
-    sslCaLocation: "/path/to/ca.pem"
-```
-
-**AWS MSK with IAM authentication:**
-
-```yaml
-rasaProServices:
-  kafka:
-    enableAwsMskIam: true
-    brokerAddress: "b-1.my-cluster.xxxxx.c1.kafka.us-east-1.amazonaws.com:9098"
-    topic: "rasa-core-events"
-    dlqTopic: "rasa-analytics-dlq"
-  useCloudProviderIam:
-    enabled: true
-    provider: "aws"
-    region: "us-east-1"
+              - my-action-server
 ```
 
 ### Network Policies
@@ -909,8 +736,6 @@ networkPolicy:
 ```
 
 > **Note:** When `networkPolicy.denyAll` is true, you must supply `nodeCIDR` so that the kubelet can reach pods for liveness and readiness probes.
-
-> **Warning:** The built-in kubelet allowlist only covers the `rasa` and `rasa-pro-services` pods. If you enable `duckling` or `actionServer` alongside `denyAll: true`, their liveness and readiness probes will silently fail — the pods will start but Kubernetes will never mark them as ready. You must add NetworkPolicy rules manually to allow kubelet access to those pods before enabling `denyAll`.
 
 ## Configuration Reference
 

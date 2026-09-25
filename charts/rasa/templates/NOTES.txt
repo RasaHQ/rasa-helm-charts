@@ -34,9 +34,15 @@ By installing and using this software, you agree to be bound by the terms and co
 {{- end }}
 
 2. Breaking changes in chart 3.0.0:
-   - rasaProServices.enabled now defaults to false. The analytics pipeline needs a
-     connected analytics database, which this chart does not provision, so it is now
-     opt-in. Set rasaProServices.enabled=true to keep deploying it.
+   - The actionServer, duckling and rasaProServices components have been removed.
+     This chart now deploys the Rasa Pro server only. Their values keys are ignored
+     rather than rejected, so an existing values file still installs.
+   - Action servers are bring-your-own. Deploy one yourself and point
+     rasa.settings.endpoints.action_endpoint.url at it. If you were using the
+     chart-managed action server, do this BEFORE upgrading: the pod starts either
+     way and the failure only appears on the first custom-action call.
+   - RASA_DUCKLING_HTTP_URL is no longer set, and rasa.settings.ducklingHttpUrl is
+     gone. Set the variable yourself via rasa.additionalEnv if you run Duckling.
    - rasa.containerSecurityContext now defaults to the restricted Pod Security Standard:
      allowPrivilegeEscalation: false, capabilities.drop: [ALL], runAsNonRoot: true and
      seccompProfile.type: RuntimeDefault. No runAsUser is set, so the effective uid is
@@ -47,12 +53,9 @@ By installing and using this software, you agree to be bound by the terms and co
    - Chart.yaml declares appVersion again, tracking the Rasa Pro release the chart
      targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
      upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
-     the image independently. actionServer, duckling and rasaProServices version
-     independently and keep explicit tags.
+     the image independently.
    - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
      so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
-   The securityContext changes apply to the rasa component and the test hook Pod;
-   actionServer and duckling are unchanged.
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
 {{- if and .Values.rasa.containerSecurityContext.enabled .Values.rasa.containerSecurityContext.runAsNonRoot (ne .Values.rasa.image.repository $defaultRepo) }}
 

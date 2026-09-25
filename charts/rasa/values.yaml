@@ -50,7 +50,7 @@ rasa:
     # secretName: "rasa-secrets"
     # secretKey: "authToken"
   # -- jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
-  # Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token.
+  # Unset by default. Set this together with jwtMethod to authenticate API requests with signed JWTs instead of a static token.
   jwtSecret:
     # secretName: "rasa-secrets"
     # secretKey: "jwtSecret"
@@ -78,7 +78,7 @@ rasa:
     #   page-access-token: "<PAGE-ACCESS-TOKEN>"
 
   # -- credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file)
-  # that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts.
+  # that is parsed and deep-merged with credentials. The structured value wins on key conflicts.
   # Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml`
   # or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`.
   # Leave unset/empty to disable. Malformed YAML fails the template render.
@@ -102,8 +102,8 @@ rasa:
       # wait_time_between_pulls:  10   # [optional](default: 100)
 
   # -- endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file)
-  # that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts,
-  # so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence
+  # that is parsed and deep-merged with endpoints. The structured value wins on key conflicts,
+  # so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence
   # over the same keys in the raw file.
   # Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml`
   # or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`.
@@ -155,12 +155,12 @@ rasa:
 
   # -- environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults.
   environment: development
-  # settings.logging sets log levels for Rasa and external libraries
+  # logging sets log levels for Rasa and external libraries
   # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
   logging:
     # -- logging.logLevel is Rasa Log Level
     logLevel: info
-# -- rasa.args overrides the default arguments for the container
+  # -- rasa.args overrides the default arguments for the container
   args: []
   # -- rasa.additionalArgs adds additional arguments to the default args
   additionalArgs: []

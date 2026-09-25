@@ -47,6 +47,7 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "enabled": { "type": "boolean" },
         "httpGet": {
           "type": "object",
           "additionalProperties": true,
@@ -68,6 +69,7 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "enabled": { "type": "boolean" },
         "minReplicas": { "type": "integer", "minimum": 1 },
         "maxReplicas": { "type": "integer", "minimum": 1 },
         "targetCPUUtilizationPercentage": { "type": "integer", "minimum": 1, "maximum": 100 }
@@ -86,6 +88,7 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "enabled": { "type": "boolean" },
         "className": { "type": "string" },
         "labels": { "type": "object" },
         "annotations": { "type": "object" },
@@ -118,6 +121,7 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "enabled": { "type": "boolean" },
         "runAsUser": { "type": ["integer", "null"] },
         "runAsGroup": { "type": ["integer", "null"] },
         "fsGroup": { "type": ["integer", "null"] },
@@ -157,6 +161,7 @@
       "type": "object",
       "additionalProperties": true,
       "properties": {
+        "enabled": { "type": "boolean" },
         "denyAll": { "type": "boolean" },
         "nodeCIDR": { "type": "array" },
         "dnsNamespace": { "type": "string", "minLength": 1 },
@@ -189,6 +194,7 @@
             "type": "object",
             "additionalProperties": true,
             "properties": {
+              "enabled": { "type": "boolean" },
               "debug": { "type": "boolean" }
             }
           },

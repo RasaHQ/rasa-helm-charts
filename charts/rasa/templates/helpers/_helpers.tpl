@@ -145,14 +145,18 @@ Configuring settings.authToken is not sufficient: rasa.overrideEnv replaces the
 generated environment block wholesale, so AUTH_TOKEN and JWT_SECRET never
 render. A token that does not reach the pod is not authentication.
 
-The converse also holds, so this counts every route that delivers one: an
-AUTH_TOKEN or JWT_SECRET entry in additionalEnv or overrideEnv, and any
-envFrom source. envFrom contents are opaque at render time, so its presence
-is treated as authentication rather than blocking a legitimate install.
+The converse also holds, so this counts every route that delivers one. Which
+route applies depends on overrideEnv: deployment.yaml emits overrideEnv INSTEAD
+of the generated block, and additionalEnv lives inside that generated block, so
+a token in additionalEnv is discarded the moment overrideEnv is set. This
+mirrors that branch rather than scanning both lists. envFrom contents are
+opaque at render time, so its presence counts as authentication rather than
+blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
-{{- range concat (.Values.rasa.additionalEnv | default list) (.Values.rasa.overrideEnv | default list) -}}
+{{- $env := .Values.rasa.overrideEnv | default (.Values.rasa.additionalEnv | default list) -}}
+{{- range $env -}}
 {{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
 {{-     $named = true -}}
 {{-   end -}}

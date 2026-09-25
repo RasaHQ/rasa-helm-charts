@@ -84,9 +84,12 @@ By installing and using this software, you agree to be bound by the terms and co
    - enableApi now defaults to FALSE. The Rasa HTTP API (model management,
      conversation and tracker endpoints) is opt-in. Set rasa.enableApi=true if your
      integration needs it, and set authToken or jwtSecret when you do.
-   - Rasa settings live directly under rasa.*
+   - Rasa settings live directly under rasa.*. Anything left under rasa.settings is
+     IGNORED, not rejected, so a port, authToken, endpoints or tracker_store left
+     there silently reverts to the chart default. Move them before upgrading.
    - rasa.enabled was removed. The chart deploys one workload, so there is nothing
-     to toggle: install to deploy, uninstall to remove.
+     to toggle: install to deploy, uninstall to remove. If you used rasa.enabled=false
+     to install this chart for its NetworkPolicies alone, it now deploys the server too.
    - rasa.scheme is gone. Nothing read it.
    - rasa.cors is a plain string again. It was typed as "string or secret
      reference"; the secret form was never read and rendered map[...] into --cors.
@@ -118,7 +121,7 @@ By installing and using this software, you agree to be bound by the terms and co
    runAsNonRoot: true requires an image whose USER is a NUMERIC non-root uid. The stock
    image is USER 1001. If yours runs as root, or declares USER by name, the pod fails with
    CreateContainerConfigError and never starts. Check your image with:
-     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag }}
+     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}
    To opt out (the pod will then not satisfy the restricted Pod Security Standard):
      --set rasa.containerSecurityContext.runAsNonRoot=false
 {{- end }}

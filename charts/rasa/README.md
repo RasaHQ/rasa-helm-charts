@@ -126,22 +126,21 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 **`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
 
-> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod and leaves the HTTP API unauthenticated. `rasa.enableApi` still defaults to `true`. Set one of them explicitly before upgrading, or set `rasa.enableApi: false`:
+> **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod. Since `rasa.enableApi` now defaults to `false` as well, an unconfigured install serves no API at all — but if you turn the API back on, set a credential with it:
 >
 > ```yaml
 > rasa:
->   settings:
->     authToken:
->       secretName: rasa-secrets
->       secretKey: authToken
+>   enableApi: true
+>   authToken:
+>     secretName: rasa-secrets
+>     secretKey: authToken
 > ```
 >
-> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render at all** once that API is reachable from outside the cluster — an ingress, a `service.type` other than `ClusterIP`, or `hostNetwork: true`. Override that only when something ahead of the chart authenticates callers:
+> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render at all** once that API is reachable from outside the cluster — an ingress, a `service.type` other than `ClusterIP`, or `hostNetwork: true`. Override only when something ahead of the chart authenticates callers:
 >
 > ```yaml
 > rasa:
->   settings:
->     allowUnauthenticatedApi: true
+>   allowUnauthenticatedApi: true
 > ```
 
 **`app.kubernetes.io/name` is now the chart name**, not the release fullname — `rasa` rather than `my-release-rasa`. The label is part of `Deployment.spec.selector`, which Kubernetes treats as immutable, so **`helm upgrade` fails on an existing release**. Delete the old Deployment first:
@@ -846,7 +845,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.additionalEnv | list | rasa.additionalEnv adds additional environment variables | `[]` |
 | rasa.affinity | object | rasa.affinity allows the deployment to schedule using affinity rules # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | rasa.allowUnauthenticatedApi | bool | allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails when the API is enabled and reachable from outside the cluster (an ingress, a non-ClusterIP service type, or host networking) with no credential reaching the container; set this to true when something in front of the chart already authenticates callers. | `false` |
-| rasa.args | list |  | `[]` |
+| rasa.args | list | rasa.args overrides the default arguments for the container | `[]` |
 | rasa.authToken | string | authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests. | `nil` |
 | rasa.automountServiceAccountToken | bool | rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never calls the Kubernetes API and this chart grants no RBAC, so the token is left out. Set it to true if you add a sidecar via rasa.additionalContainers that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | rasa.autoscaling.enabled | bool | autoscaling.enabled specifies whether autoscaling should be enabled | `false` |
@@ -863,11 +862,11 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.containerSecurityContext.seccompProfile.type | string | rasa.containerSecurityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | rasa.cors | string | cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
 | rasa.credentials | object | credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
-| rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with settings.credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
+| rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.debugMode | bool | debugMode enables debug mode | `false` |
 | rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it. | `false` |
 | rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
-| rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with settings.endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in settings.endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
+| rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.environment | string | environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
 | rasa.image.pullPolicy | string | image.pullPolicy specifies image pull policy | `"IfNotPresent"` |
@@ -881,7 +880,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.ingress.tls | list | ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover. | `[]` |
 | rasa.initContainers | list | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file | `[]` |
 | rasa.jwtMethod | string | jwtMethod is JWT algorithm to be used | `"HS256"` |
-| rasa.jwtSecret | string | jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Unset by default. Set this together with settings.jwtMethod to authenticate API requests with signed JWTs instead of a static token. | `nil` |
+| rasa.jwtSecret | string | jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Unset by default. Set this together with jwtMethod to authenticate API requests with signed JWTs instead of a static token. | `nil` |
 | rasa.lifecycle | object | rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container # Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | `{}` |
 | rasa.livenessProbe.enabled | bool | livenessProbe.enabled is used to enable or disable liveness probe | `true` |
 | rasa.livenessProbe.failureThreshold | int | livenessProbe.failureThreshold defines after how many failures container is considered unhealthy | `6` |

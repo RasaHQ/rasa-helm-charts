@@ -54,14 +54,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for Rasa Pro Services
-*/}}
-{{- define "rasa.rasaProServices.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-rasa-pro-services
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Selector labels for Duckling
 */}}
 {{- define "rasa.duckling.selectorLabels" -}}
@@ -104,17 +96,6 @@ Create the name of the service account to use
 {{- default (include "rasa.fullname" .) .Values.rasa.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasa.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.rasaProServices.serviceAccountName" -}}
-{{- if .Values.rasaProServices.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-rasa-pro-services") .Values.rasaProServices.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.rasaProServices.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -178,16 +159,5 @@ Return Duckling URL
 {{- printf "%s://%s.%s.svc:%d" .Values.duckling.settings.scheme (include "rasa.fullname" . | printf "%s-duckling") .Release.Namespace (.Values.duckling.service.port | int) -}}
 {{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl)) -}}
 {{- print .Values.rasa.settings.ducklingHttpUrl -}}
-{{- end -}}
-{{- end -}}
-
-{{/*
-Check for image pull secrets for Rasa Pro Services
-*/}}
-{{- define "rasaProServices.imagePullSecrets" -}}
-{{- if empty .Values.rasaProServices.imagePullSecrets -}}
-{{- .Values.imagePullSecrets | toYaml | nindent 8 -}}
-{{- else -}}
-{{- .Values.rasaProServices.imagePullSecrets | toYaml | nindent 8 -}}
 {{- end -}}
 {{- end -}}

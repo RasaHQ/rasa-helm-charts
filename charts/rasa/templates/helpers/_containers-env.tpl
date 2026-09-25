@@ -3,10 +3,6 @@ Environment Variables for Rasa Containers
 */}}
 {{- define "rasa.containers.env" -}}
 {{- with .Values.rasa.settings }}
-{{- if or $.Values.duckling.enabled (not (empty $.Values.rasa.settings.ducklingHttpUrl)) -}}
-- name: "RASA_DUCKLING_HTTP_URL"
-  value: "{{ include "rasa.ducklingUrl" $ }}"
-{{- end }}
 {{- if .authToken }}
 - name: "AUTH_TOKEN"
   valueFrom:

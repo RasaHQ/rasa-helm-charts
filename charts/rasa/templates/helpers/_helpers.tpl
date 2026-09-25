@@ -54,14 +54,6 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
-Selector labels for Duckling
-*/}}
-{{- define "rasa.duckling.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-duckling
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Selector labels for Action Server
 */}}
 {{- define "rasa.actionServer.selectorLabels" -}}
@@ -96,17 +88,6 @@ Create the name of the service account to use
 {{- default (include "rasa.fullname" .) .Values.rasa.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.rasa.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.duckling.serviceAccountName" -}}
-{{- if .Values.duckling.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-duckling") .Values.duckling.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.duckling.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -149,15 +130,4 @@ Determine rasa server to run with arguments
 {{- if .Values.rasa.settings.debugMode }}
 - --debug
 {{- end }}
-{{- end -}}
-
-{{/*
-Return Duckling URL
-*/}}
-{{- define "rasa.ducklingUrl" -}}
-{{- if and .Values.duckling.enabled (empty .Values.rasa.settings.ducklingHttpUrl) -}}
-{{- printf "%s://%s.%s.svc:%d" .Values.duckling.settings.scheme (include "rasa.fullname" . | printf "%s-duckling") .Release.Namespace (.Values.duckling.service.port | int) -}}
-{{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl)) -}}
-{{- print .Values.rasa.settings.ducklingHttpUrl -}}
-{{- end -}}
 {{- end -}}

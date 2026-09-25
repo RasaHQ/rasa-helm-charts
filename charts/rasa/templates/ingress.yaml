@@ -1,4 +1,16 @@
 {{- if and .Values.rasa.enabled .Values.rasa.ingress.enabled -}}
+{{- /*
+An ingress puts the Rasa Pro server in front of real traffic, so refuse to
+render one for an API that authenticates nobody. Gated on ingress rather than
+on settings.enableApi: enableApi says nothing about the running process once
+settings.useDefaultArgs is false or rasa.command is overridden.
+*/ -}}
+{{- if and .Values.rasa.settings.enableApi
+           (not .Values.rasa.settings.authToken)
+           (not .Values.rasa.settings.jwtSecret)
+           (not .Values.rasa.settings.allowUnauthenticatedApi) -}}
+{{- fail "rasa.ingress.enabled exposes the Rasa HTTP API, but neither rasa.settings.authToken nor rasa.settings.jwtSecret is set, so the API would accept unauthenticated requests. Set one of them, or set rasa.settings.enableApi=false, or acknowledge the risk with rasa.settings.allowUnauthenticatedApi=true (for example when your ingress or service mesh already authenticates callers)." -}}
+{{- end -}}
 {{- $fullName := include "rasa.fullname" . -}}
 {{- $svcPort := .Values.rasa.service.port -}}
 apiVersion: networking.k8s.io/v1

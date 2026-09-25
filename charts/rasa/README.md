@@ -137,7 +137,13 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 >       secretKey: authToken
 > ```
 >
-> The chart prints an install-time warning whenever the API is enabled with neither set.
+> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render an ingress** in that state — enabling `rasa.ingress` puts an unauthenticated API in front of real traffic. Override that only when something ahead of the chart authenticates callers:
+>
+> ```yaml
+> rasa:
+>   settings:
+>     allowUnauthenticatedApi: true
+> ```
 
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 
@@ -854,6 +860,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.serviceAccount.annotations | object | serviceAccount.annotations defines annotations to add to the service account | `{}` |
 | rasa.serviceAccount.create | bool | serviceAccount.create specifies whether a service account should be created | `true` |
 | rasa.serviceAccount.name | string | serviceAccount.name is the name of the service account to use. If not set and create is true, a name is generated using the fullname template | `""` |
+| rasa.settings.allowUnauthenticatedApi | bool | settings.allowUnauthenticatedApi acknowledges serving an unauthenticated API behind an ingress. Rendering an ingress fails when settings.enableApi is true and neither authToken nor jwtSecret is set; set this to true when something in front of the chart already authenticates callers. | `false` |
 | rasa.settings.authToken | string | settings.authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests. Unset by default: with settings.enableApi true and neither authToken nor jwtSecret set, the HTTP API accepts unauthenticated requests. | `nil` |
 | rasa.settings.cors | string | settings.cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
 | rasa.settings.credentials | object | settings.credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |

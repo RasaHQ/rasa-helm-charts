@@ -175,6 +175,7 @@
             "enableApi": { "type": "boolean" },
             "authToken": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
             "jwtSecret": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
+            "allowUnauthenticatedApi": { "type": "boolean" },
             "jwtMethod": { "type": "string" },
             "cors": { "$ref": "#/definitions/secretRefOrString" },
             "useDefaultArgs": { "type": "boolean" },

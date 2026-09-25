@@ -136,7 +136,13 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 >       secretKey: authToken
 > ```
 >
-> The chart prints an install-time warning whenever the API is enabled with neither set.
+> The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render an ingress** in that state — enabling `rasa.ingress` puts an unauthenticated API in front of real traffic. Override that only when something ahead of the chart authenticates callers:
+>
+> ```yaml
+> rasa:
+>   settings:
+>     allowUnauthenticatedApi: true
+> ```
 
 Chart 3.0.0 also hardens the surviving `rasa` component to the [restricted Pod Security Standard](https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted).
 

@@ -64,11 +64,14 @@ By installing and using this software, you agree to be bound by the terms and co
 
    WARNING: the Rasa HTTP API is enabled and NOT authenticated.
    settings.enableApi is true but neither settings.authToken nor settings.jwtSecret is set,
-   so anything that can reach the service can call the API. Set one of them before exposing
-   this deployment beyond the cluster:
+   so anything that can reach the Service inside the cluster can call the API. Set one of
+   them before exposing this deployment more widely:
      --set rasa.settings.authToken.secretName=rasa-secrets \
      --set rasa.settings.authToken.secretKey=authToken
    Or disable the API with --set rasa.settings.enableApi=false
+   Enabling rasa.ingress in this state is refused outright; override that with
+   --set rasa.settings.allowUnauthenticatedApi=true only if something in front of the
+   chart already authenticates callers.
 {{- end }}
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
 {{- if and .Values.rasa.containerSecurityContext.enabled .Values.rasa.containerSecurityContext.runAsNonRoot (ne .Values.rasa.image.repository $defaultRepo) }}

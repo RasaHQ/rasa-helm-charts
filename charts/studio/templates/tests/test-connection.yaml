@@ -7,9 +7,23 @@ metadata:
   annotations:
     "helm.sh/hook": test
 spec:
+  automountServiceAccountToken: false
   containers:
     - name: wget
       image: busybox
+      securityContext:
+        allowPrivilegeEscalation: false
+        capabilities:
+          drop:
+            - ALL
+        runAsNonRoot: true
+        # busybox has no baked-in non-root user; 65534 is nobody, which is all `wget` needs.
+        runAsUser: 65534
+        seccompProfile:
+          type: RuntimeDefault
       command: ['wget']
-      args: ['{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}']
+      # -O- streams the response to stdout. The default behaviour saves it to the
+      # working directory, which is / in the busybox image and is not writable by
+      # uid 65534, so the test would fail even against a healthy service.
+      args: ['-O-', '{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}']
   restartPolicy: Never

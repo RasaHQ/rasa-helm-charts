@@ -335,16 +335,11 @@
               "description": "Job activeDeadlineSeconds — hard wall-clock bound for the migration Job",
               "type": "integer",
               "minimum": 1
-            }
-          }
-        },
-        "image": {
-          "$ref": "#/definitions/imageConfig"
-        },
-        "migration": {
-          "description": "Database migration job configuration",
-          "type": "object",
-          "properties": {
+            },
+            "automountServiceAccountToken": {
+              "description": "Mount a Kubernetes API token into the migration Job pod",
+              "type": "boolean"
+            },
             "podSecurityContext": {
               "$ref": "#/definitions/securityContextConfig"
             },
@@ -362,6 +357,9 @@
             }
           }
         },
+        "image": {
+          "$ref": "#/definitions/imageConfig"
+        },
         "autoscaling": {
           "$ref": "#/definitions/autoscaling"
         },
@@ -373,6 +371,10 @@
         },
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"
+        },
+        "automountServiceAccountToken": {
+          "description": "Mount a Kubernetes API token into the pod",
+          "type": "boolean"
         },
         "resources": {
           "$ref": "#/definitions/resourceRequirements"
@@ -432,6 +434,10 @@
         },
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"
+        },
+        "automountServiceAccountToken": {
+          "description": "Mount a Kubernetes API token into the pod",
+          "type": "boolean"
         },
         "resources": {
           "$ref": "#/definitions/resourceRequirements"

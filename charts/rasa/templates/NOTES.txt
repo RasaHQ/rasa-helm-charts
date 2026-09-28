@@ -63,7 +63,7 @@ whole 3.0.0 block there buried the access instructions above it.
       duckling / rasaProServices components.
 
    Full migration guide, including every removed and renamed key:
-   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/README.md#upgrading-to-300
+   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/MIGRATION.md
 {{- end }}
 
 {{- if include "rasa.apiUnauthenticated" . }}

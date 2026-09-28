@@ -43,9 +43,9 @@ spec:
   {{- range $k := (list "rules" "ingressClassName" "defaultBackend") }}
   {{- if hasKey $.Values.ingress $k }}{{ $raw = append $raw (printf "ingress.%s" $k) }}{{ end }}
   {{- end }}
-  {{- $shape := "\n  ingress:\n    enabled: true\n    className: istio\n    hosts:\n      - host: my.example.com\n        paths:\n          - path: /\n            pathType: Prefix\n    tls:\n      - hosts: [my.example.com]\n        secretName: rasa-tls\n" }}
+  {{- $shape := "\n  ingress:\n    enabled: true\n    className: istio\n    hosts:\n      - host: my.example.com\n        paths:            # wired to this release's Service\n          - path: /\n            pathType: Prefix\n        extraPaths:        # any other backend you like\n          - path: /other\n            pathType: Prefix\n            serviceName: some-other-service\n            servicePort: 8080\n    tls:\n      - hosts: [my.example.com]\n        secretName: rasa-tls\n" }}
   {{- if $raw }}
-  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, and these keys are not chart values so they were ignored: %s. They look like a raw Kubernetes Ingress spec. This chart builds the spec for you - describe the routes and it wires the backend to this release's Service, whose name is derived from the release rather than being plain 'rasa':%sUse ingress.className, not ingressClassName. ingress.tls already has the same shape as the Kubernetes field." (join ", " $raw) $shape) }}
+  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, and these keys are not chart values so they were ignored: %s. They look like a raw Kubernetes Ingress spec. This chart builds the spec for you: entries under 'paths' are wired to this release's Service automatically, and 'extraPaths' takes an explicit serviceName and servicePort when you need a different backend:%sUse ingress.className, not ingressClassName. ingress.tls already has the same shape as the Kubernetes field." (join ", " $raw) $shape) }}
   {{- end }}
   {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Describe at least one route:%sOr set rasa.ingress.enabled=false and manage routing yourself." $shape) }}
   {{- end }}

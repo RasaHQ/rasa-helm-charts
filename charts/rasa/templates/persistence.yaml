@@ -1,4 +1,3 @@
-{{- include "rasa.validateNoNulledKeys" . -}}
 {{- if and .Values.persistence.create .Values.persistence.hostPath.enabled -}}
 apiVersion: v1
 kind: PersistentVolume

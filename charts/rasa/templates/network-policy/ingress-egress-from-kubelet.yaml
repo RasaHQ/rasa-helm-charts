@@ -1,4 +1,3 @@
-{{- include "rasa.validateNoNulledKeys" . -}}
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

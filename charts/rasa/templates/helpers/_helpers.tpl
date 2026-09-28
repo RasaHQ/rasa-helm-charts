@@ -250,9 +250,17 @@ to the chart default - it disappears, and every .Values.foo.bar below it fails
 with "nil pointer evaluating interface {}.bar", which names the template
 rather than the mistake. hasKey is the reliable signal because a nulled key is
 absent after coalescing.
+
+Scope is deliberate. This is included only from deployment.yaml, so it covers
+the blocks deployment.yaml is first to dereference - the ones a human edits by
+hand in a values file. Nulling a structural block like service, ingress or
+networkPolicy still produces the raw nil pointer, because another template
+reaches it first. Covering those too would mean an include at the top of every
+template, which is not worth it for a values typo that already fails safely at
+render time, before anything reaches the cluster.
 */}}
 {{- define "rasa.validateNoNulledKeys" -}}
-{{- $required := list "rasa" "image" "serviceAccount" "podSecurityContext" "containerSecurityContext" "service" "livenessProbe" "readinessProbe" "ingress" "autoscaling" "persistence" "networkPolicy" "global" -}}
+{{- $required := list "image" "podSecurityContext" "containerSecurityContext" "livenessProbe" "readinessProbe" -}}
 {{- $missing := list -}}
 {{- range $k := $required -}}
 {{- if not (hasKey $.Values $k) -}}{{- $missing = append $missing $k -}}{{- end -}}

@@ -209,6 +209,29 @@ rasa: {args: [], command: ["python", "-m", "rasa.model_service"]}
 >   secretKey: rasaProLicense   # your existing key
 > ```
 
+**`rasa.credentials` is gone; `rasa.integrations` replaces it.** Mantle declares channels in `integrations.yml` and ignores `credentials.yml` entirely — `rasa/core/config/channel_loading.py` picks the file by project layout, and for a Mantle project "channels come exclusively from `integrations.yml`".
+
+```yaml
+rasa:
+  integrations:
+    llm:
+      model_group: orchestrator
+    model_groups:
+      - id: orchestrator
+        models:
+          - provider: openai
+            model: gpt-5.1
+            api_key_env: OPENAI_API_KEY
+    channels:
+      rest: { enabled: true }
+```
+
+> **Warning:** the chart mounts this over `/app/integrations.yml`, which **replaces** the file inside your trained project rather than merging with it. `llm.model_group` is required and validated when the model archive loads, so a chart-supplied file carrying only `channels:` fails the server at startup. Supply the whole file or none of it.
+
+> **Note:** a project counts as Mantle only when `integrations.yml` **and** at least one `skills/*/skill.md` are present under the project root. The skills come from the trained artifact, so this key alone does not switch a project to Mantle — and if the artifact unpacks its skills elsewhere, channels fall back to `credentials.yml`, which the chart no longer provides.
+
+**`rasa.endpoints` is deprecated but still functional.** `rasa run` reads `/app/endpoints.yml` for the tracker store, event broker, lock store, action endpoint and NLG server, and nothing in the Mantle path bypasses that. The `model_groups`, `mcp_servers` and `tracing` blocks move into `rasa.integrations`.
+
 **`rasa.scheme` was removed.** No template read it.
 
 **`rasa.cors` is a plain string again.** It was typed as "string or secret reference"; the secret form was never read and rendered `map[...]` straight into the `--cors` argument.

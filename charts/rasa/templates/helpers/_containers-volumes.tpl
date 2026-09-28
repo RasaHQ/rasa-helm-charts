@@ -1,8 +1,8 @@
 {{- define "rasa.containers.volumes" -}}
 {{- if .Values.rasa.mountDefaultConfigmap -}}
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
-{{- $hasCredentials := include "rasa.hasCredentials" . }}
-{{- if or $hasEndpoints $hasCredentials }}
+{{- $hasIntegrations := include "rasa.hasIntegrations" . }}
+{{- if or $hasEndpoints $hasIntegrations }}
 - name: "rasa-configuration"
   configMap:
     name: {{ include "rasa.fullname" . }}-configmap
@@ -11,9 +11,9 @@
       - key: "endpoints"
         path: "endpoints.yml"
 {{- end }}
-{{- if $hasCredentials }}
-      - key: "credentials"
-        path: "credentials.yml"
+{{- if $hasIntegrations }}
+      - key: "integrations"
+        path: "integrations.yml"
 {{- end }}
 {{- end }}
 {{- end }}
@@ -46,16 +46,16 @@ itself needs no write access, so it is deliberately not mounted over.
 {{- define "rasa.containers.volumeMounts" -}}
 {{- if .Values.rasa.mountDefaultConfigmap -}}
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
-{{- $hasCredentials := include "rasa.hasCredentials" . }}
+{{- $hasIntegrations := include "rasa.hasIntegrations" . }}
 {{- if $hasEndpoints }}
 - mountPath: "/app/endpoints.yml"
   subPath: "endpoints.yml"
   name: "rasa-configuration"
   readOnly: true
 {{- end }}
-{{- if $hasCredentials }}
-- mountPath: "/app/credentials.yml"
-  subPath: "credentials.yml"
+{{- if $hasIntegrations }}
+- mountPath: "/app/integrations.yml"
+  subPath: "integrations.yml"
   name: "rasa-configuration"
   readOnly: true
 {{- end }}

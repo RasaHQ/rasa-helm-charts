@@ -205,8 +205,8 @@ Report whether the chart has any endpoints configuration to mount.
 {{- end -}}
 
 {{/*
-Report whether the chart has any credentials configuration to mount.
+Report whether the chart has any integrations configuration to mount.
 */}}
-{{- define "rasa.hasCredentials" -}}
-{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.credentials "raw" .Values.rasa.credentialsRaw "field" "credentialsRaw") -}}
+{{- define "rasa.hasIntegrations" -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.integrations "raw" .Values.rasa.integrationsRaw "field" "integrationsRaw") -}}
 {{- end -}}

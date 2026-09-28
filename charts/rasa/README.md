@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.2](https://img.shields.io/badge/Version-3.0.0--rc.2-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
+![Version: 3.0.0-rc.3](https://img.shields.io/badge/Version-3.0.0--rc.3-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -81,7 +81,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.2
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.3
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -96,7 +96,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 3.0.0-rc.2
+helm install my-release rasa/rasa --version 3.0.0-rc.3
 ```
 
 ## Upgrading the Chart
@@ -209,6 +209,29 @@ rasa: {args: [], command: ["python", "-m", "rasa.model_service"]}
 >   secretName: rasa-secrets
 >   secretKey: rasaProLicense   # your existing key
 > ```
+
+**`rasa.credentials` is gone; `rasa.integrations` replaces it.** Mantle declares channels in `integrations.yml` and ignores `credentials.yml` entirely — `rasa/core/config/channel_loading.py` picks the file by project layout, and for a Mantle project "channels come exclusively from `integrations.yml`".
+
+```yaml
+rasa:
+  integrations:
+    llm:
+      model_group: orchestrator
+    model_groups:
+      - id: orchestrator
+        models:
+          - provider: openai
+            model: gpt-5.1
+            api_key_env: OPENAI_API_KEY
+    channels:
+      rest: { enabled: true }
+```
+
+> **Warning:** the chart mounts this over `/app/integrations.yml`, which **replaces** the file inside your trained project rather than merging with it. `llm.model_group` is required and validated when the model archive loads, so a chart-supplied file carrying only `channels:` fails the server at startup. Supply the whole file or none of it.
+
+> **Note:** a project counts as Mantle only when `integrations.yml` **and** at least one `skills/*/skill.md` are present under the project root. The skills come from the trained artifact, so this key alone does not switch a project to Mantle — and if the artifact unpacks its skills elsewhere, channels fall back to `credentials.yml`, which the chart no longer provides.
+
+**`rasa.endpoints` is deprecated but still functional.** `rasa run` reads `/app/endpoints.yml` for the tracker store, event broker, lock store, action endpoint and NLG server, and nothing in the Mantle path bypasses that. The `model_groups`, `mcp_servers` and `tracing` blocks move into `rasa.integrations`.
 
 **`rasa.scheme` was removed.** No template read it.
 
@@ -517,7 +540,7 @@ Helm CLI (`--set-file`):
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 3.0.0-rc.2 \
+  --version 3.0.0-rc.3 \
   --set-file rasa.endpointsRaw=./endpoints.yml \
   --set-file rasa.credentialsRaw=./credentials.yml
 ```
@@ -529,7 +552,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 3.0.0-rc.2
+      targetRevision: 3.0.0-rc.3
       helm:
         fileParameters:
           - name: rasa.endpointsRaw
@@ -926,12 +949,10 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.containerSecurityContext.seccompProfile | object | rasa.containerSecurityContext.seccompProfile defines the seccomp profile configuration. | `{"type":"RuntimeDefault"}` |
 | rasa.containerSecurityContext.seccompProfile.type | string | rasa.containerSecurityContext.seccompProfile.type is the seccomp profile type. | `"RuntimeDefault"` |
 | rasa.cors | string | cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production. | `"*"` |
-| rasa.credentials | object | credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
-| rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.debugMode | bool | debugMode enables debug mode | `false` |
 | rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. On by default: rasa run exits immediately when it has neither a model nor the API, so a model-less install cannot serve without it. The chart refuses to render an enabled API with no credential, so set authToken or jwtSecret, or acknowledge with allowUnauthenticatedApi. | `true` |
-| rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
-| rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
+| rasa.endpoints | object | endpoints is DEPRECATED but still read. rasa run loads /app/endpoints.yml for the tracker store, event broker, lock store, action endpoint and NLG server. Under Mantle its model_groups, mcp_servers and tracing blocks belong in rasa.integrations instead. # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
+| rasa.endpointsRaw | string | endpointsRaw is DEPRECATED alongside endpoints. Accepts the contents of an endpoints.yml file as a string, deep-merged with endpoints, which wins on key conflicts. For `--set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD `fileParameters`. Malformed YAML fails the render. | `""` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.environment | string | environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
 | rasa.extraArgs | list | extraArgs appends arguments to the ones the chart generates. Ignored when args is set. | `[]` |
@@ -949,6 +970,8 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.ingress.labels | object | ingress.labels defines labels to add to the ingress | `{}` |
 | rasa.ingress.tls | list | ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover. | `[]` |
 | rasa.initContainers | list | rasa.initContainers allows to specify init containers for the Rasa deployment # Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/ # <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file | `[]` |
+| rasa.integrations | object | integrations is rendered to /app/integrations.yml, the Mantle project file declaring the LLM, its model groups, the channels customers reach the agent through, optional MCP servers and Langfuse tracing. Mantle reads channels from here and ignores credentials.yml entirely. Setting this REPLACES the integrations.yml inside the trained project, because the chart mounts over that path — so supply the whole file, llm.model_group included, or the server fails validation at startup. A Mantle project is detected by integrations.yml AND at least one skills/*/skill.md under the project root, so this key alone does not make a project Mantle; the skills come from the trained artifact. # See: https://mantle.rasa.com/reference/integrations-yml | `{}` |
+| rasa.integrationsRaw | string | integrationsRaw accepts a raw YAML string (e.g. the contents of an integrations.yml file) that is parsed and deep-merged with integrations. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.integrationsRaw=./integrations.yml` or ArgoCD multi-source `fileParameters` referencing `$values/integrations.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.jwtMethod | string | jwtMethod is JWT algorithm to be used | `"HS256"` |
 | rasa.jwtSecret | string | jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication. Unset by default. Set this together with jwtMethod to authenticate API requests with signed JWTs instead of a static token. | `nil` |
 | rasa.lifecycle | object | rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container # Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/ | `{}` |
@@ -962,7 +985,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | livenessProbe.terminationGracePeriodSeconds is an optional duration in seconds the pod needs to terminate gracefully after a liveness probe failure | `30` |
 | rasa.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
 | rasa.logging.logLevel | string | logging.logLevel is Rasa Log Level | `"info"` |
-| rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart renders a ConfigMap from endpoints and credentials and mounts it into the Rasa container at /app/endpoints.yml and /app/credentials.yml, which is where rasa run reads them from because WORKDIR is /app. When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts. | `true` |
+| rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart renders a ConfigMap from integrations and endpoints and mounts it into the Rasa container at /app/integrations.yml and /app/endpoints.yml, which is where rasa run reads them from because WORKDIR is /app. When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts. | `true` |
 | rasa.mountModelsVolume | bool | mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
 | rasa.overrideEnv | list | overrideEnv replaces the environment the chart generates, rather than adding to it. Empty (default) keeps the generated block; a non-empty list replaces it wholesale, including RASA_PRO_LICENSE, so supply every variable the container needs. Use extraEnv to add without replacing. | `[]` |

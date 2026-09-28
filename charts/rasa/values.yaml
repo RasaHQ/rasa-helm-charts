@@ -60,27 +60,34 @@ rasa:
   jwtMethod: HS256
   # -- cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
   cors: '*'
-  # -- mountDefaultConfigmap controls whether the chart renders a ConfigMap from endpoints and credentials and mounts it into the Rasa container at /app/endpoints.yml and /app/credentials.yml, which is where rasa run reads them from because WORKDIR is /app.
+  # -- mountDefaultConfigmap controls whether the chart renders a ConfigMap from integrations and endpoints and mounts it into the Rasa container at /app/integrations.yml and /app/endpoints.yml, which is where rasa run reads them from because WORKDIR is /app.
   # When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts.
   mountDefaultConfigmap: true
   # -- mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models.
   # When false, models must be available at /app/models or baked into the image.
   mountModelsVolume: true
-  # -- credentials enables credentials configuration for channel connectors
-  ## See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels
-  credentials: {}
-    # rest:
-    # facebook:
-    #   verify: "rasa"
-    #   secret: "<SECRET>"
-    #   page-access-token: "<PAGE-ACCESS-TOKEN>"
+  # -- integrations is rendered to /app/integrations.yml, the Mantle project file declaring the LLM, its model groups, the channels customers reach the agent through, optional MCP servers and Langfuse tracing. Mantle reads channels from here and ignores credentials.yml entirely.
+  # Setting this REPLACES the integrations.yml inside the trained project, because the chart mounts over that path — so supply the whole file, llm.model_group included, or the server fails validation at startup.
+  # A Mantle project is detected by integrations.yml AND at least one skills/*/skill.md under the project root, so this key alone does not make a project Mantle; the skills come from the trained artifact.
+  ## See: https://mantle.rasa.com/reference/integrations-yml
+  integrations: {}
+    # llm:
+    #   model_group: orchestrator
+    # model_groups:
+    #   - id: orchestrator
+    #     models:
+    #       - provider: openai
+    #         model: gpt-5.1
+    #         api_key_env: OPENAI_API_KEY
+    # channels:
+    #   rest: { enabled: true }
 
-  # -- credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file)
-  # that is parsed and deep-merged with credentials. The structured value wins on key conflicts.
-  # Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml`
-  # or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`.
+  # -- integrationsRaw accepts a raw YAML string (e.g. the contents of an integrations.yml file)
+  # that is parsed and deep-merged with integrations. The structured value wins on key conflicts.
+  # Intended for `helm install --set-file rasa.integrationsRaw=./integrations.yml`
+  # or ArgoCD multi-source `fileParameters` referencing `$values/integrations.yml`.
   # Leave unset/empty to disable. Malformed YAML fails the template render.
-  credentialsRaw: ""
+  integrationsRaw: ""
 
   # See: https://rasa.com/docs/rasa/telemetry/telemetry/
   telemetry:
@@ -90,66 +97,42 @@ rasa:
     debug: false
 
   # Not all parameters are mandatory
-  # -- endpoints enables endpoints configuration for the Rasa deployment.
-  # See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
+  # -- endpoints is DEPRECATED but still read. rasa run loads /app/endpoints.yml for the tracker store, event broker, lock store, action endpoint and NLG server. Under Mantle its model_groups, mcp_servers and tracing blocks belong in rasa.integrations instead.
+  ## See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
   endpoints: {}
-    # -- endpoints.models is where the models are pulled from.
-    # See: https://rasa.com/docs/reference/integrations/model-storage
-    # models:
-    #   url: http://my-server.com/models/default_core@latest
-      # wait_time_between_pulls:  10   # [optional](default: 100)
-
-  # -- endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file)
-  # that is parsed and deep-merged with endpoints. The structured value wins on key conflicts,
-  # so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence
-  # over the same keys in the raw file.
-  # Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml`
-  # or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`.
-  # Leave unset/empty to disable. Malformed YAML fails the template render.
-  endpointsRaw: ""
-
-    # --endpoints.action_endpoint is a server which runs your custom actions.
-    # See: https://rasa.com/docs/reference/integrations/action-server/actions
     # action_endpoint:
-    #   actions_module: "actions"
+    #   url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
+    #   # or run actions in-process instead of over HTTP:
+    #   # actions_module: "actions"
 
-    # -- endpoints.tracker_store is used to store the conversations.
-    # By default the conversations are stored in memory.
-    # See: https://rasa.com/docs/reference/integrations/tracker-stores
-    # tracker_store:
-    #    type: redis
-    #    url: <host of the redis instance, e.g. localhost>
-    #    port: <port of your redis instance, usually 6379>
-    #    db: <number of your database within redis, e.g. 0>
-    #    password: <password used for authentication>
-    #    use_ssl: <whether or not the communication is encrypted, default false>
+    # tracker_store:              # conversations are in memory unless set
+    #   type: redis
+    #   url: redis.data.svc.cluster.local
+    #   port: 6379
+    #   db: 0
+    #   password: <password>
+    #   use_ssl: false
 
-    # -- endpoints.event_broker allows you to connect your running assistant to other services that process the data which all conversation events should be streamed to
-    # See: https://rasa.com/docs/reference/integrations/event-brokers
-    # event_broker:
+    # event_broker:               # stream conversation events out
     #   type: kafka
-    #   url: localhost:9095
-    #   sasl_mechanism: SCRAM-SHA-512
+    #   url: kafka.data.svc.cluster.local:9092
     #   security_protocol: SASL_PLAINTEXT
-    #   sasl_username: testuser
-    #   sasl_password: testpass123
-    #   partition_by_sender: true
-    #   client_id: rasa-broker
+    #   sasl_mechanism: SCRAM-SHA-512
+    #   sasl_username: rasa
+    #   sasl_password: <password>
 
-    # -- endpoints.model_groups is used to define multiple models under a single ID which can be accessed by any component.
-    # Ensure the OPENAI_API_KEY is set to prevent any missing API key errors.
-    # See: https://rasa.com/docs/reference/config/components/llm-configuration#model-groups
-    # model_groups:
+    # lock_store:                 # required for more than one replica
+    #   type: redis
+    #   url: redis.data.svc.cluster.local
+
+    # model_groups:               # moves to rasa.integrations under Mantle
     #   - id: openai-gpt-4o
     #     models:
     #       - provider: openai
     #         model: gpt-4o-2024-11-20
-    #         request_timeout: 7
-    #         max_tokens: 256
-    #   - id: openai-embeddings
-    #     models:
-    #       - provider: openai
-    #         model: text-embedding-3-large
+
+  # -- endpointsRaw is DEPRECATED alongside endpoints. Accepts the contents of an endpoints.yml file as a string, deep-merged with endpoints, which wins on key conflicts. For `--set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD `fileParameters`. Malformed YAML fails the render.
+  endpointsRaw: ""
 
   # -- environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults.
   environment: development

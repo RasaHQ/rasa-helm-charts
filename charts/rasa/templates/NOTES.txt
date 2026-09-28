@@ -118,6 +118,18 @@ By installing and using this software, you agree to be bound by the terms and co
        rasaLicense:
          secretName: rasa-secrets
          secretKey: rasaProLicense
+   - rasa.credentials and rasa.credentialsRaw are GONE. Mantle declares channels in
+     integrations.yml and ignores credentials.yml entirely, so the chart no longer
+     renders or mounts it. Move your channels into rasa.integrations.
+   - rasa.integrations and rasa.integrationsRaw are new. They render
+     /app/integrations.yml: the LLM, its model groups, channels, optional MCP
+     servers and Langfuse tracing. Setting either REPLACES the integrations.yml
+     inside your trained project, so supply the whole file — llm.model_group
+     included — or the server fails validation at startup.
+   - rasa.endpoints is DEPRECATED but still works. rasa run continues to read
+     /app/endpoints.yml for the tracker store, event broker, lock store, action
+     endpoint and NLG server. Its model_groups, mcp_servers and tracing blocks
+     belong in rasa.integrations now.
    - Rasa settings live directly under rasa.*. Anything left under rasa.settings is
      IGNORED, not rejected, so a port, authToken, endpoints or tracker_store left
      there silently reverts to the chart default. Move them before upgrading.

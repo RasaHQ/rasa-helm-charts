@@ -30,13 +30,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
-  {{- if not .Values.ingress.hosts }}
-  {{- /*
-  An ingress with no rules routes nothing. Fail rather than emit `rules: null`,
-  which the API server accepts and silently does nothing with.
-  */}}
-  {{- fail "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Add at least one host and path, or set rasa.ingress.enabled=false and manage routing yourself." }}
-  {{- end }}
+  {{- include "rasa.validateIngressHosts" . }}
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ $.Values.global.ingressHost | default .host | quote }}

@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.29](https://img.shields.io/badge/Version-3.0.0--rc.29-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.30](https://img.shields.io/badge/Version-3.0.0--rc.30-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -13,8 +13,6 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 | **app** | Studio API server and web client — handles business logic and data persistence with Better Auth | `/api` and `/` | always on |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
-
-> **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
 
 ## Prerequisites
 
@@ -69,7 +67,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.29
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.30
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -84,7 +82,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.29
+$ helm install my-release rasa/studio --version 3.0.0-rc.30
 ```
 
 ## Quick Start
@@ -137,13 +135,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.29
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.30
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.29
+$ helm pull rasa/studio --version 3.0.0-rc.30
 ```
 
 ## General Configuration
@@ -184,7 +182,7 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.rasa.ingress.hosts[0].host`). No host value
+`rasa.ingress.hosts[0].host`). No host value
 is enforced by the schema — an install without any host renders empty
 (match-all) ingress rules and relative browser URLs.
 
@@ -276,6 +274,14 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
+> **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
+> root rather than under a nested `rasa` key — so these are `rasa.image`,
+> `rasa.resources`, `rasa.ingress`, and `rasa.rasa.*` holds only Rasa's own config
+> (`port`, `mountDefaultConfigmap`). Old paths are ignored, not rejected. Upgrading an
+> existing release also needs the Rasa Deployment deleted first, because its selector
+> changed and Kubernetes treats that field as immutable:
+> `kubectl delete deployment rasapro -n <namespace>`.
+
 When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
@@ -285,11 +291,9 @@ app:
       MS_API_URL: "https://models.example.com"
 ```
 
-> **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
-
 ### Rasa Pro Model Service Environment Variables
 
-The following environment variables can be configured on the Rasa Pro model server container via `rasa.rasa.overrideEnv`:
+The following environment variables can be configured on the Rasa Pro model server container via `rasa.overrideEnv`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -526,7 +530,7 @@ Additional breaking changes in 3.0.0:
   ingresses and every derived URL (`window.MS_API_URL`,
   `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
   service on its own hostname) leave `global.ingressHost` unset and set
-  `app.ingress.hostName` and `rasa.rasa.ingress.hosts[0].host` (model service) —
+  `app.ingress.hostName` and `rasa.ingress.hosts[0].host` (model service) —
   `global.ingressHost` overrides the per-host values when set, so the two
   are mutually exclusive by design.
 
@@ -704,9 +708,9 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumes | list | eventIngestion.volumes defines additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name | `""` |
 | global.additionalDeploymentLabels | object | global.additionalDeploymentLabels can be used to map organizational structures onto system objects https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressAnnotations | object | global.ingressAnnotations are annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.additionalAnnotations, rasa.rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
-| global.ingressClassName | string | global.ingressClassName is the ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.rasa.ingress.className) wins when set. | `""` |
-| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.rasa.ingress.hosts[0].host) instead. | `nil` |
+| global.ingressAnnotations | object | global.ingressAnnotations are annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.additionalAnnotations, rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
+| global.ingressClassName | string | global.ingressClassName is the ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.ingress.className) wins when set. | `""` |
+| global.ingressHost | string | global.ingressHost is the single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Controls whether the pod may use the node network namespace | `false` |
 | imagePullSecrets | list | imagePullSecret defines repository pull secrets | `[]` |
 | nameOverride | string | Override name of app | `""` |
@@ -714,57 +718,57 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | networkPolicy.enabled | bool | networkPolicy.enabled specifies whether to enable network policies | `false` |
 | networkPolicy.nodeCIDR | list | networkPolicy.nodeCIDR allows for traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes | `[]` |
 | podLabels | object | podLabels defines labels to add to all Studio pod(s) | `{}` |
+| rasa.args | list | args: [] replaces the chart-generated arguments entirely, so the container runs `command` alone. This is what settings.useDefaultArgs: false used to do. | `[]` |
+| rasa.command[0] | string |  | `"python"` |
+| rasa.command[1] | string |  | `"-m"` |
+| rasa.command[2] | string |  | `"rasa.model_service"` |
 | rasa.enabled | bool | rasa.enabled deploys the Rasa Pro model server subchart. To run Studio without the model service set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
+| rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
-| rasa.rasa.command[0] | string |  | `"python"` |
-| rasa.rasa.command[1] | string |  | `"-m"` |
-| rasa.rasa.command[2] | string |  | `"rasa.model_service"` |
-| rasa.rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
-| rasa.rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.rasa.image.tag | string |  | `"3.17.11-latest"` |
-| rasa.rasa.ingress.annotations | object |  | `{}` |
-| rasa.rasa.ingress.enabled | bool |  | `true` |
-| rasa.rasa.ingress.hosts[0].host | string |  | `""` |
-| rasa.rasa.ingress.hosts[0].paths[0].path | string |  | `"/modelservice"` |
-| rasa.rasa.ingress.hosts[0].paths[0].pathType | string |  | `"Prefix"` |
-| rasa.rasa.livenessProbe.enabled | bool |  | `true` |
-| rasa.rasa.livenessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |
-| rasa.rasa.livenessProbe.httpGet.port | int |  | `8000` |
-| rasa.rasa.livenessProbe.httpGet.scheme | string |  | `"HTTP"` |
-| rasa.rasa.livenessProbe.initialDelaySeconds | int |  | `30` |
-| rasa.rasa.livenessProbe.periodSeconds | int |  | `15` |
-| rasa.rasa.livenessProbe.successThreshold | int |  | `1` |
-| rasa.rasa.livenessProbe.timeoutSeconds | int |  | `5` |
-| rasa.rasa.overrideEnv[0].name | string |  | `"RASA_PRO_LICENSE"` |
-| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.key | string |  | `"RASA_PRO_LICENSE_SECRET_KEY"` |
-| rasa.rasa.overrideEnv[0].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
-| rasa.rasa.overrideEnv[1].name | string |  | `"OPENAI_API_KEY"` |
-| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
-| rasa.rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
-| rasa.rasa.persistence.create | bool |  | `true` |
-| rasa.rasa.persistence.hostPath.enabled | bool |  | `false` |
-| rasa.rasa.persistence.storageCapacity | string |  | `"1Gi"` |
-| rasa.rasa.persistence.storageClassName | string | Make sure to set the correct storage class name based on your cluster configuration | `nil` |
-| rasa.rasa.persistence.storageRequests | string |  | `"1Gi"` |
-| rasa.rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume | `1001` |
-| rasa.rasa.readinessProbe.enabled | bool |  | `true` |
-| rasa.rasa.readinessProbe.failureThreshold | int |  | `6` |
-| rasa.rasa.readinessProbe.httpGet.path | string |  | `"/modelservice/health"` |
-| rasa.rasa.readinessProbe.httpGet.port | int |  | `8000` |
-| rasa.rasa.readinessProbe.httpGet.scheme | string |  | `"HTTP"` |
-| rasa.rasa.readinessProbe.initialDelaySeconds | int |  | `30` |
-| rasa.rasa.readinessProbe.periodSeconds | int |  | `15` |
-| rasa.rasa.readinessProbe.successThreshold | int |  | `1` |
-| rasa.rasa.readinessProbe.timeoutSeconds | int |  | `5` |
-| rasa.rasa.replicaCount | int |  | `1` |
-| rasa.rasa.resources | object | rasa.resources specifies the resources limits and requests | `{}` |
-| rasa.rasa.service.port | int |  | `80` |
-| rasa.rasa.service.targetPort | int |  | `8000` |
-| rasa.rasa.settings.mountDefaultConfigmap | bool |  | `false` |
-| rasa.rasa.settings.mountModelsVolume | bool |  | `false` |
-| rasa.rasa.settings.useDefaultArgs | bool |  | `false` |
-| rasa.rasa.strategy.type | string |  | `"Recreate"` |
-| rasa.rasaProServices.enabled | bool |  | `false` |
+| rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
+| rasa.image.tag | string |  | `"3.17.11-latest"` |
+| rasa.ingress.annotations | object |  | `{}` |
+| rasa.ingress.enabled | bool |  | `true` |
+| rasa.ingress.hosts[0].host | string |  | `""` |
+| rasa.ingress.hosts[0].paths[0].path | string |  | `"/modelservice"` |
+| rasa.ingress.hosts[0].paths[0].pathType | string |  | `"Prefix"` |
+| rasa.livenessProbe.enabled | bool |  | `true` |
+| rasa.livenessProbe.failureThreshold | int |  | `6` |
+| rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |
+| rasa.livenessProbe.httpGet.port | int |  | `8000` |
+| rasa.livenessProbe.httpGet.scheme | string |  | `"HTTP"` |
+| rasa.livenessProbe.initialDelaySeconds | int |  | `30` |
+| rasa.livenessProbe.periodSeconds | int |  | `15` |
+| rasa.livenessProbe.successThreshold | int |  | `1` |
+| rasa.livenessProbe.timeoutSeconds | int |  | `5` |
+| rasa.mountModelsVolume | bool | The model service ships its own models; no chart-managed volume. | `false` |
+| rasa.overrideEnv[0].name | string |  | `"RASA_LICENSE"` |
+| rasa.overrideEnv[0].valueFrom.secretKeyRef.key | string |  | `"RASA_PRO_LICENSE_SECRET_KEY"` |
+| rasa.overrideEnv[0].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
+| rasa.overrideEnv[1].name | string |  | `"OPENAI_API_KEY"` |
+| rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
+| rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
+| rasa.persistence.create | bool |  | `true` |
+| rasa.persistence.hostPath.enabled | bool |  | `false` |
+| rasa.persistence.storageCapacity | string |  | `"1Gi"` |
+| rasa.persistence.storageClassName | string | Make sure to set the correct storage class name based on your cluster configuration | `nil` |
+| rasa.persistence.storageRequests | string |  | `"1Gi"` |
+| rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume | `1001` |
+| rasa.rasa.mountDefaultConfigmap | bool | Studio supplies no endpoints or integrations, so render no ConfigMap. | `false` |
+| rasa.rasa.port | int | The model service listens on 8000, not the chart default 5005. | `8000` |
+| rasa.readinessProbe.enabled | bool |  | `true` |
+| rasa.readinessProbe.failureThreshold | int |  | `6` |
+| rasa.readinessProbe.httpGet.path | string |  | `"/modelservice/health"` |
+| rasa.readinessProbe.httpGet.port | int |  | `8000` |
+| rasa.readinessProbe.httpGet.scheme | string |  | `"HTTP"` |
+| rasa.readinessProbe.initialDelaySeconds | int |  | `30` |
+| rasa.readinessProbe.periodSeconds | int |  | `15` |
+| rasa.readinessProbe.successThreshold | int |  | `1` |
+| rasa.readinessProbe.timeoutSeconds | int |  | `5` |
+| rasa.replicaCount | int |  | `1` |
+| rasa.resources | object | rasa.resources specifies the resources limits and requests | `{}` |
+| rasa.service.port | int |  | `80` |
+| rasa.service.targetPort | int |  | `8000` |
+| rasa.strategy.type | string |  | `"Recreate"` |
 | repository | string | repository specifies image repository for Studio | `"europe-west3-docker.pkg.dev/rasa-releases/studio/"` |
 | tag | string | tag overrides the image tag for all Studio images (unified studio image; Studio ≥ 2.0.0). Empty (default) uses the chart's appVersion. Set an exact, immutable tag to pin deployments independently of chart upgrades. | `""` |

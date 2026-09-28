@@ -264,7 +264,7 @@ tolerations:
 Resolve the model service ingress host
 */}}
 {{- define "studio.modelServiceHost" -}}
-{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
 {{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
 {{- if $globalHost -}}
@@ -281,7 +281,7 @@ Resolve the model service ingress host
 Model service ingress path prefix
 */}}
 {{- define "studio.modelServiceIngressPath" -}}
-{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
 {{- $firstPath := dig "path" "" (($firstHost.paths | default list | first) | default dict) -}}
 {{- if $firstPath -}}

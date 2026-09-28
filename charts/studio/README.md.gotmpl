@@ -13,7 +13,6 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
-> **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
 
 ## Prerequisites
 
@@ -183,7 +182,7 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.rasa.ingress.hosts[0].host`). No host value
+`rasa.ingress.hosts[0].host`). No host value
 is enforced by the schema — an install without any host renders empty
 (match-all) ingress rules and relative browser URLs.
 
@@ -275,6 +274,14 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
+> **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
+> root rather than under a nested `rasa` key — so these are `rasa.image`,
+> `rasa.resources`, `rasa.ingress`, and `rasa.rasa.*` holds only Rasa's own config
+> (`port`, `mountDefaultConfigmap`). Old paths are ignored, not rejected. Upgrading an
+> existing release also needs the Rasa Deployment deleted first, because its selector
+> changed and Kubernetes treats that field as immutable:
+> `kubectl delete deployment rasapro -n <namespace>`.
+
 When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
@@ -284,11 +291,10 @@ app:
       MS_API_URL: "https://models.example.com"
 ```
 
-> **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
 
 ### Rasa Pro Model Service Environment Variables
 
-The following environment variables can be configured on the Rasa Pro model server container via `rasa.rasa.overrideEnv`:
+The following environment variables can be configured on the Rasa Pro model server container via `rasa.overrideEnv`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -525,7 +531,7 @@ Additional breaking changes in 3.0.0:
   ingresses and every derived URL (`window.MS_API_URL`,
   `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
   service on its own hostname) leave `global.ingressHost` unset and set
-  `app.ingress.hostName` and `rasa.rasa.ingress.hosts[0].host` (model service) —
+  `app.ingress.hostName` and `rasa.ingress.hosts[0].host` (model service) —
   `global.ingressHost` overrides the per-host values when set, so the two
   are mutually exclusive by design.
 

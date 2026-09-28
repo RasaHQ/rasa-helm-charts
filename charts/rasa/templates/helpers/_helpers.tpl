@@ -241,3 +241,25 @@ Report whether the chart has any integrations configuration to mount.
 {{- define "rasa.hasIntegrations" -}}
 {{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.integrations "raw" .Values.rasa.integrationsRaw "field" "integrationsRaw") -}}
 {{- end -}}
+
+{{/*
+Refuse an enabled ingress with no routes.
+
+An ingress with no rules routes nothing, and emitting `rules: null` is worse:
+the API server accepts it and silently does nothing. Raw Kubernetes Ingress
+keys get named because they are not chart values, so coalescing drops them and
+the operator sees "hosts is empty" while looking at a block describing hosts.
+*/}}
+{{- define "rasa.validateIngressHosts" -}}
+{{- if .Values.ingress.hosts -}}{{- else -}}
+{{- $raw := list -}}
+{{- range $k := (list "rules" "ingressClassName" "defaultBackend") -}}
+{{- if hasKey $.Values.ingress $k -}}{{- $raw = append $raw (printf "ingress.%s" $k) -}}{{- end -}}
+{{- end -}}
+{{- $why := "" -}}
+{{- if $raw -}}
+{{- $why = printf " These keys are not chart values, so they were ignored: %s. Use ingress.className rather than ingressClassName; the chart builds the rest of the spec itself." (join ", " $raw) -}}
+{{- end -}}
+{{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing.%s\n\n  hosts:\n    - host: my.example.com\n      paths:                       # backend is this release's Service\n        - {path: /, pathType: Prefix}\n      extraPaths:                  # backend is whatever you name\n        - {path: /other, pathType: Prefix, serviceName: other-svc, servicePort: 8080}\n\nOr set rasa.ingress.enabled=false and route to the Service yourself." $why) -}}
+{{- end -}}
+{{- end -}}

@@ -30,25 +30,7 @@ spec:
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
-  {{- if not .Values.ingress.hosts }}
-  {{- /*
-  An ingress with no rules routes nothing. Fail rather than emit `rules: null`,
-  which the API server accepts and silently does nothing with.
-
-  Raw Kubernetes Ingress keys are named explicitly. They are not chart values,
-  so coalescing drops them and the operator gets "hosts is empty" while looking
-  straight at a block that plainly describes hosts.
-  */}}
-  {{- $raw := list }}
-  {{- range $k := (list "rules" "ingressClassName" "defaultBackend") }}
-  {{- if hasKey $.Values.ingress $k }}{{ $raw = append $raw (printf "ingress.%s" $k) }}{{ end }}
-  {{- end }}
-  {{- $shape := "\n  ingress:\n    enabled: true\n    className: istio\n    hosts:\n      - host: my.example.com\n        paths:            # wired to this release's Service\n          - path: /\n            pathType: Prefix\n        extraPaths:        # any other backend you like\n          - path: /other\n            pathType: Prefix\n            serviceName: some-other-service\n            servicePort: 8080\n    tls:\n      - hosts: [my.example.com]\n        secretName: rasa-tls\n" }}
-  {{- if $raw }}
-  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, and these keys are not chart values so they were ignored: %s. They look like a raw Kubernetes Ingress spec. This chart builds the spec for you: entries under 'paths' are wired to this release's Service automatically, and 'extraPaths' takes an explicit serviceName and servicePort when you need a different backend:%sUse ingress.className, not ingressClassName. ingress.tls already has the same shape as the Kubernetes field." (join ", " $raw) $shape) }}
-  {{- end }}
-  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Describe at least one route:%sOr set rasa.ingress.enabled=false and manage routing yourself." $shape) }}
-  {{- end }}
+  {{- include "rasa.validateIngressHosts" . }}
   rules:
     {{- range .Values.ingress.hosts }}
     - host: {{ $.Values.global.ingressHost | default .host | quote }}

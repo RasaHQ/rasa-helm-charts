@@ -23,6 +23,21 @@
 - name: models
   emptyDir: {}
 {{- end }}
+{{ if .Values.rasa.containerSecurityContext.readOnlyRootFilesystem -}}
+{{- /*
+An immutable root filesystem still has to let Rasa write three paths: /tmp,
+which the image declares as a VOLUME but Kubernetes ignores, and $HOME/.config
+and $HOME/.cache for the global config and the matplotlib cache. Each was found
+by turning the flag on and reading the resulting errno 30. The project directory
+itself needs no write access, so it is deliberately not mounted over.
+*/}}
+- name: writable-tmp
+  emptyDir: {}
+- name: writable-dot-config
+  emptyDir: {}
+- name: writable-dot-cache
+  emptyDir: {}
+{{- end }}
 {{ if .Values.rasa.persistence.create -}}
 - name: model-data
   persistentVolumeClaim:
@@ -54,6 +69,14 @@
 {{ if .Values.rasa.mountModelsVolume -}}
 - name: "models"
   mountPath: "/app/models"
+{{- end }}
+{{ if .Values.rasa.containerSecurityContext.readOnlyRootFilesystem -}}
+- name: "writable-tmp"
+  mountPath: "/tmp"
+- name: "writable-dot-config"
+  mountPath: "/app/.config"
+- name: "writable-dot-cache"
+  mountPath: "/app/.cache"
 {{- end }}
 {{ if .Values.rasa.persistence.create -}}
 - mountPath: "/app/working-data"

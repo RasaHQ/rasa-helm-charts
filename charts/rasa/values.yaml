@@ -249,6 +249,8 @@ rasa:
     enabled: true
     # -- rasa.containerSecurityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
     allowPrivilegeEscalation: false
+    # -- rasa.containerSecurityContext.readOnlyRootFilesystem makes the container filesystem immutable. Commented out (off) by default. Turning it on makes the chart mount the two paths Rasa needs to write: emptyDirs at /tmp, /app/.config and /app/.cache for the global config and the matplotlib cache. The project directory itself does not need to be writable.
+    # readOnlyRootFilesystem: true
     # -- rasa.containerSecurityContext.capabilities defines the Linux capabilities configuration.
     capabilities:
       # -- rasa.containerSecurityContext.capabilities.drop defines capabilities to drop from the container.

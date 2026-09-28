@@ -15,37 +15,30 @@ By installing and using this software, you agree to be bound by the terms and co
   echo "Visit http://127.0.0.1:4000 to use Studio"
 {{- end }}
 
-2. Breaking changes in chart 3.0.0:
-   - Values key `backend` is now `app`.
-   - Values key `webClient` is now nested under `app.webClient`.
-   - Do not set app container env `MS_API_URL`; use `app.webClient.config.MS_API_URL`
-     for the browser model-service URL (`window.MS_API_URL`).
-   - Resources `*-backend` are now `*-app`; the migration Job is `*-app-migration`;
-     and separate ingestion resources are `*-app-ingestion`.
-   - Studio uses the unified `studio` image. Chart 3.0.0 requires Studio >= 2.0.0;
-     use the documented tag placeholder until a promoted image tag is available.
-   - Bundled Keycloak is removed. Login is Better Auth at `/api/auth/*`.
-     `keycloak`, `config.keycloak`, and `config.database.keycloakDatabaseName`
-     are ignored if still present in values — drop them from your values file.
+2. Upgrading from 2.x? Four things need action outside your values file:
 
-3. Event ingestion modes:
-   - `colocated` (default): runs inside the Studio app pod.
-   - `separate`: deploys a dedicated ingestion workload.
-   - `disabled`: does not run an ingestion consumer.
-   Do not run dual consumers; the chart fails validation when configuration would do so.
+   a) Delete the orphaned resources from the old topology:
+        kubectl delete deployment,svc,ingress,sa,hpa -l app.kubernetes.io/component=studio-backend -n {{ .Release.Namespace }}
+        kubectl delete deployment,svc,ingress,sa -l app.kubernetes.io/component=studio-web-client -n {{ .Release.Namespace }}
+        kubectl delete deployment,sa,hpa -l app.kubernetes.io/component=studio-event-ingestion -n {{ .Release.Namespace }}
+      Also remove old jobs/sa named *-database-migration or *-db-migration.
+{{- if .Values.rasa.enabled }}
 
-4. Authentication:
-   - Better Auth is served by Studio at `/api/auth/*`. There is no `/auth` IdP.
-   - Helm removes Keycloak resources that were part of the previous release.
-     If any remain (label mismatch or a non-Helm install), delete them:
-     kubectl delete deployment,svc,ingress,sa,networkpolicy -l app.kubernetes.io/component=studio-keycloak -n {{ .Release.Namespace }}
-   - Remove unused `KEYCLOAK_*` keys from `studio-secrets` after upgrade.
-   - Do not drop the Keycloak Postgres database until you have confirmed users
-     exist in Better Auth.
+   b) Delete the Rasa Deployment. The rasa subchart changed a selector label,
+      which Kubernetes treats as immutable, so `helm upgrade` fails without it:
+        kubectl delete deployment {{ .Values.rasa.fullnameOverride | default "rasapro" }} -n {{ .Release.Namespace }}
+{{- end }}
 
-5. After upgrading, manually remove orphaned resources from the prior topology:
+   c) Keycloak is gone. Better Auth serves login at /api/auth/*. Confirm your
+      users exist in Better Auth BEFORE dropping the Keycloak database, then
+      drop the unused KEYCLOAK_* keys from studio-secrets. If any Keycloak
+      objects survive:
+        kubectl delete deployment,svc,ingress,sa,networkpolicy -l app.kubernetes.io/component=studio-keycloak -n {{ .Release.Namespace }}
 
-   kubectl delete deployment,svc,ingress,sa,hpa -l app.kubernetes.io/component=studio-backend -n <ns>
-   kubectl delete deployment,svc,ingress,sa -l app.kubernetes.io/component=studio-web-client -n <ns>
-   kubectl delete deployment,sa,hpa -l app.kubernetes.io/component=studio-event-ingestion -n <ns>
-   # also delete old jobs/sa named *-database-migration / *-db-migration if present
+   d) Old values keys are IGNORED, not rejected, so anything left under them is
+      silently dropped: backend (now app), webClient (now app.webClient),
+      keycloak, config.keycloak, config.database.keycloakDatabaseName, and
+      rasa.rasa.<deployment key> (now rasa.<key>).
+
+   Full migration guide:
+   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md#upgrading-to-chart-300

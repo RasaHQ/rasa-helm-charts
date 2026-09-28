@@ -178,7 +178,6 @@ rasa:
 | `additionalEnv` | `extraEnv` |
 | `additionalContainers` | `extraContainers` |
 | `volumes` / `volumeMounts` | `extraVolumes` / `extraVolumeMounts` |
-| `overrideEnv` | `env` |
 | `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
 | `useDefaultArgs: false` | `args: []` |
 
@@ -891,7 +890,6 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it. | `false` |
 | rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
 | rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
-| rasa.env | list | env overrides all default environment variables | `[]` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |
 | rasa.environment | string | environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults. | `"development"` |
 | rasa.extraArgs | list | extraArgs appends arguments to the ones the chart generates. Ignored when args is set. | `[]` |
@@ -925,6 +923,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
 | rasa.mountModelsVolume | bool | mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
+| rasa.overrideEnv | list | overrideEnv replaces the environment the chart generates, rather than adding to it. Empty (default) keeps the generated block; a non-empty list replaces it wholesale, including RASA_PRO_LICENSE, so supply every variable the container needs. Use extraEnv to add without replacing. | `[]` |
 | rasa.persistence.create | bool |  | `false` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |

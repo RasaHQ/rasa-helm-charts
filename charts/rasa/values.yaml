@@ -164,8 +164,8 @@ rasa:
   extraArgs: []
   # -- rasa.command overrides the default command for the container
   command: []
-  # -- env overrides all default environment variables
-  env: []
+  # -- overrideEnv replaces the environment the chart generates, rather than adding to it. Empty (default) keeps the generated block; a non-empty list replaces it wholesale, including RASA_PRO_LICENSE, so supply every variable the container needs. Use extraEnv to add without replacing.
+  overrideEnv: []
   # -- extraEnv adds additional environment variables
   extraEnv: []
     # - name: SOME_CUSTOM_ENV_VAR

@@ -206,7 +206,7 @@
         "args": { "type": ["array", "null"] },
         "extraArgs": { "type": "array" },
         "command": { "type": "array" },
-        "env": { "type": "array" },
+        "overrideEnv": { "type": "array" },
         "extraEnv": { "type": "array" },
         "envFrom": { "type": "array" },
         "initContainers": { "type": "array" },

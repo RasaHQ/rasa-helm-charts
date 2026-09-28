@@ -142,13 +142,13 @@ authenticated rather than blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
-{{- $env := .Values.rasa.env | default (.Values.rasa.extraEnv | default list) -}}
+{{- $env := .Values.rasa.overrideEnv | default (.Values.rasa.extraEnv | default list) -}}
 {{- range $env -}}
 {{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
 {{-     $named = true -}}
 {{-   end -}}
 {{- end -}}
-{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.env)) -}}
+{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
 true
 {{- end -}}
 {{- end -}}

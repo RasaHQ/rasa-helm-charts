@@ -88,8 +88,7 @@ By installing and using this software, you agree to be bound by the terms and co
        additionalArgs -> extraArgs        additionalEnv -> extraEnv
        additionalContainers -> extraContainers
        volumes -> extraVolumes            volumeMounts -> extraVolumeMounts
-       overrideEnv -> env                 global.additionalDeploymentLabels ->
-                                          global.extraDeploymentLabels
+       global.additionalDeploymentLabels -> global.extraDeploymentLabels
      The old names are IGNORED, not rejected, so anything left under them is
      silently dropped. Move them before upgrading.
    - useDefaultArgs is gone. args now has three states: unset means the chart

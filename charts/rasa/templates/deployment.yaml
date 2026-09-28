@@ -96,9 +96,9 @@ spec:
             - name: http
               containerPort: {{ .Values.rasa.port }}
               protocol: TCP
-          {{- if .Values.rasa.env }}
+          {{- if .Values.rasa.overrideEnv }}
           env:
-            {{- toYaml .Values.rasa.env | nindent 12 }}
+            {{- toYaml .Values.rasa.overrideEnv | nindent 12 }}
           {{- else }}
           env:
             {{- include "rasa.containers.env" . | trim | nindent 12 }}

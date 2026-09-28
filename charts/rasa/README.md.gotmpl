@@ -358,6 +358,16 @@ See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-re
 
 The default readiness probe hits the `/` endpoint, which returns a success code as soon as the HTTP server is up — before any model has been loaded. For production, use the `/status` endpoint instead, which only returns a success code once Rasa has loaded a model and is ready to process conversations.
 
+Measured against `rasa-pro:3.20.0-latest`, which is what makes the two cases below necessary:
+
+| endpoint | no credential | `AUTH_TOKEN` set |
+|---|---|---|
+| `/` | `200` immediately | `200` — not authenticated |
+| `/version` | `200` immediately | `200` — not authenticated |
+| `/status` | `409` until a model is loaded | `401` without a token |
+
+So `/` and `/version` stay usable as probes whatever your auth configuration, and `/status` needs the token once one is set.
+
 **Without authentication:**
 
 ```yaml
@@ -365,7 +375,7 @@ rasa:
   readinessProbe:
     httpGet:
       path: /status
-      port: 5005
+      port: 5005          # keep in step with rasa.port
       scheme: HTTP
 ```
 
@@ -388,6 +398,10 @@ rasa:
     timeoutSeconds: 5
     failureThreshold: 6
 ```
+
+**With only `jwtSecret` configured:**
+
+`/status` returns `401` and there is no way to satisfy it from a probe — a JWT would have to be minted and signed per request. Leave readiness on `/` (or `/version`) and rely on liveness plus your own monitoring for model readiness.
 
 > **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.port` from its default.
 

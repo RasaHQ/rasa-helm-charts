@@ -359,6 +359,16 @@ See the [Rasa documentation](https://rasa.com/docs/reference/api/pro/rasa-pro-re
 
 The default readiness probe hits the `/` endpoint, which returns a success code as soon as the HTTP server is up — before any model has been loaded. For production, use the `/status` endpoint instead, which only returns a success code once Rasa has loaded a model and is ready to process conversations.
 
+Measured against `rasa-pro:3.20.0-latest`, which is what makes the two cases below necessary:
+
+| endpoint | no credential | `AUTH_TOKEN` set |
+|---|---|---|
+| `/` | `200` immediately | `200` — not authenticated |
+| `/version` | `200` immediately | `200` — not authenticated |
+| `/status` | `409` until a model is loaded | `401` without a token |
+
+So `/` and `/version` stay usable as probes whatever your auth configuration, and `/status` needs the token once one is set.
+
 **Without authentication:**
 
 ```yaml
@@ -366,7 +376,7 @@ rasa:
   readinessProbe:
     httpGet:
       path: /status
-      port: 5005
+      port: 5005          # keep in step with rasa.port
       scheme: HTTP
 ```
 
@@ -389,6 +399,10 @@ rasa:
     timeoutSeconds: 5
     failureThreshold: 6
 ```
+
+**With only `jwtSecret` configured:**
+
+`/status` returns `401` and there is no way to satisfy it from a probe — a JWT would have to be minted and signed per request. Leave readiness on `/` (or `/version`) and rely on liveness plus your own monitoring for model readiness.
 
 > **Note:** The `AUTH_TOKEN` environment variable is automatically injected by the chart from the secret referenced in `rasa.authToken`. Setting `httpGet: null` removes the default value set by the chart — this is required when switching from an `httpGet` probe to an `exec` probe, otherwise both will be rendered and Kubernetes will reject the manifest. Update the port in the `curl` command if you have changed `rasa.port` from its default.
 
@@ -887,7 +901,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.credentials | object | credentials enables credentials configuration for channel connectors # See: https://rasa.com/docs/reference/channels/messaging-and-voice-channels | `{}` |
 | rasa.credentialsRaw | string | credentialsRaw accepts a raw YAML string (e.g. the contents of a credentials.yml file) that is parsed and deep-merged with credentials. The structured value wins on key conflicts. Intended for `helm install --set-file rasa.credentialsRaw=./credentials.yml` or ArgoCD multi-source `fileParameters` referencing `$values/credentials.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.debugMode | bool | debugMode enables debug mode | `false` |
-| rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. Off by default: the API is unauthenticated unless you also set authToken or jwtSecret, and most of its endpoints read and write conversation data. Turn it on for integrations that need it. | `false` |
+| rasa.enableApi | bool | enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. On by default: rasa run exits immediately when it has neither a model nor the API, so a model-less install cannot serve without it. The chart refuses to render an enabled API with no credential, so set authToken or jwtSecret, or acknowledge with allowUnauthenticatedApi. | `true` |
 | rasa.endpoints | object | endpoints enables endpoints configuration for the Rasa deployment. See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints | `{}` |
 | rasa.endpointsRaw | string | endpointsRaw accepts a raw YAML string (e.g. the contents of an endpoints.yml file) that is parsed and deep-merged with endpoints. The structured value wins on key conflicts, so infra-owned blocks (tracker_store, event_broker) defined in endpoints take precedence over the same keys in the raw file. Intended for `helm install --set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD multi-source `fileParameters` referencing `$values/endpoints.yml`. Leave unset/empty to disable. Malformed YAML fails the template render. | `""` |
 | rasa.envFrom | list | rasa.envFrom is used to add environment variables from ConfigMap or Secret | `[]` |

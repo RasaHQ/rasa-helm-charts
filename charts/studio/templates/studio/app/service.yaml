@@ -1,3 +1,4 @@
+{{- include "studio.validateNoNulledKeys" . -}}
 apiVersion: v1
 kind: Service
 metadata:

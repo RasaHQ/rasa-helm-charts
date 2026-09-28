@@ -1,3 +1,4 @@
+{{- include "studio.validateNoNulledKeys" . -}}
 {{- if .Values.app.migration.enabled }}
 apiVersion: batch/v1
 kind: Job

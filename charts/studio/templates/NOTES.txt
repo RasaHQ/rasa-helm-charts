@@ -15,6 +15,11 @@ By installing and using this software, you agree to be bound by the terms and co
   echo "Visit http://127.0.0.1:4000 to use Studio"
 {{- end }}
 
+{{- if .Release.IsUpgrade }}
+{{- /*
+Only on upgrade. A fresh install has nothing to migrate, and printing the
+whole block there buried the access instructions above it.
+*/}}
 2. Upgrading from 2.x? Four things need action outside your values file:
 
    a) Delete the orphaned resources from the old topology:
@@ -42,3 +47,4 @@ By installing and using this software, you agree to be bound by the terms and co
 
    Full migration guide:
    https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md#upgrading-to-chart-300
+{{- end }}

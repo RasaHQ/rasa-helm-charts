@@ -80,8 +80,14 @@ whole 3.0.0 block there buried the access instructions above it.
    Or --set rasa.enableApi=false (needs a model; rasa run exits without either).
    Or --set rasa.allowUnauthenticatedApi=true to accept an open API.
 {{- end }}
-{{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
-{{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.runAsNonRoot (ne .Values.image.repository $defaultRepo) }}
+{{- /*
+Official Rasa Pro images, none of which warrant the custom-image warning.
+Docker Hub is what the public docs point people at, in both the short and the
+fully-qualified form, so warning there would tell a user following our own
+documentation that they are running something unofficial.
+*/}}
+{{- $officialRepos := list "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" "rasa/rasa-pro" "docker.io/rasa/rasa-pro" "index.docker.io/rasa/rasa-pro" }}
+{{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.runAsNonRoot (not (has .Values.image.repository $officialRepos)) }}
 
    WARNING: custom image with runAsNonRoot: true.
    {{ .Values.image.repository }}

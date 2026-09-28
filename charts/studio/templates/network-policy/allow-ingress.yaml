@@ -23,5 +23,5 @@ spec:
     {{- toYaml .Values.networkPolicy.allowIngressFrom | nindent 4 }}
     ports:
     - protocol: TCP
-      port: {{ .Values.app.service.port }}
+      port: {{ .Values.app.service.targetPort }}
 {{- end }}

@@ -1,3 +1,4 @@
+{{- include "rasa.validateNoNulledKeys" . }}
 {{- if .Values.ingress.enabled -}}
 {{- $fullName := include "rasa.fullname" . -}}
 {{- $svcPort := .Values.service.port -}}

@@ -33,6 +33,11 @@ By installing and using this software, you agree to be bound by the terms and co
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
 
+{{- if .Release.IsUpgrade }}
+{{- /*
+Only on upgrade. A fresh install has nothing to migrate, and printing the
+whole 3.0.0 block there buried the access instructions above it.
+*/}}
 2. Upgrading from 2.x? Three changes need action OUTSIDE your values file:
 
    a) The Deployment selector changed, and Kubernetes will not let you edit it.
@@ -59,6 +64,8 @@ By installing and using this software, you agree to be bound by the terms and co
 
    Full migration guide, including every removed and renamed key:
    https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/README.md#upgrading-to-300
+{{- end }}
+
 {{- if include "rasa.apiUnauthenticated" . }}
 
    WARNING: the Rasa HTTP API is enabled and NOT authenticated.

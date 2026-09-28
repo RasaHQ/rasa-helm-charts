@@ -241,3 +241,26 @@ Report whether the chart has any integrations configuration to mount.
 {{- define "rasa.hasIntegrations" -}}
 {{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.integrations "raw" .Values.rasa.integrationsRaw "field" "integrationsRaw") -}}
 {{- end -}}
+
+{{/*
+Refuse to render when a values block the chart dereferences has been nulled.
+
+Helm treats `foo: null` as "delete this key", so the block does not fall back
+to the chart default - it disappears, and every .Values.foo.bar below it fails
+with "nil pointer evaluating interface {}.bar", which names the template
+rather than the mistake. hasKey is the reliable signal because a nulled key is
+absent after coalescing.
+*/}}
+{{- define "rasa.validateNoNulledKeys" -}}
+{{- $required := list "rasa" "image" "serviceAccount" "podSecurityContext" "containerSecurityContext" "service" "livenessProbe" "readinessProbe" "ingress" "autoscaling" "persistence" "networkPolicy" "global" -}}
+{{- $missing := list -}}
+{{- range $k := $required -}}
+{{- if not (hasKey $.Values $k) -}}{{- $missing = append $missing $k -}}{{- end -}}
+{{- end -}}
+{{- range $k := (list "license" "telemetry" "logging") -}}
+{{- if not (hasKey (index $.Values "rasa" | default dict) $k) -}}{{- $missing = append $missing (printf "rasa.%s" $k) -}}{{- end -}}
+{{- end -}}
+{{- if $missing -}}
+{{- fail (printf "these values keys were set to null, which deletes them rather than restoring the chart default: %s. Remove the key entirely to use the default, or give it a value. To switch a component off use its own flag (for example persistence.create=false or ingress.enabled=false)." (join ", " $missing)) -}}
+{{- end -}}
+{{- end -}}

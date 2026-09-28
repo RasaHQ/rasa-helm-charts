@@ -1,3 +1,4 @@
+{{- include "rasa.validateNoNulledKeys" . }}
 apiVersion: v1
 kind: Pod
 metadata:

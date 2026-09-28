@@ -344,6 +344,32 @@ Return the event-ingestion mode.
 {{- end -}}
 
 {{/*
+Report whether event ingestion is co-located with the Studio App.
+
+These three are not referenced by any template today -- the gates inline
+`eq (include "studio.eventIngestion.mode" .) "..."` instead -- but they are
+kept as the supported way to branch on the mode, so `eventIngestion.mode:
+separate` stays expressible for anyone extending the chart.
+*/}}
+{{- define "studio.eventIngestion.isColocated" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+{{- end -}}
+
+{{/*
+Report whether event ingestion runs in a separate deployment.
+*/}}
+{{- define "studio.eventIngestion.isSeparate" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "separate" -}}
+{{- end -}}
+
+{{/*
+Report whether event ingestion is disabled.
+*/}}
+{{- define "studio.eventIngestion.isDisabled" -}}
+{{- eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+{{- end -}}
+
+{{/*
 Resolve the Studio App ingress host.
 */}}
 {{- define "studio.appHost" -}}

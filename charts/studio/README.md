@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.39](https://img.shields.io/badge/Version-3.0.0--rc.39-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.40](https://img.shields.io/badge/Version-3.0.0--rc.40-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -67,7 +67,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.39
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -82,7 +82,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.39
+$ helm install my-release rasa/studio --version 3.0.0-rc.40
 ```
 
 ## Quick Start
@@ -135,13 +135,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.39
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.39
+$ helm pull rasa/studio --version 3.0.0-rc.40
 ```
 
 ## General Configuration
@@ -429,7 +429,7 @@ Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `
 | --- | --- |
 | Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
 | Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
-| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `extraContainers` |
 
 ## Network Policies
 
@@ -511,6 +511,17 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
+Pass-through keys use the conventional `extra*` names, matching the `rasa` chart:
+
+| old | new |
+|---|---|
+| `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
+| `app.additionalContainers` | `app.extraContainers` |
+| `eventIngestion.additionalContainers` | `eventIngestion.extraContainers` |
+| `app.ingress.additionalAnnotations` | `app.ingress.extraAnnotations` |
+
+Old names are **ignored, not rejected** — a stale `additionalAnnotations` silently drops your ingress annotations.
+
 Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
 
 ```yaml
@@ -569,7 +580,6 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
-| app.additionalContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.affinity | object | Affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.annotations | object | Annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.authSecret | object | Secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
@@ -581,13 +591,14 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
 | app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
+| app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.image | object | Container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | Unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | Container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
-| app.ingress | object | How the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"additionalAnnotations":{},"className":"","enabled":true,"labels":{},"tls":[]}` |
-| app.ingress.additionalAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
+| app.ingress | object | How the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"className":"","enabled":true,"extraAnnotations":{},"labels":{},"tls":[]}` |
 | app.ingress.className | string | Ingress class name. This should match your cluster's ingress controller. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | app.ingress.enabled | bool | Whether to create an ingress resource. | `true` |
+| app.ingress.extraAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.ingress.labels | object | Labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | app.ingress.tls | list | TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
 | app.livenessProbe | object | Liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
@@ -697,7 +708,6 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | deploymentLabels | object | Labels to add to all Studio deployment. | `{}` |
 | dnsConfig | object | Pod's DNS config # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config | `{}` |
 | dnsPolicy | string | Pod's DNS policy # ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy | `""` |
-| eventIngestion.additionalContainers | list | Additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
 | eventIngestion.affinity | object | Affinity rules for the event ingestion pods. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.annotations | object | Annotations to add to all Studio Event Ingestion resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | eventIngestion.automountServiceAccountToken | bool | Whether the event ingestion pod is given a Kubernetes API token. Ingestion only talks to Kafka and PostgreSQL. Applies only when eventIngestion.mode is separate. | `false` |
@@ -708,10 +718,11 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. Applies only when eventIngestion.mode is separate. | `80` |
 | eventIngestion.env | list | Extra environment variables for the event ingestion consumers, in native Kubernetes EnvVar format (name + value or valueFrom). Injected into the app container when mode is colocated, and into the sibling ingestion Deployment when mode is separate. NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep (KAFKA_TOPIC, KAFKA_DLQ_TOPIC, KAFKA_GROUP_ID, KAFKA_SASL_PASSWORD). Optional Kafka settings (add as needed):   - name: KAFKA_BROKER_ADDRESS      # address of the Kafka broker (required for ingestion)     value: "kafka.example.com:9092"   - name: KAFKA_ENABLE_SSL          # enable SSL for Kafka connections     value: "true"   - name: KAFKA_CUSTOM_SSL          # use custom SSL certificates for Kafka     value: "true"   - name: KAFKA_CA_FILE             # path to the CA certificate file     value: "/certs/ca.pem"   - name: KAFKA_KEY_FILE            # path to the client key file     value: "/certs/key.pem"   - name: KAFKA_CERT_FILE           # path to the client certificate file     value: "/certs/cert.pem"   - name: KAFKA_REJECT_UNAUTHORIZED # verify server certificates     value: "true"   - name: NODE_TLS_REJECT_UNAUTHORIZED  # allow untrusted certificates ("0" allows)     value: "0"   - name: KAFKA_SASL_MECHANISM      # plain, SCRAM-SHA-256 or SCRAM-SHA-512     value: "plain"   - name: KAFKA_SASL_USERNAME     value: "kafka-user" | `[{"name":"KAFKA_TOPIC","value":"rasa-events"},{"name":"KAFKA_DLQ_TOPIC","value":"rasa-events-dlq"},{"name":"KAFKA_GROUP_ID","value":"studio"},{"name":"KAFKA_SASL_PASSWORD","valueFrom":{"secretKeyRef":{"key":"KAFKA_SASL_PASSWORD","name":"studio-secrets"}}}]` |
 | eventIngestion.envFrom | list | Additional environment variables from ConfigMap or Secret. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret | `[]` |
+| eventIngestion.extraContainers | list | Additional containers to run alongside the main Event Ingestion container. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] | `[]` |
 | eventIngestion.image | object | Container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | Unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | Container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
-| eventIngestion.mode | string | Event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
+| eventIngestion.mode | string | Event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
 | eventIngestion.nodeSelector | object | Which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | Annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | Security settings for the entire pod. | `{"enabled":true}` |
@@ -734,8 +745,8 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | eventIngestion.volumeMounts | list | Where to mount the volumes in the Event Ingestion container. Example: - name: config-volume   mountPath: /etc/config   readOnly: true | `[]` |
 | eventIngestion.volumes | list | Additional volumes for the Event Ingestion container. Example: - name: config-volume   configMap:     name: special-config | `[]` |
 | fullnameOverride | string | Override the full qualified app name. | `""` |
-| global.additionalDeploymentLabels | object | Map organizational structures onto system objects. https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
-| global.ingressAnnotations | object | Annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.additionalAnnotations, rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
+| global.extraDeploymentLabels | object | Map organizational structures onto system objects. https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
+| global.ingressAnnotations | object | Annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.extraAnnotations, rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | global.ingressClassName | string | Ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.ingress.className) wins when set. | `""` |
 | global.ingressHost | string | Single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Whether the pod may use the node network namespace. | `false` |

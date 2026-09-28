@@ -430,7 +430,7 @@ Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `
 | --- | --- |
 | Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
 | Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
-| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `extraContainers` |
 
 ## Network Policies
 
@@ -511,6 +511,17 @@ $ helm upgrade my-release rasa/{{ template "chart.name" . }} --version <new-vers
 Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
 
 ### Upgrading to chart 3.0.0
+
+Pass-through keys use the conventional `extra*` names, matching the `rasa` chart:
+
+| old | new |
+|---|---|
+| `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
+| `app.additionalContainers` | `app.extraContainers` |
+| `eventIngestion.additionalContainers` | `eventIngestion.extraContainers` |
+| `app.ingress.additionalAnnotations` | `app.ingress.extraAnnotations` |
+
+Old names are **ignored, not rejected** — a stale `additionalAnnotations` silently drops your ingress annotations.
 
 Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
 

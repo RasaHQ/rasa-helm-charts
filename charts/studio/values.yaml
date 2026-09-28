@@ -35,14 +35,14 @@ global:
   ingressClassName: ""
   # -- Annotations added to the Studio app ingress
   # and the Rasa Pro model-service ingress. Merged with per-ingress annotations
-  # (app.ingress.additionalAnnotations, rasa.ingress.annotations), which win
+  # (app.ingress.extraAnnotations, rasa.ingress.annotations), which win
   # on key conflicts.
   # Example:
   #   cert-manager.io/cluster-issuer: letsencrypt-prod
   ingressAnnotations: {}
   # -- Map organizational structures onto system objects.
   # https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
-  additionalDeploymentLabels: {}
+  extraDeploymentLabels: {}
 
 config:
   # -- Define the URL scheme (`http` or `https`) for externally derived URLs
@@ -226,7 +226,7 @@ app:
   #   image: busybox
   #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
   # Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers
-  additionalContainers: []
+  extraContainers: []
 
   # -- Kubernetes service account used by the app pod.
   # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
@@ -533,7 +533,7 @@ app:
     #   kubernetes.io/ingress.class: nginx
     #   cert-manager.io/cluster-issuer: letsencrypt-prod
     # Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
-    additionalAnnotations: {}
+    extraAnnotations: {}
     # -- TLS configuration for the ingress.
     # Example:
     # - secretName: chart-example-tls
@@ -609,7 +609,7 @@ eventIngestion:
   #   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment).
   # - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,
   #   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment.
-  # - volumes / volumeMounts / envFrom / additionalContainers: applied to the app pod when
+  # - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when
   #   colocated, and to the sibling Deployment when separate.
   mode: colocated
   # -- Number of replicas for the Event Ingestion deployment.
@@ -691,7 +691,7 @@ eventIngestion:
   # - name: sidecar
   #   image: busybox
   #   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"]
-  additionalContainers: []
+  extraContainers: []
 
   # -- Additional volumes for the Event Ingestion container.
   # Example:

@@ -40,8 +40,8 @@ helm.sh/chart: {{ include "studio.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ if .Values.global.additionalDeploymentLabels -}}
-{{- $.Values.global.additionalDeploymentLabels | toYaml -}}
+{{ if .Values.global.extraDeploymentLabels -}}
+{{- $.Values.global.extraDeploymentLabels | toYaml -}}
 {{- end }}
 {{- end }}
 
@@ -132,7 +132,7 @@ Return annotations for ingress, combining global and per-service annotations for
 */}}
 {{- define "app.ingress.annotations" -}}
 {{- $global := dig "ingressAnnotations" (dict) (.Values.global | default dict) | default dict | deepCopy }}
-{{- $additional := .Values.app.ingress.additionalAnnotations | default dict | deepCopy }}
+{{- $additional := .Values.app.ingress.extraAnnotations | default dict | deepCopy }}
 {{- /* Component wins on key conflicts: global.ingressAnnotations is a baseline
        applied to every ingress, per-ingress annotations are local exceptions.
        Mirrors the rasa subchart ingress, which does merge (component) (global). */ -}}

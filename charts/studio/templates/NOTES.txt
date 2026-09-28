@@ -42,8 +42,10 @@ whole block there buried the access instructions above it.
 
    d) Old values keys are IGNORED, not rejected, so anything left under them is
       silently dropped: backend (now app), webClient (now app.webClient),
-      keycloak, config.keycloak, config.database.keycloakDatabaseName, and
-      rasa.rasa.<deployment key> (now rasa.<key>).
+      keycloak, config.keycloak, config.database.keycloakDatabaseName,
+      rasa.rasa.<deployment key> (now rasa.<key>), and additional* (now
+      extra*): additionalDeploymentLabels, additionalContainers,
+      additionalAnnotations.
 
    Full migration guide:
    https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md#upgrading-to-chart-300

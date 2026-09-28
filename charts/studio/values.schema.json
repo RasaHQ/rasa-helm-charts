@@ -144,7 +144,7 @@
         "labels": {
           "type": "object"
         },
-        "additionalAnnotations": {
+        "extraAnnotations": {
           "type": "object"
         },
         "tls": {

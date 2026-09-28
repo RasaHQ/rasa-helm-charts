@@ -5,7 +5,7 @@ kind: Deployment
 metadata:
   name: {{ include "studio.fullname" . }}-app-ingestion
   labels:
-    {{- include "studio.labels" . | nindent 4 -}}
+    {{- include "studio.labels" . | nindent 4 }}
     app.kubernetes.io/component: studio-app-ingestion
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
@@ -79,8 +79,8 @@ spec:
           envFrom:
             {{- toYaml .Values.eventIngestion.envFrom | nindent 12 }}
           {{- end }}
-      {{- if .Values.eventIngestion.additionalContainers }}
-        {{- toYaml .Values.eventIngestion.additionalContainers | nindent 8 }}
+      {{- if .Values.eventIngestion.extraContainers }}
+        {{- toYaml .Values.eventIngestion.extraContainers | nindent 8 }}
       {{- end }}
       {{- include "studio.eventIngestion.scheduling" . | nindent 6 }}
       volumes:

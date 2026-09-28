@@ -1,4 +1,4 @@
-{{- include "rasa.validateNoNulledKeys" . }}
+{{- include "rasa.validateNoNulledKeys" . -}}
 {{- include "rasa.validateApiExposure" . }}
 apiVersion: apps/v1
 kind: Deployment

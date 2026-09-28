@@ -1,4 +1,4 @@
-{{- include "rasa.validateNoNulledKeys" . }}
+{{- include "rasa.validateNoNulledKeys" . -}}
 {{- if .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler

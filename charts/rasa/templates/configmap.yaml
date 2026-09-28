@@ -1,4 +1,4 @@
-{{- include "rasa.validateNoNulledKeys" . }}
+{{- include "rasa.validateNoNulledKeys" . -}}
 {{- if .Values.rasa.mountDefaultConfigmap }}
 {{- $integrations := include "rasa.hasIntegrations" . }}
 {{- $endpoints := include "rasa.hasEndpoints" . }}

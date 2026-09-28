@@ -129,7 +129,7 @@
     }
   },
   "type": "object",
-  "required": ["rasa", "image", "serviceAccount", "podSecurityContext", "containerSecurityContext", "service", "livenessProbe", "readinessProbe", "ingress", "autoscaling", "persistence", "networkPolicy", "global"],
+  "required": ["rasa", "image", "serviceAccount", "podSecurityContext", "containerSecurityContext", "service", "livenessProbe", "readinessProbe", "ingress", "autoscaling", "persistence", "networkPolicy", "podDisruptionBudget", "global"],
   "properties": {
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
@@ -207,6 +207,16 @@
             }
           }
         },
+    "podDisruptionBudget": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "minAvailable": { "type": ["integer", "string", "null"] },
+        "maxUnavailable": { "type": ["integer", "string", "null"] },
+        "annotations": { "type": "object" }
+      }
+    },
     "nodeSelector": { "type": "object" },
     "tolerations": { "type": "array" },
     "affinity": { "type": "object" },

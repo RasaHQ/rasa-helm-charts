@@ -707,6 +707,28 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
               - my-action-server
 ```
 
+### Pod Disruption Budget
+
+Off by default. Enabling it protects the Rasa Pro pods during voluntary
+disruptions — node drains, cluster upgrades — by capping how many can go at once.
+
+```yaml
+replicaCount: 2          # or autoscaling.minReplicas: 2
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1      # or minAvailable, never both
+```
+
+> **Warning:** the chart **refuses to render** a budget when the release can run
+> on a single replica — `replicaCount: 1` with autoscaling off, or
+> `autoscaling.minReplicas: 1`. A budget over one pod protects nothing, and with
+> `minAvailable` it makes the node **undrainable**: evicting the only pod would
+> violate it, so `kubectl drain` blocks indefinitely and cluster upgrades stall.
+
+More than one replica also needs a **lock store**, or concurrent turns on the
+same conversation race each other. Set `rasa.endpoints.lock_store` before
+scaling up.
+
 ### Network Policies
 
 Network policies are disabled by default. Every policy the chart emits selects **only this release's pods**, so enabling them in a shared namespace does not affect anything else.

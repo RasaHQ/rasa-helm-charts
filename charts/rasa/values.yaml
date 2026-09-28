@@ -375,6 +375,17 @@ persistence:
 
 ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
 ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+# -- PodDisruptionBudget for the Rasa Pro pods. Off by default. Requires more than one replica: the chart refuses to render a budget for a single-replica Deployment, because it would make the node undrainable.
+podDisruptionBudget:
+  # -- Create the PodDisruptionBudget.
+  enabled: false
+  # -- Minimum pods that must stay available. Mutually exclusive with maxUnavailable.
+  minAvailable:
+  # -- Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable.
+  maxUnavailable: 1
+  # -- Annotations for the PodDisruptionBudget.
+  annotations: {}
+
 # -- Node selector.
 nodeSelector: {}
 

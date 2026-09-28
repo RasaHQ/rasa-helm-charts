@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.10](https://img.shields.io/badge/Version-3.0.0--rc.10-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
+![Version: 3.0.0-rc.11](https://img.shields.io/badge/Version-3.0.0--rc.11-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.10
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.11
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -97,7 +97,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 3.0.0-rc.10
+helm install my-release rasa/rasa --version 3.0.0-rc.11
 ```
 
 ## Upgrading the Chart
@@ -395,7 +395,7 @@ See the [integrations.yml reference](https://mantle.rasa.com/reference/integrati
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 3.0.0-rc.10 \
+  --version 3.0.0-rc.11 \
   --set-file rasa.integrationsRaw=./integrations.yml \
   --set-file rasa.endpointsRaw=./endpoints.yml
 ```
@@ -407,7 +407,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 3.0.0-rc.10
+      targetRevision: 3.0.0-rc.11
       helm:
         fileParameters:
           - name: rasa.integrationsRaw
@@ -708,6 +708,28 @@ A shared `podLabels` key is preferable to selecting on `app.kubernetes.io/instan
               - my-action-server
 ```
 
+### Pod Disruption Budget
+
+Off by default. Enabling it protects the Rasa Pro pods during voluntary
+disruptions — node drains, cluster upgrades — by capping how many can go at once.
+
+```yaml
+replicaCount: 2          # or autoscaling.minReplicas: 2
+podDisruptionBudget:
+  enabled: true
+  maxUnavailable: 1      # or minAvailable, never both
+```
+
+> **Warning:** the chart **refuses to render** a budget when the release can run
+> on a single replica — `replicaCount: 1` with autoscaling off, or
+> `autoscaling.minReplicas: 1`. A budget over one pod protects nothing, and with
+> `minAvailable` it makes the node **undrainable**: evicting the only pod would
+> violate it, so `kubectl drain` blocks indefinitely and cluster upgrades stall.
+
+More than one replica also needs a **lock store**, or concurrent turns on the
+same conversation race each other. Set `rasa.endpoints.lock_store` before
+scaling up.
+
 ### Network Policies
 
 Network policies are disabled by default. Every policy the chart emits selects **only this release's pods**, so enabling them in a shared namespace does not affect anything else.
@@ -822,6 +844,11 @@ The following table lists all configurable parameters for this chart and their d
 | overrideEnv | list | Replaces the generated environment wholesale, including RASA_LICENSE. Empty keeps it. Use extraEnv to add. | `[]` |
 | persistence | object | PersistentVolumeClaim for model data at /app/working-data. | `{"create":false,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"}` |
 | podAnnotations | object | Pod annotations. | `{}` |
+| podDisruptionBudget | object | PodDisruptionBudget for the Rasa Pro pods. Off by default. Requires more than one replica: the chart refuses to render a budget for a single-replica Deployment, because it would make the node undrainable. | `{"annotations":{},"enabled":false,"maxUnavailable":1,"minAvailable":null}` |
+| podDisruptionBudget.annotations | object | Annotations for the PodDisruptionBudget. | `{}` |
+| podDisruptionBudget.enabled | bool | Create the PodDisruptionBudget. | `false` |
+| podDisruptionBudget.maxUnavailable | int | Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable. | `1` |
+| podDisruptionBudget.minAvailable | string | Minimum pods that must stay available. Mutually exclusive with maxUnavailable. | `nil` |
 | podLabels | object | Labels on all Rasa pods. | `{}` |
 | podSecurityContext | object | Pod-level security context. | `{"enabled":true}` |
 | rasa.allowUnauthenticatedApi | bool | Accept an unauthenticated API: silences the install warning and the render refusal. | `false` |

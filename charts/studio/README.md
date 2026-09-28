@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.31](https://img.shields.io/badge/Version-3.0.0--rc.31-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.32](https://img.shields.io/badge/Version-3.0.0--rc.32-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -67,7 +67,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.31
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.32
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -82,7 +82,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.31
+$ helm install my-release rasa/studio --version 3.0.0-rc.32
 ```
 
 ## Quick Start
@@ -135,13 +135,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.31
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.32
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.31
+$ helm pull rasa/studio --version 3.0.0-rc.32
 ```
 
 ## General Configuration
@@ -441,12 +441,39 @@ networkPolicy:
   denyAll: true
 ```
 
-When enabled, three policies are created:
-- **deny-all** — drops all ingress/egress by default (namespace-scoped)
-- **allow-dns-access** — permits UDP/TCP port 53 for DNS resolution
-- **ingress-egress-from-kubelet** — allows Kubernetes health-check traffic from the kubelet
+All policies are named after the release and select only its pods.
 
-> **Note:** Requires a CNI plugin that enforces `NetworkPolicy` (e.g. Calico, Cilium, Antrea). Enabling network policies without a compatible CNI has no effect.
+| policy | created when | effect |
+|---|---|---|
+| `deny-all` | `denyAll: true` | drops all ingress and egress |
+| `allow-dns-access` | always | UDP/TCP 53 to `dnsNamespace` |
+| `kubelet-access` | `nodeCIDR` set | probe traffic from the nodes to the app pods |
+| `allow-egress` | `egressPorts` non-empty | outbound to the listed ports |
+| `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
+
+With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
+
+```yaml
+networkPolicy:
+  enabled: true
+  denyAll: true
+  nodeCIDR:
+    - ipBlock:
+        cidr: 10.0.0.0/16        # your node CIDR, for kubelet probes
+  egressPorts:
+    - { port: 443, protocol: TCP }
+    - { port: 80,  protocol: TCP }
+    - { port: 5432, protocol: TCP }   # PostgreSQL
+    - { port: 9092, protocol: TCP }   # Kafka
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+```
+
+> **Note:** requires a CNI that enforces `NetworkPolicy` (Calico, Cilium, Antrea). Without one, enabling this has no effect.
+
+> **Note:** these policies cover Studio's own pods. The bundled `rasa` subchart has its own `rasa.networkPolicy.*` settings and is not affected by enabling these.
 
 ## Database Migration
 
@@ -714,9 +741,12 @@ Helm does not delete resources that disappeared from the previous topology. Afte
 | hostNetwork | bool | Whether the pod may use the node network namespace. | `false` |
 | imagePullSecrets | list | Repository pull secrets. | `[]` |
 | nameOverride | string | Override name of app. | `""` |
-| networkPolicy.denyAll | bool | Whether to apply denyAll network policy. | `false` |
-| networkPolicy.enabled | bool | Whether to enable network policies. | `false` |
-| networkPolicy.nodeCIDR | list | For traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes. | `[]` |
+| networkPolicy.allowIngressFrom | list | Peers allowed to reach the Studio app port. Required with denyAll; nodeCIDR only covers kubelet probes. | `[]` |
+| networkPolicy.denyAll | bool | Whether to default-deny all ingress and egress before more specific rules apply. | `false` |
+| networkPolicy.dnsNamespace | string | Namespace running cluster DNS, matched on kubernetes.io/metadata.name. | `"kube-system"` |
+| networkPolicy.egressPorts | list | Destination ports Studio may reach. Defaults cover HTTP and HTTPS only — add your database, Kafka and object-storage ports. | `[{"port":443,"protocol":"TCP"},{"port":80,"protocol":"TCP"}]` |
+| networkPolicy.enabled | bool | Whether to enable network policies. Only explicitly allowed traffic is permitted. | `false` |
+| networkPolicy.nodeCIDR | list | Node IP ranges allowed to reach pods. Required for kubelet probes when enabled. | `[]` |
 | podLabels | object | Labels to add to all Studio pod(s) | `{}` |
 | rasa.args | list | `args: []` replaces the chart-generated arguments entirely, so the container runs `command` alone. This is what settings.useDefaultArgs: false used to do. | `[]` |
 | rasa.command[0] | string |  | `"python"` |

@@ -810,14 +810,27 @@ eventIngestion:
 
 # Network policy settings
 networkPolicy:
-  # -- Whether to enable network policies.
+  # -- Whether to enable network policies. Only explicitly allowed traffic is permitted.
   enabled: false
-  # -- Whether to apply denyAll network policy.
+  # -- Whether to default-deny all ingress and egress before more specific rules apply.
   denyAll: false
-  # -- For traffic from a given CIDR - it's required in order to make kubelet able to run live and readiness probes.
+  # -- Node IP ranges allowed to reach pods. Required for kubelet probes when enabled.
   nodeCIDR: []
   #  - ipBlock:
   #      cidr: 0.0.0.0/0
+  # -- Namespace running cluster DNS, matched on kubernetes.io/metadata.name.
+  dnsNamespace: kube-system
+  # -- Destination ports Studio may reach. Defaults cover HTTP and HTTPS only — add your database, Kafka and object-storage ports.
+  egressPorts:
+    - port: 443
+      protocol: TCP
+    - port: 80
+      protocol: TCP
+  # -- Peers allowed to reach the Studio app port. Required with denyAll; nodeCIDR only covers kubelet probes.
+  allowIngressFrom: []
+  #  - namespaceSelector:
+  #      matchLabels:
+  #        kubernetes.io/metadata.name: ingress-nginx
 
 # -- Whether the pod may use the node network namespace.
 hostNetwork: false

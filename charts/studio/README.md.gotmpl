@@ -442,12 +442,39 @@ networkPolicy:
   denyAll: true
 ```
 
-When enabled, three policies are created:
-- **deny-all** — drops all ingress/egress by default (namespace-scoped)
-- **allow-dns-access** — permits UDP/TCP port 53 for DNS resolution
-- **ingress-egress-from-kubelet** — allows Kubernetes health-check traffic from the kubelet
+All policies are named after the release and select only its pods.
 
-> **Note:** Requires a CNI plugin that enforces `NetworkPolicy` (e.g. Calico, Cilium, Antrea). Enabling network policies without a compatible CNI has no effect.
+| policy | created when | effect |
+|---|---|---|
+| `deny-all` | `denyAll: true` | drops all ingress and egress |
+| `allow-dns-access` | always | UDP/TCP 53 to `dnsNamespace` |
+| `kubelet-access` | `nodeCIDR` set | probe traffic from the nodes to the app pods |
+| `allow-egress` | `egressPorts` non-empty | outbound to the listed ports |
+| `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
+
+With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
+
+```yaml
+networkPolicy:
+  enabled: true
+  denyAll: true
+  nodeCIDR:
+    - ipBlock:
+        cidr: 10.0.0.0/16        # your node CIDR, for kubelet probes
+  egressPorts:
+    - { port: 443, protocol: TCP }
+    - { port: 80,  protocol: TCP }
+    - { port: 5432, protocol: TCP }   # PostgreSQL
+    - { port: 9092, protocol: TCP }   # Kafka
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+```
+
+> **Note:** requires a CNI that enforces `NetworkPolicy` (Calico, Cilium, Antrea). Without one, enabling this has no effect.
+
+> **Note:** these policies cover Studio's own pods. The bundled `rasa` subchart has its own `rasa.networkPolicy.*` settings and is not affected by enabling these.
 
 ## Database Migration
 

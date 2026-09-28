@@ -300,14 +300,14 @@ rasa:
 
 **mountDefaultConfigmap:**
 
-By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a ConfigMap to the Rasa deployment. If you prefer to mount these files from a different source (e.g., from the `/.config` directory or baked into the image), you can disable this behavior:
+By default, the chart renders a ConfigMap from `rasa.credentials` and `rasa.endpoints` and mounts it at `/app/credentials.yml` and `/app/endpoints.yml` — which is where `rasa run` looks for them, since the image sets `WORKDIR /app`. If you would rather supply those files from somewhere else, disable it:
 
 ```yaml
 rasa:
   mountDefaultConfigmap: false
 ```
 
-When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
+When disabled, supply the files yourself — baked into the image, or mounted at `/app/credentials.yml` and `/app/endpoints.yml` through `rasa.extraVolumes` and `rasa.extraVolumeMounts`.
 
 **mountModelsVolume:**
 
@@ -952,7 +952,7 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.livenessProbe.terminationGracePeriodSeconds | int | livenessProbe.terminationGracePeriodSeconds is an optional duration in seconds the pod needs to terminate gracefully after a liveness probe failure | `30` |
 | rasa.livenessProbe.timeoutSeconds | int | livenessProbe.timeoutSeconds defines number of seconds after which the probe times out | `5` |
 | rasa.logging.logLevel | string | logging.logLevel is Rasa Log Level | `"info"` |
-| rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container. When false, credentials and endpoints must be available at /.config or baked into the image. | `true` |
+| rasa.mountDefaultConfigmap | bool | mountDefaultConfigmap controls whether the chart renders a ConfigMap from endpoints and credentials and mounts it into the Rasa container at /app/endpoints.yml and /app/credentials.yml, which is where rasa run reads them from because WORKDIR is /app. When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts. | `true` |
 | rasa.mountModelsVolume | bool | mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models. When false, models must be available at /app/models or baked into the image. | `true` |
 | rasa.nodeSelector | object | rasa.nodeSelector allows the deployment to be scheduled on selected nodes # Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector # Ref: https://kubernetes.io/docs/user-guide/node-selection/ | `{}` |
 | rasa.overrideEnv | list | overrideEnv replaces the environment the chart generates, rather than adding to it. Empty (default) keeps the generated block; a non-empty list replaces it wholesale, including RASA_PRO_LICENSE, so supply every variable the container needs. Use extraEnv to add without replacing. | `[]` |

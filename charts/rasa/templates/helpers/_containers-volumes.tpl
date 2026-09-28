@@ -3,8 +3,6 @@
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
 {{- $hasCredentials := include "rasa.hasCredentials" . }}
 {{- if or $hasEndpoints $hasCredentials }}
-- name: config-dir
-  emptyDir: {}
 - name: "rasa-configuration"
   configMap:
     name: {{ include "rasa.fullname" . }}-configmap
@@ -49,10 +47,6 @@ itself needs no write access, so it is deliberately not mounted over.
 {{- if .Values.rasa.mountDefaultConfigmap -}}
 {{- $hasEndpoints := include "rasa.hasEndpoints" . }}
 {{- $hasCredentials := include "rasa.hasCredentials" . }}
-{{- if or $hasEndpoints $hasCredentials }}
-- name: "config-dir"
-  mountPath: "/.config"
-{{- end }}
 {{- if $hasEndpoints }}
 - mountPath: "/app/endpoints.yml"
   subPath: "endpoints.yml"

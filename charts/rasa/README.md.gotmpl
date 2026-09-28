@@ -299,14 +299,14 @@ rasa:
 
 **mountDefaultConfigmap:**
 
-By default, the chart mounts `credentials.yml` and `endpoints.yml` files from a ConfigMap to the Rasa deployment. If you prefer to mount these files from a different source (e.g., from the `/.config` directory or baked into the image), you can disable this behavior:
+By default, the chart renders a ConfigMap from `rasa.credentials` and `rasa.endpoints` and mounts it at `/app/credentials.yml` and `/app/endpoints.yml` — which is where `rasa run` looks for them, since the image sets `WORKDIR /app`. If you would rather supply those files from somewhere else, disable it:
 
 ```yaml
 rasa:
   mountDefaultConfigmap: false
 ```
 
-When disabled, it is expected that the credentials and endpoints are mounted to the `/.config` directory or baked into the image.
+When disabled, supply the files yourself — baked into the image, or mounted at `/app/credentials.yml` and `/app/endpoints.yml` through `rasa.extraVolumes` and `rasa.extraVolumeMounts`.
 
 **mountModelsVolume:**
 

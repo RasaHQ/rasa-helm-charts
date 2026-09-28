@@ -60,8 +60,8 @@ rasa:
   jwtMethod: HS256
   # -- cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
   cors: '*'
-  # -- mountDefaultConfigmap controls whether the chart mounts a ConfigMap containing credentials.yml and endpoints.yml into the Rasa container.
-  # When false, credentials and endpoints must be available at /.config or baked into the image.
+  # -- mountDefaultConfigmap controls whether the chart renders a ConfigMap from endpoints and credentials and mounts it into the Rasa container at /app/endpoints.yml and /app/credentials.yml, which is where rasa run reads them from because WORKDIR is /app.
+  # When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts.
   mountDefaultConfigmap: true
   # -- mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models.
   # When false, models must be available at /app/models or baked into the image.

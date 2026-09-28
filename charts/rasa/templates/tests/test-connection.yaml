@@ -25,5 +25,5 @@ spec:
       # -O- streams the response to stdout. The default behaviour saves it to the
       # working directory, which is / in the busybox image and is not writable by
       # uid 65534, so the test would fail even against a healthy service.
-      args: ['-O-', '{{ include "rasa.fullname" . }}:{{ .Values.rasa.service.port }}']
+      args: ['-O-', '{{ include "rasa.fullname" . }}:{{ .Values.service.port }}']
   restartPolicy: Never

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Helm charts for deploying Rasa products on Kubernetes (chart versions live in each `Chart.yaml`, not here — they drift):
 - **`charts/studio/`** - Rasa Studio: multi-component app with backend, web-client, keycloak, event-ingestion. Optionally bundles the `rasa` chart as an OCI subchart (toggled by `rasa.enabled`).
-- **`charts/rasa/`** - Rasa Pro: main Rasa Pro server, action-server, duckling, rasa-pro-services
+- **`charts/rasa/`** - Rasa Pro: the Rasa Pro server. Deploys exactly one workload; action servers are bring-your-own.
 - **`charts/op-kits/`** - Operator Kits: thin CRD-wrapper chart that creates custom resources for PostgreSQL (CloudNativePG), Kafka (Strimzi), and Valkey. The operators themselves must be **pre-installed** in the cluster — this chart only emits CRs (`postgresql.cnpg.io/v1`, `kafka.strimzi.io/v1`, `hyperspike.io/v1`), gated by `<component>.enabled` flags.
 
 ## Commands

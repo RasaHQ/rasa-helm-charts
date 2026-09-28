@@ -2,7 +2,7 @@
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-rasa
+  name: {{ include "rasa.fullname" . }}-kubelet-access
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:
@@ -10,7 +10,7 @@ spec:
     - Egress
   podSelector:
     matchLabels:
-      app.kubernetes.io/name: {{ include "rasa.name" . }}
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
   egress:
     - to:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
@@ -19,29 +19,5 @@ spec:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.rasa.service.port }}
-{{- if .Values.rasaProServices.enabled }}
----
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: ingress-egress-from-kubelet-to-rasa-pro-services
-  namespace: {{ .Release.Namespace }}
-spec:
-  policyTypes:
-    - Ingress
-    - Egress
-  podSelector:
-    matchLabels:
-      app.kubernetes.io/name: rasa-pro-services
-  egress:
-    - to:
-    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
-  ingress:
-    - from:
-    {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
-      ports:
-      - protocol: TCP
-        port: {{ .Values.rasaProServices.service.port }}
-{{- end }}
+        port: {{ .Values.rasa.port }}
 {{- end }}

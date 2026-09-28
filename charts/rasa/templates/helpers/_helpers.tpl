@@ -40,7 +40,7 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
-{{- with .Values.global.additionalDeploymentLabels }}
+{{- with .Values.global.extraDeploymentLabels }}
 {{ toYaml . -}}
 {{- end }}
 {{- end }}
@@ -49,31 +49,7 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 Selector labels for Rasa OSS/Plus
 */}}
 {{- define "rasa.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Selector labels for Rasa Pro Services
-*/}}
-{{- define "rasa.rasaProServices.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-rasa-pro-services
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Selector labels for Duckling
-*/}}
-{{- define "rasa.duckling.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-duckling
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
-Selector labels for Action Server
-*/}}
-{{- define "rasa.actionServer.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "rasa.fullname" . }}-action-server
+app.kubernetes.io/name: {{ include "rasa.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
@@ -100,43 +76,10 @@ Usage: include "rasa.topologySpreadConstraints" (dict "constraints" <list> "sele
 Create the name of the service account to use
 */}}
 {{- define "rasa.serviceAccountName" -}}
-{{- if .Values.rasa.serviceAccount.create }}
-{{- default (include "rasa.fullname" .) .Values.rasa.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "rasa.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.rasa.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.rasaProServices.serviceAccountName" -}}
-{{- if .Values.rasaProServices.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-rasa-pro-services") .Values.rasaProServices.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.rasaProServices.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.duckling.serviceAccountName" -}}
-{{- if .Values.duckling.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-duckling") .Values.duckling.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.duckling.serviceAccount.name }}
-{{- end }}
-{{- end }}
-
-{{/*
-Create the name of the service account to use
-*/}}
-{{- define "rasa.actionServer.serviceAccountName" -}}
-{{- if .Values.actionServer.serviceAccount.create }}
-{{- default (include "rasa.fullname" . | printf "%s-action-server") .Values.actionServer.serviceAccount.name }}
-{{- else }}
-{{- default "default" .Values.actionServer.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -158,36 +101,202 @@ Determine rasa server to run with arguments
 */}}
 {{- define "rasa.defaultArgs" -}}
 - run
-{{- if .Values.rasa.settings.enableApi }}
+{{- if .Values.rasa.enableApi }}
 - --enable-api
 {{- end }}
 - --port
-- "{{ .Values.rasa.settings.port }}"
+- "{{ .Values.rasa.port }}"
+{{- if .Values.rasa.cors }}
 - --cors
-- {{- if .Values.rasa.settings.cors }} {{ .Values.rasa.settings.cors | quote }}{{ end }}
-{{- if .Values.rasa.settings.debugMode }}
+- {{ .Values.rasa.cors | quote }}
+{{- end }}
+{{- if .Values.rasa.debugMode }}
 - --debug
 {{- end }}
 {{- end -}}
 
 {{/*
-Return Duckling URL
+Report whether the chart itself starts the Rasa HTTP API.
+
+enableApi alone does not answer this: --enable-api is only rendered when the
+chart builds the arguments, which it skips when rasa.args is set. rasa.command
+is deliberately not part of this — command and args render independently, so
+overriding the entrypoint leaves --enable-api in place. Arguments you supply
+yourself are opaque, so an --enable-api inside rasa.args or extraArgs is
+invisible here.
 */}}
-{{- define "rasa.ducklingUrl" -}}
-{{- if and .Values.duckling.enabled (empty .Values.rasa.settings.ducklingHttpUrl) -}}
-{{- printf "%s://%s.%s.svc:%d" .Values.duckling.settings.scheme (include "rasa.fullname" . | printf "%s-duckling") .Release.Namespace (.Values.duckling.service.port | int) -}}
-{{- else if and (not .Values.duckling.enabled) (not (empty .Values.rasa.settings.ducklingHttpUrl)) -}}
-{{- print .Values.rasa.settings.ducklingHttpUrl -}}
+{{- define "rasa.apiServed" -}}
+{{- if and .Values.rasa.enableApi (kindIs "invalid" .Values.args) -}}
+true
 {{- end -}}
 {{- end -}}
 
 {{/*
-Check for image pull secrets for Rasa Pro Services
+Report whether an API credential reaches the container.
+
+rasa.overrideEnv replaces the generated environment block, so it decides which
+list to scan: a token in extraEnv is discarded as soon as overrideEnv is
+non-empty, and an authToken or jwtSecret with it. Both this and deployment.yaml
+test truthiness, so an empty overrideEnv keeps the generated block in both.
+envFrom is opaque at render time and counts as authenticated rather than
+blocking a legitimate install.
 */}}
-{{- define "rasaProServices.imagePullSecrets" -}}
-{{- if empty .Values.rasaProServices.imagePullSecrets -}}
-{{- .Values.imagePullSecrets | toYaml | nindent 8 -}}
+{{- define "rasa.apiAuthenticated" -}}
+{{- $named := false -}}
+{{- $env := .Values.overrideEnv | default (.Values.extraEnv | default list) -}}
+{{- range $env -}}
+{{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
+{{-     $named = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if or $named .Values.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.overrideEnv)) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether an enabled Rasa HTTP API authenticates nobody.
+
+This alone only warrants a warning, not a refusal. enableApi has to default to
+true because rasa run exits when it has neither a model nor the API to load one
+through, so failing on this predicate would make a no-values install
+unrenderable. allowUnauthenticatedApi silences both tiers for anyone who has
+already decided an open API is acceptable.
+*/}}
+{{- define "rasa.apiUnauthenticated" -}}
+{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether this chart itself puts the Service on the network.
+
+A ClusterIP Service is not a security boundary and a route to it can be added
+without touching this chart, which is why the warning above is unconditional.
+This predicate is narrower on purpose: it is what the chart can actually prove
+it is doing, so it is what the chart is willing to refuse over. service.type is
+defaulted rather than read directly, so `service: {}` does not read as routed.
+*/}}
+{{- define "rasa.apiRouted" -}}
+{{- if or .Values.ingress.enabled (ne (.Values.service.type | default "ClusterIP") "ClusterIP") .Values.hostNetwork -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Refuse to render an unauthenticated API that this chart routes traffic to.
+
+Composed from the two predicates above rather than repeating their conditions,
+so the NOTES warning and this refusal cannot drift apart: anything that fails
+here also warns, and the warning is strictly the wider set.
+*/}}
+{{- define "rasa.validateApiExposure" -}}
+{{- if and (include "rasa.apiUnauthenticated" .) (include "rasa.apiRouted" .) -}}
+{{- fail "rasa.enableApi is true, no API credential reaches the container, and this release routes traffic to it - rasa.ingress.enabled is true, rasa.service.type is not ClusterIP, or hostNetwork is true. That would put an unauthenticated Rasa HTTP API, including its model-management endpoints, on the network. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, stop routing to it, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Merge a structured map with its raw-YAML counterpart, or return nothing when
+both are empty.
+
+configmap.yaml and both volume defines share this so they cannot disagree about
+whether there is configuration to ship — they once did, and endpointsRaw
+produced a ConfigMap that nothing mounted. fromYaml reports a parse failure as a
+map holding only an Error key, hence the length check.
+
+Usage: include "rasa.mergedConfig" (dict "structured" ... "raw" ... "field" "endpointsRaw")
+*/}}
+{{- define "rasa.mergedConfig" -}}
+{{- $merged := dict -}}
+{{- if .raw -}}
+{{-   $trimmed := .raw | toString | trim -}}
+{{-   if $trimmed -}}
+{{-     $parsed := fromYaml $trimmed -}}
+{{-     if and (hasKey $parsed "Error") (eq (len $parsed) 1) -}}
+{{-       fail (printf "rasa.%s is not valid YAML (reported while rendering the ConfigMap, which the Deployment checksums, so Helm may name deployment.yaml as the location): %s" .field (index $parsed "Error")) -}}
+{{-     end -}}
+{{-     $merged = $parsed -}}
+{{-   end -}}
+{{- end -}}
+{{- if .structured -}}
+{{-   $merged = merge (deepCopy .structured) $merged -}}
+{{- end -}}
+{{- if $merged -}}
+{{- toYaml $merged -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether the chart has any endpoints configuration to mount.
+*/}}
+{{- define "rasa.hasEndpoints" -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.endpoints "raw" .Values.rasa.endpointsRaw "field" "endpointsRaw") -}}
+{{- end -}}
+
+{{/*
+Report whether the chart has any integrations configuration to mount.
+*/}}
+{{- define "rasa.hasIntegrations" -}}
+{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.integrations "raw" .Values.rasa.integrationsRaw "field" "integrationsRaw") -}}
+{{- end -}}
+
+{{/*
+Refuse an enabled ingress with no routes.
+
+An ingress with no rules routes nothing, and emitting `rules: null` is worse:
+the API server accepts it and silently does nothing. Raw Kubernetes Ingress
+keys get named because they are not chart values, so coalescing drops them and
+the operator sees "hosts is empty" while looking at a block describing hosts.
+*/}}
+{{- define "rasa.validateIngressHosts" -}}
+{{- if .Values.ingress.hosts -}}{{- else -}}
+{{- $raw := list -}}
+{{- range $k := (list "rules" "ingressClassName" "defaultBackend") -}}
+{{- if hasKey $.Values.ingress $k -}}{{- $raw = append $raw (printf "ingress.%s" $k) -}}{{- end -}}
+{{- end -}}
+{{- $why := "" -}}
+{{- if $raw -}}
+{{- $why = printf " These keys are not chart values, so they were ignored: %s. Use ingress.className rather than ingressClassName; the chart builds the rest of the spec itself." (join ", " $raw) -}}
+{{- end -}}
+{{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing.%s\n\n  hosts:\n    - host: my.example.com\n      paths:                       # backend is this release's Service\n        - {path: /, pathType: Prefix}\n      extraPaths:                  # backend is whatever you name\n        - {path: /other, pathType: Prefix, serviceName: other-svc, servicePort: 8080}\n\nOr set rasa.ingress.enabled=false and route to the Service yourself." $why) -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Smallest number of replicas this release can run.
+
+An HPA with minReplicas: 1 can sit at one replica, so autoscaling being on is
+not on its own enough to make a disruption budget safe.
+*/}}
+{{- define "rasa.minReplicas" -}}
+{{- if .Values.autoscaling.enabled -}}
+{{- .Values.autoscaling.minReplicas | default 1 -}}
 {{- else -}}
-{{- .Values.rasaProServices.imagePullSecrets | toYaml | nindent 8 -}}
+{{- .Values.replicaCount | default 1 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Refuse a PodDisruptionBudget that cannot do its job, or that would wedge the node.
+
+minAvailable: 1 against a single-replica Deployment makes the node undrainable:
+evicting the only pod violates the budget, so `kubectl drain` blocks forever and
+cluster upgrades stall. A budget over one replica is also pointless. Failing is
+better than skipping the object, because the operator asked for disruption
+protection and would otherwise believe they had it.
+*/}}
+{{- define "rasa.validatePodDisruptionBudget" -}}
+{{- if .Values.podDisruptionBudget.enabled -}}
+{{- $min := include "rasa.minReplicas" . | int -}}
+{{- if le $min 1 -}}
+{{- fail (printf "podDisruptionBudget.enabled is true but this release runs at most one replica (effective minimum: %d). A budget over a single replica protects nothing and, with minAvailable, makes the node undrainable because evicting the only pod would violate it. Set replicaCount above 1, or autoscaling.minReplicas above 1, or podDisruptionBudget.enabled=false." $min) -}}
+{{- end -}}
+{{- $hasMin := not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) -}}
+{{- $hasMax := not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) -}}
+{{- if and $hasMin $hasMax -}}
+{{- fail "podDisruptionBudget.minAvailable and podDisruptionBudget.maxUnavailable are mutually exclusive; Kubernetes rejects a PodDisruptionBudget that sets both. Both are unset in the chart defaults, so you have set both explicitly - drop one, or set it to null." -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}

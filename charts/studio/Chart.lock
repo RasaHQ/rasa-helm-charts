@@ -1,6 +1,6 @@
 dependencies:
 - name: rasa
   repository: oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts
-  version: 3.0.0-rc.5
-digest: sha256:f27da86a5d108433392a0e6abfac28eb1cf3b71882138479d07c16daebccaf5e
-generated: "2026-09-28T12:21:18.982866+02:00"
+  version: 3.0.0-rc.9
+digest: sha256:b603350cf1d49e1080a7776fcabf44085149765ff60904e34b9fa68bdb9b4b92
+generated: "2026-09-28T13:57:16.189176+02:00"

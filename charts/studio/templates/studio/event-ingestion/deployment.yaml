@@ -1,4 +1,3 @@
-{{- include "studio.validateNoNulledKeys" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
 {{- if eq (include "studio.eventIngestion.mode" .) "separate" }}
 apiVersion: apps/v1

@@ -194,7 +194,7 @@
     }
   },
   "type": "object",
-  "required": ["config"],
+  "required": ["config", "app", "global", "networkPolicy"],
   "properties": {
     "nameOverride": {
       "description": "Override name of app",

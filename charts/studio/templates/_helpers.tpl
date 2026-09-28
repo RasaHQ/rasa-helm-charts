@@ -365,23 +365,3 @@ Studio App external URL for CORS_ORIGINS.
 {{- define "studio.webClientUrl" -}}
 {{- printf "%s://%s" .Values.config.connectionType (include "studio.appHost" .) -}}
 {{- end -}}
-
-{{/*
-Refuse to render when a values block the chart dereferences has been nulled.
-
-Helm treats `foo: null` as "delete this key", so the block does not fall back
-to the chart default - it disappears, and every .Values.foo.bar below it fails
-with "nil pointer evaluating interface {}.bar", naming the template rather
-than the mistake. hasKey is the reliable signal because a nulled key is absent
-after coalescing. The rasa subchart block has its own guard, studio.rasa.validate,
-which gives a more specific message.
-*/}}
-{{- define "studio.validateNoNulledKeys" -}}
-{{- $missing := list -}}
-{{- range $k := (list "global" "app" "networkPolicy" "config" "eventIngestion") -}}
-{{- if not (hasKey $.Values $k) -}}{{- $missing = append $missing $k -}}{{- end -}}
-{{- end -}}
-{{- if $missing -}}
-{{- fail (printf "these values keys were set to null, which deletes them rather than restoring the chart default: %s. Remove the key entirely to use the default, or give it a value. To switch a component off use its own flag (for example networkPolicy.enabled=false or eventIngestion.mode=disabled)." (join ", " $missing)) -}}
-{{- end -}}
-{{- end -}}

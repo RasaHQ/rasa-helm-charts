@@ -1,4 +1,3 @@
-{{- include "studio.validateNoNulledKeys" . -}}
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.denyAll }}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

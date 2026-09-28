@@ -1,4 +1,3 @@
-{{- include "studio.validateNoNulledKeys" . -}}
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
 {{- /*
 Scoped to this release's app pods. Event ingestion declares no probes, so the

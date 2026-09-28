@@ -1,4 +1,3 @@
-{{- include "studio.validateNoNulledKeys" . -}}
 {{- if .Values.app.ingress.enabled -}}
 {{- $fullName := include "studio.fullname" . -}}
 {{- $svcPort := .Values.app.service.port -}}

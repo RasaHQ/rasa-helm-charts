@@ -1,4 +1,3 @@
-{{- include "studio.validateNoNulledKeys" . -}}
 {{- if .Values.rasa.enabled }}
 apiVersion: v1
 kind: ConfigMap

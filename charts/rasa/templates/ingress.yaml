@@ -34,8 +34,20 @@ spec:
   {{- /*
   An ingress with no rules routes nothing. Fail rather than emit `rules: null`,
   which the API server accepts and silently does nothing with.
+
+  Raw Kubernetes Ingress keys are named explicitly. They are not chart values,
+  so coalescing drops them and the operator gets "hosts is empty" while looking
+  straight at a block that plainly describes hosts.
   */}}
-  {{- fail "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Add at least one host and path, or set rasa.ingress.enabled=false and manage routing yourself." }}
+  {{- $raw := list }}
+  {{- range $k := (list "rules" "ingressClassName" "defaultBackend") }}
+  {{- if hasKey $.Values.ingress $k }}{{ $raw = append $raw (printf "ingress.%s" $k) }}{{ end }}
+  {{- end }}
+  {{- $shape := "\n  ingress:\n    enabled: true\n    className: istio\n    hosts:\n      - host: my.example.com\n        paths:\n          - path: /\n            pathType: Prefix\n    tls:\n      - hosts: [my.example.com]\n        secretName: rasa-tls\n" }}
+  {{- if $raw }}
+  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, and these keys are not chart values so they were ignored: %s. They look like a raw Kubernetes Ingress spec. This chart builds the spec for you - describe the routes and it wires the backend to this release's Service, whose name is derived from the release rather than being plain 'rasa':%sUse ingress.className, not ingressClassName. ingress.tls already has the same shape as the Kubernetes field." (join ", " $raw) $shape) }}
+  {{- end }}
+  {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing. Describe at least one route:%sOr set rasa.ingress.enabled=false and manage routing yourself." $shape) }}
   {{- end }}
   rules:
     {{- range .Values.ingress.hosts }}

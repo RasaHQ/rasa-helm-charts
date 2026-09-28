@@ -12,11 +12,17 @@ metadata:
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:
-  {{- with .Values.podDisruptionBudget.minAvailable }}
-  minAvailable: {{ . }}
+  {{- /*
+  Tested for being absent, not falsy: maxUnavailable: 0 is a valid budget that
+  forbids every voluntary eviction, and `with` would drop it, leaving a spec
+  with no budget field at all. This matches how the validator decides whether
+  a field is set.
+  */}}
+  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
   {{- end }}
-  {{- with .Values.podDisruptionBudget.maxUnavailable }}
-  maxUnavailable: {{ . }}
+  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
   {{- end }}
   selector:
     matchLabels:

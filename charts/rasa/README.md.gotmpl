@@ -725,10 +725,6 @@ podDisruptionBudget:
 > `minAvailable` it makes the node **undrainable**: evicting the only pod would
 > violate it, so `kubectl drain` blocks indefinitely and cluster upgrades stall.
 
-More than one replica also needs a **lock store**, or concurrent turns on the
-same conversation race each other. Set `rasa.endpoints.lock_store` before
-scaling up.
-
 ### Network Policies
 
 Network policies are disabled by default. Every policy the chart emits selects **only this release's pods**, so enabling them in a shared namespace does not affect anything else.

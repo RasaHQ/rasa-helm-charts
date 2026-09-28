@@ -10,7 +10,7 @@ fullnameOverride: ""
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all Rasa Pro deployments.
+# -- rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted.
 rasaProLicense:
   secretName: "rasa-secrets"
   secretKey: "rasaProLicense"

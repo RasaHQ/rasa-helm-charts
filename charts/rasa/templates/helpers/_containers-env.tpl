@@ -21,8 +21,12 @@ Environment Variables for Rasa Containers
 - name: "JWT_METHOD"
   value: {{ .jwtMethod | quote }}
 {{- end }}
-# Rasa Pro License
-- name: "RASA_PRO_LICENSE"
+{{- /*
+RASA_LICENSE is the canonical name; RASA_PRO_LICENSE is legacy and emits a
+deprecation warning. Verified against rasa 3.20.0, which the chart's appVersion
+pins: licensing.LICENSE_ENV_VAR == "RASA_LICENSE".
+*/}}
+- name: "RASA_LICENSE"
   valueFrom:
     secretKeyRef:
       name: {{ $.Values.rasaProLicense.secretName }}

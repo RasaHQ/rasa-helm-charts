@@ -8,166 +8,79 @@ By installing and using this software, you agree to be bound by the terms and co
 
 1. Get Rasa application URL by running these commands:
 
-{{- if .Values.rasa.ingress.enabled }}
-{{- range $host := .Values.rasa.ingress.hosts }}
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
   {{- range .paths }}
-  http{{ if $.Values.rasa.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
   {{- end }}
 {{- end }}
 
-{{- else if contains "NodePort" .Values.rasa.service.type }}
+{{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "rasa.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 
-{{- else if contains "LoadBalancer" .Values.rasa.service.type }}
+{{- else if contains "LoadBalancer" .Values.service.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "rasa.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "rasa.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.rasa.service.port }}
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
 
-{{- else if contains "ClusterIP" .Values.rasa.service.type }}
+{{- else if contains "ClusterIP" .Values.service.type }}
   export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "rasa.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
 {{- end }}
 
-2. Breaking changes in chart 3.0.0:
-   - The actionServer, duckling and rasaProServices components have been removed.
-     This chart now deploys the Rasa Pro server only. Their values keys are ignored
-     rather than rejected, so an existing values file still installs.
-   - Action servers are bring-your-own. Deploy one yourself and point
-     rasa.endpoints.action_endpoint.url at it. If you were using the
-     chart-managed action server, do this BEFORE upgrading: the pod starts either
-     way and the failure only appears on the first custom-action call.
-   - RASA_DUCKLING_HTTP_URL is no longer set, and rasa.ducklingHttpUrl is
-     gone. Set the variable yourself via rasa.extraEnv if you run Duckling.
-   - rasa.containerSecurityContext now defaults to the restricted Pod Security Standard:
-     allowPrivilegeEscalation: false, capabilities.drop: [ALL], runAsNonRoot: true and
-     seccompProfile.type: RuntimeDefault. No runAsUser is set, so the effective uid is
-     still whatever the image declares.
-   - rasa.automountServiceAccountToken now defaults to false, so no Kubernetes API token
-     is mounted. Rasa Pro does not call the Kubernetes API and this chart grants no RBAC.
-     Set it to true if you add a sidecar via rasa.extraContainers that needs one.
-   - Chart.yaml declares appVersion again, tracking the Rasa Pro release the chart
-     targets. rasa.image.tag now defaults to "" and falls back to appVersion, so a chart
-     upgrade moves the Rasa Pro image with it. Set rasa.image.tag to an exact tag to pin
-     the image independently.
-   - rasa.authToken and rasa.jwtSecret are now unset by default, so a
-     default install no longer needs authToken and jwtSecret keys in its Secret. If you
-     relied on the old defaults without setting them explicitly, this upgrade REMOVES
-     AUTH_TOKEN and JWT_SECRET from the pod and leaves the HTTP API unauthenticated.
-   - app.kubernetes.io/name is now the chart name ("rasa") instead of the release
-     fullname. This label is part of Deployment.spec.selector, which Kubernetes does
-     not allow you to change, so `helm upgrade` FAILS on an existing release. Delete
-     the old Deployment first and accept the downtime:
-       kubectl delete deployment <release>-rasa -n <namespace>
-       helm upgrade <release> ...
-     Do NOT use --cascade=orphan here. The orphaned ReplicaSet keeps the old labels,
-     which the new selector cannot match, so nothing ever adopts it: the old pods
-     outlive the release, survive `helm uninstall` and are never garbage collected.
-     They also leave the Service the moment its selector flips, so orphaning buys no
-     continuity. To avoid downtime, install alongside under a second release name and
-     cut traffic over yourself.
-   - NetworkPolicy objects are now named after the release and select only this
-     release's pods. Previously deny-all and allow-dns-access selected EVERY pod in
-     the namespace, and allow-dns-access was a fixed name that collided between
-     releases. If you relied on this chart imposing a namespace-wide default-deny,
-     that is now scoped to the chart's own pods.
-   - networkPolicy gained dnsNamespace, egressPorts and allowIngressFrom. Egress is
-     still limited to 443 and 80 by default, so add your tracker store and event
-     broker ports before enabling denyAll, and list your ingress controller in
-     allowIngressFrom or its traffic is dropped.
-   - rasa.ingress.hosts is now empty by default instead of carrying a placeholder
-     host with a /api path. Enabling the ingress without hosts is refused.
-   - enableApi=true now REQUIRES a credential. The chart refuses to render an
-     enabled API that authenticates nobody, so a first install needs one of:
-       rasa.authToken / rasa.jwtSecret pointing at a Secret,
-       an AUTH_TOKEN or JWT_SECRET entry in rasa.extraEnv or rasa.overrideEnv,
-       a Secret or ConfigMap via rasa.envFrom,
-       rasa.enableApi=false, or
-       rasa.allowUnauthenticatedApi=true to accept an open API.
-     Note that enableApi=false only works if you supply a model: rasa run exits
-     immediately when it has neither a model nor the API to load one through.
-   - The pass-through keys follow the usual Helm naming now:
-       additionalArgs -> extraArgs        additionalEnv -> extraEnv
-       additionalContainers -> extraContainers
-       volumes -> extraVolumes            volumeMounts -> extraVolumeMounts
-       global.additionalDeploymentLabels -> global.extraDeploymentLabels
-     The old names are IGNORED, not rejected, so anything left under them is
-     silently dropped. Move them before upgrading.
-   - useDefaultArgs is gone. args now has three states: unset means the chart
-     builds the arguments and appends extraArgs, an explicit list replaces them,
-     and an explicit empty list ([]) means no arguments at all — that last one is
-     what useDefaultArgs=false used to do.
-   - enableApi=true now REQUIRES a credential. The chart refuses to render an
-     enabled API with no authToken, jwtSecret or AUTH_TOKEN/JWT_SECRET reaching
-     the container. A ClusterIP Service is not a boundary, so this no longer waits
-     for an ingress. Set allowUnauthenticatedApi=true to accept the risk.
-   - The licence is passed to the container as RASA_LICENSE. RASA_PRO_LICENSE is
-     deprecated upstream and is no longer set. If a sidecar or a custom probe read
-     RASA_PRO_LICENSE, point it at RASA_LICENSE.
-   - The values key rasaProLicense is now rasaLicense, and Secret keys default to
-     upper snake case to match the variables they populate and the studio chart:
-     RASA_LICENSE, AUTH_TOKEN, JWT_SECRET.
-     THIS NEEDS A CHANGE ON YOUR SIDE. The chart cannot rename a key inside your
-     Secret, so if you relied on the old default your Secret still holds
-     "rasaProLicense" and the pod will not start. Either rename the key in your
-     Secret, or keep the old one explicitly:
-       rasaLicense:
-         secretName: rasa-secrets
-         secretKey: rasaProLicense
-   - rasa.credentials and rasa.credentialsRaw are GONE. Mantle declares channels in
-     integrations.yml and ignores credentials.yml entirely, so the chart no longer
-     renders or mounts it. Move your channels into rasa.integrations.
-   - rasa.integrations and rasa.integrationsRaw are new. They render
-     /app/integrations.yml: the LLM, its model groups, channels, optional MCP
-     servers and Langfuse tracing. Setting either REPLACES the integrations.yml
-     inside your trained project, so supply the whole file — llm.model_group
-     included — or the server fails validation at startup.
-   - rasa.endpoints is DEPRECATED but still works. rasa run continues to read
-     /app/endpoints.yml for the tracker store, event broker, lock store, action
-     endpoint and NLG server. Its model_groups, mcp_servers and tracing blocks
-     belong in rasa.integrations now.
-   - Rasa settings live directly under rasa.*. Anything left under rasa.settings is
-     IGNORED, not rejected, so a port, authToken, endpoints or tracker_store left
-     there silently reverts to the chart default. Move them before upgrading.
-   - rasa.enabled was removed. The chart deploys one workload, so there is nothing
-     to toggle: install to deploy, uninstall to remove. If you used rasa.enabled=false
-     to install this chart for its NetworkPolicies alone, it now deploys the server too.
-   - rasa.scheme is gone. Nothing read it.
-   - rasa.cors is a plain string again. It was typed as "string or secret
-     reference"; the secret form was never read and rendered map[...] into --cors.
-   - The container port, the Service targetPort and the NetworkPolicy ports all follow
-     rasa.port now instead of rasa.service.port, so they cannot drift from the
-     port Rasa actually binds. service.targetPort defaults to empty and follows
-     port; set it only to target a different or named container port.
-   - The helm test hook Pod now runs non-root (uid 65534) with the restricted fields set,
-     so `helm test` works in a namespace enforcing the restricted Pod Security Standard.
-{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) }}
+2. Upgrading from 2.x? Three changes need action OUTSIDE your values file:
+
+   a) The Deployment selector changed, and Kubernetes will not let you edit it.
+      `helm upgrade` FAILS on an existing release. Delete first, accept downtime:
+        kubectl delete deployment <release>-rasa -n <namespace>
+        helm upgrade <release> ...
+      Do NOT use --cascade=orphan: the orphaned pods can never be adopted and
+      survive `helm uninstall`.
+
+   b) The licence Secret key default is now RASA_LICENSE, not rasaProLicense.
+      A chart cannot rename a key inside your Secret, so the pod will not start
+      until you rename it there, or pin the old name:
+        rasa: {license: {secretName: rasa-secrets, secretKey: rasaProLicense}}
+
+   c) Deployment settings moved from rasa.* to the chart ROOT. rasa.image,
+      rasa.resources, rasa.nodeSelector, rasa.service, rasa.ingress and the
+      rest are now top-level; rasa.* keeps only Rasa's own config (port,
+      enableApi, cors, endpoints, integrations, license, ...).
+      Old keys are IGNORED, not rejected, so a stale rasa.image silently falls
+      back to the chart default image. Also ignored: rasa.settings.*,
+      additional* (now extra*), volumes, volumeMounts, rasa.credentials,
+      useDefaultArgs, rasa.enabled, rasa.scheme, and the actionServer /
+      duckling / rasaProServices components.
+
+   Full migration guide, including every removed and renamed key:
+   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/README.md#upgrading-to-300
+{{- if include "rasa.apiUnauthenticated" . }}
 
    WARNING: the Rasa HTTP API is enabled and NOT authenticated.
-   enableApi is true but neither authToken nor jwtSecret is set,
-   so anything that can reach the Service inside the cluster can call the API. Set one of
-   them before exposing this deployment more widely:
+   No credential reaches the container, so anything that can reach the Service
+   can call the API, including the model-management endpoints. The chart warns
+   here and REFUSES to render if you route traffic to it - ingress.enabled, a
+   service.type other than ClusterIP, or hostNetwork. A ClusterIP Service is
+   not a boundary either, and a route added outside this chart is invisible.
+   Fix it:
      --set rasa.authToken.secretName=rasa-secrets \
-     --set rasa.authToken.secretKey=authToken
-   Or disable the API with --set rasa.enableApi=false
-   Exposing it outside the cluster in this state is refused outright - that means an
-   ingress, a non-ClusterIP service type, or hostNetwork. Override with
-   --set rasa.allowUnauthenticatedApi=true only if something in front of the
-   chart already authenticates callers.
+     --set rasa.authToken.secretKey=AUTH_TOKEN    # the Secret must hold this key
+   Or --set rasa.enableApi=false (needs a model; rasa run exits without either).
+   Or --set rasa.allowUnauthenticatedApi=true to accept an open API.
 {{- end }}
 {{- $defaultRepo := "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" }}
-{{- if and .Values.rasa.containerSecurityContext.enabled .Values.rasa.containerSecurityContext.runAsNonRoot (ne .Values.rasa.image.repository $defaultRepo) }}
+{{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.runAsNonRoot (ne .Values.image.repository $defaultRepo) }}
 
-   WARNING: you are running a custom Rasa Pro image:
-     {{ .Values.rasa.image.repository }}
-   runAsNonRoot: true requires an image whose USER is a NUMERIC non-root uid. The stock
-   image is USER 1001. If yours runs as root, or declares USER by name, the pod fails with
-   CreateContainerConfigError and never starts. Check your image with:
-     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.rasa.image.repository }}:{{ .Values.rasa.image.tag | default .Chart.AppVersion }}
-   To opt out (the pod will then not satisfy the restricted Pod Security Standard):
-     --set rasa.containerSecurityContext.runAsNonRoot=false
+   WARNING: custom image with runAsNonRoot: true.
+   {{ .Values.image.repository }}
+   The image USER must be a NUMERIC non-root uid (the stock image is 1001), or
+   the pod fails with CreateContainerConfigError. Check it:
+     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+   Opt out with --set rasa.containerSecurityContext.runAsNonRoot=false (the pod
+   then fails the restricted Pod Security Standard).
 {{- end }}

@@ -17,11 +17,11 @@
 {{- end }}
 {{- end }}
 {{- end }}
-{{ if .Values.rasa.mountModelsVolume -}}
+{{ if .Values.mountModelsVolume -}}
 - name: models
   emptyDir: {}
 {{- end }}
-{{ if .Values.rasa.containerSecurityContext.readOnlyRootFilesystem -}}
+{{ if .Values.containerSecurityContext.readOnlyRootFilesystem -}}
 {{- /*
 An immutable root filesystem still has to let Rasa write three paths: /tmp,
 which the image declares as a VOLUME but Kubernetes ignores, and $HOME/.config
@@ -36,7 +36,7 @@ itself needs no write access, so it is deliberately not mounted over.
 - name: writable-dot-cache
   emptyDir: {}
 {{- end }}
-{{ if .Values.rasa.persistence.create -}}
+{{ if .Values.persistence.create -}}
 - name: model-data
   persistentVolumeClaim:
     claimName: rasa-pro-data-pvc-{{ .Release.Namespace }}
@@ -60,11 +60,11 @@ itself needs no write access, so it is deliberately not mounted over.
   readOnly: true
 {{- end }}
 {{- end }}
-{{ if .Values.rasa.mountModelsVolume -}}
+{{ if .Values.mountModelsVolume -}}
 - name: "models"
   mountPath: "/app/models"
 {{- end }}
-{{ if .Values.rasa.containerSecurityContext.readOnlyRootFilesystem -}}
+{{ if .Values.containerSecurityContext.readOnlyRootFilesystem -}}
 - name: "writable-tmp"
   mountPath: "/tmp"
 - name: "writable-dot-config"
@@ -72,7 +72,7 @@ itself needs no write access, so it is deliberately not mounted over.
 - name: "writable-dot-cache"
   mountPath: "/app/.cache"
 {{- end }}
-{{ if .Values.rasa.persistence.create -}}
+{{ if .Values.persistence.create -}}
 - mountPath: "/app/working-data"
   name: model-data
 {{- end -}}

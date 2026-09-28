@@ -1,4 +1,4 @@
-{{- if and .Values.rasa.persistence.create .Values.rasa.persistence.hostPath.enabled -}}
+{{- if and .Values.persistence.create .Values.persistence.hostPath.enabled -}}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
@@ -8,20 +8,20 @@ metadata:
     name: rasa-pro-data-pv-{{ .Release.Namespace }}
 spec:
   capacity:
-    storage: {{ .Values.rasa.persistence.storageCapacity }}
+    storage: {{ .Values.persistence.storageCapacity }}
   volumeMode: Filesystem
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.rasa.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
   hostPath:
-    path: {{ .Values.rasa.persistence.hostPath.path | default "/mnt/data" }}
-    type: {{ .Values.rasa.persistence.hostPath.type | default "DirectoryOrCreate" }}
+    path: {{ .Values.persistence.hostPath.path | default "/mnt/data" }}
+    type: {{ .Values.persistence.hostPath.type | default "DirectoryOrCreate" }}
   claimRef:
     name: rasa-pro-data-pvc-{{ .Release.Namespace }}
     namespace: {{ .Release.Namespace }}
 {{- end }}
-{{- if .Values.rasa.persistence.create }}
+{{- if .Values.persistence.create }}
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
@@ -36,6 +36,6 @@ spec:
   volumeMode: Filesystem
   resources:
     requests:
-      storage: {{ .Values.rasa.persistence.storageRequests }}
-  storageClassName: {{ .Values.rasa.persistence.storageClassName }}
+      storage: {{ .Values.persistence.storageRequests }}
+  storageClassName: {{ .Values.persistence.storageClassName }}
 {{- end }}

@@ -1,75 +1,44 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-# -- nameOverride overrides the name used for chart resources. Defaults to the chart name.
+# -- Overrides the chart name used in resource names.
 nameOverride: ""
-# -- fullnameOverride overrides the fully-qualified name prefix used for all chart resources.
+# -- Overrides the full name prefix for all chart resources.
 fullnameOverride: ""
 
-# -- imagePullSecrets contains references to Secrets for pulling images from private registries.
+# -- Secrets for pulling images from private registries.
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted.
-rasaLicense:
-  secretName: "rasa-secrets"
-  secretKey: "RASA_LICENSE"
-
-# Rasa Pro Image
 rasa:
-  # -- rasa.replicaCount specifies number of replicas
-  replicaCount: 1
-  # rasa.image defines image settings
-  image:
-    # -- image.repository specifies image repository
-    repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
-    # -- image.pullPolicy specifies image pull policy
-    pullPolicy: IfNotPresent
-    # -- image.tag overrides the Rasa Pro image tag. Empty (default) uses the chart's
-    # appVersion. Set an exact, immutable tag to pin deployments independently of chart
-    # upgrades.
-    tag: ""
-
-  # -- rasa.strategy specifies deployment strategy type
-  ## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
-  strategy: {}
-  #   type: RollingUpdate
-  #   rollingUpdate:
-  #     maxSurge: 1
-  #     maxUnavailable: 0
-
-  # -- debugMode enables debug mode
+  # -- Secret holding the Rasa Pro licence. Required. Passed to the container as RASA_LICENSE.
+  license:
+    secretName: "rasa-secrets"
+    secretKey: "RASA_LICENSE"
+  # -- Run Rasa with --debug.
   debugMode: false
-  # -- port defines port on which Rasa runs
+  # -- Port Rasa binds. The container port, Service targetPort and probes all follow it.
   port: 5005
-  # -- enableApi adds the Rasa HTTP API (model management, conversation and tracker endpoints) to the configured input channel. On by default: rasa run exits immediately when it has neither a model nor the API, so a model-less install cannot serve without it. The chart refuses to render an enabled API with no credential, so set authToken or jwtSecret, or acknowledge with allowUnauthenticatedApi.
+  # -- Serve the Rasa HTTP API. On by default because rasa run exits when it has neither a model nor the API. The API is unauthenticated until you set authToken or jwtSecret.
   enableApi: true
-  # -- authToken references the Kubernetes Secret containing the static bearer token used to authenticate API requests.
-  # Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests.
+  # -- Secret holding the static bearer token for API requests. Unset by default.
   authToken:
     # secretName: "rasa-secrets"
     # secretKey: "AUTH_TOKEN"
-  # -- jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
-  # Unset by default. Set this together with jwtMethod to authenticate API requests with signed JWTs instead of a static token.
+  # -- Secret holding the JWT signing secret for API requests. Unset by default; pair with jwtMethod.
   jwtSecret:
     # secretName: "rasa-secrets"
     # secretKey: "JWT_SECRET"
-  # -- allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails whenever enableApi is true and no credential reaches the container, regardless of how the Service is exposed; set this to true when something in front of the chart already authenticates callers.
+  # -- Accept an unauthenticated API: silences the install warning and the render refusal.
   allowUnauthenticatedApi: false
-  # -- jwtMethod is JWT algorithm to be used
+  # -- JWT algorithm.
   jwtMethod: HS256
-  # -- cors sets the allowed CORS origin for the Rasa API. Defaults to '*' (all origins). Restrict to specific domains in production.
+  # -- Allowed CORS origin. Restrict to specific domains in production.
   cors: '*'
-  # -- mountDefaultConfigmap controls whether the chart renders a ConfigMap from integrations and endpoints and mounts it into the Rasa container at /app/integrations.yml and /app/endpoints.yml, which is where rasa run reads them from because WORKDIR is /app.
-  # When false, supply those files yourself — baked into the image, or through extraVolumes and extraVolumeMounts.
+  # -- Render integrations and endpoints into a ConfigMap mounted at /app/integrations.yml and /app/endpoints.yml. Set false to supply them yourself.
   mountDefaultConfigmap: true
-  # -- mountModelsVolume controls whether the chart mounts a volume for Rasa models at /app/models.
-  # When false, models must be available at /app/models or baked into the image.
-  mountModelsVolume: true
-  # -- integrations is rendered to /app/integrations.yml, the Mantle project file declaring the LLM, its model groups, the channels customers reach the agent through, optional MCP servers and Langfuse tracing. Mantle reads channels from here and ignores credentials.yml entirely.
-  # Setting this REPLACES the integrations.yml inside the trained project, because the chart mounts over that path — so supply the whole file, llm.model_group included, or the server fails validation at startup.
-  # A Mantle project is detected by integrations.yml AND at least one skills/*/skill.md under the project root, so this key alone does not make a project Mantle; the skills come from the trained artifact.
   ## See: https://mantle.rasa.com/reference/integrations-yml
+  # -- Rendered to /app/integrations.yml (Mantle: LLM, model groups, channels, MCP servers, tracing). Replaces the file in your trained project, so supply all of it.
   integrations: {}
     # llm:
     #   model_group: orchestrator
@@ -82,23 +51,20 @@ rasa:
     # channels:
     #   rest: { enabled: true }
 
-  # -- integrationsRaw accepts a raw YAML string (e.g. the contents of an integrations.yml file)
-  # that is parsed and deep-merged with integrations. The structured value wins on key conflicts.
-  # Intended for `helm install --set-file rasa.integrationsRaw=./integrations.yml`
-  # or ArgoCD multi-source `fileParameters` referencing `$values/integrations.yml`.
-  # Leave unset/empty to disable. Malformed YAML fails the template render.
+  # -- Raw integrations.yml as a string, deep-merged with integrations, which wins. For --set-file or ArgoCD fileParameters.
   integrationsRaw: ""
 
   # See: https://rasa.com/docs/rasa/telemetry/telemetry/
+  # -- Telemetry settings.
   telemetry:
-    # -- telemetry.enabled allow Rasa to collect anonymous usage details
+    # -- Send anonymous usage data to Rasa.
     enabled: true
-    # -- telemetry.debug prints telemetry data to stdout
+    # -- Print telemetry payloads to stdout.
     debug: false
 
   # Not all parameters are mandatory
-  # -- endpoints is DEPRECATED but still read. rasa run loads /app/endpoints.yml for the tracker store, event broker, lock store, action endpoint and NLG server. Under Mantle its model_groups, mcp_servers and tracing blocks belong in rasa.integrations instead.
   ## See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
+  # -- DEPRECATED. Rendered to /app/endpoints.yml: tracker store, event broker, lock store, action endpoint, NLG server.
   endpoints: {}
     # action_endpoint:
     #   url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
@@ -131,301 +97,318 @@ rasa:
     #       - provider: openai
     #         model: gpt-4o-2024-11-20
 
-  # -- endpointsRaw is DEPRECATED alongside endpoints. Accepts the contents of an endpoints.yml file as a string, deep-merged with endpoints, which wins on key conflicts. For `--set-file rasa.endpointsRaw=./endpoints.yml` or ArgoCD `fileParameters`. Malformed YAML fails the render.
+  # -- DEPRECATED. Raw endpoints.yml as a string, deep-merged with endpoints, which wins. Malformed YAML fails the render.
   endpointsRaw: ""
 
-  # -- environment sets the Rasa runtime environment. Use 'production' to disable certain development-only defaults.
+  # -- Rasa runtime environment. 'production' disables development-only defaults.
   environment: development
   # logging sets log levels for Rasa and external libraries
   # See: https://rasa.com/docs/rasa/next/command-line-interface/#log-level
+  # -- Logging settings.
   logging:
-    # -- logging.logLevel is Rasa Log Level
+    # -- Rasa log level.
     logLevel: info
-  # -- args replaces the generated container arguments entirely. Unset (default) lets the chart build them from port, cors, enableApi and debugMode, then append extraArgs. An explicit empty list means no arguments at all — use that when rasa.command runs something other than the Rasa server.
-  args:
-  # -- extraArgs appends arguments to the ones the chart generates. Ignored when args is set.
-  extraArgs: []
-  # -- rasa.command overrides the default command for the container
-  command: []
-  # -- overrideEnv replaces the environment the chart generates, rather than adding to it. Empty (default) keeps the generated block; a non-empty list replaces it wholesale, including RASA_PRO_LICENSE, so supply every variable the container needs. Use extraEnv to add without replacing.
-  overrideEnv: []
-  # -- extraEnv adds additional environment variables
-  extraEnv: []
-    # - name: SOME_CUSTOM_ENV_VAR
-    #   value: "custom value"
-    # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
-    #   valueFrom:
-    #     secretKeyRef:
-    #       name:
-    #       key:
 
-  # -- rasa.envFrom is used to add environment variables from ConfigMap or Secret
-  envFrom: []
-    # - configMapRef:
-    #     name: my-configmap
 
-  # -- rasa.initContainers allows to specify init containers for the Rasa deployment
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
-  ## <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file
-  initContainers: []
-    # - name: initial-model
-    #   image: "alpine"
-    #   command: ["/bin/sh", "-c"]
-    #   args:
-    #     - cd /app/models/ && wget <PATH_TO_INITIAL_MODEL> -O model.tar.gz
-    #   volumeMounts:
-    #     - mountPath: /app/models
-    #       name: models
+# ---- Deployment / Kubernetes workload ----
 
-  # -- extraContainers allows to specify additional containers for the Rasa Deployment
-  extraContainers: []
-    # - name: extra
-    #   image: "busybox"
-    #   command: ["bash", "-c"]
+# -- Number of Rasa Pro replicas.
+replicaCount: 1
+# Rasa Pro image.
+image:
+  # -- Image repository.
+  repository: "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+  # -- Image pull policy.
+  pullPolicy: IfNotPresent
+  # -- Image tag. Empty uses the chart appVersion. Set an exact tag to pin independently of chart upgrades.
+  tag: ""
 
-  # -- extraVolumes specify additional volumes to mount in the Rasa container
-  ## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
-  extraVolumes: []
-  #   - hostPath:
-  #       path: <HOST_PATH>
-  #     name: <VOLUME_NAME>
+## ref: https://kubernetes.io/docs/concepts/workloads/controllers/deployment/#strategy
+# -- Deployment strategy.
+strategy: {}
+#   type: RollingUpdate
+#   rollingUpdate:
+#     maxSurge: 1
+#     maxUnavailable: 0
 
-  # -- extraVolumeMounts specifies additional volumes to mount in the Rasa container
-  extraVolumeMounts: []
-    # - name: <VOLUME_NAME>
-    #   mountPath: <CONTAINER_PATH>
-    #   readOnly: true
+# -- Mount an emptyDir for models at /app/models.
+mountModelsVolume: true
+# -- Replaces the generated container arguments. Unset builds them from rasa.port, rasa.cors, rasa.enableApi, rasa.debugMode. [] means no arguments.
+args:
+# -- Arguments appended to the generated ones. Ignored when args is set.
+extraArgs: []
+# -- Overrides the container entrypoint.
+command: []
+# -- Replaces the generated environment wholesale, including RASA_LICENSE. Empty keeps it. Use extraEnv to add.
+overrideEnv: []
+# -- Environment variables added to the generated ones.
+extraEnv: []
+  # - name: SOME_CUSTOM_ENV_VAR
+  #   value: "custom value"
+  # - name: SOME_CUSTOM_ENV_VAR_FROM_SECRET
+  #   valueFrom:
+  #     secretKeyRef:
+  #       name:
+  #       key:
 
-  # -- rasa.serviceAccount defines service account
-  serviceAccount:
-    # -- serviceAccount.create specifies whether a service account should be created
-    create: true
-    # -- serviceAccount.annotations defines annotations to add to the service account
-    annotations: {}
-    # -- serviceAccount.name is the name of the service account to use.
-    # If not set and create is true, a name is generated using the fullname template
-    name: ""
+# -- Environment from ConfigMaps or Secrets.
+envFrom: []
+  # - configMapRef:
+  #     name: my-configmap
 
-  # -- (int) rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30
-  terminationGracePeriodSeconds:
+## Ref: https://kubernetes.io/docs/concepts/workloads/pods/init-containers/
+## <PATH_TO_INITIAL_MODEL> has to be a URL (without auth) that points to a tar.gz file
+# -- Init containers.
+initContainers: []
+  # - name: initial-model
+  #   image: "alpine"
+  #   command: ["/bin/sh", "-c"]
+  #   args:
+  #     - cd /app/models/ && wget <PATH_TO_INITIAL_MODEL> -O model.tar.gz
+  #   volumeMounts:
+  #     - mountPath: /app/models
+  #       name: models
 
-  # -- rasa.podAnnotations defines annotations to add to the pod
-  podAnnotations: {}
-    # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
+# -- Sidecar containers.
+extraContainers: []
+  # - name: extra
+  #   image: "busybox"
+  #   command: ["bash", "-c"]
 
-  # -- rasa.podSecurityContext defines pod security context
-  podSecurityContext:
-    enabled: true
-    # fsGroup: 2000
+## Ref: https://kubernetes.io/docs/concepts/storage/volumes/
+# -- Additional volumes.
+extraVolumes: []
+#   - hostPath:
+#       path: <HOST_PATH>
+#     name: <VOLUME_NAME>
 
-  # -- rasa.automountServiceAccountToken determines whether the Rasa Pro pod is given a
-  # Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Rasa Pro never
-  # calls the Kubernetes API and this chart grants no RBAC, so the token is left out.
-  # Set it to true if you add a sidecar via rasa.extraContainers that needs one.
-  # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
-  automountServiceAccountToken: false
+# -- Additional volume mounts.
+extraVolumeMounts: []
+  # - name: <VOLUME_NAME>
+  #   mountPath: <CONTAINER_PATH>
+  #   readOnly: true
 
-  # -- rasa.containerSecurityContext defines security context that allows you to overwrite the container-level security context
-  # The defaults below satisfy the restricted Pod Security Standard.
-  # Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
-  containerSecurityContext:
-    enabled: true
-    # -- rasa.containerSecurityContext.allowPrivilegeEscalation determines whether to allow privilege escalation.
-    allowPrivilegeEscalation: false
-    # -- rasa.containerSecurityContext.readOnlyRootFilesystem makes the container filesystem immutable. Commented out (off) by default. Turning it on makes the chart mount the two paths Rasa needs to write: emptyDirs at /tmp, /app/.config and /app/.cache for the global config and the matplotlib cache. The project directory itself does not need to be writable.
-    # readOnlyRootFilesystem: true
-    # -- rasa.containerSecurityContext.capabilities defines the Linux capabilities configuration.
-    capabilities:
-      # -- rasa.containerSecurityContext.capabilities.drop defines capabilities to drop from the container.
-      drop:
-        - ALL
-    # -- rasa.containerSecurityContext.runAsNonRoot determines whether to run the container as a non-root user.
-    # REQUIRES an image whose USER is a numeric non-root uid. The stock rasa-pro image is
-    # USER 1001 and satisfies this. If you point rasa.image.repository at a custom image
-    # that runs as root, or whose USER is a name rather than a number, the pod will fail
-    # with CreateContainerConfigError. Fix the image, or set this to false — in which case
-    # the deployment will not satisfy the restricted Pod Security Standard.
-    runAsNonRoot: true
-    # -- rasa.containerSecurityContext.seccompProfile defines the seccomp profile configuration.
-    seccompProfile:
-      # -- rasa.containerSecurityContext.seccompProfile.type is the seccomp profile type.
-      type: RuntimeDefault
+# -- Service account for the Rasa pod.
+serviceAccount:
+  # -- Create the service account.
+  create: true
+  # -- Service account annotations.
+  annotations: {}
+  # -- Service account name. Empty generates one.
+  name: ""
 
-  # -- rasa.service configures the Kubernetes Service exposing the Rasa Pro server.
-  service:
-    # -- service.type is used to specify service type
-    type: ClusterIP
-    # -- service.port is used to specify service port
-    port: 5005
-    # -- service.targetPort is the container port that Service traffic is forwarded to. Empty (default) follows port, so the two cannot drift. Set it only to target a different container port or a named port.
-    targetPort:
-    # -- service.annotations defines annotations to add to the service
-    annotations: {}
-    # -- service.nodePort is used to specify the nodePort(s) value(s) for the LoadBalancer and NodePort service types
-    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
-    nodePort:
-    # -- service.loadBalancerIP exposes the Service externally using a cloud provider's load balancer
-    ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
-    loadBalancerIP:
-    # -- service.externalTrafficPolicy enables client source IP preservation
-    ## Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
-    externalTrafficPolicy: Cluster
+# -- (int) Grace period after SIGTERM before SIGKILL. Unset uses the Kubernetes default of 30.
+terminationGracePeriodSeconds:
 
-  # rasa.livenessProbe is used to override default liveness probe settings
-  livenessProbe:
-    # -- livenessProbe.enabled is used to enable or disable liveness probe
-    enabled: true
-    # -- livenessProbe.httpGet is used to define HTTP request
-    httpGet:
-      path: /
-      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows port.
-      port:
-      scheme: HTTP
-    # -- livenessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
-    initialDelaySeconds: 15
-    # -- livenessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
-    periodSeconds: 15
-    # -- livenessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure
-    successThreshold: 1
-    # -- livenessProbe.timeoutSeconds defines number of seconds after which the probe times out
-    timeoutSeconds: 5
-    # -- livenessProbe.failureThreshold defines after how many failures container is considered unhealthy
-    failureThreshold: 6
-    # -- livenessProbe.terminationGracePeriodSeconds is an optional duration in seconds the pod needs to terminate gracefully after a liveness probe failure
-    terminationGracePeriodSeconds: 30
+# -- Pod annotations.
+podAnnotations: {}
+  # container.apparmor.security.beta.kubernetes.io/rasa: runtime/default
 
-  # rasa.readinessProbe is used to override default readiness probe settings
-  readinessProbe:
-    # -- readinessProbe.enabled is used to enable or disable readinessProbe
-    enabled: true
-    # -- readinessProbe.httpGet is used to define HTTP request
-    httpGet:
-      path: /
-      # -- httpGet.port is the container port the kubelet probes. Empty (default) follows port.
-      port:
-      scheme: HTTP
-    # -- readinessProbe.initialDelaySeconds defines wait time in seconds before performing the first probe
-    initialDelaySeconds: 15
-    # -- readinessProbe.periodSeconds specifies that the kubelet should perform a liveness probe every X seconds
-    periodSeconds: 15
-    # -- readinessProbe.successThreshold is the minimum consecutive successes required before the probe is considered successful after a failure
-    successThreshold: 1
-    # -- readinessProbe.timeoutSeconds defines number of seconds after which the probe times out
-    timeoutSeconds: 5
-    # -- readinessProbe.failureThreshold defines after how many failures container is considered unhealthy
-    failureThreshold: 6
+# -- Pod-level security context.
+podSecurityContext:
+  enabled: true
+  # fsGroup: 2000
 
-  # -- rasa.lifecycle defines container lifecycle hooks (postStart / preStop) for the Rasa container
-  ## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
-  lifecycle: {}
-    # preStop:
-    #   exec:
-    #     command: ["/bin/sh", "-c", "sleep 10"]
-    # postStart:
-    #   exec:
-    #     command: ["/bin/sh", "-c", "echo started"]
+# Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/
+# -- Mount a Kubernetes API token. Off: Rasa never calls the API and the chart grants no RBAC. Turn on for a sidecar that needs one.
+automountServiceAccountToken: false
 
-  # Configure the ingress resource that allows you to access the deployment installation.
-  ## ref: http://kubernetes.io/docs/user-guide/ingress/
-  ingress:
-    # -- ingress.enabled specifies whether an ingress service should be created
+# Ref: https://kubernetes.io/docs/concepts/security/pod-security-standards/#restricted
+# -- Container security context. Defaults satisfy the restricted Pod Security Standard.
+containerSecurityContext:
+  enabled: true
+  # -- Allow privilege escalation.
+  allowPrivilegeEscalation: false
+  # readOnlyRootFilesystem: true
+  # -- Linux capabilities.
+  capabilities:
+    # -- Capabilities to drop.
+    drop:
+      - ALL
+  # -- Run as a non-root user. Requires an image whose USER is a numeric non-root uid; the stock image is 1001.
+  runAsNonRoot: true
+  # -- Seccomp profile.
+  seccompProfile:
+    # -- Seccomp profile type.
+    type: RuntimeDefault
+
+# -- Service exposing the Rasa Pro server.
+service:
+  # -- Service type.
+  type: ClusterIP
+  # -- Service port.
+  port: 5005
+  # -- Container port traffic is forwarded to. Empty follows port.
+  targetPort:
+  # -- Service annotations.
+  annotations: {}
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#nodeport
+  nodePort:
+  ## Ref: https://kubernetes.io/docs/concepts/services-networking/service/#loadbalancer
+  loadBalancerIP:
+  ## Ref: http://kubernetes.io/docs/tasks/access-application-cluster/create-external-load-balancer/#preserving-the-client-source-ip
+  externalTrafficPolicy: Cluster
+
+# rasa.livenessProbe is used to override default liveness probe settings
+# -- Liveness probe.
+livenessProbe:
+  # -- Enable the liveness probe.
+  enabled: true
+  # -- Liveness probe HTTP request.
+  httpGet:
+    path: /
+    # -- Probed container port. Empty follows port.
+    port:
+    scheme: HTTP
+  # -- Delay before the first liveness probe.
+  initialDelaySeconds: 15
+  # -- Liveness probe interval, seconds.
+  periodSeconds: 15
+  # -- Consecutive successes needed after a failure.
+  successThreshold: 1
+  # -- Liveness probe timeout, seconds.
+  timeoutSeconds: 5
+  # -- Failures before the container is restarted.
+  failureThreshold: 6
+  # -- Grace period after a liveness probe failure.
+  terminationGracePeriodSeconds: 30
+
+# rasa.readinessProbe is used to override default readiness probe settings
+# -- Readiness probe.
+readinessProbe:
+  # -- Enable the readiness probe.
+  enabled: true
+  # -- Readiness probe HTTP request.
+  httpGet:
+    path: /
+    # -- Probed container port. Empty follows port.
+    port:
+    scheme: HTTP
+  # -- Delay before the first readiness probe.
+  initialDelaySeconds: 15
+  # -- Readiness probe interval, seconds.
+  periodSeconds: 15
+  # -- Consecutive successes needed after a failure.
+  successThreshold: 1
+  # -- Readiness probe timeout, seconds.
+  timeoutSeconds: 5
+  # -- Failures before the pod is marked unready.
+  failureThreshold: 6
+
+## Ref: https://kubernetes.io/docs/concepts/containers/container-lifecycle-hooks/
+# -- Container lifecycle hooks (postStart / preStop).
+lifecycle: {}
+  # preStop:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "sleep 10"]
+  # postStart:
+  #   exec:
+  #     command: ["/bin/sh", "-c", "echo started"]
+
+# Configure the ingress resource that allows you to access the deployment installation.
+## ref: http://kubernetes.io/docs/user-guide/ingress/
+# -- Ingress for the Rasa Pro server.
+ingress:
+  # -- Create an Ingress.
+  enabled: false
+  # -- Ingress class name.
+  className: ""
+  # -- Ingress labels.
+  labels: {}
+  # -- Ingress annotations.
+  annotations:
+    {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  # -- Hosts and paths. Empty by default, so an ingress you enable is one you fully describe. global.ingressHost overrides each host but cannot create one.
+  hosts: []
+    # - host: rasa.example.com
+    #   paths:
+    #     - path: /
+    #       pathType: Prefix
+    #   extraPaths: []
+  # -- TLS configuration. Keep the hosts in sync with ingress.hosts; not derived from global.ingressHost.
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+# -- Resource requests and limits.
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+# rasa.autoscaling specifies the HPA settings
+# -- HorizontalPodAutoscaler.
+autoscaling:
+  # -- Enable the HorizontalPodAutoscaler.
+  enabled: false
+  # -- Minimum replicas.
+  minReplicas: 1
+  # -- Maximum replicas.
+  maxReplicas: 100
+  # -- Target CPU utilisation percentage.
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# rasa.persistence creates a PVC for model storage. Only supported when running Rasa Pro as a model service for Studio.
+# Note: the PVC name is scoped to the namespace, so only one release per namespace can use persistence at a time.
+# A PV is also created when hostPath.enabled is true (for development/single-node use only).
+# -- PersistentVolumeClaim for model data at /app/working-data.
+persistence:
+  create: false
+  storageClassName:
+  storageRequests: 1Gi
+  storageCapacity: 1Gi
+  hostPath:
     enabled: false
-    # -- ingress.className specifies the ingress className to be used
-    className: ""
-    # -- ingress.labels defines labels to add to the ingress
-    labels: {}
-    # -- ingress.annotations defines annotations to add to the ingress
-    annotations:
-      {}
-      # kubernetes.io/ingress.class: nginx
-      # kubernetes.io/tls-acme: "true"
-    # -- ingress.hosts specifies the hosts and paths for this ingress. Empty by default: the chart ships no hostname or path opinion, so an ingress you enable is one you fully describe. global.ingressHost overrides the host of every entry but cannot create one.
-    hosts: []
-      # - host: rasa.example.com
-      #   paths:
-      #     - path: /
-      #       pathType: Prefix
-      #   extraPaths: []
-    # -- ingress.tls specifies the TLS configuration for ingress. Not derived from global.ingressHost. List every host explicitly and keep it in sync with ingress.hosts, otherwise the ingress serves a host the certificate does not cover.
-    tls: []
-    #  - secretName: chart-example-tls
-    #    hosts:
-    #      - chart-example.local
+    # path:
+    # type:
 
-  # -- rasa.resources specifies the resources limits and requests
-  resources: {}
-    # We usually recommend not to specify default resources and to leave this as a conscious
-    # choice for the user. This also increases chances charts run on environments with little
-    # resources, such as Minikube. If you do want to specify resources, uncomment the following
-    # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
+## Ref: https://kubernetes.io/docs/user-guide/node-selection/
+# -- Node selector.
+nodeSelector: {}
 
-  # rasa.autoscaling specifies the HPA settings
-  autoscaling:
-    # -- autoscaling.enabled specifies whether autoscaling should be enabled
-    enabled: false
-    # -- autoscaling.minReplicas specifies the minimum number of replicas
-    minReplicas: 1
-    # -- autoscaling.maxReplicas specifies the maximum number of replicas
-    maxReplicas: 100
-    # -- autoscaling.targetCPUUtilizationPercentage specifies the target CPU/Memory utilization percentage
-    targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
+## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
+# -- Tolerations.
+tolerations: []
 
-  # rasa.persistence creates a PVC for model storage. Only supported when running Rasa Pro as a model service for Studio.
-  # Note: the PVC name is scoped to the namespace, so only one release per namespace can use persistence at a time.
-  # A PV is also created when hostPath.enabled is true (for development/single-node use only).
-  persistence:
-    create: false
-    storageClassName:
-    storageRequests: 1Gi
-    storageCapacity: 1Gi
-    hostPath:
-      enabled: false
-      # path:
-      # type:
+## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
+# -- Affinity rules.
+affinity: {}
 
-  # -- rasa.nodeSelector allows the deployment to be scheduled on selected nodes
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#nodeselector
-  ## Ref: https://kubernetes.io/docs/user-guide/node-selection/
-  nodeSelector: {}
-
-  # -- rasa.tolerations defines tolerations for pod assignment
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/
-  tolerations: []
-
-  # -- rasa.affinity allows the deployment to schedule using affinity rules
-  ## Ref: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity
-  affinity: {}
-
-  # -- rasa.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods.
-  ## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
-  topologySpreadConstraints: []
+## Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/
+# -- Pod spread across zones or nodes. An entry without labelSelector defaults to this component's pods.
+topologySpreadConstraints: []
 
 # Network policy settings
 networkPolicy:
-  # -- networkPolicy.enabled enables Kubernetes NetworkPolicy resources for the Rasa Pro server. When true, only explicitly allowed traffic is permitted.
+  # -- Create NetworkPolicy resources. Only explicitly allowed traffic is permitted.
   enabled: false
-  # -- networkPolicy.denyAll applies a default-deny NetworkPolicy that blocks all ingress and egress traffic before more specific rules are applied.
+  # -- Default-deny all ingress and egress before more specific rules apply.
   denyAll: false
-  # -- networkPolicy.nodeCIDR specifies node IP ranges allowed to reach pods. Required to allow kubelet liveness and readiness probes when networkPolicy.enabled is true.
+  # -- Node IP ranges allowed to reach pods. Required for kubelet probes when enabled.
   nodeCIDR: []
     # - ipBlock:
     #     cidr: 0.0.0.0/0
-  # -- networkPolicy.dnsNamespace is the namespace running cluster DNS, matched on the API-server-managed kubernetes.io/metadata.name label.
+  # -- Namespace running cluster DNS, matched on kubernetes.io/metadata.name.
   dnsNamespace: kube-system
-  # -- networkPolicy.egressPorts lists the destination ports the Rasa Pro server may reach. The defaults cover HTTPS and HTTP only; add your tracker store, event broker and model storage ports (for example 5432 for PostgreSQL, 9092 for Kafka, 6379 for Valkey) or egress to them is denied.
+  # -- Destination ports the server may reach. Defaults cover HTTP and HTTPS only — add your tracker store, broker and model storage ports.
   egressPorts:
     - port: 443
       protocol: TCP
     - port: 80
       protocol: TCP
-  # -- networkPolicy.allowIngressFrom lists NetworkPolicy peers allowed to reach the Rasa Pro server port. Required when networkPolicy.denyAll is true and an ingress controller, service mesh or other pod must reach the service; nodeCIDR only covers kubelet probes.
+  # -- Peers allowed to reach the server port. Required with denyAll; nodeCIDR only covers kubelet probes.
   allowIngressFrom: []
     # - namespaceSelector:
     #     matchLabels:
@@ -433,43 +416,42 @@ networkPolicy:
 
 # Defines global settings for all resources
 global:
-  # -- global.extraDeploymentLabels adds extra labels to all Deployment resources. Useful for mapping organizational structures onto Kubernetes objects.
   # See: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
   extraDeploymentLabels: {}
-  # -- global.ingressHost sets the host of every rule in the Rasa Pro server ingress. Unlike the other global ingress settings it overrides rasa.ingress.hosts[*].host rather than acting as a fallback. Applies only to the rasa component.
+  # -- Sets the host of every ingress rule. Overrides rasa.ingress.hosts[*].host rather than acting as a fallback.
   ingressHost:
-  # -- global.ingressAnnotations defines annotations added to the Rasa Pro server ingress. Merged with rasa.ingress.annotations, which wins on key conflicts. Applies only to the rasa component.
+  # -- Annotations added to the ingress. Merged with rasa.ingress.annotations, which wins.
   ingressAnnotations: {}
-  # -- global.ingressClassName defines the ingress class for the Rasa Pro server ingress. Used only when rasa.ingress.className is empty. Applies only to the rasa component.
+  # -- Ingress class. Used only when rasa.ingress.className is empty.
   ingressClassName: ""
 
-# -- hostNetwork controls whether the pod may use the node network namespace
+# -- Let the pod use the node network namespace.
 hostNetwork: false
 
-# -- hostAliases specifies pod-level override of hostname resolution when DNS and other options are not applicable
+# -- Pod-level hostname resolution overrides.
 hostAliases: []
 # - ip: 127.0.0.1
 #   hostnames:
 #   - "localhost"
 
-# -- dnsPolicy specifies Pod's DNS policy
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-s-dns-policy
+# -- Pod DNS policy.
 dnsPolicy: ""
 
-# -- dnsConfig specifies Pod's DNS config
 ## ref: https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pod-dns-config
+# -- Pod DNS config.
 dnsConfig:
   {}
   # options:
   # - name: ndots
   #   value: "1"
 
-# -- deploymentAnnotations defines annotations to add to all Rasa deployments
+# -- Annotations on all Rasa deployments.
 deploymentAnnotations: {}
   #  key: "value"
 
-# -- deploymentLabels defines labels to add to all Rasa deployment
+# -- Labels on all Rasa deployments.
 deploymentLabels: {}
 
-# -- podLabels defines labels to add to all Rasa pod(s)
+# -- Labels on all Rasa pods.
 podLabels: {}

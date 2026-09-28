@@ -76,10 +76,10 @@ Usage: include "rasa.topologySpreadConstraints" (dict "constraints" <list> "sele
 Create the name of the service account to use
 */}}
 {{- define "rasa.serviceAccountName" -}}
-{{- if .Values.rasa.serviceAccount.create }}
-{{- default (include "rasa.fullname" .) .Values.rasa.serviceAccount.name }}
+{{- if .Values.serviceAccount.create }}
+{{- default (include "rasa.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
-{{- default "default" .Values.rasa.serviceAccount.name }}
+{{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
 
@@ -126,7 +126,7 @@ yourself are opaque, so an --enable-api inside rasa.args or extraArgs is
 invisible here.
 */}}
 {{- define "rasa.apiServed" -}}
-{{- if and .Values.rasa.enableApi (kindIs "invalid" .Values.rasa.args) -}}
+{{- if and .Values.rasa.enableApi (kindIs "invalid" .Values.args) -}}
 true
 {{- end -}}
 {{- end -}}
@@ -143,26 +143,57 @@ blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
-{{- $env := .Values.rasa.overrideEnv | default (.Values.rasa.extraEnv | default list) -}}
+{{- $env := .Values.overrideEnv | default (.Values.extraEnv | default list) -}}
 {{- range $env -}}
 {{-   if or (eq .name "AUTH_TOKEN") (eq .name "JWT_SECRET") -}}
 {{-     $named = true -}}
 {{-   end -}}
 {{- end -}}
-{{- if or $named .Values.rasa.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.rasa.overrideEnv)) -}}
+{{- if or $named .Values.envFrom (and (or .Values.rasa.authToken .Values.rasa.jwtSecret) (not .Values.overrideEnv)) -}}
 true
 {{- end -}}
 {{- end -}}
 
 {{/*
-Refuse to render an enabled Rasa HTTP API that authenticates nobody.
+Report whether an enabled Rasa HTTP API authenticates nobody.
 
-Not gated on being externally reachable: a ClusterIP Service is not a boundary,
-and a route to it can be added without touching this chart.
+This alone only warrants a warning, not a refusal. enableApi has to default to
+true because rasa run exits when it has neither a model nor the API to load one
+through, so failing on this predicate would make a no-values install
+unrenderable. allowUnauthenticatedApi silences both tiers for anyone who has
+already decided an open API is acceptable.
+*/}}
+{{- define "rasa.apiUnauthenticated" -}}
+{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Report whether this chart itself puts the Service on the network.
+
+A ClusterIP Service is not a security boundary and a route to it can be added
+without touching this chart, which is why the warning above is unconditional.
+This predicate is narrower on purpose: it is what the chart can actually prove
+it is doing, so it is what the chart is willing to refuse over. service.type is
+defaulted rather than read directly, so `service: {}` does not read as routed.
+*/}}
+{{- define "rasa.apiRouted" -}}
+{{- if or .Values.ingress.enabled (ne (.Values.service.type | default "ClusterIP") "ClusterIP") .Values.hostNetwork -}}
+true
+{{- end -}}
+{{- end -}}
+
+{{/*
+Refuse to render an unauthenticated API that this chart routes traffic to.
+
+Composed from the two predicates above rather than repeating their conditions,
+so the NOTES warning and this refusal cannot drift apart: anything that fails
+here also warns, and the warning is strictly the wider set.
 */}}
 {{- define "rasa.validateApiExposure" -}}
-{{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
-{{- fail "rasa.enableApi is true but no API credential reaches the container, so the Rasa HTTP API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
+{{- if and (include "rasa.apiUnauthenticated" .) (include "rasa.apiRouted" .) -}}
+{{- fail "rasa.enableApi is true, no API credential reaches the container, and this release routes traffic to it - rasa.ingress.enabled is true, rasa.service.type is not ClusterIP, or hostNetwork is true. That would put an unauthenticated Rasa HTTP API, including its model-management endpoints, on the network. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, stop routing to it, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 

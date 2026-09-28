@@ -134,11 +134,12 @@ true
 {{/*
 Report whether an API credential reaches the container.
 
-rasa.env replaces the generated environment block, so it decides which list to
-scan: a token in extraEnv is discarded as soon as rasa.env is non-empty, and an
-authToken or jwtSecret with it. The test is truthiness, matching
-deployment.yaml — `rasa.env: []` falls back to the generated block in both. envFrom is opaque at render time and counts as
-authenticated rather than blocking a legitimate install.
+rasa.overrideEnv replaces the generated environment block, so it decides which
+list to scan: a token in extraEnv is discarded as soon as overrideEnv is
+non-empty, and an authToken or jwtSecret with it. Both this and deployment.yaml
+test truthiness, so an empty overrideEnv keeps the generated block in both.
+envFrom is opaque at render time and counts as authenticated rather than
+blocking a legitimate install.
 */}}
 {{- define "rasa.apiAuthenticated" -}}
 {{- $named := false -}}
@@ -161,7 +162,7 @@ and a route to it can be added without touching this chart.
 */}}
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiServed" .) (not (include "rasa.apiAuthenticated" .)) (not .Values.rasa.allowUnauthenticatedApi) -}}
-{{- fail "rasa.enableApi is true but no API credential reaches the container, so the Rasa HTTP API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.env discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.env or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
+{{- fail "rasa.enableApi is true but no API credential reaches the container, so the Rasa HTTP API would accept unauthenticated requests. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 

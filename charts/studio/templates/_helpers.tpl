@@ -346,27 +346,38 @@ Return the event-ingestion mode.
 {{/*
 Report whether event ingestion is co-located with the Studio App.
 
-These three are not referenced by any template today -- the gates inline
-`eq (include "studio.eventIngestion.mode" .) "..."` instead -- but they are
-kept as the supported way to branch on the mode, so `eventIngestion.mode:
-separate` stays expressible for anyone extending the chart.
+Each emits "true" or nothing, never the string "false". include returns a
+string and Go templates treat any non-empty string as true, so a helper
+returning "false" would make `{{ if include ... }}` fire in every mode. This
+shape matches the rest of both charts and lets the guard be written plainly.
+
+The chart's own event-ingestion templates inline
+`eq (include "studio.eventIngestion.mode" .) "separate"`, so these three are
+intentionally unreferenced here -- they exist so anyone extending the chart
+can branch on the mode without repeating the comparison.
 */}}
 {{- define "studio.eventIngestion.isColocated" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*
 Report whether event ingestion runs in a separate deployment.
 */}}
 {{- define "studio.eventIngestion.isSeparate" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "separate" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "separate" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*
 Report whether event ingestion is disabled.
 */}}
 {{- define "studio.eventIngestion.isDisabled" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*

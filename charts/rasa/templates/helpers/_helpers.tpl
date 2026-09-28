@@ -263,3 +263,40 @@ the operator sees "hosts is empty" while looking at a block describing hosts.
 {{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing.%s\n\n  hosts:\n    - host: my.example.com\n      paths:                       # backend is this release's Service\n        - {path: /, pathType: Prefix}\n      extraPaths:                  # backend is whatever you name\n        - {path: /other, pathType: Prefix, serviceName: other-svc, servicePort: 8080}\n\nOr set rasa.ingress.enabled=false and route to the Service yourself." $why) -}}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Smallest number of replicas this release can run.
+
+An HPA with minReplicas: 1 can sit at one replica, so autoscaling being on is
+not on its own enough to make a disruption budget safe.
+*/}}
+{{- define "rasa.minReplicas" -}}
+{{- if .Values.autoscaling.enabled -}}
+{{- .Values.autoscaling.minReplicas | default 1 -}}
+{{- else -}}
+{{- .Values.replicaCount | default 1 -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Refuse a PodDisruptionBudget that cannot do its job, or that would wedge the node.
+
+minAvailable: 1 against a single-replica Deployment makes the node undrainable:
+evicting the only pod violates the budget, so `kubectl drain` blocks forever and
+cluster upgrades stall. A budget over one replica is also pointless. Failing is
+better than skipping the object, because the operator asked for disruption
+protection and would otherwise believe they had it.
+*/}}
+{{- define "rasa.validatePodDisruptionBudget" -}}
+{{- if .Values.podDisruptionBudget.enabled -}}
+{{- $min := include "rasa.minReplicas" . | int -}}
+{{- if le $min 1 -}}
+{{- fail (printf "podDisruptionBudget.enabled is true but this release runs at most one replica (effective minimum: %d). A budget over a single replica protects nothing and, with minAvailable, makes the node undrainable because evicting the only pod would violate it. Set replicaCount above 1, or autoscaling.minReplicas above 1, or podDisruptionBudget.enabled=false." $min) -}}
+{{- end -}}
+{{- $hasMin := not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) -}}
+{{- $hasMax := not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) -}}
+{{- if and $hasMin $hasMax -}}
+{{- fail "podDisruptionBudget.minAvailable and podDisruptionBudget.maxUnavailable are mutually exclusive; Kubernetes rejects a PodDisruptionBudget that sets both. Both are unset in the chart defaults, so you have set both explicitly - drop one, or set it to null." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}

@@ -10,10 +10,10 @@ fullnameOverride: ""
 imagePullSecrets: []
   # - name: regcred
 
-# -- rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted.
-rasaProLicense:
+# -- rasaLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted.
+rasaLicense:
   secretName: "rasa-secrets"
-  secretKey: "rasaProLicense"
+  secretKey: "RASA_LICENSE"
 
 # Rasa Pro Image
 rasa:
@@ -48,12 +48,12 @@ rasa:
   # Unset by default. Set it whenever enableApi is true, or the API accepts unauthenticated requests.
   authToken:
     # secretName: "rasa-secrets"
-    # secretKey: "authToken"
+    # secretKey: "AUTH_TOKEN"
   # -- jwtSecret references the Kubernetes Secret containing the JWT secret used to verify signed tokens for API authentication.
   # Unset by default. Set this together with jwtMethod to authenticate API requests with signed JWTs instead of a static token.
   jwtSecret:
     # secretName: "rasa-secrets"
-    # secretKey: "jwtSecret"
+    # secretKey: "JWT_SECRET"
   # -- allowUnauthenticatedApi acknowledges serving an unauthenticated API. Rendering fails whenever enableApi is true and no credential reaches the container, regardless of how the Service is exposed; set this to true when something in front of the chart already authenticates callers.
   allowUnauthenticatedApi: false
   # -- jwtMethod is JWT algorithm to be used

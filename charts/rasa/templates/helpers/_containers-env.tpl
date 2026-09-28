@@ -29,8 +29,8 @@ pins: licensing.LICENSE_ENV_VAR == "RASA_LICENSE".
 - name: "RASA_LICENSE"
   valueFrom:
     secretKeyRef:
-      name: {{ $.Values.rasaProLicense.secretName }}
-      key: {{ $.Values.rasaProLicense.secretKey }}
+      name: {{ $.Values.rasaLicense.secretName }}
+      key: {{ $.Values.rasaLicense.secretKey }}
 # Telemetry
 - name: "RASA_TELEMETRY_ENABLED"
   value: {{ .telemetry.enabled | quote }}

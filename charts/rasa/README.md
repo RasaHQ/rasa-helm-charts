@@ -20,15 +20,15 @@ Create a secret containing your Rasa Pro license key before installing:
 
 ```console
 kubectl create secret generic rasa-secrets \
-  --from-literal=rasaProLicense="<YOUR_LICENSE_KEY>"
+  --from-literal=RASA_LICENSE="<YOUR_LICENSE_KEY>"
 ```
 
-The chart defaults to `secretName: rasa-secrets` and `secretKey: rasaProLicense`. Override both in your values if you use a different name or key:
+The chart defaults to `secretName: rasa-secrets` and `secretKey: RASA_LICENSE`. Secret keys are upper snake case, matching the environment variables they populate and the `studio` chart. Override both in your values if you use a different name or key:
 
 ```yaml
-rasaProLicense:
+rasaLicense:
   secretName: my-custom-secret
-  secretKey: myLicenseKey
+  secretKey: MY_LICENSE_KEY
 ```
 
 ### Optional Secrets
@@ -37,15 +37,15 @@ Add optional keys to the same secret (or separate secrets) as you enable feature
 
 ```console
 kubectl patch secret rasa-secrets -p \
-  '{"stringData":{"authToken":"<YOUR_TOKEN>","jwtSecret":"<YOUR_JWT_SECRET>"}}'
+  '{"stringData":{"AUTH_TOKEN":"<YOUR_TOKEN>","JWT_SECRET":"<YOUR_JWT_SECRET>"}}'
 ```
 
 The table below lists all secret-backed fields:
 
 | Secret key | Feature | values.yaml field |
 |---|---|---|
-| `authToken` | Token-based API authentication | `rasa.authToken` |
-| `jwtSecret` | JWT API authentication | `rasa.jwtSecret` |
+| `AUTH_TOKEN` | Token-based API authentication | `rasa.authToken` |
+| `JWT_SECRET` | JWT API authentication | `rasa.jwtSecret` |
 
 Both are unset by default, so adding the key to the Secret is not enough on its own — point the values field at it as well:
 
@@ -53,7 +53,7 @@ Both are unset by default, so adding the key to the Secret is not enough on its 
 rasa:
   authToken:
     secretName: rasa-secrets
-    secretKey: authToken
+    secretKey: AUTH_TOKEN
 ```
 
 Alternatively, create all credentials upfront from a manifest. The chart ships a `secrets.yaml` example that you can use as a starting point — **use `stringData` so Kubernetes base64-encodes the values automatically**:
@@ -65,9 +65,9 @@ metadata:
   name: rasa-secrets
 type: Opaque
 stringData:
-  rasaProLicense: "<YOUR_LICENSE_KEY>"    # required for all deployments
-  authToken: "<YOUR_AUTH_TOKEN>"          # optional: token-based API auth
-  jwtSecret: "<YOUR_JWT_SECRET>"          # optional: JWT auth
+  RASA_LICENSE: "<YOUR_LICENSE_KEY>"      # required for all deployments
+  AUTH_TOKEN: "<YOUR_AUTH_TOKEN>"         # optional: token-based API auth
+  JWT_SECRET: "<YOUR_JWT_SECRET>"         # optional: JWT auth
 ```
 
 ## Installing the Chart
@@ -124,7 +124,7 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 
 **`RASA_DUCKLING_HTTP_URL` is no longer emitted**, and `rasa.ducklingHttpUrl` is gone. Set the variable through `rasa.extraEnv` if you run Duckling yourself.
 
-**`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `authToken` and `jwtSecret` keys in its Secret — only `rasaProLicense`.
+**`rasa.authToken` and `rasa.jwtSecret` are now unset by default.** A default install no longer requires `AUTH_TOKEN` and `JWT_SECRET` keys in its Secret — only `RASA_LICENSE`.
 
 > **Warning:** if you relied on the old defaults without setting these explicitly, this upgrade **removes** `AUTH_TOKEN` and `JWT_SECRET` from the pod. Since `rasa.enableApi` now defaults to `false` as well, an unconfigured install serves no API at all — but if you turn the API back on, set a credential with it:
 >
@@ -133,7 +133,7 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 >   enableApi: true
 >   authToken:
 >     secretName: rasa-secrets
->     secretKey: authToken
+>     secretKey: AUTH_TOKEN
 > ```
 >
 > The chart prints an install-time warning whenever the API is enabled with neither set, and **refuses to render at all** once that API is reachable from outside the cluster — an ingress, a `service.type` other than `ClusterIP`, or `hostNetwork: true`. Override only when something ahead of the chart authenticates callers:
@@ -167,7 +167,7 @@ rasa:
   enableApi: true
   authToken:
     secretName: rasa-secrets
-    secretKey: authToken
+    secretKey: AUTH_TOKEN
 ```
 
 **Pass-through keys use the conventional `extra*` names**, and `useDefaultArgs` is gone:
@@ -199,6 +199,16 @@ rasa: {args: [], command: ["python", "-m", "rasa.model_service"]}
 **Rasa settings live directly under `rasa.*`.** With one component left, the extra `settings` level grouped nothing — `rasa.port`, `rasa.authToken`, `rasa.endpoints` and the rest sit alongside `rasa.service` and `rasa.ingress`.
 
 **`rasa.enabled` was removed.** The chart deploys a single workload, so there was nothing left to toggle — install it to deploy the server, uninstall it to remove it.
+
+**The licence values key is `rasaLicense`, and Secret keys are upper snake case.** `rasaProLicense` became `rasaLicense`, and the default Secret keys are now `RASA_LICENSE`, `AUTH_TOKEN` and `JWT_SECRET` — matching the environment variables they populate and the `studio` chart's convention.
+
+> **Warning:** this one needs a change on your side. The chart cannot rename a key inside your Secret, so if you relied on the old default your Secret still holds `rasaProLicense` and the pod will not start — `CreateContainerConfigError`, because the `secretKeyRef` cannot resolve. Either rename the key in your Secret, or pin the old one:
+>
+> ```yaml
+> rasaLicense:
+>   secretName: rasa-secrets
+>   secretKey: rasaProLicense   # your existing key
+> ```
 
 **`rasa.scheme` was removed.** No template read it.
 
@@ -236,7 +246,7 @@ The command removes all the Kubernetes components associated with the chart and 
 ## General Configuration
 
 - **imagePullSecrets**: If you're pulling from a private registry, provide your pull secret name(s) here.
-- **rasaProLicense**: All Rasa Pro deployments require a valid license. Provide `secretName` and `secretKey` pointing to the Kubernetes Secret that holds your license value.
+- **rasaLicense**: All Rasa Pro deployments require a valid license. Provide `secretName` and `secretKey` pointing to the Kubernetes Secret that holds your license value.
 
 > **Note:** For application-specific settings, refer to the [Rasa documentation](https://rasa.com/docs/). The full list of configurable values is at the bottom of this page.
 
@@ -245,9 +255,9 @@ The command removes all the Kubernetes components associated with the chart and 
 The following is the smallest `values.yaml` needed to get Rasa Pro running. It assumes the license secret was created as shown in [Creating Secrets](#creating-secrets):
 
 ```yaml
-rasaProLicense:
+rasaLicense:
   secretName: rasa-secrets
-  secretKey: rasaProLicense
+  secretKey: RASA_LICENSE
 
 rasa:
   enabled: true
@@ -335,7 +345,7 @@ kubectl create secret generic rasa-secrets \
 rasa:
   authToken:
     secretName: rasa-secrets
-    secretKey: authToken
+    secretKey: AUTH_TOKEN
 ```
 
 **JWT authentication:**
@@ -349,7 +359,7 @@ kubectl create secret generic rasa-secrets \
 rasa:
   jwtSecret:
     secretName: rasa-secrets
-    secretKey: jwtSecret
+    secretKey: JWT_SECRET
   jwtMethod: HS256
 ```
 
@@ -992,4 +1002,4 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.terminationGracePeriodSeconds | int | rasa.terminationGracePeriodSeconds is the pod-level grace period Kubernetes waits after SIGTERM before sending SIGKILL. Leave unset to use the Kubernetes default of 30 | `nil` |
 | rasa.tolerations | list | rasa.tolerations defines tolerations for pod assignment # Ref: https://kubernetes.io/docs/concepts/configuration/taint-and-toleration/ | `[]` |
 | rasa.topologySpreadConstraints | list | rasa.topologySpreadConstraints controls how pods are spread across topology domains such as zones or nodes. An entry that omits labelSelector defaults to this component's own pods. # Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/topology-spread-constraints/ | `[]` |
-| rasaProLicense | object | rasaProLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted. | `{"secretKey":"rasaProLicense","secretName":"rasa-secrets"}` |
+| rasaLicense | object | rasaLicense references the Kubernetes Secret that holds your Rasa Pro license key. Required for all deployments. The chart passes it to the container as RASA_LICENSE; RASA_PRO_LICENSE is the deprecated name and is no longer emitted. | `{"secretKey":"RASA_LICENSE","secretName":"rasa-secrets"}` |

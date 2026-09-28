@@ -106,9 +106,18 @@ By installing and using this software, you agree to be bound by the terms and co
      the container. A ClusterIP Service is not a boundary, so this no longer waits
      for an ingress. Set allowUnauthenticatedApi=true to accept the risk.
    - The licence is passed to the container as RASA_LICENSE. RASA_PRO_LICENSE is
-     deprecated upstream and is no longer set. Your Secret and the
-     rasaProLicense values key are unchanged; only the env var name moved. If a
-     sidecar or a custom probe read RASA_PRO_LICENSE, point it at RASA_LICENSE.
+     deprecated upstream and is no longer set. If a sidecar or a custom probe read
+     RASA_PRO_LICENSE, point it at RASA_LICENSE.
+   - The values key rasaProLicense is now rasaLicense, and Secret keys default to
+     upper snake case to match the variables they populate and the studio chart:
+     RASA_LICENSE, AUTH_TOKEN, JWT_SECRET.
+     THIS NEEDS A CHANGE ON YOUR SIDE. The chart cannot rename a key inside your
+     Secret, so if you relied on the old default your Secret still holds
+     "rasaProLicense" and the pod will not start. Either rename the key in your
+     Secret, or keep the old one explicitly:
+       rasaLicense:
+         secretName: rasa-secrets
+         secretKey: rasaProLicense
    - Rasa settings live directly under rasa.*. Anything left under rasa.settings is
      IGNORED, not rejected, so a port, authToken, endpoints or tracker_store left
      there silently reverts to the chart default. Move them before upgrading.

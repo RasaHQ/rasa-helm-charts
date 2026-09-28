@@ -140,7 +140,7 @@
     "deploymentAnnotations": { "type": "object" },
     "deploymentLabels": { "type": "object" },
     "podLabels": { "type": "object" },
-    "rasaProLicense": { "$ref": "#/definitions/secretRef" },
+    "rasaLicense": { "$ref": "#/definitions/secretRef" },
     "global": {
       "type": "object",
       "additionalProperties": true,

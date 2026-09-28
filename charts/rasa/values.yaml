@@ -379,10 +379,10 @@ persistence:
 podDisruptionBudget:
   # -- Create the PodDisruptionBudget.
   enabled: false
-  # -- Minimum pods that must stay available. Mutually exclusive with maxUnavailable.
+  # -- Minimum pods that must stay available. Mutually exclusive with maxUnavailable. Both unset by default; the chart then uses maxUnavailable: 1.
   minAvailable:
-  # -- Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable.
-  maxUnavailable: 1
+  # -- Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable. Both unset by default; the chart then uses maxUnavailable: 1.
+  maxUnavailable:
   # -- Annotations for the PodDisruptionBudget.
   annotations: {}
 

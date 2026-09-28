@@ -716,7 +716,16 @@ disruptions — node drains, cluster upgrades — by capping how many can go at 
 replicaCount: 2          # or autoscaling.minReplicas: 2
 podDisruptionBudget:
   enabled: true
-  maxUnavailable: 1      # or minAvailable, never both
+```
+
+That alone gives you `maxUnavailable: 1`. Set `minAvailable` or `maxUnavailable`
+to choose explicitly — one or the other, never both, since Kubernetes rejects a
+budget carrying both:
+
+```yaml
+podDisruptionBudget:
+  enabled: true
+  minAvailable: 2
 ```
 
 > **Warning:** the chart **refuses to render** a budget when the release can run

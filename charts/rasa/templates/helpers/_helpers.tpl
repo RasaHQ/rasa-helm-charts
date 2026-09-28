@@ -274,10 +274,7 @@ protection and would otherwise believe they had it.
 {{- $hasMin := not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) -}}
 {{- $hasMax := not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) -}}
 {{- if and $hasMin $hasMax -}}
-{{- fail "podDisruptionBudget.minAvailable and podDisruptionBudget.maxUnavailable are mutually exclusive; Kubernetes rejects a PodDisruptionBudget that sets both. Set one and leave the other unset." -}}
-{{- end -}}
-{{- if not (or $hasMin $hasMax) -}}
-{{- fail "podDisruptionBudget.enabled is true but neither minAvailable nor maxUnavailable is set, so the budget would permit any number of evictions. Set one of them." -}}
+{{- fail "podDisruptionBudget.minAvailable and podDisruptionBudget.maxUnavailable are mutually exclusive; Kubernetes rejects a PodDisruptionBudget that sets both. Both are unset in the chart defaults, so you have set both explicitly - drop one, or set it to null." -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

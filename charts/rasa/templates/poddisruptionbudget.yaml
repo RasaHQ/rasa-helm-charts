@@ -20,9 +20,15 @@ spec:
   */}}
   {{- if not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) }}
   minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
-  {{- end }}
-  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) }}
+  {{- else if not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) }}
   maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- else }}
+  {{- /*
+  Neither field is set, so pick one. If maxUnavailable carried a chart default
+  instead, Helm would merge it under a user who set only minAvailable and the
+  render would fail as "both set" -- for a field they never touched.
+  */}}
+  maxUnavailable: 1
   {{- end }}
   selector:
     matchLabels:

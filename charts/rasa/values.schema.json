@@ -129,6 +129,7 @@
     }
   },
   "type": "object",
+  "required": ["rasa", "image", "serviceAccount", "podSecurityContext", "containerSecurityContext", "service", "livenessProbe", "readinessProbe", "ingress", "autoscaling", "persistence", "networkPolicy", "global"],
   "properties": {
     "nameOverride": { "type": "string" },
     "fullnameOverride": { "type": "string" },
@@ -214,6 +215,7 @@
     "rasa": {
       "type": "object",
       "additionalProperties": true,
+      "required": ["license", "telemetry", "logging"],
       "properties": {
           "license": { "$ref": "#/definitions/secretRef" },
           "debugMode": { "type": "boolean" },

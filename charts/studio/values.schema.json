@@ -144,7 +144,7 @@
         "labels": {
           "type": "object"
         },
-        "additionalAnnotations": {
+        "extraAnnotations": {
           "type": "object"
         },
         "tls": {
@@ -194,7 +194,7 @@
     }
   },
   "type": "object",
-  "required": ["config"],
+  "required": ["config", "app", "global", "networkPolicy", "eventIngestion"],
   "properties": {
     "nameOverride": {
       "description": "Override name of app",
@@ -464,6 +464,31 @@
         "denyAll": {
           "description": "Create a default-deny policy for all ingress and egress traffic",
           "type": "boolean"
+        },
+        "nodeCIDR": {
+          "description": "Node IP ranges allowed to reach pods, so the kubelet can run probes",
+          "type": "array"
+        },
+        "dnsNamespace": {
+          "description": "Namespace running cluster DNS, matched on kubernetes.io/metadata.name",
+          "type": "string",
+          "minLength": 1
+        },
+        "egressPorts": {
+          "description": "Destination ports Studio may reach when denyAll is set",
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["port"],
+            "properties": {
+              "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+              "protocol": { "type": "string", "enum": ["TCP", "UDP", "SCTP"] }
+            }
+          }
+        },
+        "allowIngressFrom": {
+          "description": "NetworkPolicy peers allowed to reach the Studio app port",
+          "type": "array"
         }
       }
     },

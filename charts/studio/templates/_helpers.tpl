@@ -40,8 +40,8 @@ helm.sh/chart: {{ include "studio.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{ if .Values.global.additionalDeploymentLabels -}}
-{{- $.Values.global.additionalDeploymentLabels | toYaml -}}
+{{ if .Values.global.extraDeploymentLabels -}}
+{{- $.Values.global.extraDeploymentLabels | toYaml -}}
 {{- end }}
 {{- end }}
 
@@ -132,7 +132,7 @@ Return annotations for ingress, combining global and per-service annotations for
 */}}
 {{- define "app.ingress.annotations" -}}
 {{- $global := dig "ingressAnnotations" (dict) (.Values.global | default dict) | default dict | deepCopy }}
-{{- $additional := .Values.app.ingress.additionalAnnotations | default dict | deepCopy }}
+{{- $additional := .Values.app.ingress.extraAnnotations | default dict | deepCopy }}
 {{- /* Component wins on key conflicts: global.ingressAnnotations is a baseline
        applied to every ingress, per-ingress annotations are local exceptions.
        Mirrors the rasa subchart ingress, which does merge (component) (global). */ -}}
@@ -264,7 +264,7 @@ tolerations:
 Resolve the model service ingress host
 */}}
 {{- define "studio.modelServiceHost" -}}
-{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := dig "host" "" (($ingress.hosts | default list | first) | default dict) -}}
 {{- $globalHost := dig "ingressHost" "" (.Values.global | default dict) -}}
 {{- if $globalHost -}}
@@ -281,7 +281,7 @@ Resolve the model service ingress host
 Model service ingress path prefix
 */}}
 {{- define "studio.modelServiceIngressPath" -}}
-{{- $ingress := dig "rasa" "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
 {{- $firstPath := dig "path" "" (($firstHost.paths | default list | first) | default dict) -}}
 {{- if $firstPath -}}
@@ -345,23 +345,39 @@ Return the event-ingestion mode.
 
 {{/*
 Report whether event ingestion is co-located with the Studio App.
+
+Each emits "true" or nothing, never the string "false". include returns a
+string and Go templates treat any non-empty string as true, so a helper
+returning "false" would make `{{ if include ... }}` fire in every mode. This
+shape matches the rest of both charts and lets the guard be written plainly.
+
+The chart's own event-ingestion templates inline
+`eq (include "studio.eventIngestion.mode" .) "separate"`, so these three are
+intentionally unreferenced here -- they exist so anyone extending the chart
+can branch on the mode without repeating the comparison.
 */}}
 {{- define "studio.eventIngestion.isColocated" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "colocated" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*
 Report whether event ingestion runs in a separate deployment.
 */}}
 {{- define "studio.eventIngestion.isSeparate" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "separate" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "separate" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*
 Report whether event ingestion is disabled.
 */}}
 {{- define "studio.eventIngestion.isDisabled" -}}
-{{- eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+{{- if eq (include "studio.eventIngestion.mode" .) "disabled" -}}
+true
+{{- end -}}
 {{- end -}}
 
 {{/*

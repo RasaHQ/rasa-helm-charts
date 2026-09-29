@@ -12,7 +12,7 @@ Helm charts for deploying Rasa products on Kubernetes (chart versions live in ea
 ## Commands
 
 Standard `helm` / `ct` / `pre-commit` invocations apply. Two non-obvious flags:
-- `helm template` needs `--kube-version 1.29.0` to match CI and stay deterministic across Helm versions.
+- `helm template` takes `--kube-version 1.37.0` — Helm 4.3's own default and the kind image we test against. CI passes no `--kube-version` at all, and neither chart reads `.Capabilities`, so it does not change the rendered output today; it only matters if version-dependent templates are ever added, in which case pin CI to the same value.
 - A dependency **version bump** in `Chart.yaml` needs `helm dependency update`, not `build` — `build` only re-resolves what `Chart.lock` already pins.
 
 ## Before Every Commit
@@ -98,6 +98,6 @@ Charts must lint and render cleanly under **both Helm 3 and Helm 4**. CI enforce
 
 ## CI / Release Pipeline
 
-- **`lint.yml`** (on PR): `lint` (ct lint, Helm 3), `lint-helm4` (helm lint --strict, Helm 4), and `kube-linter` (matrix over studio/rasa/op-kits; renders with `--kube-version 1.29.0` then scans the manifests). `ct.yaml` sets `check-version-increment: true`, so **every PR touching a chart must bump its `Chart.yaml` version** or CI fails. YAML lint rules live in `lintconf.yaml`.
+- **`lint.yml`** (on PR): `lint` (ct lint, Helm 3), `lint-helm4` (helm lint --strict, Helm 4), and `kube-linter` (matrix over studio/rasa/op-kits; `kube-linter-action` renders the chart itself after `helm dependency build`, which is required or it silently skips the subchart's objects). `ct.yaml` sets `check-version-increment: true`, so **every PR touching a chart must bump its `Chart.yaml` version** or CI fails. YAML lint rules live in `lintconf.yaml`.
 - **`check-rc.yaml`** (on PR): detects changed charts and uses `.github/actions/check-chart-rc` to gate on the `-rc` suffix. CI **blocks `-rc` versions from merging to `main`** (see Release Branch Versioning above).
 - **Release**: per-product `*-release-candidate.yml` and `*-chart-release.yml` workflows package and push charts to an OCI registry (Google Artifact Registry) via `.github/actions/release-helm-charts-oci`, and `chart-release-github-pages.yml` maintains the Helm repo index on the `ci/helm-index` branch. Release tags are prefixed per chart (`studio-`, `rasa-`, `op-kits-`).

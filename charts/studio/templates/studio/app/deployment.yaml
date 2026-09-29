@@ -6,7 +6,7 @@ kind: Deployment
 metadata:
   name: {{ include "studio.fullname" . }}-app
   labels:
-    {{- include "studio.labels" . | nindent 4 -}}
+    {{- include "studio.labels" . | nindent 4 }}
     app.kubernetes.io/component: studio-app
     {{- if .Values.deploymentLabels }}
       {{- toYaml .Values.deploymentLabels | nindent 4 }}
@@ -121,8 +121,8 @@ spec:
           envFrom:
             {{- toYaml $envFrom | nindent 12 }}
           {{- end }}
-      {{- if .Values.app.additionalContainers }}
-        {{- toYaml .Values.app.additionalContainers | nindent 8 }}
+      {{- if .Values.app.extraContainers }}
+        {{- toYaml .Values.app.extraContainers | nindent 8 }}
       {{- end }}
       {{- include "studio.app.scheduling" . | nindent 6 }}
       volumes:

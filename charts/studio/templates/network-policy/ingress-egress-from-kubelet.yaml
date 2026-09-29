@@ -1,8 +1,12 @@
 {{- if and .Values.networkPolicy.enabled .Values.networkPolicy.nodeCIDR }}
+{{- /*
+Scoped to this release's app pods. Event ingestion declares no probes, so the
+kubelet never reaches it and it is deliberately not selected here.
+*/}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
-  name: ingress-egress-from-kubelet-to-studio-app
+  name: {{ include "studio.fullname" . }}-kubelet-access
   namespace: {{ .Release.Namespace }}
 spec:
   policyTypes:
@@ -10,6 +14,7 @@ spec:
     - Egress
   podSelector:
     matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
       app.kubernetes.io/component: studio-app
   egress:
     - to:
@@ -19,5 +24,5 @@ spec:
     {{- toYaml .Values.networkPolicy.nodeCIDR | nindent 6 }}
       ports:
       - protocol: TCP
-        port: {{ .Values.app.service.port }}
+        port: {{ .Values.app.service.targetPort }}
 {{- end }}

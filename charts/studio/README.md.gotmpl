@@ -13,7 +13,6 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
 | **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
 
-> **Note:** `rasaProServices` is always disabled in this chart — it requires a separate analytics database that must be provisioned externally.
 
 ## Prerequisites
 
@@ -183,7 +182,7 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.rasa.ingress.hosts[0].host`). No host value
+`rasa.ingress.hosts[0].host`). No host value
 is enforced by the schema — an install without any host renders empty
 (match-all) ingress rules and relative browser URLs.
 
@@ -275,6 +274,14 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
+> **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
+> root rather than under a nested `rasa` key — so these are `rasa.image`,
+> `rasa.resources`, `rasa.ingress`, and `rasa.rasa.*` holds only Rasa's own config
+> (`port`, `mountDefaultConfigmap`). Old paths are ignored, not rejected. Upgrading an
+> existing release also needs the Rasa Deployment deleted first, because its selector
+> changed and Kubernetes treats that field as immutable:
+> `kubectl delete deployment rasapro -n <namespace>`.
+
 When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
 
 ```yaml
@@ -284,11 +291,10 @@ app:
       MS_API_URL: "https://models.example.com"
 ```
 
-> **Note:** `rasaProServices` is always disabled. It requires a dedicated analytics database and must be enabled and configured separately if needed.
 
 ### Rasa Pro Model Service Environment Variables
 
-The following environment variables can be configured on the Rasa Pro model server container via `rasa.rasa.overrideEnv`:
+The following environment variables can be configured on the Rasa Pro model server container via `rasa.overrideEnv`:
 
 | Variable | Description | Default |
 |----------|-------------|---------|
@@ -424,7 +430,7 @@ Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `
 | --- | --- |
 | Both `colocated` and `separate` | Kafka-related env under `eventIngestion.env` |
 | Only `mode: separate` | `replicaCount`, `image`, `resources`, `serviceAccount`, HPA/`autoscaling`, scheduling (`nodeSelector` / `affinity` / `tolerations`) |
-| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `additionalContainers` |
+| `colocated` (on app) and `separate` (on sibling) | `volumes`, `volumeMounts`, `envFrom`, `extraContainers` |
 
 ## Network Policies
 
@@ -436,12 +442,39 @@ networkPolicy:
   denyAll: true
 ```
 
-When enabled, three policies are created:
-- **deny-all** — drops all ingress/egress by default (namespace-scoped)
-- **allow-dns-access** — permits UDP/TCP port 53 for DNS resolution
-- **ingress-egress-from-kubelet** — allows Kubernetes health-check traffic from the kubelet
+All policies are named after the release and select only its pods.
 
-> **Note:** Requires a CNI plugin that enforces `NetworkPolicy` (e.g. Calico, Cilium, Antrea). Enabling network policies without a compatible CNI has no effect.
+| policy | created when | effect |
+|---|---|---|
+| `deny-all` | `denyAll: true` | drops all ingress and egress |
+| `allow-dns-access` | always | UDP/TCP 53 to `dnsNamespace` |
+| `kubelet-access` | `nodeCIDR` set | probe traffic from the nodes to the app pods |
+| `allow-egress` | `egressPorts` non-empty | outbound to the listed ports |
+| `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
+
+With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
+
+```yaml
+networkPolicy:
+  enabled: true
+  denyAll: true
+  nodeCIDR:
+    - ipBlock:
+        cidr: 10.0.0.0/16        # your node CIDR, for kubelet probes
+  egressPorts:
+    - { port: 443, protocol: TCP }
+    - { port: 80,  protocol: TCP }
+    - { port: 5432, protocol: TCP }   # PostgreSQL
+    - { port: 9092, protocol: TCP }   # Kafka
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+```
+
+> **Note:** requires a CNI that enforces `NetworkPolicy` (Calico, Cilium, Antrea). Without one, enabling this has no effect.
+
+> **Note:** these policies cover Studio's own pods. The bundled `rasa` subchart has its own `rasa.networkPolicy.*` settings and is not affected by enabling these.
 
 ## Database Migration
 
@@ -479,58 +512,12 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
+3.0.0 is a breaking release: the `backend`, `web-client` and standalone
+`event-ingestion` Deployments collapse into one `app` Deployment on the unified
+`studio` image, bundled Keycloak is replaced by Better Auth, and the bundled
+Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Four
+changes need work outside your values file.
 
-```yaml
-# Before
-webClient:
-  environmentVariables:
-    MS_API_URL: "https://studio.example.com"
-
-# After
-app:
-  webClient:
-    config:
-      MS_API_URL: "https://studio.example.com"
-```
-
-Additional breaking changes in 3.0.0:
-
-- Bundled Keycloak is **removed**. Authentication is Better Auth on the app at
-  `/api/auth/*` only — there is no `/auth` ingress or Keycloak Deployment.
-  Delete leftover `keycloak`, `config.keycloak`, and
-  `config.database.keycloakDatabaseName` from values (they are ignored). After
-  upgrade, Helm prunes Keycloak resources that belonged to the release; remove
-  unused `KEYCLOAK_*` secret keys, and do not drop the Keycloak Postgres
-  database until users exist in Better Auth. See `helm get notes <release>`.
-- Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
-  `app.migration.environmentVariables`, and `eventIngestion.environmentVariables` 
-  were removed — define entries under `app.env`, `app.migration.env`, and
-  `eventIngestion.env` as `- name/value` or `- name/valueFrom.secretKeyRef` 
-  (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
-  Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
-  list replaces the chart defaults wholesale — copy the defaults you want to keep.
-- `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
-  `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
-  always render as quoted strings in config.js.
-- `config.database.host` must be set to a real host; empty values are rejected by the
-  values schema at install time.
-- `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
-  only overrides the appVersion-derived image tag. The migration Job is bounded by
-  `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
-- The `&dns_hostname` YAML anchor and its `config.ingressHost` key were
-  **removed** — a value still set there is silently ignored, so move it
-  before upgrading. For a single-host install set
-  **`global.ingressHost`** once — the app and Rasa Pro model-service
-  ingresses and every derived URL (`window.MS_API_URL`,
-  `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
-  service on its own hostname) leave `global.ingressHost` unset and set
-  `app.ingress.hostName` and `rasa.rasa.ingress.hosts[0].host` (model service) —
-  `global.ingressHost` overrides the per-host values when set, so the two
-  are mutually exclusive by design.
-
-Better Auth is served by the app at `/api/auth/*`. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
-
-Helm does not delete resources that disappeared from the previous topology. After upgrade, remove the old backend, web-client, and event-ingestion resources as described in the chart release notes (`helm get notes <release-name>`).
+**See [MIGRATION.md](MIGRATION.md) for the full guide.**
 
 {{ template "chart.valuesSection" . }}

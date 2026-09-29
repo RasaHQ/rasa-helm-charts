@@ -35,15 +35,15 @@ The licence now reaches the container as `RASA_LICENSE`; `RASA_PRO_LICENSE` is d
 
 ### 3. The HTTP API is unauthenticated unless you give it a credential
 
-`rasa.enableApi` stays `true` and `authToken`/`jwtSecret` are unset. The chart cannot default the API off: `rasa run` exits when it has neither a model nor the API to load one through.
+`rasa.enableApi` stays `true` and `rasa.authToken`/`rasa.jwtSecret` are unset. The chart cannot default the API off: `rasa run` exits when it has neither a model nor the API to load one through.
 
 | state | behaviour |
 |---|---|
 | no credential, ClusterIP only | install-time warning |
 | no credential **and** `ingress.enabled`, `service.type` ≠ `ClusterIP`, or `hostNetwork` | **render fails** |
-| `allowUnauthenticatedApi: true` | both suppressed |
+| `rasa.allowUnauthenticatedApi: true` | both suppressed |
 
-A ClusterIP Service is not a security boundary, and a route added outside this chart is invisible to it — the refusal covers what the chart can prove it is doing, the warning covers the rest. Satisfy it with `authToken`, `jwtSecret`, or an `AUTH_TOKEN`/`JWT_SECRET` entry via `overrideEnv`, `extraEnv` or `envFrom`.
+A ClusterIP Service is not a security boundary, and a route added outside this chart is invisible to it — the refusal covers what the chart can prove it is doing, the warning covers the rest. Satisfy it with `rasa.authToken`, `rasa.jwtSecret`, or an `AUTH_TOKEN`/`JWT_SECRET` entry via the root-level `overrideEnv`, `extraEnv` or `envFrom`.
 
 ### Deployment settings moved to the chart root
 
@@ -84,21 +84,40 @@ Old keys are **ignored, not rejected**, so anything left behind is silently drop
 | `rasa.enabled`, `rasa.scheme`, `rasa.ducklingHttpUrl` | removed |
 | `actionServer`, `duckling`, `rasaProServices` | removed |
 
-`rasa.args` now has three states: unset builds the arguments and appends `extraArgs`; a list replaces them; `[]` means no arguments at all, for when `command` runs something other than the Rasa server.
+`args` now has three states: unset builds the arguments and appends `extraArgs`; a list replaces them; `[]` means no arguments at all, for when `command` runs something other than the Rasa server.
+
+Nulling a block to blank it is now rejected up front. 2.6.0 shipped no
+`required` list, so `networkPolicy: null` either crashed the render with
+`nil pointer evaluating interface {}.enabled` or was silently ignored,
+depending on the block. 3.0.0 declares fourteen top-level blocks required —
+`rasa`, `image`, `serviceAccount`, `podSecurityContext`,
+`containerSecurityContext`, `service`, `livenessProbe`, `readinessProbe`,
+`ingress`, `autoscaling`, `persistence`, `networkPolicy`, `podDisruptionBudget`,
+`global` — plus `license`, `telemetry` and `logging` under `rasa`. Helm rejects
+a missing one before rendering starts:
+
+```text
+values don't meet the specifications of the schema(s):
+- at '': missing property 'service'
+```
+
+Use the block's own toggle instead — `networkPolicy.enabled: false`,
+`autoscaling.enabled: false`, `persistence.create: false` — or leave the block
+at its default.
 
 ### Changed defaults and behaviour
 
 | change | what to do |
 |---|---|
 | Action servers are bring-your-own | Deploy one, point `rasa.endpoints.action_endpoint.url` at it — **before** upgrading. The pod starts either way; the break surfaces on the first custom-action call. |
-| `RASA_DUCKLING_HTTP_URL` no longer emitted | Set it through `rasa.extraEnv` if you run Duckling. |
+| `RASA_DUCKLING_HTTP_URL` no longer emitted | Set it through `extraEnv` if you run Duckling. |
 | NetworkPolicies are release-scoped | They previously selected *every* pod in the namespace. Set `dnsNamespace`, `egressPorts` and `allowIngressFrom` — see [Network Policies](README.md#network-policies). |
-| `rasa.ingress.hosts` is empty | Supply hosts, or enabling the ingress is refused at render time. |
+| `ingress.hosts` is empty | Supply hosts, or enabling the ingress is refused at render time. |
 | Restricted Pod Security Standard by default | `allowPrivilegeEscalation: false`, `capabilities.drop: [ALL]`, `runAsNonRoot: true`, `seccompProfile: RuntimeDefault`. No `runAsUser`, so volume ownership is unchanged. |
 | `automountServiceAccountToken: false` | Set `true` for a sidecar that calls the Kubernetes API. |
-| `appVersion` drives the image tag | `rasa.image.tag` defaults to `""` and follows `appVersion`, so **a chart upgrade moves the image**. Set an exact tag to pin. |
-| Ports follow `rasa.port`, not `rasa.service.port` | `service.targetPort` is empty by default and follows `rasa.port`. Set it only for a different or named port. |
+| `appVersion` drives the image tag | `image.tag` defaults to `""` and follows `appVersion`, so **a chart upgrade moves the image**. Set an exact tag to pin. |
+| Ports follow `rasa.port`, not `service.port` | `service.targetPort` is empty by default and follows `rasa.port`. Set it only for a different or named port. |
 | `rasa.cors` is a plain string | The secret-reference form was never read and rendered `map[...]` into `--cors`. Remove it. |
 | `rasa.endpoints` is deprecated but works | `rasa run` still reads `/app/endpoints.yml`. Move `model_groups`, `mcp_servers` and `tracing` into `rasa.integrations`. |
 
-> **Custom images:** `runAsNonRoot: true` needs a numeric non-root `USER` (the stock image is `USER 1001`). An image running as root, or declaring `USER` by name, fails with `CreateContainerConfigError`. Check with `docker image inspect --format '{{.Config.User}}' <your-image>`, or opt out via `rasa.containerSecurityContext.runAsNonRoot: false`.
+> **Custom images:** `runAsNonRoot: true` needs a numeric non-root `USER` (the stock image is `USER 1001`). An image running as root, or declaring `USER` by name, fails with `CreateContainerConfigError`. Check with `docker image inspect --format '{{.Config.User}}' <your-image>`, or opt out via `containerSecurityContext.runAsNonRoot: false`.

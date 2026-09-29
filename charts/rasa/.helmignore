@@ -24,3 +24,6 @@
 
 # Example manifests, not part of the chart
 secrets.yaml
+
+# helm-docs sources, not part of the chart
+*.gotmpl

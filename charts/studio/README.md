@@ -511,70 +511,13 @@ Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases)
 
 ### Upgrading to chart 3.0.0
 
-Pass-through keys use the conventional `extra*` names, matching the `rasa` chart:
+3.0.0 is a breaking release: the `backend`, `web-client` and standalone
+`event-ingestion` Deployments collapse into one `app` Deployment on the unified
+`studio` image, bundled Keycloak is replaced by Better Auth, and the bundled
+Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Four
+changes need work outside your values file.
 
-| old | new |
-|---|---|
-| `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
-| `app.additionalContainers` | `app.extraContainers` |
-| `eventIngestion.additionalContainers` | `eventIngestion.extraContainers` |
-| `app.ingress.additionalAnnotations` | `app.ingress.extraAnnotations` |
-
-Old names are **ignored, not rejected** — a stale `additionalAnnotations` silently drops your ingress annotations.
-
-Chart 3.0.0 is a hard break: rename `backend` values to `app`; it uses the unified `studio` image and requires Studio ≥ 2.0.0. The default image tag is a placeholder until a published unified image is promoted. Configure web client runtime values under `app.webClient.config` (was top-level `webClient.environmentVariables`). Do not set `MS_API_URL` on `app.env` — only `app.webClient.config.MS_API_URL` affects `window.MS_API_URL`.
-
-```yaml
-# Before
-webClient:
-  environmentVariables:
-    MS_API_URL: "https://studio.example.com"
-
-# After
-app:
-  webClient:
-    config:
-      MS_API_URL: "https://studio.example.com"
-```
-
-Additional breaking changes in 3.0.0:
-
-- Bundled Keycloak is **removed**. Authentication is Better Auth on the app at
-  `/api/auth/*` only — there is no `/auth` ingress or Keycloak Deployment.
-  Delete leftover `keycloak`, `config.keycloak`, and
-  `config.database.keycloakDatabaseName` from values (they are ignored). After
-  upgrade, Helm prunes Keycloak resources that belonged to the release; remove
-  unused `KEYCLOAK_*` secret keys, and do not drop the Keycloak Postgres
-  database until users exist in Better Auth. See `helm get notes <release>`.
-- Environment variables use native Kubernetes `EnvVar` lists. `app.environmentVariables`,
-  `app.migration.environmentVariables`, and `eventIngestion.environmentVariables`
-  were removed — define entries under `app.env`, `app.migration.env`, and
-  `eventIngestion.env` as `- name/value` or `- name/valueFrom.secretKeyRef`
-  (was `KEY: {value: ...}` / `KEY: {secret: {name, key}}`).
-  Keys are rendered verbatim (no more automatic upper-casing), and a user-supplied
-  list replaces the chart defaults wholesale — copy the defaults you want to keep.
-- `app.webClient.environmentVariables` is now `app.webClient.config` — a plain
-  `KEY: "value"` map of browser `window.*` globals (not container env). Flag values
-  always render as quoted strings in config.js.
-- `config.database.host` must be set to a real host; empty values are rejected by the
-  values schema at install time.
-- `Chart.yaml` now declares `appVersion`; the `tag` value is empty by default and
-  only overrides the appVersion-derived image tag. The migration Job is bounded by
-  `app.migration.backoffLimit` / `app.migration.activeDeadlineSeconds`.
-- The `&dns_hostname` YAML anchor and its `config.ingressHost` key were
-  **removed** — a value still set there is silently ignored, so move it
-  before upgrading. For a single-host install set
-  **`global.ingressHost`** once — the app and Rasa Pro model-service
-  ingresses and every derived URL (`window.MS_API_URL`,
-  `RASA_MODEL_SERVER_BASE_URL`) follow it. For a split-host install (model
-  service on its own hostname) leave `global.ingressHost` unset and set
-  `app.ingress.hostName` and `rasa.ingress.hosts[0].host` (model service) —
-  `global.ingressHost` overrides the per-host values when set, so the two
-  are mutually exclusive by design.
-
-Better Auth is served by the app at `/api/auth/*`. Choose exactly one ingestion topology with `eventIngestion.mode`: `colocated` (default), `separate`, or `disabled`.
-
-Helm does not delete resources that disappeared from the previous topology. After upgrade, remove the old backend, web-client, and event-ingestion resources as described in the chart release notes (`helm get notes <release-name>`).
+**See [MIGRATION.md](MIGRATION.md) for the full guide.**
 
 ## Values
 

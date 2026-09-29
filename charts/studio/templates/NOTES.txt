@@ -47,6 +47,6 @@ whole block there buried the access instructions above it.
       extra*): additionalDeploymentLabels, additionalContainers,
       additionalAnnotations.
 
-   Full migration guide:
-   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/README.md#upgrading-to-chart-300
+   Full migration guide, including every removed and renamed key:
+   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/studio/MIGRATION.md
 {{- end }}

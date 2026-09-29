@@ -114,27 +114,6 @@ config:
   # -- Pod affinity and anti-affinity rules for all deployments.
   # These settings can be overridden by component-specific configurations.
   affinity: {}
-  # Example:
-  # affinity:
-  #   nodeAffinity:
-  #     requiredDuringSchedulingIgnoredDuringExecution:
-  #       nodeSelectorTerms:
-  #       - matchExpressions:
-  #         - key: kubernetes.io/os
-  #           operator: In
-  #           values:
-  #           - linux
-  #   podAffinity:
-  #     preferredDuringSchedulingIgnoredDuringExecution:
-  #     - weight: 100
-  #       podAffinityTerm:
-  #         labelSelector:
-  #           matchExpressions:
-  #           - key: app
-  #             operator: In
-  #             values:
-  #             - database
-  #         topologyKey: kubernetes.io/hostname
 
   # -- Pod tolerations for all deployments.
   # These settings can be overridden by component-specific configurations.
@@ -266,29 +245,18 @@ app:
     # -- Whether to enable the security context.
     enabled: true
     # -- Whether to allow privilege escalation.
-    # Should be false for security best practices.
     allowPrivilegeEscalation: false
     # -- Whether to run the container as a non-root user.
-    # Should be true for security best practices.
     runAsNonRoot: true
     # -- Linux capabilities configuration.
     # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
     capabilities:
       # -- Capabilities to drop from the container.
-      # ALL drops all capabilities for maximum security.
       drop:
         - ALL
-      # -- Capabilities to add to the container.
-      # Uncomment and modify if specific capabilities are needed.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
-    # -- Whether to run the container in privileged mode.
-    # Should be false for security best practices.
-    # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
     # privileged: false
-    # -- Whether to mount the root filesystem as read-only.
-    # Can be enabled for additional security.
     # readOnlyRootFilesystem: true
-    # -- User ID to run the container as.
     # runAsUser: 1000
     # -- Seccomp profile configuration.
     # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
@@ -438,20 +406,15 @@ app:
       # -- Whether to enable the security context.
       enabled: true
       # -- Whether to allow privilege escalation.
-      # Should be false for security best practices.
       allowPrivilegeEscalation: false
       # -- Whether to run the container as a non-root user.
-      # Should be true for security best practices.
       runAsNonRoot: true
       # -- Linux capabilities configuration.
       # Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-capabilities-for-a-container
       capabilities:
         # -- Capabilities to drop from the container.
-        # ALL drops all capabilities for maximum security.
         drop:
           - ALL
-        # -- Capabilities to add to the container.
-        # Uncomment and modify if specific capabilities are needed.
         # add: ['NET_BIND_SERVICE', 'NET_RAW']
       # -- Seccomp profile configuration.
       # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the
@@ -460,13 +423,8 @@ app:
       seccompProfile:
         # -- Seccomp profile type.
         type: RuntimeDefault
-      # -- Whether to run the container in privileged mode.
-      # Should be false for security best practices.
       # privileged: false
-      # -- Whether to mount the root filesystem as read-only.
-      # Can be enabled for additional security.
       # readOnlyRootFilesystem: true
-      # -- User ID to run the container as.
       # runAsUser: 1000
 
     # -- Annotations to add to the migration job resource.
@@ -641,19 +599,19 @@ eventIngestion:
   # merge lists) — copy the default entries you want to keep
   # (KAFKA_TOPIC, KAFKA_DLQ_TOPIC, KAFKA_GROUP_ID, KAFKA_SASL_PASSWORD).
   # Optional Kafka settings (add as needed):
-  #   - name: KAFKA_BROKER_ADDRESS      # address of the Kafka broker (required for ingestion)
+  #   - name: KAFKA_BROKER_ADDRESS      # required for ingestion
   #     value: "kafka.example.com:9092"
-  #   - name: KAFKA_ENABLE_SSL          # enable SSL for Kafka connections
+  #   - name: KAFKA_ENABLE_SSL
   #     value: "true"
-  #   - name: KAFKA_CUSTOM_SSL          # use custom SSL certificates for Kafka
+  #   - name: KAFKA_CUSTOM_SSL
   #     value: "true"
-  #   - name: KAFKA_CA_FILE             # path to the CA certificate file
+  #   - name: KAFKA_CA_FILE
   #     value: "/certs/ca.pem"
-  #   - name: KAFKA_KEY_FILE            # path to the client key file
+  #   - name: KAFKA_KEY_FILE
   #     value: "/certs/key.pem"
-  #   - name: KAFKA_CERT_FILE           # path to the client certificate file
+  #   - name: KAFKA_CERT_FILE
   #     value: "/certs/cert.pem"
-  #   - name: KAFKA_REJECT_UNAUTHORIZED # verify server certificates
+  #   - name: KAFKA_REJECT_UNAUTHORIZED
   #     value: "true"
   #   - name: NODE_TLS_REJECT_UNAUTHORIZED  # allow untrusted certificates ("0" allows)
   #     value: "0"
@@ -750,13 +708,9 @@ eventIngestion:
       # -- Capabilities to drop from the container.
       drop:
         - ALL
-      # -- Capabilities to add to the container.
       # add: ['NET_BIND_SERVICE', 'NET_RAW']
-    # -- Whether to run the container in privileged mode.
     # privileged: false
-    # -- Whether to mount the root filesystem as read-only.
     # readOnlyRootFilesystem: true
-    # -- User ID to run the container as.
     # runAsUser: 1000
     # -- Seccomp profile configuration.
     # Kept active because the restricted Pod Security Standard requires a seccomp profile, and the

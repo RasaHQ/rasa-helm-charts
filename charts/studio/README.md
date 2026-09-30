@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.56](https://img.shields.io/badge/Version-3.0.0--rc.56-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.57](https://img.shields.io/badge/Version-3.0.0--rc.57-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -61,6 +61,22 @@ $ kubectl create secret generic studio-secrets \
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
+### Letting the chart generate `AUTH_SECRET`
+
+`AUTH_SECRET` is the only required secret with no external source — it just has to be random. Set `app.authSecret.generate: true` and the chart creates it for you:
+
+```yaml
+app:
+  authSecret:
+    generate: true
+```
+
+The value is 32 random alphanumeric characters from a cryptographic source, stored in a Secret named `<release>-studio-auth-secret`. On upgrade the chart reads the existing Secret back and keeps the same value, so sessions survive. `app.authSecret.secretName` is ignored while `generate` is true; `app.authSecret.secretKey` still names the key inside the generated Secret. The Secret carries `helm.sh/resource-policy: keep`, so `helm uninstall` leaves it in place and a reinstall reuses it.
+
+> **Do not enable this under GitOps.** Reuse depends on Helm's `lookup`, which returns nothing when there is no API server to query. Argo CD and Flux render with `helm template`, so they generate a different value on every sync — the Application never reaches Synced, and each sync logs every user out. The same applies to `helm template`, `helm diff` and `--dry-run`. For Argo CD and Flux, leave `generate: false` and supply the Secret through External Secrets Operator or Sealed Secrets.
+
+> **Note:** the generated value is stored in the Secret *and* in Helm's release history (`sh.helm.release.v1.<release>.vN`), where every past revision keeps its own copy. Anyone who can read Secrets in the namespace can read it. That is true of any Helm-managed secret, but it is the reason generation is opt-in rather than the default.
+
 ## Installing the Chart
 
 You can install the chart from either the OCI registry or the GitHub Helm repository.
@@ -70,7 +86,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.57
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +101,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.56
+$ helm install my-release rasa/studio --version 3.0.0-rc.57
 ```
 
 ## Quick Start
@@ -143,13 +159,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.57
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.56
+$ helm pull rasa/studio --version 3.0.0-rc.57
 ```
 
 ## General Configuration
@@ -640,7 +656,7 @@ changes need work outside your values file.
 |-----|------|-------------|---------|
 | app.affinity | object | Affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
 | app.annotations | object | Annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| app.authSecret | object | Secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
+| app.authSecret | object | Secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. Set `generate: true` to have the chart create it instead of referencing one you made yourself — see the note below before doing that under GitOps. | `{"generate":false,"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
 | app.automountServiceAccountToken | bool | Whether the app pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Studio never calls the Kubernetes API, so the token is left out; set it to true if you add a sidecar that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
 | app.autoscaling | object | Horizontal Pod Autoscaling configuration. This enables automatic scaling of the app deployment based on metrics. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/ | `{"enabled":false,"maxReplicas":100,"minReplicas":1,"targetCPUUtilizationPercentage":80}` |
 | app.autoscaling.enabled | bool | Whether to enable horizontal pod autoscaling. | `false` |

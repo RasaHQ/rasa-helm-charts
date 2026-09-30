@@ -320,8 +320,26 @@
           "minimum": 1
         },
         "authSecret": {
-          "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
-          "$ref": "#/definitions/secretRef"
+          "description": "Secret used by the app to sign sessions and tokens (min 32 chars). Either a reference to a Secret you manage, or chart-generated when generate is true.",
+          "type": "object",
+          "required": ["secretName", "secretKey"],
+          "properties": {
+            "generate": {
+              "description": "Generate a random value and store it in a chart-owned Secret named <fullname>-auth-secret. secretName is ignored when true. Not safe under GitOps, where lookup cannot reach the cluster and the value is regenerated on every sync.",
+              "type": "boolean"
+            },
+            "secretName": {
+              "description": "Name of the Kubernetes Secret holding the value. Ignored when generate is true.",
+              "type": "string",
+              "minLength": 1
+            },
+            "secretKey": {
+              "description": "Key within the Kubernetes Secret. Also names the key inside the generated Secret.",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "additionalProperties": false
         },
         "initialAdmin": {
           "description": "Initial admin user created by the backend on first startup. Ignored once the account exists.",

@@ -164,7 +164,18 @@ app:
 
   # -- Secret used by the app to sign sessions and tokens.
   # Must be at least 32 characters long. Stored in a Kubernetes secret. Required.
+  # Set `generate: true` to have the chart create it instead of referencing one
+  # you made yourself — see the note below before doing that under GitOps.
   authSecret:
+    # Let the chart generate a random 32-character value and store it in a Secret
+    # named `<fullname>-auth-secret`. `secretName` below is then ignored;
+    # `secretKey` still names the key inside the generated Secret.
+    #
+    # Reuse relies on `lookup`, which only sees the cluster when Helm talks to an
+    # API server. Argo CD and Flux render with `helm template` and no cluster, so
+    # they regenerate the value on every sync and log every user out. Leave this
+    # false under GitOps and supply the Secret via External Secrets Operator.
+    generate: false
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 

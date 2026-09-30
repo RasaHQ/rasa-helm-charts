@@ -88,6 +88,20 @@ Create the name of the app migration service account to use for Database Migrati
 
 
 {{/*
+Name of the Secret holding AUTH_SECRET. When the chart generates the value it
+owns the Secret and names it itself, so `app.authSecret.secretName` only applies
+to a Secret the user manages.
+*/}}
+{{- define "studio.app.authSecretName" -}}
+{{- if .Values.app.authSecret.generate -}}
+{{- printf "%s-auth-secret" (include "studio.fullname" .) -}}
+{{- else -}}
+{{- .Values.app.authSecret.secretName -}}
+{{- end -}}
+{{- end }}
+
+
+{{/*
 Return DNS policy depends on host network configuration
 */}}
 {{- define "studio.dnsPolicy" -}}

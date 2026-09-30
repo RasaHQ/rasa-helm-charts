@@ -428,12 +428,11 @@ on the Studio App container only. Setting some but not all three fails
 
 ### Segment product telemetry
 
-Studio product telemetry is off by default. Enable it with
-`STUDIO_TELEMETRY_ENABLED` and a `SEGMENT_TRACKING_KEY`. When telemetry is on,
-`STUDIO_USER_ID_TELEMETRY_ENABLED` controls per-user attribution (Legal
-requirement): set it to `"false"` for deployments that must not send real user
-ids (for example a bank or a works-council requirement). Events then use a
-shared constant identity.
+Studio product telemetry is on by default. The published image already includes
+the Segment write key. Set `STUDIO_TELEMETRY_ENABLED` to `"false"` to opt out.
+`STUDIO_USER_ID_TELEMETRY_ENABLED` controls per-user attribution: set it to
+`"false"` for deployments that must not send real user ids (for example a bank
+or a works-council requirement). Events then use a shared constant identity.
 
 ```yaml
 app:
@@ -441,14 +440,14 @@ app:
     - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
     - name: STUDIO_TELEMETRY_ENABLED
-      value: "true"
+      value: "false"
     - name: STUDIO_USER_ID_TELEMETRY_ENABLED
       value: "true"
 ```
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `STUDIO_TELEMETRY_ENABLED` | Master switch for Segment product telemetry. | `"false"` |
+| `STUDIO_TELEMETRY_ENABLED` | Master switch for Segment product telemetry. | `"true"` |
 | `STUDIO_USER_ID_TELEMETRY_ENABLED` | When `"true"`, Segment events use the authenticated user id. When `"false"`, every event uses a shared constant identity instead of a real user id. | `"true"` |
 
 > **Note:** A custom `app.env` list replaces the chart default list wholesale.

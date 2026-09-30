@@ -212,9 +212,10 @@ app:
     - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
     # STUDIO_TELEMETRY_ENABLED: master switch for Segment product telemetry.
-    # Default "false". Set to "true" only when SEGMENT_TRACKING_KEY is also set.
+    # On by default; the published image includes the write key. Set to "false"
+    # to opt out.
     - name: STUDIO_TELEMETRY_ENABLED
-      value: "false"
+      value: "true"
     # STUDIO_USER_ID_TELEMETRY_ENABLED: when telemetry is enabled, controls whether
     # events attribute a real per-user id. Default "true". Set to "false" for
     # deployments that must disable per-user attribution (e.g. works-council /

@@ -336,9 +336,18 @@ fully successful install with a broken release.
 {{- range (.Values.rasa.overrideEnv | default list) -}}
 {{- $declared = append $declared .name -}}
 {{- end -}}
-{{- range $var := list "RASA_LICENSE" "OPENAI_API_KEY" -}}
-{{- if not (has $var $declared) -}}
-{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. Setting rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" $var) -}}
+{{- /* Each entry is a list of names that satisfy the requirement. The licence
+       has two: RASA_LICENSE is canonical, RASA_PRO_LICENSE is the legacy name
+       rasa still reads, and real consumers use it. */ -}}
+{{- range $accepted := list (list "RASA_LICENSE" "RASA_PRO_LICENSE") (list "OPENAI_API_KEY") -}}
+{{- $found := false -}}
+{{- range $name := $accepted -}}
+{{- if has $name $declared -}}
+{{- $found = true -}}
+{{- end -}}
+{{- end -}}
+{{- if not $found -}}
+{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

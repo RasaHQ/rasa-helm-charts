@@ -426,6 +426,35 @@ Renders `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and `GITHUB_APP_PRIVATE_KE
 on the Studio App container only. Setting some but not all three fails
 `helm install`/`helm upgrade`.
 
+### Segment product telemetry
+
+Studio product telemetry is on by default. The published image already includes
+the Segment write key. Set `STUDIO_TELEMETRY_ENABLED` to `"false"` to opt out.
+`STUDIO_USER_ID_TELEMETRY_ENABLED` controls per-user attribution: set it to
+`"false"` for deployments that must not send real user ids (for example a bank
+or a works-council requirement). Events then use a shared constant identity.
+
+```yaml
+app:
+  env:
+    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
+      value: "0 * * * *"
+    - name: STUDIO_TELEMETRY_ENABLED
+      value: "false"
+    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
+      value: "true"
+```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `STUDIO_TELEMETRY_ENABLED` | Master switch for Segment product telemetry. | `"true"` |
+| `STUDIO_USER_ID_TELEMETRY_ENABLED` | When `"true"`, Segment events use the authenticated user id. When `"false"`, every event uses a shared constant identity instead of a real user id. | `"true"` |
+
+> **Note:** A custom `app.env` list replaces the chart default list wholesale.
+> Keep the default entries you still need (including
+> `DELETE_CONVERSATIONS_CRON_EXPRESSION`, `STUDIO_TELEMETRY_ENABLED`, and
+> `STUDIO_USER_ID_TELEMETRY_ENABLED`) when overriding.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:

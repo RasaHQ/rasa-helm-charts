@@ -211,6 +211,17 @@ app:
     # cleanup job ("minute hour day-of-month month day-of-week").
     - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
       value: "0 * * * *"
+    # STUDIO_TELEMETRY_ENABLED: master switch for Segment product telemetry.
+    # On by default; the published image includes the write key. Set to "false"
+    # to opt out.
+    - name: STUDIO_TELEMETRY_ENABLED
+      value: "true"
+    # STUDIO_USER_ID_TELEMETRY_ENABLED: when telemetry is enabled, controls whether
+    # events attribute a real per-user id. Default "true". Set to "false" for
+    # deployments that must disable per-user attribution (e.g. works-council /
+    # banking requirements); events then use a shared constant identity instead.
+    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
+      value: "true"
 
   # -- Additional environment variables from ConfigMap or Secret.
   # These will be mounted as environment variables in the container.

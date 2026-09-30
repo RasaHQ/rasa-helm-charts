@@ -163,14 +163,23 @@ app:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 
-  # -- Initial admin user, created by the backend on first startup. Set this on a
-  # fresh install — without it nobody can log in, and every other user is invited
-  # by an existing admin. `email` is a plain string, `password` is a secret
-  # reference; both must be set together, or the block left empty. Used only until
-  # the account exists: the initial admin is required to choose a new password on
-  # first login, and upgrades of an install that already has an admin can leave
-  # this empty. See the "Initial Admin User" section of the README.
-  initialAdmin: {}
+  # -- Initial admin user for a fresh install. A new Studio install has no users,
+  # and every account after the first is created by invitation from an existing
+  # admin, so the first admin has to come from here. The backend creates it on
+  # startup if it does not already exist, and ignores these values once it does.
+  # See the "Initial Admin User" section of the README.
+  initialAdmin:
+    # -- Email address of the initial admin user. The only value you need to set
+    # on a fresh install. Leave it empty to skip initial-admin creation, which is
+    # correct when upgrading an install that already has an admin.
+    email: ""
+    # -- Secret holding the initial admin's bootstrap password. Read only when
+    # `email` is set. The initial admin is required to choose a new password on
+    # first login, so treat this as a throwaway value and rotate or remove the
+    # key afterwards.
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
 
   # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
   # repositories. Takes three secret references (`appId`, `installationId`,

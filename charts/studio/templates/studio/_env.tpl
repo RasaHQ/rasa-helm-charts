@@ -77,8 +77,9 @@ Studio App Database Environment Variables
 {{/*
 Studio App Initial Admin Environment Variables
 
-Optional; the caller guards on a non-empty `app.initialAdmin`, and
-values.schema.json enforces all-or-none, so both keys are present here.
+`app.initialAdmin.email` is the switch: the caller renders this only when it is
+non-empty, so an install that already has an admin emits neither variable and
+never needs the password Secret key to exist.
 App-only on purpose: the backend creates the account on startup, so the
 migration Job and the standalone event-ingestion deployment never read these.
 Takes the `app.initialAdmin` map as its context, not the root.

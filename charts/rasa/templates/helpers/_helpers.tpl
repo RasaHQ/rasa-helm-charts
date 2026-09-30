@@ -191,6 +191,29 @@ Composed from the two predicates above rather than repeating their conditions,
 so the NOTES warning and this refusal cannot drift apart: anything that fails
 here also warns, and the warning is strictly the wider set.
 */}}
+{{/*
+Refuse an install that would run Rasa Pro without a licence.
+
+overrideEnv replaces the generated environment wholesale, and the generated
+block is the only thing carrying RASA_LICENSE. Setting overrideEnv to add one
+variable therefore dropped the licence silently: the install succeeded and the
+container started unlicensed. Only overrideEnv is checked -- extraEnv is
+additive, so it cannot remove the generated entry.
+*/}}
+{{- define "rasa.validateLicense" -}}
+{{- if .Values.overrideEnv -}}
+{{- $declared := false -}}
+{{- range .Values.overrideEnv -}}
+{{-   if eq .name "RASA_LICENSE" -}}
+{{-     $declared = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if not $declared -}}
+{{- fail "overrideEnv is set but declares no RASA_LICENSE entry, and overrideEnv replaces the generated environment wholesale - so the licence the chart would have passed from rasa.license is discarded and Rasa Pro starts unlicensed. Add a RASA_LICENSE entry to overrideEnv (copy the generated one: valueFrom.secretKeyRef from rasa.license.secretName / rasa.license.secretKey), or use extraEnv instead, which adds to the generated environment rather than replacing it." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiUnauthenticated" .) (include "rasa.apiRouted" .) -}}
 {{- fail "rasa.enableApi is true, no API credential reaches the container, and this release routes traffic to it - rasa.ingress.enabled is true, rasa.service.type is not ClusterIP, or hostNetwork is true. That would put an unauthenticated Rasa HTTP API, including its model-management endpoints, on the network. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, stop routing to it, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}

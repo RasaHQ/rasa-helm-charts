@@ -76,6 +76,39 @@ With `denyAll` set you must also supply `dnsNamespace`, `egressPorts` and
 Studio. `egressPorts` defaults to 443 and 80 only — add your database, Kafka and
 object-storage ports. See [Network Policies](README.md#network-policies).
 
+### 5. `rasa.persistence.storageClassName` is now required
+
+Only when the Rasa Pro model service is enabled, which is the default:
+`rasa.persistence.create` is `true`, and the subchart's schema now rejects an
+unset class. A fresh install refuses to render:
+
+```
+rasa:
+- at '/persistence': missing property 'storageClassName'
+```
+
+```yaml
+rasa:
+  persistence:
+    storageClassName: gp3   # kubectl get storageclass
+```
+
+Leaving it unset used to work by accident: the cluster's default StorageClass was
+substituted at admission, and Kubernetes then treats the field as immutable, so
+every later `helm upgrade` was rejected with `spec: Forbidden: spec is immutable
+after creation`. On a cluster with no default StorageClass the claim simply stayed
+`Pending` with nothing explaining why.
+
+**If you already have a claim**, set the value to the class it is bound to — that
+single edit also unblocks your upgrades:
+
+```console
+$ kubectl get pvc rasa-pro-data-pvc-<namespace> -n <namespace> \
+    -o jsonpath='{.spec.storageClassName}'
+```
+
+Full detail in the Rasa Pro chart's [migration guide](../rasa/MIGRATION.md).
+
 ### Renamed and removed keys
 
 Old keys are **ignored, not rejected**, so anything left behind is silently

@@ -931,7 +931,12 @@ rasa:
     create: true
     storageCapacity: 1Gi
     storageRequests: 1Gi
-    # -- Make sure to set the correct storage class name based on your cluster configuration.
+    # -- Required, because `create` above is true. The chart cannot guess it —
+    # the class is a property of your cluster (`kubectl get storageclass`). An
+    # unset value is rejected by the schema: it used to be silently replaced by
+    # the cluster default at admission, which Kubernetes then treats as an
+    # immutable field and refuses to reconcile on every later `helm upgrade`.
+    # Use "" to bind a classless PersistentVolume, such as one `hostPath` creates.
     storageClassName:
     hostPath:
       enabled: false

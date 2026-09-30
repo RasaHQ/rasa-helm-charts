@@ -12,7 +12,7 @@ Helm charts for deploying Rasa products on Kubernetes (chart versions live in ea
 ## Commands
 
 Standard `helm` / `ct` / `pre-commit` invocations apply. Two non-obvious flags:
-- `helm template` needs `--kube-version 1.29.0` to match CI and stay deterministic across Helm versions.
+- `helm template` takes `--kube-version 1.37.0` — Helm 4.3's own default and the kind image we test against. CI passes no `--kube-version` at all. Neither chart reads `.Capabilities`, so the flag does not change rendered output; it only exercises the `kubeVersion` floor in `Chart.yaml`, which Helm checks against whatever value it resolves.
 - A dependency **version bump** in `Chart.yaml` needs `helm dependency update`, not `build` — `build` only re-resolves what `Chart.lock` already pins.
 
 ## Before Every Commit
@@ -73,7 +73,7 @@ CI blocks `-rc` suffixes on `main`.
 Charts must lint and render cleanly under **both Helm 3 and Helm 4**. CI enforces this: `lint.yml` runs a `lint` job (Helm 3.22.0 via `ct lint`) and a parallel `lint-helm4` job (Helm 4.3.0 via `helm lint --strict`) on every PR. When writing or editing templates:
 
 - **Never mutate `.Values`.** Helm 4 makes `.Values` read-only at render time, so `{{- $_ := set .Values.foo ... }}` breaks. Build a local dict (`merge`/`deepCopy`) instead.
-- **Don't branch on `.Capabilities.KubeVersion` for API versions.** All supported clusters are ≥1.19; ingress templates hardcode `networking.k8s.io/v1` with `pathType` and the `service:`/`port:` backend form. The old `extensions/v1beta1` / `networking.k8s.io/v1beta1` fallbacks were removed.
+- **Don't branch on `.Capabilities.KubeVersion` for API versions.** The floor is declared once as `kubeVersion: ">=1.23.0-0"` in each `Chart.yaml` and enforced by Helm, so templates never test it. 1.23 is set by `autoscaling/v2` (`hpa.yaml`), the newest API either chart emits; ingress hardcodes `networking.k8s.io/v1` with `pathType` and the `service:`/`port:` backend form, and the old `extensions/v1beta1` / `networking.k8s.io/v1beta1` fallbacks were removed. Raise `kubeVersion` if a template ever adopts a newer API.
 - **Prefer `deepCopy` over `toYaml | fromYaml`** for deep-copying a values map before `merge`.
 - **`helm registry login` takes a domain only in Helm 4** (no `https://` prefix). The OCI release action (`.github/actions/release-helm-charts-oci`) still passes a full URL and is pinned to Helm 3.22.0 — it must be updated before that action moves to Helm 4.
 

@@ -1,5 +1,6 @@
 {{- include "studio.rasa.validate" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
+{{- include "studio.requiredValues.validate" . -}}
 {{- $mode := include "studio.eventIngestion.mode" . -}}
 apiVersion: apps/v1
 kind: Deployment

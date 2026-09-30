@@ -580,9 +580,6 @@ app:
 
 # Studio Event Ingestion component specific configuration
 eventIngestion:
-  # -- Kafka client.id for the ingestion consumer, in both colocated and
-  # separate modes. Rendered as KAFKA_CLIENT_ID.
-  kafkaClientId: "kafka-python-rasa"
   # -- Event-ingestion topology.
   # colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment.
   # separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false.
@@ -597,6 +594,9 @@ eventIngestion:
   # - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when
   #   colocated, and to the sibling Deployment when separate.
   mode: colocated
+  # -- Kafka client.id for the ingestion consumer, in both colocated and
+  # separate modes. Rendered as KAFKA_CLIENT_ID.
+  kafkaClientId: "kafka-python-rasa"
   # -- Number of replicas for the Event Ingestion deployment.
   # Applies only when eventIngestion.mode is separate.
   replicaCount: 1

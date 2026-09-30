@@ -503,11 +503,6 @@ app:
   ingress:
     # -- Whether to create an ingress resource.
     enabled: true
-    # -- (string) Hostname for the Studio app ingress, and the source of every
-    # derived URL (API_URL, WEB_CLIENT_URL, CORS_ORIGINS). Use this for a
-    # split-host install; global.ingressHost overrides it when set. Leaving both
-    # unset renders a host-less ingress rule that matches any host.
-    hostName:
     # -- Ingress class name.
     # This should match your cluster's ingress controller.
     # Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class

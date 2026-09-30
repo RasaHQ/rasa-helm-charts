@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.51](https://img.shields.io/badge/Version-3.0.0--rc.51-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.52](https://img.shields.io/badge/Version-3.0.0--rc.52-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.51
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.52
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.51
+$ helm install my-release rasa/studio --version 3.0.0-rc.52
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.51
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.52
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.51
+$ helm pull rasa/studio --version 3.0.0-rc.52
 ```
 
 ## General Configuration
@@ -625,11 +625,10 @@ changes need work outside your values file.
 | app.image | object | Container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | Unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | Container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
-| app.ingress | object | How the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"className":"","enabled":true,"extraAnnotations":{},"hostName":null,"labels":{},"tls":[]}` |
+| app.ingress | object | How the app service is exposed externally. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/ | `{"className":"","enabled":true,"extraAnnotations":{},"labels":{},"tls":[]}` |
 | app.ingress.className | string | Ingress class name. This should match your cluster's ingress controller. Ref: https://kubernetes.io/docs/concepts/services-networking/ingress/#ingress-class | `""` |
 | app.ingress.enabled | bool | Whether to create an ingress resource. | `true` |
 | app.ingress.extraAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
-| app.ingress.hostName | string | Hostname for the Studio app ingress, and the source of every derived URL (API_URL, WEB_CLIENT_URL, CORS_ORIGINS). Use this for a split-host install; global.ingressHost overrides it when set. Leaving both unset renders a host-less ingress rule that matches any host. | `nil` |
 | app.ingress.labels | object | Labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | app.ingress.tls | list | TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
 | app.initialAdmin | object | Initial admin user. A fresh install has no users and every later account is invited by an admin, so the first one comes from here. Created by the backend on startup, ignored once it exists. | `{"email":"","password":{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}}` |

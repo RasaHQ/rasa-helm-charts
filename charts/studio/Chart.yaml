@@ -5,7 +5,7 @@ type: application
 # Minimum Kubernetes version. autoscaling/v2 (templates/studio/app/hpa.yaml) is GA
 # from 1.23; the `-0` suffix lets pre-release cluster versions satisfy the constraint.
 kubeVersion: ">=1.23.0-0"
-version: 3.0.0-rc.47
+version: 3.0.0-rc.48
 appVersion: "2.0.0-latest"
 home: https://helm.rasa.com
 sources:

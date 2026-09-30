@@ -135,6 +135,10 @@
       "description": "Kubernetes Ingress configuration",
       "type": "object",
       "properties": {
+        "hostName": {
+          "description": "Hostname for this ingress; global.ingressHost overrides it when set",
+          "type": ["string", "null"]
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -455,6 +459,10 @@
       "description": "Studio Event Ingestion component configuration",
       "type": "object",
       "properties": {
+        "kafkaClientId": {
+          "description": "Kafka client.id for the ingestion consumer (KAFKA_CLIENT_ID)",
+          "type": "string"
+        },
         "mode": {
           "description": "Where to run event ingestion",
           "type": "string",
@@ -475,9 +483,6 @@
         },
         "autoscaling": {
           "$ref": "#/definitions/autoscaling"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
         },
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"

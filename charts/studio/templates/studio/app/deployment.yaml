@@ -1,5 +1,6 @@
 {{- include "studio.rasa.validate" . -}}
 {{- include "studio.eventIngestion.validate" . -}}
+{{- include "studio.requiredValues.validate" . -}}
 {{- $mode := include "studio.eventIngestion.mode" . -}}
 apiVersion: apps/v1
 kind: Deployment
@@ -73,7 +74,7 @@ spec:
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
           env:
-            {{- include "studio.app.env" . | nindent 12 }}
+            {{- include "studio.database.env" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
             - name: API_URL
@@ -83,6 +84,12 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.authSecret.secretName | quote }}
                   key: {{ .Values.app.authSecret.secretKey | quote }}
+            {{- if .Values.app.initialAdmin.email }}
+            {{- include "studio.app.initialAdmin.env" .Values.app.initialAdmin | nindent 12 }}
+            {{- end }}
+            {{- with .Values.app.github }}
+            {{- include "studio.app.github.env" . | nindent 12 }}
+            {{- end }}
             - name: BETTER_AUTH_BASE_URL
               value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
             - name: STUDIO_ROLE

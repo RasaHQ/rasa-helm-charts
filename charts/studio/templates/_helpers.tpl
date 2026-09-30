@@ -319,6 +319,41 @@ re-populated from the subchart's own defaults, which never define `enabled`
 {{- end -}}
 
 {{/*
+Validate values the chart cannot install without.
+
+Only covers what is visible at render time. Secret *contents* are not — a short
+AUTH_SECRET or an expired licence cannot be seen here, and a missing Secret key
+already blocks container start. What is checked is config that can produce a
+fully successful install with a broken release.
+*/}}
+{{- define "studio.requiredValues.validate" -}}
+{{- $db := .Values.config.database -}}
+{{- if and (ne ($db.useAwsIamAuth | toString) "true") (not $db.password) -}}
+{{- fail "config.database.password is required unless config.database.useAwsIamAuth is \"true\" — set config.database.password.secretName and .secretKey, or enable IAM auth" -}}
+{{- end -}}
+{{- if .Values.rasa.enabled -}}
+{{- $declared := list -}}
+{{- range (.Values.rasa.overrideEnv | default list) -}}
+{{- $declared = append $declared .name -}}
+{{- end -}}
+{{- /* Each entry is a list of names that satisfy the requirement. The licence
+       has two: RASA_LICENSE is canonical, RASA_PRO_LICENSE is the legacy name
+       rasa still reads, and real consumers use it. */ -}}
+{{- range $accepted := list (list "RASA_LICENSE" "RASA_PRO_LICENSE") (list "OPENAI_API_KEY") -}}
+{{- $found := false -}}
+{{- range $name := $accepted -}}
+{{- if has $name $declared -}}
+{{- $found = true -}}
+{{- end -}}
+{{- end -}}
+{{- if not $found -}}
+{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Validate event-ingestion topology configuration.
 */}}
 {{- define "studio.eventIngestion.validate" -}}

@@ -54,10 +54,15 @@ config:
   # -- The postgres database instance details for Studio to connect to.
   # This section configures the database connection parameters for Studio.
   database:
-    # -- The database host name or IP address where PostgreSQL is running.
-    # Example: "postgres.example.com" or "10.0.0.1"
-    # Placeholder value — you MUST set this; an empty value is rejected by the schema.
-    host: "DATABASE.HOST.NAME"
+    # -- (string) The database host name or IP address where PostgreSQL is running.
+    # No default: you must set this. An unset or empty value is rejected by the
+    # schema at install time. Can be a plain string or a secret reference.
+    # Plain value example: host: "postgres.example.com"
+    # Secret reference example:
+    # host:
+    #   secretName: "my-secret"
+    #   secretKey: "DB_HOST"
+    host:
     # -- The database port number for PostgreSQL.
     # Default PostgreSQL port is 5432
     port: "5432"
@@ -162,6 +167,25 @@ app:
   authSecret:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
+
+  # -- Initial admin user. A fresh install has no users and every later account is
+  # invited by an admin, so the first one comes from here. Created by the backend
+  # on startup, ignored once it exists.
+  initialAdmin:
+    # -- Email of the initial admin. The only value a fresh install needs.
+    # Empty (default) skips creation — correct when an admin already exists.
+    email: ""
+    # -- Secret holding the bootstrap password. Read only when `email` is set.
+    # The admin must choose a new password on first login.
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
+
+  # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
+  # repositories. Three secret references — `appId`, `installationId`, `privateKey`
+  # — each a `secretName` + `secretKey` pair, so they may live in one Secret or
+  # three. All three or none; a partial block is rejected by the schema.
+  github: {}
 
   # -- Extra environment variables for the Studio App container,
   # in native Kubernetes EnvVar format (name + value or valueFrom).

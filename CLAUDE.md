@@ -77,7 +77,7 @@ Most components use `<component>.enabled` flags. Studio specifics:
 
 - **Chart shapes differ.** `studio` is the only chart with a dependency (`Chart.lock` pins the `rasa` OCI subchart) and the only one with a Helm hook Job. `rasa` is standalone. `op-kits` emits operator CRs only — no Deployments, Services, network policies, or `values.schema.json` — with templates grouped per operator (`cloudnativepg/`, `strimzi/`, `valkey/`).
 - Each chart's `_helpers.tpl` defines naming helpers (`fullname`, `labels`, `selectorLabels`, `serviceAccountName`, `image`). Studio's is at `templates/_helpers.tpl`; rasa's is at `templates/helpers/_helpers.tpl`.
-- Studio templates live under `templates/studio/{app,event-ingestion}/`. There is **no** separate web-client Deployment — browser config is `app.webClient.environmentVariables` → ConfigMap mounted at `/usr/src/app/webclient/config.js` on the app pod.
+- Studio templates live under `templates/studio/{app,event-ingestion}/`. There is **no** separate web-client Deployment — browser config is `app.webClient.config` → ConfigMap mounted at `/usr/src/app/webclient/config.js` on the app pod.
 - Studio env helpers are in `templates/studio/_env.tpl`: `studio.app.env`. App auth uses `app.authSecret` → `AUTH_SECRET` / `BETTER_AUTH_BASE_URL` on the app Deployment.
 - Top-level `repository` + `tag` feed the unified Studio image; `app.image.name` / `eventIngestion.image.name` default to `studio` (chart 3.0 requires Studio ≥ 2.0.0). Formerly `backend` / `studio-backend`.
 - `templates/shared-env-configmap.yaml` emits shared `CORS_ORIGINS` and model-service URL for in-cluster consumers.

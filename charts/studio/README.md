@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.40](https://img.shields.io/badge/Version-3.0.0--rc.40-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.54](https://img.shields.io/badge/Version-3.0.0--rc.54-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -49,12 +49,15 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a fresh install — see ["Initial Admin User"](#initial-admin-user).
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -67,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.54
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -82,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.40
+$ helm install my-release rasa/studio --version 3.0.0-rc.54
 ```
 
 ## Quick Start
@@ -99,6 +102,11 @@ config:
     host: "postgres.example.com"
     username: "studio"
     databaseName: "studio"
+
+# First account on a fresh install — without it nobody can log in.
+app:
+  initialAdmin:
+    email: "admin@example.com"
 
 # Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
@@ -135,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.54
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.40
+$ helm pull rasa/studio --version 3.0.0-rc.54
 ```
 
 ## General Configuration
@@ -209,6 +217,15 @@ config:
 ### Using Secrets for Sensitive Values
 
 Database credentials can be provided as plain values or secret references:
+
+**Host from secret:**
+```yaml
+config:
+  database:
+    host:
+      secretName: "my-db-secret"
+      secretKey: "DB_HOST"
+```
 
 **Username from secret:**
 ```yaml
@@ -301,20 +318,33 @@ The following environment variables can be configured on the Rasa Pro model serv
 | `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
 | `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded (e.g. `aws`, `gcs`, `azure`). Leave unset to disable remote storage. | `None` |
 
-Example:
+`rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence and `OPENAI_API_KEY` into the model service — so re-declare both alongside your additions. Omitting them is refused at install time.
 
 ```yaml
 rasa:
   enabled: true
-  rasa:
-    overrideEnv:
-      - name: MAX_PARALLEL_TRAININGS
-        value: "5"
-      - name: MAX_PARALLEL_BOT_RUNS
-        value: "20"
-      - name: RASA_REMOTE_STORAGE
-        value: "aws"
+  overrideEnv:
+    # Chart defaults — keep these, or the model service starts with no licence.
+    - name: RASA_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: RASA_PRO_LICENSE_SECRET_KEY
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: OPENAI_API_KEY_SECRET_KEY
+    # Your additions:
+    - name: MAX_PARALLEL_TRAININGS
+      value: "5"
+    - name: MAX_PARALLEL_BOT_RUNS
+      value: "20"
+    - name: RASA_REMOTE_STORAGE
+      value: "aws"
 ```
+
+> **Note:** `rasa.extraEnv` does not work here. The subchart reads `extraEnv` only when `overrideEnv` is unset, and this chart sets `overrideEnv` by default. `rasa.rasa.overrideEnv` does nothing either — `overrideEnv` sits at the subchart root, so it is `rasa.overrideEnv`.
 
 ### Studio App Model Service Environment Variables
 
@@ -338,6 +368,62 @@ app:
     - name: MODEL_INACTIVE_AFTER_MS
       value: "600000"
 ```
+
+## Initial Admin User
+
+A fresh install has no users, and every later account is invited by an admin — so
+the first admin comes from the chart:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+```
+
+That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
+key of `studio-secrets`; add it when you
+[create the Secret](#2-create-the-studio-secrets-secret). Override
+`app.initialAdmin.password` to read from a different Secret.
+
+Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
+container only.
+
+- **The password is a bootstrap value.** The admin must choose a new one on first
+  login; rotate or remove the Secret key afterwards.
+- **`email` is the switch.** Empty (the default) renders neither variable, so the
+  Secret key need not exist. Leave it empty on an install that already has an
+  admin; set it on a fresh one, or nobody can log in.
+- The account is created only if absent, and is marked in the database, so changing
+  its email later does not spawn a second one.
+- An email without an `@` is rejected at install time.
+
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and
+provide its credentials. All three values must be set together. Leave them unset
+if you do not use GitHub integration.
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_ID"
+    installationId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_PRIVATE_KEY"
+```
+
+Add the matching keys to `studio-secrets`. Each entry is an independent secret
+reference, so the values may live in one Secret or three — useful when only the
+private key is synced from an external secret store.
+
+Renders `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and `GITHUB_APP_PRIVATE_KEY`
+on the Studio App container only. Setting some but not all three fails
+`helm install`/`helm upgrade`.
 
 ## URL Scheme (`connectionType`)
 
@@ -535,6 +621,7 @@ changes need work outside your values file.
 | app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
+| app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |
 | app.image | object | Container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | Unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | Container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
@@ -544,6 +631,9 @@ changes need work outside your values file.
 | app.ingress.extraAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.ingress.labels | object | Labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | app.ingress.tls | list | TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
+| app.initialAdmin | object | Initial admin user. A fresh install has no users and every later account is invited by an admin, so the first one comes from here. Created by the backend on startup, ignored once it exists. | `{"email":"","password":{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}}` |
+| app.initialAdmin.email | string | Email of the initial admin. The only value a fresh install needs. Empty (default) skips creation — correct when an admin already exists. | `""` |
+| app.initialAdmin.password | object | Secret holding the bootstrap password. Read only when `email` is set. The admin must choose a new password on first login. | `{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | app.livenessProbe | object | Liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
 | app.livenessProbe.enabled | bool | Whether to enable the liveness probe. | `true` |
 | app.livenessProbe.failureThreshold | int | Number of failures before the container is considered unhealthy. | `6` |
@@ -633,10 +723,10 @@ changes need work outside your values file.
 | app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
-| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":"DATABASE.HOST.NAME","iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
+| config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":null,"iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
-| config.database.host | string | The database host name or IP address where PostgreSQL is running. Example: "postgres.example.com" or "10.0.0.1" Placeholder value — you MUST set this; an empty value is rejected by the schema. | `"DATABASE.HOST.NAME"` |
+| config.database.host | string | The database host name or IP address where PostgreSQL is running. No default: you must set this. An unset or empty value is rejected by the schema at install time. Can be a plain string or a secret reference. Plain value example: host: "postgres.example.com" Secret reference example: host:   secretName: "my-secret"   secretKey: "DB_HOST" | `nil` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
 | config.database.port | string | The database port number for PostgreSQL. Default PostgreSQL port is 5432 | `"5432"` |

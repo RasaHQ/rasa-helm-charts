@@ -135,6 +135,10 @@
       "description": "Kubernetes Ingress configuration",
       "type": "object",
       "properties": {
+        "hostName": {
+          "description": "Hostname for this ingress; global.ingressHost overrides it when set",
+          "type": ["string", "null"]
+        },
         "enabled": {
           "type": "boolean"
         },
@@ -239,9 +243,16 @@
           "required": ["host"],
           "properties": {
             "host": {
-              "description": "Database host name or IP address",
-              "type": "string",
-              "minLength": 1
+              "description": "Database host name or IP address \u2014 plain string or secret reference. Required; the chart ships no default.",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "$ref": "#/definitions/secretRef"
+                }
+              ]
             },
             "port": {
               "description": "Database port (default: 5432)",
@@ -311,6 +322,46 @@
         "authSecret": {
           "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
+        },
+        "initialAdmin": {
+          "description": "Initial admin user created by the backend on first startup. Ignored once the account exists.",
+          "type": "object",
+          "properties": {
+            "email": {
+              "description": "Email address of the initial admin user. Empty disables initial-admin creation.",
+              "type": "string",
+              "pattern": "^$|.+@.+"
+            },
+            "password": {
+              "description": "Initial admin bootstrap password \u2014 secret reference. Read only when email is set; the user must choose a new password on first login.",
+              "$ref": "#/definitions/secretRef"
+            }
+          },
+          "additionalProperties": false
+        },
+        "github": {
+          "description": "Optional GitHub App credentials letting Studio connect projects to GitHub repositories. All three keys must be set together, or the block left empty.",
+          "type": "object",
+          "properties": {
+            "appId": {
+              "description": "GitHub App ID — secret reference",
+              "$ref": "#/definitions/secretRef"
+            },
+            "installationId": {
+              "description": "GitHub App installation ID — secret reference",
+              "$ref": "#/definitions/secretRef"
+            },
+            "privateKey": {
+              "description": "GitHub App private key (PEM) — secret reference",
+              "$ref": "#/definitions/secretRef"
+            }
+          },
+          "additionalProperties": false,
+          "dependencies": {
+            "appId": ["installationId", "privateKey"],
+            "installationId": ["appId", "privateKey"],
+            "privateKey": ["appId", "installationId"]
+          }
         },
         "env": {
           "description": "Extra environment variables for the Studio App container (native EnvVar list)",
@@ -408,6 +459,10 @@
       "description": "Studio Event Ingestion component configuration",
       "type": "object",
       "properties": {
+        "kafkaClientId": {
+          "description": "Kafka client.id for the ingestion consumer (KAFKA_CLIENT_ID)",
+          "type": "string"
+        },
         "mode": {
           "description": "Where to run event ingestion",
           "type": "string",
@@ -428,9 +483,6 @@
         },
         "autoscaling": {
           "$ref": "#/definitions/autoscaling"
-        },
-        "service": {
-          "$ref": "#/definitions/serviceConfig"
         },
         "serviceAccount": {
           "$ref": "#/definitions/serviceAccount"

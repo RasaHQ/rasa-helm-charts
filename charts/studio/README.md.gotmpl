@@ -49,12 +49,15 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a fresh install — see ["Initial Admin User"](#initial-admin-user).
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -99,6 +102,11 @@ config:
     host: "postgres.example.com"
     username: "studio"
     databaseName: "studio"
+
+# First account on a fresh install — without it nobody can log in.
+app:
+  initialAdmin:
+    email: "admin@example.com"
 
 # Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
@@ -210,6 +218,15 @@ config:
 
 Database credentials can be provided as plain values or secret references:
 
+**Host from secret:**
+```yaml
+config:
+  database:
+    host:
+      secretName: "my-db-secret"
+      secretKey: "DB_HOST"
+```
+
 **Username from secret:**
 ```yaml
 config:
@@ -302,20 +319,33 @@ The following environment variables can be configured on the Rasa Pro model serv
 | `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
 | `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded (e.g. `aws`, `gcs`, `azure`). Leave unset to disable remote storage. | `None` |
 
-Example:
+`rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence and `OPENAI_API_KEY` into the model service — so re-declare both alongside your additions. Omitting them is refused at install time.
 
 ```yaml
 rasa:
   enabled: true
-  rasa:
-    overrideEnv:
-      - name: MAX_PARALLEL_TRAININGS
-        value: "5"
-      - name: MAX_PARALLEL_BOT_RUNS
-        value: "20"
-      - name: RASA_REMOTE_STORAGE
-        value: "aws"
+  overrideEnv:
+    # Chart defaults — keep these, or the model service starts with no licence.
+    - name: RASA_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: RASA_PRO_LICENSE_SECRET_KEY
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: OPENAI_API_KEY_SECRET_KEY
+    # Your additions:
+    - name: MAX_PARALLEL_TRAININGS
+      value: "5"
+    - name: MAX_PARALLEL_BOT_RUNS
+      value: "20"
+    - name: RASA_REMOTE_STORAGE
+      value: "aws"
 ```
+
+> **Note:** `rasa.extraEnv` does not work here. The subchart reads `extraEnv` only when `overrideEnv` is unset, and this chart sets `overrideEnv` by default. `rasa.rasa.overrideEnv` does nothing either — `overrideEnv` sits at the subchart root, so it is `rasa.overrideEnv`.
 
 ### Studio App Model Service Environment Variables
 
@@ -339,6 +369,62 @@ app:
     - name: MODEL_INACTIVE_AFTER_MS
       value: "600000"
 ```
+
+## Initial Admin User
+
+A fresh install has no users, and every later account is invited by an admin — so
+the first admin comes from the chart:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+```
+
+That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
+key of `studio-secrets`; add it when you
+[create the Secret](#2-create-the-studio-secrets-secret). Override
+`app.initialAdmin.password` to read from a different Secret.
+
+Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
+container only.
+
+- **The password is a bootstrap value.** The admin must choose a new one on first
+  login; rotate or remove the Secret key afterwards.
+- **`email` is the switch.** Empty (the default) renders neither variable, so the
+  Secret key need not exist. Leave it empty on an install that already has an
+  admin; set it on a fresh one, or nobody can log in.
+- The account is created only if absent, and is marked in the database, so changing
+  its email later does not spawn a second one.
+- An email without an `@` is rejected at install time.
+
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and
+provide its credentials. All three values must be set together. Leave them unset
+if you do not use GitHub integration.
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_ID"
+    installationId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_PRIVATE_KEY"
+```
+
+Add the matching keys to `studio-secrets`. Each entry is an independent secret
+reference, so the values may live in one Secret or three — useful when only the
+private key is synced from an external secret store.
+
+Renders `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and `GITHUB_APP_PRIVATE_KEY`
+on the Studio App container only. Setting some but not all three fails
+`helm install`/`helm upgrade`.
 
 ## URL Scheme (`connectionType`)
 

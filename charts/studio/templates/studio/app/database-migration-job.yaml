@@ -48,8 +48,19 @@ spec:
             {{- omit .Values.app.migration.waitForItContainer.securityContext "enabled" | toYaml | nindent 12 }}
           {{- end }}
           image: {{ .Values.app.migration.waitForItContainer.image }}
-          command: ['sh', '-c', 'until pg_isready -h {{ .Values.config.database.host }} -p {{ .Values.config.database.port }} -U "$DB_USER"; do echo waiting for postgresql; sleep 2; done;']
+          # DB_HOST comes from the environment rather than being interpolated:
+          # config.database.host may be a secret reference, which has no string form.
+          command: ['sh', '-c', 'until pg_isready -h "$DB_HOST" -p {{ .Values.config.database.port }} -U "$DB_USER"; do echo waiting for postgresql; sleep 2; done;']
           env:
+            - name: DB_HOST
+              {{- if kindIs "map" .Values.config.database.host }}
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.config.database.host.secretName | quote }}
+                  key: {{ .Values.config.database.host.secretKey | quote }}
+              {{- else }}
+              value: {{ .Values.config.database.host | quote }}
+              {{- end }}
             - name: DB_USER
               {{- if kindIs "map" .Values.config.database.username }}
               valueFrom:
@@ -69,7 +80,7 @@ spec:
         image: {{ include "studio.migration.image" . }}
         imagePullPolicy: {{ .Values.app.migration.image.pullPolicy }}
         env:
-          {{- include "studio.app.env" . | nindent 10 }}
+          {{- include "studio.database.env" . | nindent 10 }}
           - name: STUDIO_ROLE
             value: "migration"
           - name: DB_SSL

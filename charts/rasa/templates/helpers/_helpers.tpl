@@ -194,29 +194,29 @@ here also warns, and the warning is strictly the wider set.
 {{/*
 Refuse an install that would run Rasa Pro without a licence.
 
-overrideEnv replaces the generated environment wholesale, and the generated
-block is the only thing carrying RASA_LICENSE. Setting overrideEnv to add one
-variable therefore dropped the licence silently: the install succeeded and the
-container started unlicensed. Only overrideEnv is checked -- extraEnv is
-additive, so it cannot remove the generated entry.
+overrideEnv replaces the generated environment, which is the only thing
+carrying the licence, so adding one variable used to drop it silently.
+Matches either env name rasa accepts: RASA_LICENSE, or the legacy
+RASA_PRO_LICENSE. The Secret key behind it (rasa.license.secretKey) is
+arbitrary and not inspected. extraEnv is additive, so it is not checked.
 */}}
 {{- define "rasa.validateLicense" -}}
 {{- if .Values.overrideEnv -}}
 {{- $declared := false -}}
 {{- range .Values.overrideEnv -}}
-{{-   if eq .name "RASA_LICENSE" -}}
+{{-   if or (eq .name "RASA_LICENSE") (eq .name "RASA_PRO_LICENSE") -}}
 {{-     $declared = true -}}
 {{-   end -}}
 {{- end -}}
 {{- if not $declared -}}
-{{- fail "overrideEnv is set but declares no RASA_LICENSE entry, and overrideEnv replaces the generated environment wholesale - so the licence the chart would have passed from rasa.license is discarded and Rasa Pro starts unlicensed. Add a RASA_LICENSE entry to overrideEnv (copy the generated one: valueFrom.secretKeyRef from rasa.license.secretName / rasa.license.secretKey), or use extraEnv instead, which adds to the generated environment rather than replacing it." -}}
+{{- fail "overrideEnv replaces the generated environment, so rasa.license is discarded and Rasa Pro starts unlicensed. Add a RASA_LICENSE entry to overrideEnv, or use extraEnv, which adds instead of replacing." -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}
 
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiUnauthenticated" .) (include "rasa.apiRouted" .) -}}
-{{- fail "rasa.enableApi is true, no API credential reaches the container, and this release routes traffic to it - ingress.enabled is true, service.type is not ClusterIP, or hostNetwork is true. That would put an unauthenticated Rasa HTTP API, including its model-management endpoints, on the network. Supply a credential with rasa.authToken or rasa.jwtSecret (note that overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in overrideEnv or extraEnv, or through envFrom. Alternatively set rasa.enableApi=false, stop routing to it, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
+{{- fail "This release routes traffic to an unauthenticated Rasa HTTP API, model-management endpoints included, because rasa.enableApi is true and no credential reaches the container. Set rasa.authToken or rasa.jwtSecret (overrideEnv discards both, since it replaces the generated environment), or add AUTH_TOKEN / JWT_SECRET via overrideEnv, extraEnv or envFrom. Otherwise set rasa.enableApi=false, stop routing to it (ingress.enabled, a non-ClusterIP service.type, hostNetwork), or set rasa.allowUnauthenticatedApi=true if something in front already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 

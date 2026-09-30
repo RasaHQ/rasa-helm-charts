@@ -163,6 +163,15 @@ app:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 
+  # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
+  # repositories. Takes three secret references (`appId`, `installationId`,
+  # `privateKey`), each a `secretName` + `secretKey` pair, so the values may live in
+  # one Secret or in three different ones. All three must be set together — a partial
+  # block is rejected by values.schema.json at install/upgrade time. Leave the block
+  # empty (the default) if you do not use GitHub integration. See the "GitHub App
+  # Integration" section of the README for a worked example.
+  github: {}
+
   # -- Extra environment variables for the Studio App container,
   # in native Kubernetes EnvVar format (name + value or valueFrom).
   # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not

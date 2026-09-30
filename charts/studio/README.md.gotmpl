@@ -340,6 +340,55 @@ app:
       value: "600000"
 ```
 
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and
+provide its credentials as backend environment variables. All three values must
+be set together. Leave these unset if you do not use GitHub integration.
+
+Add the keys to your `studio-secrets` Secret (or any Secret you prefer), then
+point `app.github` at them:
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_ID"
+    installationId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_PRIVATE_KEY"
+```
+
+The chart renders these as the `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and
+`GITHUB_APP_PRIVATE_KEY` environment variables on the Studio App container only
+— the migration Job and the event-ingestion deployment never receive them.
+
+Each entry is an independent secret reference, so the three values may live in
+one Secret or in three different ones. This is useful when only the private key
+is synced from an external secret store:
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-github-app"
+      secretKey: "APP_ID"
+    installationId:
+      secretName: "studio-github-app"
+      secretKey: "INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-github-app-key"  # e.g. synced by External Secrets
+      secretKey: "PRIVATE_KEY"
+```
+
+> **Note:** `values.schema.json` enforces all-or-none. Setting only some of the
+> three fails `helm install`/`helm upgrade` with
+> `properties 'installationId', 'privateKey' required, if 'appId' exists`.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:

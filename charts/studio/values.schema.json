@@ -312,6 +312,30 @@
           "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
         },
+        "github": {
+          "description": "Optional GitHub App credentials letting Studio connect projects to GitHub repositories. All three keys must be set together, or the block left empty.",
+          "type": "object",
+          "properties": {
+            "appId": {
+              "description": "GitHub App ID — secret reference",
+              "$ref": "#/definitions/secretRef"
+            },
+            "installationId": {
+              "description": "GitHub App installation ID — secret reference",
+              "$ref": "#/definitions/secretRef"
+            },
+            "privateKey": {
+              "description": "GitHub App private key (PEM) — secret reference",
+              "$ref": "#/definitions/secretRef"
+            }
+          },
+          "additionalProperties": false,
+          "dependencies": {
+            "appId": ["installationId", "privateKey"],
+            "installationId": ["appId", "privateKey"],
+            "privateKey": ["appId", "installationId"]
+          }
+        },
         "env": {
           "description": "Extra environment variables for the Studio App container (native EnvVar list)",
           "type": "array",

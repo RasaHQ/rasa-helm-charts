@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.40](https://img.shields.io/badge/Version-3.0.0--rc.40-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.41](https://img.shields.io/badge/Version-3.0.0--rc.41-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -67,7 +67,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.41
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -82,7 +82,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.40
+$ helm install my-release rasa/studio --version 3.0.0-rc.41
 ```
 
 ## Quick Start
@@ -135,13 +135,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.40
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.41
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.40
+$ helm pull rasa/studio --version 3.0.0-rc.41
 ```
 
 ## General Configuration
@@ -339,6 +339,55 @@ app:
       value: "600000"
 ```
 
+## GitHub App Integration (optional)
+
+To let Studio connect projects to GitHub repositories, create a GitHub App and
+provide its credentials as backend environment variables. All three values must
+be set together. Leave these unset if you do not use GitHub integration.
+
+Add the keys to your `studio-secrets` Secret (or any Secret you prefer), then
+point `app.github` at them:
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_ID"
+    installationId:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-secrets"
+      secretKey: "GITHUB_APP_PRIVATE_KEY"
+```
+
+The chart renders these as the `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and
+`GITHUB_APP_PRIVATE_KEY` environment variables on the Studio App container only
+— the migration Job and the event-ingestion deployment never receive them.
+
+Each entry is an independent secret reference, so the three values may live in
+one Secret or in three different ones. This is useful when only the private key
+is synced from an external secret store:
+
+```yaml
+app:
+  github:
+    appId:
+      secretName: "studio-github-app"
+      secretKey: "APP_ID"
+    installationId:
+      secretName: "studio-github-app"
+      secretKey: "INSTALLATION_ID"
+    privateKey:
+      secretName: "studio-github-app-key"  # e.g. synced by External Secrets
+      secretKey: "PRIVATE_KEY"
+```
+
+> **Note:** `values.schema.json` enforces all-or-none. Setting only some of the
+> three fails `helm install`/`helm upgrade` with
+> `properties 'installationId', 'privateKey' required, if 'appId' exists`.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
@@ -535,6 +584,7 @@ changes need work outside your values file.
 | app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
+| app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Takes three secret references (`appId`, `installationId`, `privateKey`), each a `secretName` + `secretKey` pair, so the values may live in one Secret or in three different ones. All three must be set together — a partial block is rejected by values.schema.json at install/upgrade time. Leave the block empty (the default) if you do not use GitHub integration. See the "GitHub App Integration" section of the README for a worked example. | `{}` |
 | app.image | object | Container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | Unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | Container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |

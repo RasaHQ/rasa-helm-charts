@@ -72,3 +72,31 @@ Studio App Database Environment Variables
 {{- end }}
 {{- end }}
 {{- end -}}
+
+
+{{/*
+Studio App GitHub App Environment Variables
+
+Optional integration; the caller guards on a non-empty `app.github`, and
+values.schema.json enforces all-or-none, so every key is present here.
+App-only on purpose: the migration Job and the standalone event-ingestion
+deployment never read these, so they are not included there.
+Takes the `app.github` map as its context, not the root.
+*/}}
+{{- define "studio.app.github.env" -}}
+- name: GITHUB_APP_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .appId.secretName | quote }}
+      key: {{ .appId.secretKey | quote }}
+- name: GITHUB_APP_INSTALLATION_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .installationId.secretName | quote }}
+      key: {{ .installationId.secretKey | quote }}
+- name: GITHUB_APP_PRIVATE_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .privateKey.secretName | quote }}
+      key: {{ .privateKey.secretKey | quote }}
+{{- end -}}

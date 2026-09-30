@@ -83,6 +83,9 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.authSecret.secretName | quote }}
                   key: {{ .Values.app.authSecret.secretKey | quote }}
+            {{- with .Values.app.github }}
+            {{- include "studio.app.github.env" . | nindent 12 }}
+            {{- end }}
             - name: BETTER_AUTH_BASE_URL
               value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
             - name: STUDIO_ROLE

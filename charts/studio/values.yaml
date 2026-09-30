@@ -163,31 +163,23 @@ app:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 
-  # -- Initial admin user for a fresh install. A new Studio install has no users,
-  # and every account after the first is created by invitation from an existing
-  # admin, so the first admin has to come from here. The backend creates it on
-  # startup if it does not already exist, and ignores these values once it does.
-  # See the "Initial Admin User" section of the README.
+  # -- Initial admin user. A fresh install has no users and every later account is
+  # invited by an admin, so the first one comes from here. Created by the backend
+  # on startup, ignored once it exists.
   initialAdmin:
-    # -- Email address of the initial admin user. The only value you need to set
-    # on a fresh install. Leave it empty to skip initial-admin creation, which is
-    # correct when upgrading an install that already has an admin.
+    # -- Email of the initial admin. The only value a fresh install needs.
+    # Empty (default) skips creation — correct when an admin already exists.
     email: ""
-    # -- Secret holding the initial admin's bootstrap password. Read only when
-    # `email` is set. The initial admin is required to choose a new password on
-    # first login, so treat this as a throwaway value and rotate or remove the
-    # key afterwards.
+    # -- Secret holding the bootstrap password. Read only when `email` is set.
+    # The admin must choose a new password on first login.
     password:
       secretName: "studio-secrets"
       secretKey: "INITIAL_ADMIN_PASSWORD"
 
   # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
-  # repositories. Takes three secret references (`appId`, `installationId`,
-  # `privateKey`), each a `secretName` + `secretKey` pair, so the values may live in
-  # one Secret or in three different ones. All three must be set together — a partial
-  # block is rejected by values.schema.json at install/upgrade time. Leave the block
-  # empty (the default) if you do not use GitHub integration. See the "GitHub App
-  # Integration" section of the README for a worked example.
+  # repositories. Three secret references — `appId`, `installationId`, `privateKey`
+  # — each a `secretName` + `secretKey` pair, so they may live in one Secret or
+  # three. All three or none; a partial block is rejected by the schema.
   github: {}
 
   # -- Extra environment variables for the Studio App container,

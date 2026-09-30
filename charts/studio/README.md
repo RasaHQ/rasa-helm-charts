@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.43](https://img.shields.io/badge/Version-3.0.0--rc.43-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.44](https://img.shields.io/badge/Version-3.0.0--rc.44-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -57,7 +57,7 @@ $ kubectl create secret generic studio-secrets \
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
 
-> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a **fresh** install, together with `app.initialAdmin.email`. See ["Initial Admin User"](#initial-admin-user).
+> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a fresh install — see ["Initial Admin User"](#initial-admin-user).
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.43
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.44
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.43
+$ helm install my-release rasa/studio --version 3.0.0-rc.44
 ```
 
 ## Quick Start
@@ -103,8 +103,7 @@ config:
     username: "studio"
     databaseName: "studio"
 
-# The first account on a fresh install. Without it nobody can log in.
-# The password defaults to the INITIAL_ADMIN_PASSWORD key of studio-secrets.
+# First account on a fresh install — without it nobody can log in.
 app:
   initialAdmin:
     email: "admin@example.com"
@@ -144,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.43
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.44
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.43
+$ helm pull rasa/studio --version 3.0.0-rc.44
 ```
 
 ## General Configuration
@@ -350,9 +349,8 @@ app:
 
 ## Initial Admin User
 
-A fresh Studio install has no users, and every account after the first is created
-by invitation from an existing admin — so the first admin has to come from the
-chart. Set an email address and the backend creates that account on startup:
+A fresh install has no users, and every later account is invited by an admin — so
+the first admin comes from the chart:
 
 ```yaml
 app:
@@ -360,50 +358,28 @@ app:
     email: "admin@example.com"
 ```
 
-That is the only value you need. The password comes from the `INITIAL_ADMIN_PASSWORD`
-key of `studio-secrets` by default — add that key to your Secret (see
-["Create the `studio-secrets` Secret"](#2-create-the-studio-secrets-secret)). Point it
-somewhere else if you keep the password in a different Secret:
+That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
+key of `studio-secrets`; add it when you
+[create the Secret](#2-create-the-studio-secrets-secret). Override
+`app.initialAdmin.password` to read from a different Secret.
 
-```yaml
-app:
-  initialAdmin:
-    email: "admin@example.com"
-    password:
-      secretName: "studio-bootstrap"
-      secretKey: "ADMIN_PASSWORD"
-```
+Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
+container only.
 
-The chart renders the pair as `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on
-the Studio App container only.
-
-**The password is a bootstrap credential, not a permanent one.** The initial admin
-is required to choose a new password on first login. Use a throwaway value, and
-rotate the Secret key or remove it after the first login.
-
-Behaviour worth knowing:
-
-- The account is created **only if it does not already exist**. Both values are
-  ignored on every later startup, so they are inert on upgrades of an install that
-  already has an admin.
-- The initial admin is marked as such in the database, so changing its email later
-  does not cause a second admin to be created on the next restart.
-- `email` is the switch. Leaving it empty — the default — renders neither variable,
-  so the `INITIAL_ADMIN_PASSWORD` Secret key does not need to exist. This is the
-  right setting when upgrading an install that already has an admin; it also means
-  a fresh install that forgets to set `email` comes up with no way to log in.
-- An email address that does not contain an `@` is rejected at install time, so a
-  username typed in place of an address fails fast instead of creating an
-  unreachable admin account.
+- **The password is a bootstrap value.** The admin must choose a new one on first
+  login; rotate or remove the Secret key afterwards.
+- **`email` is the switch.** Empty (the default) renders neither variable, so the
+  Secret key need not exist. Leave it empty on an install that already has an
+  admin; set it on a fresh one, or nobody can log in.
+- The account is created only if absent, and is marked in the database, so changing
+  its email later does not spawn a second one.
+- An email without an `@` is rejected at install time.
 
 ## GitHub App Integration (optional)
 
 To let Studio connect projects to GitHub repositories, create a GitHub App and
-provide its credentials as backend environment variables. All three values must
-be set together. Leave these unset if you do not use GitHub integration.
-
-Add the keys to your `studio-secrets` Secret (or any Secret you prefer), then
-point `app.github` at them:
+provide its credentials. All three values must be set together. Leave them unset
+if you do not use GitHub integration.
 
 ```yaml
 app:
@@ -419,31 +395,13 @@ app:
       secretKey: "GITHUB_APP_PRIVATE_KEY"
 ```
 
-The chart renders these as the `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and
-`GITHUB_APP_PRIVATE_KEY` environment variables on the Studio App container only
-— the migration Job and the event-ingestion deployment never receive them.
+Add the matching keys to `studio-secrets`. Each entry is an independent secret
+reference, so the values may live in one Secret or three — useful when only the
+private key is synced from an external secret store.
 
-Each entry is an independent secret reference, so the three values may live in
-one Secret or in three different ones. This is useful when only the private key
-is synced from an external secret store:
-
-```yaml
-app:
-  github:
-    appId:
-      secretName: "studio-github-app"
-      secretKey: "APP_ID"
-    installationId:
-      secretName: "studio-github-app"
-      secretKey: "INSTALLATION_ID"
-    privateKey:
-      secretName: "studio-github-app-key"  # e.g. synced by External Secrets
-      secretKey: "PRIVATE_KEY"
-```
-
-> **Note:** `values.schema.json` enforces all-or-none. Setting only some of the
-> three fails `helm install`/`helm upgrade` with
-> `properties 'installationId', 'privateKey' required, if 'appId' exists`.
+Renders `GITHUB_APP_ID`, `GITHUB_APP_INSTALLATION_ID` and `GITHUB_APP_PRIVATE_KEY`
+on the Studio App container only. Setting some but not all three fails
+`helm install`/`helm upgrade`.
 
 ## URL Scheme (`connectionType`)
 
@@ -641,7 +599,7 @@ changes need work outside your values file.
 | app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
-| app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Takes three secret references (`appId`, `installationId`, `privateKey`), each a `secretName` + `secretKey` pair, so the values may live in one Secret or in three different ones. All three must be set together — a partial block is rejected by values.schema.json at install/upgrade time. Leave the block empty (the default) if you do not use GitHub integration. See the "GitHub App Integration" section of the README for a worked example. | `{}` |
+| app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |
 | app.image | object | Container image settings for the app service. This section defines the container image settings for the app service. Ref: https://kubernetes.io/docs/concepts/containers/images/ | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | app.image.name | string | Unified Studio container image (API + web client + optional co-located ingestion). Chart 3.0.0 requires this image (Studio ≥ 2.0.0). Formerly studio-backend. | `"studio"` |
 | app.image.pullPolicy | string | Container image pull policy. Valid values: Always, IfNotPresent, Never Always: Always pull the image IfNotPresent: Only pull if not present locally Never: Never pull the image Ref: https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy | `"IfNotPresent"` |
@@ -651,9 +609,9 @@ changes need work outside your values file.
 | app.ingress.extraAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.ingress.labels | object | Labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | app.ingress.tls | list | TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
-| app.initialAdmin | object | Initial admin user for a fresh install. A new Studio install has no users, and every account after the first is created by invitation from an existing admin, so the first admin has to come from here. The backend creates it on startup if it does not already exist, and ignores these values once it does. See the "Initial Admin User" section of the README. | `{"email":"","password":{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}}` |
-| app.initialAdmin.email | string | Email address of the initial admin user. The only value you need to set on a fresh install. Leave it empty to skip initial-admin creation, which is correct when upgrading an install that already has an admin. | `""` |
-| app.initialAdmin.password | object | Secret holding the initial admin's bootstrap password. Read only when `email` is set. The initial admin is required to choose a new password on first login, so treat this as a throwaway value and rotate or remove the key afterwards. | `{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
+| app.initialAdmin | object | Initial admin user. A fresh install has no users and every later account is invited by an admin, so the first one comes from here. Created by the backend on startup, ignored once it exists. | `{"email":"","password":{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}}` |
+| app.initialAdmin.email | string | Email of the initial admin. The only value a fresh install needs. Empty (default) skips creation — correct when an admin already exists. | `""` |
+| app.initialAdmin.password | object | Secret holding the bootstrap password. Read only when `email` is set. The admin must choose a new password on first login. | `{"secretKey":"INITIAL_ADMIN_PASSWORD","secretName":"studio-secrets"}` |
 | app.livenessProbe | object | Liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
 | app.livenessProbe.enabled | bool | Whether to enable the liveness probe. | `true` |
 | app.livenessProbe.failureThreshold | int | Number of failures before the container is considered unhealthy. | `6` |

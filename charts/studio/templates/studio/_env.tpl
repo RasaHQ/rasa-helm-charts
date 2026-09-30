@@ -77,12 +77,10 @@ Studio App Database Environment Variables
 {{/*
 Studio App Initial Admin Environment Variables
 
-`app.initialAdmin.email` is the switch: the caller renders this only when it is
-non-empty, so an install that already has an admin emits neither variable and
-never needs the password Secret key to exist.
-App-only on purpose: the backend creates the account on startup, so the
-migration Job and the standalone event-ingestion deployment never read these.
-Takes the `app.initialAdmin` map as its context, not the root.
+Rendered only when `app.initialAdmin.email` is non-empty, so an install that
+already has an admin never needs the password Secret key to exist.
+App-only: the backend creates the account on startup.
+Context is the `app.initialAdmin` map, not the root.
 */}}
 {{- define "studio.app.initialAdmin.env" -}}
 - name: INITIAL_ADMIN_EMAIL
@@ -98,11 +96,10 @@ Takes the `app.initialAdmin` map as its context, not the root.
 {{/*
 Studio App GitHub App Environment Variables
 
-Optional integration; the caller guards on a non-empty `app.github`, and
-values.schema.json enforces all-or-none, so every key is present here.
-App-only on purpose: the migration Job and the standalone event-ingestion
-deployment never read these, so they are not included there.
-Takes the `app.github` map as its context, not the root.
+Caller guards on a non-empty `app.github`; the schema enforces all-or-none, so
+every key is present here.
+App-only: the migration Job and event-ingestion deployment never read these.
+Context is the `app.github` map, not the root.
 */}}
 {{- define "studio.app.github.env" -}}
 - name: GITHUB_APP_ID

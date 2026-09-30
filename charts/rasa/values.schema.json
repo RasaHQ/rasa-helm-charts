@@ -205,6 +205,19 @@
                 "enabled": { "type": "boolean" }
               }
             }
+          },
+          "if": {
+            "properties": { "create": { "const": true } },
+            "required": ["create"]
+          },
+          "then": {
+            "properties": {
+              "storageClassName": {
+                "description": "Required when persistence.create is true. Leaving it unset makes the PersistentVolumeClaim inherit the cluster default StorageClass at admission, which server-side apply then reports as an immutable-field conflict on every later upgrade. Use \"\" to bind a classless PersistentVolume, such as the one hostPath creates.",
+                "type": "string"
+              }
+            },
+            "required": ["storageClassName"]
           }
         },
     "podDisruptionBudget": {

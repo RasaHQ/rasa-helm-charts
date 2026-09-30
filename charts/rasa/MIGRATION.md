@@ -45,6 +45,37 @@ The licence now reaches the container as `RASA_LICENSE`; `RASA_PRO_LICENSE` is d
 
 A ClusterIP Service is not a security boundary, and a route added outside this chart is invisible to it — the refusal covers what the chart can prove it is doing, the warning covers the rest. Satisfy it with `rasa.authToken`, `rasa.jwtSecret`, or an `AUTH_TOKEN`/`JWT_SECRET` entry via the root-level `overrideEnv`, `extraEnv` or `envFrom`.
 
+### 4. `persistence.storageClassName` is required when `persistence.create` is true
+
+Previously this could be left unset, and the PersistentVolumeClaim silently inherited whatever StorageClass the cluster defaults to. The schema now rejects an unset value:
+
+```
+rasa:
+- at '/persistence': missing property 'storageClassName'
+```
+
+Two reasons. On a cluster with no default StorageClass the claim stayed `Pending` forever with nothing pointing at the cause. And on a cluster that has one, the `DefaultStorageClass` admission plugin rewrote the field at install; every later upgrade under Helm 4 then sent the original null back through server-side apply, which reads a null as *remove this field* and rejects it:
+
+```
+PersistentVolumeClaim "rasa-pro-data-pvc-<namespace>" is invalid:
+spec: Forbidden: spec is immutable after creation
+```
+
+**If you already have a claim from an earlier install**, set the value to the class it is already bound to — the same edit fixes the upgrade:
+
+```console
+$ kubectl get pvc rasa-pro-data-pvc-<namespace> -n <namespace> \
+    -o jsonpath='{.spec.storageClassName}'
+```
+
+```yaml
+persistence:
+  create: true
+  storageClassName: gp3   # whatever the command above printed
+```
+
+Set it to `""` to bind a classless PersistentVolume instead — that is what you want alongside `persistence.hostPath.enabled: true`, which creates exactly such a volume. `""` is an explicit empty string, not the same as leaving the key unset, and admission leaves it alone.
+
 ### Deployment settings moved to the chart root
 
 `rasa.*` now holds **only Rasa's own configuration** — `port`, `enableApi`, `cors`, `authToken`, `jwtSecret`, `license`, `endpoints`, `integrations`, `telemetry`, `logging`, `environment`, `debugMode`, `mountDefaultConfigmap`. Everything that describes the Kubernetes workload moved to the root.

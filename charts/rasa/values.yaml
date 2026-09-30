@@ -365,6 +365,10 @@ autoscaling:
 # -- PersistentVolumeClaim for model data at /app/working-data.
 persistence:
   create: false
+  # Required when `create` is true — the schema rejects an unset value. Naming the
+  # class explicitly keeps server-side apply from fighting the one the cluster
+  # picks at admission, which breaks every later `helm upgrade`. Use "" to bind a
+  # classless PersistentVolume, such as the one `hostPath` creates.
   storageClassName:
   storageRequests: 1Gi
   storageCapacity: 1Gi

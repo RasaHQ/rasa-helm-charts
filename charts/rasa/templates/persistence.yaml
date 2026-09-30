@@ -13,7 +13,7 @@ spec:
   accessModes:
   - ReadWriteOnce
   persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
   hostPath:
     path: {{ .Values.persistence.hostPath.path | default "/mnt/data" }}
     type: {{ .Values.persistence.hostPath.type | default "DirectoryOrCreate" }}
@@ -37,5 +37,5 @@ spec:
   resources:
     requests:
       storage: {{ .Values.persistence.storageRequests }}
-  storageClassName: {{ .Values.persistence.storageClassName }}
+  storageClassName: {{ .Values.persistence.storageClassName | quote }}
 {{- end }}

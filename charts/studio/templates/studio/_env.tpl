@@ -44,7 +44,14 @@ Studio App Database Environment Variables
       key: {{ .password.secretKey | quote }}
 {{- end }}
 - name: DB_HOST
+  {{- if kindIs "map" .host }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .host.secretName | quote }}
+      key: {{ .host.secretKey | quote }}
+  {{- else }}
   value: {{ .host | quote }}
+  {{- end }}
 - name: DB_PORT
   value: {{ .port | quote }}
 - name: DB_NAME

@@ -218,6 +218,15 @@ config:
 
 Database credentials can be provided as plain values or secret references:
 
+**Host from secret:**
+```yaml
+config:
+  database:
+    host:
+      secretName: "my-db-secret"
+      secretKey: "DB_HOST"
+```
+
 **Username from secret:**
 ```yaml
 config:

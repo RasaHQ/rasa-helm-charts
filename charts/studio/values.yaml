@@ -56,7 +56,12 @@ config:
   database:
     # -- (string) The database host name or IP address where PostgreSQL is running.
     # No default: you must set this. An unset or empty value is rejected by the
-    # schema at install time. Example: "postgres.example.com" or "10.0.0.1"
+    # schema at install time. Can be a plain string or a secret reference.
+    # Plain value example: host: "postgres.example.com"
+    # Secret reference example:
+    # host:
+    #   secretName: "my-secret"
+    #   secretKey: "DB_HOST"
     host:
     # -- The database port number for PostgreSQL.
     # Default PostgreSQL port is 5432

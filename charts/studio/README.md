@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.45](https://img.shields.io/badge/Version-3.0.0--rc.45-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.46](https://img.shields.io/badge/Version-3.0.0--rc.46-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.45
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.46
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.45
+$ helm install my-release rasa/studio --version 3.0.0-rc.46
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.45
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.46
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.45
+$ helm pull rasa/studio --version 3.0.0-rc.46
 ```
 
 ## General Configuration
@@ -217,6 +217,15 @@ config:
 ### Using Secrets for Sensitive Values
 
 Database credentials can be provided as plain values or secret references:
+
+**Host from secret:**
+```yaml
+config:
+  database:
+    host:
+      secretName: "my-db-secret"
+      secretKey: "DB_HOST"
+```
 
 **Username from secret:**
 ```yaml
@@ -704,7 +713,7 @@ changes need work outside your values file.
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":null,"iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
 | config.database.awsRegion | string | The AWS region for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.databaseName | string | The database name for Studio app services. This is used by Studio to store its data. Can be specified as a plain string value or as a secret reference. Plain value example: databaseName: "studio" Secret reference example: databaseName:   secretName: "my-secret"   secretKey: "DB_NAME" | `"studio"` |
-| config.database.host | string | The database host name or IP address where PostgreSQL is running. No default: you must set this. An unset or empty value is rejected by the schema at install time. Example: "postgres.example.com" or "10.0.0.1" | `nil` |
+| config.database.host | string | The database host name or IP address where PostgreSQL is running. No default: you must set this. An unset or empty value is rejected by the schema at install time. Can be a plain string or a secret reference. Plain value example: host: "postgres.example.com" Secret reference example: host:   secretName: "my-secret"   secretKey: "DB_HOST" | `nil` |
 | config.database.iamDbUsername | string | The IAM database username for the database. Needed if you want to use AWS IAM authentication for the database. | `""` |
 | config.database.password | object | The database password configuration. This references a Kubernetes secret containing the database password. | `{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"}` |
 | config.database.port | string | The database port number for PostgreSQL. Default PostgreSQL port is 5432 | `"5432"` |

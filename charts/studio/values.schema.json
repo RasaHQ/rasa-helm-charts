@@ -239,9 +239,16 @@
           "required": ["host"],
           "properties": {
             "host": {
-              "description": "Database host name or IP address",
-              "type": "string",
-              "minLength": 1
+              "description": "Database host name or IP address \u2014 plain string or secret reference. Required; the chart ships no default.",
+              "oneOf": [
+                {
+                  "type": "string",
+                  "minLength": 1
+                },
+                {
+                  "$ref": "#/definitions/secretRef"
+                }
+              ]
             },
             "port": {
               "description": "Database port (default: 5432)",

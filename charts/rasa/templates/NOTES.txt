@@ -94,6 +94,6 @@ documentation that they are running something unofficial.
    The image USER must be a NUMERIC non-root uid (the stock image is 1001), or
    the pod fails with CreateContainerConfigError. Check it:
      docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
-   Opt out with --set rasa.containerSecurityContext.runAsNonRoot=false (the pod
+   Opt out with --set containerSecurityContext.runAsNonRoot=false (the pod
    then fails the restricted Pod Security Standard).
 {{- end }}

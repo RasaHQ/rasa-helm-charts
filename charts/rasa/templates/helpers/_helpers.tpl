@@ -191,9 +191,32 @@ Composed from the two predicates above rather than repeating their conditions,
 so the NOTES warning and this refusal cannot drift apart: anything that fails
 here also warns, and the warning is strictly the wider set.
 */}}
+{{/*
+Refuse an install that would run Rasa Pro without a licence.
+
+overrideEnv replaces the generated environment, which is the only thing
+carrying the licence, so adding one variable used to drop it silently.
+Matches either env name rasa accepts: RASA_LICENSE, or the legacy
+RASA_PRO_LICENSE. The Secret key behind it (rasa.license.secretKey) is
+arbitrary and not inspected. extraEnv is additive, so it is not checked.
+*/}}
+{{- define "rasa.validateLicense" -}}
+{{- if .Values.overrideEnv -}}
+{{- $declared := false -}}
+{{- range .Values.overrideEnv -}}
+{{-   if or (eq .name "RASA_LICENSE") (eq .name "RASA_PRO_LICENSE") -}}
+{{-     $declared = true -}}
+{{-   end -}}
+{{- end -}}
+{{- if not $declared -}}
+{{- fail "overrideEnv replaces the generated environment, so rasa.license is discarded and Rasa Pro starts unlicensed. Add a RASA_LICENSE entry to overrideEnv, or use extraEnv, which adds instead of replacing." -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
 {{- define "rasa.validateApiExposure" -}}
 {{- if and (include "rasa.apiUnauthenticated" .) (include "rasa.apiRouted" .) -}}
-{{- fail "rasa.enableApi is true, no API credential reaches the container, and this release routes traffic to it - rasa.ingress.enabled is true, rasa.service.type is not ClusterIP, or hostNetwork is true. That would put an unauthenticated Rasa HTTP API, including its model-management endpoints, on the network. Supply a credential with rasa.authToken or rasa.jwtSecret (note that rasa.overrideEnv discards those, since it replaces the generated environment), or as an AUTH_TOKEN / JWT_SECRET entry in rasa.overrideEnv or rasa.extraEnv, or through rasa.envFrom. Alternatively set rasa.enableApi=false, stop routing to it, or acknowledge the risk with rasa.allowUnauthenticatedApi=true when something in front of the chart already authenticates callers." -}}
+{{- fail "This release routes traffic to an unauthenticated Rasa HTTP API, model-management endpoints included, because rasa.enableApi is true and no credential reaches the container. Set rasa.authToken or rasa.jwtSecret (overrideEnv discards both, since it replaces the generated environment), or add AUTH_TOKEN / JWT_SECRET via overrideEnv, extraEnv or envFrom. Otherwise set rasa.enableApi=false, stop routing to it (ingress.enabled, a non-ClusterIP service.type, hostNetwork), or set rasa.allowUnauthenticatedApi=true if something in front already authenticates callers." -}}
 {{- end -}}
 {{- end -}}
 
@@ -260,7 +283,7 @@ the operator sees "hosts is empty" while looking at a block describing hosts.
 {{- if $raw -}}
 {{- $why = printf " These keys are not chart values, so they were ignored: %s. Use ingress.className rather than ingressClassName; the chart builds the rest of the spec itself." (join ", " $raw) -}}
 {{- end -}}
-{{- fail (printf "rasa.ingress.enabled is true but rasa.ingress.hosts is empty, so the ingress would route nothing.%s\n\n  hosts:\n    - host: my.example.com\n      paths:                       # backend is this release's Service\n        - {path: /, pathType: Prefix}\n      extraPaths:                  # backend is whatever you name\n        - {path: /other, pathType: Prefix, serviceName: other-svc, servicePort: 8080}\n\nOr set rasa.ingress.enabled=false and route to the Service yourself." $why) -}}
+{{- fail (printf "ingress.enabled is true but ingress.hosts is empty, so the ingress would route nothing.%s\n\n  hosts:\n    - host: my.example.com\n      paths:                       # backend is this release's Service\n        - {path: /, pathType: Prefix}\n      extraPaths:                  # backend is whatever you name\n        - {path: /other, pathType: Prefix, serviceName: other-svc, servicePort: 8080}\n\nOr set ingress.enabled=false and route to the Service yourself." $why) -}}
 {{- end -}}
 {{- end -}}
 

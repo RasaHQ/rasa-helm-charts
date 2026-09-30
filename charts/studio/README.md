@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.50](https://img.shields.io/badge/Version-3.0.0--rc.50-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.51](https://img.shields.io/badge/Version-3.0.0--rc.51-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.50
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.51
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.50
+$ helm install my-release rasa/studio --version 3.0.0-rc.51
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.50
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.51
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.50
+$ helm pull rasa/studio --version 3.0.0-rc.51
 ```
 
 ## General Configuration
@@ -318,20 +318,33 @@ The following environment variables can be configured on the Rasa Pro model serv
 | `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
 | `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded (e.g. `aws`, `gcs`, `azure`). Leave unset to disable remote storage. | `None` |
 
-Example:
+`rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence and `OPENAI_API_KEY` into the model service — so re-declare both alongside your additions. Omitting them is refused at install time.
 
 ```yaml
 rasa:
   enabled: true
-  rasa:
-    overrideEnv:
-      - name: MAX_PARALLEL_TRAININGS
-        value: "5"
-      - name: MAX_PARALLEL_BOT_RUNS
-        value: "20"
-      - name: RASA_REMOTE_STORAGE
-        value: "aws"
+  overrideEnv:
+    # Chart defaults — keep these, or the model service starts with no licence.
+    - name: RASA_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: RASA_PRO_LICENSE_SECRET_KEY
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: OPENAI_API_KEY_SECRET_KEY
+    # Your additions:
+    - name: MAX_PARALLEL_TRAININGS
+      value: "5"
+    - name: MAX_PARALLEL_BOT_RUNS
+      value: "20"
+    - name: RASA_REMOTE_STORAGE
+      value: "aws"
 ```
+
+> **Note:** `rasa.extraEnv` does not work here. The subchart reads `extraEnv` only when `overrideEnv` is unset, and this chart sets `overrideEnv` by default. `rasa.rasa.overrideEnv` does nothing either — `overrideEnv` sits at the subchart root, so it is `rasa.overrideEnv`.
 
 ### Studio App Model Service Environment Variables
 

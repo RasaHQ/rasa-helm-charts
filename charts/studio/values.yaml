@@ -54,10 +54,10 @@ config:
   # -- The postgres database instance details for Studio to connect to.
   # This section configures the database connection parameters for Studio.
   database:
-    # -- The database host name or IP address where PostgreSQL is running.
-    # Example: "postgres.example.com" or "10.0.0.1"
-    # Placeholder value — you MUST set this; an empty value is rejected by the schema.
-    host: "DATABASE.HOST.NAME"
+    # -- (string) The database host name or IP address where PostgreSQL is running.
+    # No default: you must set this. An unset or empty value is rejected by the
+    # schema at install time. Example: "postgres.example.com" or "10.0.0.1"
+    host:
     # -- The database port number for PostgreSQL.
     # Default PostgreSQL port is 5432
     port: "5432"

@@ -186,7 +186,7 @@ values twice.
 | change | what to do |
 |---|---|
 | Event ingestion topology is explicit | Pick one `eventIngestion.mode`: `colocated` (default, consumers on the app pod), `separate` (a sibling `{release}-app-ingestion` Deployment), or `disabled`. In `separate` the app pod gets `ENABLE_EVENT_INGESTION=false` and no `KAFKA_*` variables at all, so the two can never double-consume. |
-| `config.database.host` must be a real host | The schema rejects an empty value at install time. The shipped default is the placeholder `DATABASE.HOST.NAME`. |
+| `config.database.host` must be a real host | There is no default. The schema rejects an unset or empty value at install time with `at '/config/database': missing property 'host'`. |
 | `Chart.yaml` declares `appVersion`, which drives the image tag | `tag` is empty by default and follows `appVersion`, so **a chart upgrade moves the image**. Set an exact tag to pin. |
 | Restricted Pod Security Standard by default | `seccompProfile: RuntimeDefault` is on for the app and ingestion containers, so existing installs inherit it. The chart installs into a namespace labelled `pod-security.kubernetes.io/enforce=restricted` unmodified. |
 | `automountServiceAccountToken: false` on all four pod specs | App, migration Job, separate ingestion and the test hook lose the API token. No Studio component calls the Kubernetes API; set `app.automountServiceAccountToken: true` (or the `app.migration.*` / `eventIngestion.*` equivalent) for a sidecar that does. |

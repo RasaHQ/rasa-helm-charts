@@ -49,12 +49,15 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a **fresh** install, together with `app.initialAdmin.email`. See ["Initial Admin User"](#initial-admin-user).
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -99,6 +102,14 @@ config:
     host: "postgres.example.com"
     username: "studio"
     databaseName: "studio"
+
+# The first account on a fresh install. Without it nobody can log in.
+app:
+  initialAdmin:
+    email: "admin@example.com"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
 
 # Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
@@ -339,6 +350,44 @@ app:
     - name: MODEL_INACTIVE_AFTER_MS
       value: "600000"
 ```
+
+## Initial Admin User
+
+A fresh Studio install has no users, and every account after the first is created
+by invitation from an existing admin — so the first admin has to come from the
+chart. Set `app.initialAdmin` and the backend creates that account on startup:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
+```
+
+Add the matching `INITIAL_ADMIN_PASSWORD` key to your `studio-secrets` Secret (see
+["Create the `studio-secrets` Secret"](#2-create-the-studio-secrets-secret)). The
+chart renders the pair as `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the
+Studio App container only.
+
+**The password is a bootstrap credential, not a permanent one.** The initial admin
+is required to choose a new password on first login. Use a throwaway value, and
+rotate the Secret key or remove it after the first login.
+
+Behaviour worth knowing:
+
+- The account is created **only if it does not already exist**. Both values are
+  ignored on every later startup, so they are inert on upgrades of an install that
+  already has an admin.
+- The initial admin is marked as such in the database, so changing its email later
+  does not cause a second admin to be created on the next restart.
+- Both keys must be set together. Setting only one fails `helm install`/`helm upgrade`
+  with `at '/app/initialAdmin': properties 'password' required, if 'email' exists`.
+
+> **Note:** `app.initialAdmin` is optional so that existing installs are not forced
+> to supply a value that does nothing. On a **fresh** install it is effectively
+> required — omit it and there is no way to log in.
 
 ## GitHub App Integration (optional)
 

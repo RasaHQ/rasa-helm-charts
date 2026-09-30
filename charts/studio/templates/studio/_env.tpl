@@ -75,6 +75,26 @@ Studio App Database Environment Variables
 
 
 {{/*
+Studio App Initial Admin Environment Variables
+
+Optional; the caller guards on a non-empty `app.initialAdmin`, and
+values.schema.json enforces all-or-none, so both keys are present here.
+App-only on purpose: the backend creates the account on startup, so the
+migration Job and the standalone event-ingestion deployment never read these.
+Takes the `app.initialAdmin` map as its context, not the root.
+*/}}
+{{- define "studio.app.initialAdmin.env" -}}
+- name: INITIAL_ADMIN_EMAIL
+  value: {{ .email | quote }}
+- name: INITIAL_ADMIN_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .password.secretName | quote }}
+      key: {{ .password.secretKey | quote }}
+{{- end -}}
+
+
+{{/*
 Studio App GitHub App Environment Variables
 
 Optional integration; the caller guards on a non-empty `app.github`, and

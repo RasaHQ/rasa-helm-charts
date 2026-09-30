@@ -83,6 +83,9 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.authSecret.secretName | quote }}
                   key: {{ .Values.app.authSecret.secretKey | quote }}
+            {{- with .Values.app.initialAdmin }}
+            {{- include "studio.app.initialAdmin.env" . | nindent 12 }}
+            {{- end }}
             {{- with .Values.app.github }}
             {{- include "studio.app.github.env" . | nindent 12 }}
             {{- end }}

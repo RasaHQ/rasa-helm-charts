@@ -312,6 +312,27 @@
           "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
         },
+        "initialAdmin": {
+          "description": "Initial admin user created by the backend on first startup. Both keys must be set together, or the block left empty. Ignored once the account exists.",
+          "type": "object",
+          "properties": {
+            "email": {
+              "description": "Email address of the initial admin user",
+              "type": "string",
+              "minLength": 1,
+              "pattern": ".+@.+"
+            },
+            "password": {
+              "description": "Initial admin password \u2014 secret reference. The user must choose a new password on first login.",
+              "$ref": "#/definitions/secretRef"
+            }
+          },
+          "additionalProperties": false,
+          "dependencies": {
+            "email": ["password"],
+            "password": ["email"]
+          }
+        },
         "github": {
           "description": "Optional GitHub App credentials letting Studio connect projects to GitHub repositories. All three keys must be set together, or the block left empty.",
           "type": "object",

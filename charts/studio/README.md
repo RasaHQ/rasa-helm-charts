@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.41](https://img.shields.io/badge/Version-3.0.0--rc.41-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.42](https://img.shields.io/badge/Version-3.0.0--rc.42-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -49,12 +49,15 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
     --from-literal=KAFKA_SASL_PASSWORD="<kafka-sasl-password>"
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a **fresh** install, together with `app.initialAdmin.email`. See ["Initial Admin User"](#initial-admin-user).
 
 > **Note:** The secret name `studio-secrets` is the default referenced throughout `values.yaml`. If you use a different name, override every `secretName` field accordingly.
 
@@ -67,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.41
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.42
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -82,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.41
+$ helm install my-release rasa/studio --version 3.0.0-rc.42
 ```
 
 ## Quick Start
@@ -99,6 +102,14 @@ config:
     host: "postgres.example.com"
     username: "studio"
     databaseName: "studio"
+
+# The first account on a fresh install. Without it nobody can log in.
+app:
+  initialAdmin:
+    email: "admin@example.com"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
 
 # Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
 # See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
@@ -135,13 +146,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.41
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.42
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.41
+$ helm pull rasa/studio --version 3.0.0-rc.42
 ```
 
 ## General Configuration
@@ -338,6 +349,44 @@ app:
     - name: MODEL_INACTIVE_AFTER_MS
       value: "600000"
 ```
+
+## Initial Admin User
+
+A fresh Studio install has no users, and every account after the first is created
+by invitation from an existing admin — so the first admin has to come from the
+chart. Set `app.initialAdmin` and the backend creates that account on startup:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+    password:
+      secretName: "studio-secrets"
+      secretKey: "INITIAL_ADMIN_PASSWORD"
+```
+
+Add the matching `INITIAL_ADMIN_PASSWORD` key to your `studio-secrets` Secret (see
+["Create the `studio-secrets` Secret"](#2-create-the-studio-secrets-secret)). The
+chart renders the pair as `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the
+Studio App container only.
+
+**The password is a bootstrap credential, not a permanent one.** The initial admin
+is required to choose a new password on first login. Use a throwaway value, and
+rotate the Secret key or remove it after the first login.
+
+Behaviour worth knowing:
+
+- The account is created **only if it does not already exist**. Both values are
+  ignored on every later startup, so they are inert on upgrades of an install that
+  already has an admin.
+- The initial admin is marked as such in the database, so changing its email later
+  does not cause a second admin to be created on the next restart.
+- Both keys must be set together. Setting only one fails `helm install`/`helm upgrade`
+  with `at '/app/initialAdmin': properties 'password' required, if 'email' exists`.
+
+> **Note:** `app.initialAdmin` is optional so that existing installs are not forced
+> to supply a value that does nothing. On a **fresh** install it is effectively
+> required — omit it and there is no way to log in.
 
 ## GitHub App Integration (optional)
 
@@ -594,6 +643,7 @@ changes need work outside your values file.
 | app.ingress.extraAnnotations | object | Additional annotations for the ingress resource. Example:   kubernetes.io/ingress.class: nginx   cert-manager.io/cluster-issuer: letsencrypt-prod Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.ingress.labels | object | Labels to add to the ingress resource. Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | app.ingress.tls | list | TLS configuration for the ingress. Example: - secretName: chart-example-tls   hosts:     - chart-example.local | `[]` |
+| app.initialAdmin | object | Initial admin user, created by the backend on first startup. Set this on a fresh install — without it nobody can log in, and every other user is invited by an existing admin. `email` is a plain string, `password` is a secret reference; both must be set together, or the block left empty. Used only until the account exists: the initial admin is required to choose a new password on first login, and upgrades of an install that already has an admin can leave this empty. See the "Initial Admin User" section of the README. | `{}` |
 | app.livenessProbe | object | Liveness probe configuration. This determines if the container is alive and functioning. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
 | app.livenessProbe.enabled | bool | Whether to enable the liveness probe. | `true` |
 | app.livenessProbe.failureThreshold | int | Number of failures before the container is considered unhealthy. | `6` |

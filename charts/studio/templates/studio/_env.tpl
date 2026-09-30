@@ -23,9 +23,15 @@ stringified and quoted here. valueFrom entries pass through verbatim.
 
 
 {{/*
-Studio App Database Environment Variables
+Database Environment Variables
+
+Included by all three database clients: the app Deployment, the standalone
+event-ingestion Deployment, and the migration Job. Event ingestion is a
+first-class client with its own connection pool, not a borrower of the app's
+— which is why config.database lives under config: rather than app:.
+Keep app-only env in studio.app.*.env helpers instead.
 */}}
-{{- define "studio.app.env" -}}
+{{- define "studio.database.env" -}}
 {{- with .Values.config.database }}
 - name: DB_USER
   {{- if kindIs "map" .username }}

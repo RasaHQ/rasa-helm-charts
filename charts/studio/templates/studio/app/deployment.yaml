@@ -74,7 +74,7 @@ spec:
           resources:
             {{- toYaml .Values.app.resources | nindent 12 }}
           env:
-            {{- include "studio.app.env" . | nindent 12 }}
+            {{- include "studio.database.env" . | nindent 12 }}
             - name: WEB_CLIENT_URL
               value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
             - name: API_URL

@@ -80,7 +80,7 @@ spec:
         image: {{ include "studio.migration.image" . }}
         imagePullPolicy: {{ .Values.app.migration.image.pullPolicy }}
         env:
-          {{- include "studio.app.env" . | nindent 10 }}
+          {{- include "studio.database.env" . | nindent 10 }}
           - name: STUDIO_ROLE
             value: "migration"
           - name: DB_SSL

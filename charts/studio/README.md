@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.53](https://img.shields.io/badge/Version-3.0.0--rc.53-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.54](https://img.shields.io/badge/Version-3.0.0--rc.54-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.53
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.54
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.53
+$ helm install my-release rasa/studio --version 3.0.0-rc.54
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.53
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.54
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.53
+$ helm pull rasa/studio --version 3.0.0-rc.54
 ```
 
 ## General Configuration
@@ -755,7 +755,6 @@ changes need work outside your values file.
 | eventIngestion.image | object | Container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | Unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | Container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
-| eventIngestion.kafkaClientId | string | Kafka client.id for the ingestion consumer, in both colocated and separate modes. Rendered as KAFKA_CLIENT_ID. | `"kafka-python-rasa"` |
 | eventIngestion.mode | string | Event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
 | eventIngestion.nodeSelector | object | Which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | Annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |

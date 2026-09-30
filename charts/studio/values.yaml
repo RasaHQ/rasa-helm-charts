@@ -594,9 +594,6 @@ eventIngestion:
   # - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when
   #   colocated, and to the sibling Deployment when separate.
   mode: colocated
-  # -- Kafka client.id for the ingestion consumer, in both colocated and
-  # separate modes. Rendered as KAFKA_CLIENT_ID.
-  kafkaClientId: "kafka-python-rasa"
   # -- Number of replicas for the Event Ingestion deployment.
   # Applies only when eventIngestion.mode is separate.
   replicaCount: 1

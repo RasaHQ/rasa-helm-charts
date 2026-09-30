@@ -32,15 +32,17 @@ eksctl create iamserviceaccount \
 
 Add any additional policy ARNs to this service account in order to grant access to any AWS services that your Rasa Pro deployment may depend on (e.g. [S3](https://aws.amazon.com/s3/), [MSK](https://aws.amazon.com/msk/), [RDS](https://aws.amazon.com/rds/)).
 
-### Rasa Pro License
+### Secrets
 
 First, acquire a valid Rasa Pro license key from the Rasa team through the AWS Marketplace.
-
-Use the following command to store that license key as a Kubernetes secret in your Amazon EKS cluster:
+Next, generate a JWT secret and auth token for the Rasa Pro API.
+Finally, use the following command to store that license key as a Kubernetes secret in your Amazon EKS cluster:
 
 ```shell
 kubectl create secret generic rasa-secrets --namespace rasa \
-  --from-literal=rasaProLicense="<YOUR_LICENSE_KEY>"
+  --from-literal=rasaProLicense="<YOUR_LICENSE_KEY>" \
+  --from-literal=jwtSecret="<YOUR_JWT_SECRET>" \
+  --from-literal=authToken="<YOUR_AUTH_TOKEN>"
 ```
 
 ## Installation

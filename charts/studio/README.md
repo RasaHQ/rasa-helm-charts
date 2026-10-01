@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.59](https://img.shields.io/badge/Version-3.0.0--rc.59-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.60](https://img.shields.io/badge/Version-3.0.0--rc.60-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.59
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.60
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.59
+$ helm install my-release rasa/studio --version 3.0.0-rc.60
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.59
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.60
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.59
+$ helm pull rasa/studio --version 3.0.0-rc.60
 ```
 
 ## General Configuration
@@ -157,6 +157,34 @@ $ helm pull rasa/studio --version 3.0.0-rc.59
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+## Initial Admin User
+
+A fresh install has no users, and every later account is invited by an admin — so
+the first admin comes from the chart:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+```
+
+That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
+key of `studio-secrets`; add it when you
+[create the Secret](#2-create-the-studio-secrets-secret). Override
+`app.initialAdmin.password` to read from a different Secret.
+
+Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
+container only.
+
+- **The password is a bootstrap value.** The admin must choose a new one on first
+  login; rotate or remove the Secret key afterwards.
+- **`email` is the switch.** Empty (the default) renders neither variable, so the
+  Secret key need not exist. Leave it empty on an install that already has an
+  admin; set it on a fresh one, or nobody can log in.
+- The account is created only if absent, and is marked in the database, so changing
+  its email later does not spawn a second one.
+- An email without an `@` is rejected at install time.
 
 ## Ingress Host Configuration
 
@@ -611,34 +639,6 @@ rasa:
   write a custom `Persistor`.
 - [Studio Architecture — Model Storage](https://rasa.com/docs/reference/architecture/studio#model-storage) —
   where the model service keeps models and how `RASA_REMOTE_STORAGE` fits in.
-
-## Initial Admin User
-
-A fresh install has no users, and every later account is invited by an admin — so
-the first admin comes from the chart:
-
-```yaml
-app:
-  initialAdmin:
-    email: "admin@example.com"
-```
-
-That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
-key of `studio-secrets`; add it when you
-[create the Secret](#2-create-the-studio-secrets-secret). Override
-`app.initialAdmin.password` to read from a different Secret.
-
-Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
-container only.
-
-- **The password is a bootstrap value.** The admin must choose a new one on first
-  login; rotate or remove the Secret key afterwards.
-- **`email` is the switch.** Empty (the default) renders neither variable, so the
-  Secret key need not exist. Leave it empty on an install that already has an
-  admin; set it on a fresh one, or nobody can log in.
-- The account is created only if absent, and is marked in the database, so changing
-  its email later does not spawn a second one.
-- An email without an `@` is rejected at install time.
 
 ## GitHub App Integration (optional)
 

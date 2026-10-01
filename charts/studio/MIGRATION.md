@@ -76,6 +76,52 @@ With `denyAll` set you must also supply `dnsNamespace`, `egressPorts` and
 Studio. `egressPorts` defaults to 443 and 80 only — add your database, Kafka and
 object-storage ports. See [Network Policies](README.md#network-policies).
 
+### 5. `rasa.persistence.storageClassName` is now required
+
+Only when the Rasa Pro model service is enabled, which is the default:
+`rasa.persistence.create` is `true`, and the subchart's schema now rejects an
+unset class. A fresh install refuses to render:
+
+```
+rasa:
+- at '/persistence/storageClassName': got null, want string
+```
+
+(The Rasa Pro chart used on its own reports `missing property 'storageClassName'`
+instead. Helm drops a null that comes from a chart's own `values.yaml`, but this
+chart declares `rasa.persistence.storageClassName` explicitly, and a null set by
+the parent survives the merge into the subchart. Same cause, different wording —
+worth knowing if you are grepping logs.)
+
+```yaml
+rasa:
+  persistence:
+    storageClassName: gp3   # kubectl get storageclass
+```
+
+Leaving it unset installed fine and broke on the next deploy. The chart rendered
+the key with a null value, and a field the chart renders is a field Helm manages.
+At install the `DefaultStorageClass` admission plugin substituted the cluster
+default; every later `helm upgrade` reconciled that drift back towards null, and
+a PersistentVolumeClaim spec is immutable:
+
+```
+spec: Forbidden: spec is immutable after creation
+```
+
+On a cluster with no default StorageClass there was nothing to substitute, so the
+claim simply stayed `Pending` with nothing explaining why.
+
+**If you already have a claim**, set the value to the class it is bound to — that
+single edit also unblocks your upgrades:
+
+```console
+$ kubectl get pvc rasa-pro-data-pvc-<namespace> -n <namespace> \
+    -o jsonpath='{.spec.storageClassName}'
+```
+
+Full detail in the Rasa Pro chart's [migration guide](../rasa/MIGRATION.md).
+
 ### Renamed and removed keys
 
 Old keys are **ignored, not rejected**, so anything left behind is silently

@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.55](https://img.shields.io/badge/Version-3.0.0--rc.55-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.56](https://img.shields.io/badge/Version-3.0.0--rc.56-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.55
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.55
+$ helm install my-release rasa/studio --version 3.0.0-rc.56
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.55
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.55
+$ helm pull rasa/studio --version 3.0.0-rc.56
 ```
 
 ## General Configuration
@@ -854,7 +854,7 @@ changes need work outside your values file.
 | rasa.persistence.create | bool |  | `true` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |
-| rasa.persistence.storageClassName | string | Make sure to set the correct storage class name based on your cluster configuration. | `nil` |
+| rasa.persistence.storageClassName | string | Required, because `create` above is true. The chart cannot guess it — the class is a property of your cluster (`kubectl get storageclass`). An unset value is rejected by the schema: it used to be silently replaced by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume, such as one `hostPath` creates. | `nil` |
 | rasa.persistence.storageRequests | string |  | `"1Gi"` |
 | rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume. | `1001` |
 | rasa.rasa.mountDefaultConfigmap | bool | Studio supplies no endpoints or integrations, so render no ConfigMap. | `false` |

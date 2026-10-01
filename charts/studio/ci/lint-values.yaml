@@ -4,3 +4,10 @@
 config:
   database:
     host: "postgres.example.com"
+
+# The rasa subchart requires an explicit storageClassName whenever
+# persistence.create is true, and studio's own values set it true. There is no
+# right default — the class is a property of the cluster, not the chart.
+rasa:
+  persistence:
+    storageClassName: "standard"

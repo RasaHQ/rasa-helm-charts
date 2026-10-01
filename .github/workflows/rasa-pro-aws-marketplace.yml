@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-      - INFRA-2166 # TODO: remove this before merging PR
     paths:
       - 'charts/rasa/**'
       - '!charts/studio/**'

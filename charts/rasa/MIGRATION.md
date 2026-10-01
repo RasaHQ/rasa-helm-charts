@@ -54,7 +54,7 @@ rasa:
 - at '/persistence': missing property 'storageClassName'
 ```
 
-Two reasons. On a cluster with no default StorageClass the claim stayed `Pending` forever with nothing pointing at the cause. And on a cluster that has one, the `DefaultStorageClass` admission plugin rewrote the field at install; every later upgrade under Helm 4 then sent the original null back through server-side apply, which reads a null as *remove this field* and rejects it:
+Two reasons. On a cluster with no default StorageClass the claim stayed `Pending` forever with nothing pointing at the cause. And on a cluster that has one, the install succeeded and the next upgrade failed. The chart rendered the key with a null value, and a field the chart renders is a field Helm manages; the `DefaultStorageClass` admission plugin substituted the cluster default at install, so every later upgrade reconciled that drift back towards null against an immutable PersistentVolumeClaim spec:
 
 ```
 PersistentVolumeClaim "rasa-pro-data-pvc-<namespace>" is invalid:

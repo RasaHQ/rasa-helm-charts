@@ -99,11 +99,18 @@ rasa:
     storageClassName: gp3   # kubectl get storageclass
 ```
 
-Leaving it unset used to work by accident: the cluster's default StorageClass was
-substituted at admission, and Kubernetes then treats the field as immutable, so
-every later `helm upgrade` was rejected with `spec: Forbidden: spec is immutable
-after creation`. On a cluster with no default StorageClass the claim simply stayed
-`Pending` with nothing explaining why.
+Leaving it unset installed fine and broke on the next deploy. The chart rendered
+the key with a null value, and a field the chart renders is a field Helm manages.
+At install the `DefaultStorageClass` admission plugin substituted the cluster
+default; every later `helm upgrade` reconciled that drift back towards null, and
+a PersistentVolumeClaim spec is immutable:
+
+```
+spec: Forbidden: spec is immutable after creation
+```
+
+On a cluster with no default StorageClass there was nothing to substitute, so the
+claim simply stayed `Pending` with nothing explaining why.
 
 **If you already have a claim**, set the value to the class it is bound to — that
 single edit also unblocks your upgrades:

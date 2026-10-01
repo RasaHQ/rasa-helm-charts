@@ -2,7 +2,11 @@ apiVersion: v2
 name: rasa
 description: A Rasa Pro Helm chart for Kubernetes
 type: application
-version: 2.6.0
+# Minimum Kubernetes version. autoscaling/v2 (templates/hpa.yaml) is GA from 1.23;
+# the `-0` suffix lets pre-release cluster versions satisfy the constraint.
+kubeVersion: ">=1.23.0-0"
+version: 3.0.0-rc.22
+appVersion: "3.20.0-latest"
 home: https://rasa.com
 sources:
   - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa

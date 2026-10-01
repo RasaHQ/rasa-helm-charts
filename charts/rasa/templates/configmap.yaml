@@ -1,0 +1,25 @@
+{{- if .Values.rasa.mountDefaultConfigmap }}
+{{- $integrations := include "rasa.hasIntegrations" . }}
+{{- $endpoints := include "rasa.hasEndpoints" . }}
+{{- /*
+Emit nothing when there is no configuration to ship: the same two predicates
+drive the volume and the mount, so an empty ConfigMap would never be referenced.
+*/ -}}
+{{- if or $integrations $endpoints }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "rasa.fullname" . }}-configmap
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+data:
+{{- if $integrations }}
+  integrations: |
+    {{- $integrations | nindent 4 }}
+{{- end }}
+{{- if $endpoints }}
+  endpoints: |
+    {{- $endpoints | nindent 4 }}
+{{- end }}
+{{- end }}
+{{- end }}

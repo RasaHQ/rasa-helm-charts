@@ -928,17 +928,27 @@ rasa:
             pathType: Prefix
 
   persistence:
-    create: true
+    # -- Mount a PersistentVolumeClaim at `/app/working-data`, where the model
+    # service writes trained models. Off by default. With no volume the models
+    # sit on the container filesystem and are lost on every pod restart,
+    # including every `helm upgrade` — the model service runs a single replica
+    # with a `Recreate` strategy. Either turn this on, or send models to object
+    # storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README.
+    create: false
+    # -- Capacity of the hostPath PersistentVolume. Only read when `hostPath.enabled` is true.
     storageCapacity: 1Gi
+    # -- Size requested by the PersistentVolumeClaim. Only read when `create` is true.
     storageRequests: 1Gi
-    # -- Required, because `create` above is true. The chart cannot guess it —
-    # the class is a property of your cluster (`kubectl get storageclass`). An
-    # unset value is rejected by the schema: it used to be silently replaced by
-    # the cluster default at admission, which Kubernetes then treats as an
+    # -- Required once `create` is true — the subchart schema rejects an unset
+    # value. The chart cannot guess it: the class is a property of your cluster
+    # (`kubectl get storageclass`). An unset value used to be replaced silently
+    # by the cluster default at admission, which Kubernetes then treats as an
     # immutable field and refuses to reconcile on every later `helm upgrade`.
     # Use "" to bind a classless PersistentVolume, such as one `hostPath` creates.
     storageClassName:
     hostPath:
+      # -- Also create a hostPath PersistentVolume for the claim to bind.
+      # Single-node development clusters only.
       enabled: false
 
   podSecurityContext:

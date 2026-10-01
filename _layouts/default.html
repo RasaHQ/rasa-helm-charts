@@ -9,35 +9,56 @@
     /* ── Reset ──────────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── Brand tokens ────────────────────────────────────────────────────── */
+    /* ── Brand tokens (Rasa Visual Identity) ─────────────────────────────── */
     :root {
-      --purple:       #5a17ee;
-      --purple-light: #ede8fd;
-      --navy:         #32415b;
-      --text:         #24292f;
-      --text-muted:   #57606a;
-      --bg:           #ffffff;
-      --code-bg:      #f6f8fa;
-      --border:       #d0d7de;
+      /* Primary palette: build around Ink and Cream, Pink for emphasis */
+      --ink:          #181210;
+      --ink-muted:    #524a43;
+      --cream:        #faf6f0;
+      --pink:         #e85a91;
+
+      /* Secondary palette: supporting surfaces and accents only */
+      --periwinkle:   #bbc9ff;
+      --seafoam:      #9fdbd0;
+      --sage:         #d1d8ce;
+      --coral:        #ffb28c;
+      --gold:         #f6e668;
+      --orchid:       #f5ddf0;
+      --lavender:     #c8b7e7;
+
+      /* Semantic roles */
+      --text:         var(--ink);
+      --text-muted:   var(--ink-muted);
+      --accent:       var(--pink);
+      --bg:           var(--cream);
+      --surface:      #f2ece3;
+      --surface-alt:  #f6f1ea;
+      --border:       #e3dbd0;
       --radius:       6px;
+
+      /* Typography: STK Bureau family, with system fallbacks */
+      --font-serif: "STK Bureau Serif", "STK Bureau Serif Book", Georgia, "Times New Roman", serif;
+      --font-sans:  "STK Bureau Sans", "STK Bureau Sans Book", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-mono:  "STK Bureau Sans Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
     /* ── Base ────────────────────────────────────────────────────────────── */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      font-family: var(--font-sans);
+      font-weight: 400;
       font-size: 16px;
       line-height: 1.65;
       color: var(--text);
       background: var(--bg);
     }
 
-    /* ── Purple accent strip ─────────────────────────────────────────────── */
+    /* ── Pink accent strip ───────────────────────────────────────────────── */
     .accent-strip {
       position: sticky;
       top: 0;
       z-index: 201;
       height: 3px;
-      background: var(--purple);
+      background: var(--accent);
     }
 
     /* ── Header ──────────────────────────────────────────────────────────── */
@@ -72,29 +93,29 @@
     /* Rasa wordmark SVG */
     .logo-icon {
       display: block;
+      color: var(--ink);
       flex-shrink: 0;
       width: auto;
     }
 
+    /* Product label: uppercase Mono, per the "RASA / VISUAL IDENTITY" eyebrow style */
     .logo-wordmark {
       display: flex;
       align-items: baseline;
-      gap: 6px;
-      font-size: 1.05rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
+      gap: 8px;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
       line-height: 1;
     }
 
-    .logo-divider {
-      color: var(--border);
-      font-weight: 300;
-      font-size: 1.1rem;
-    }
+    .logo-divider { color: var(--text-muted); }
 
-    .logo-product { color: var(--purple); }
+    .logo-product { color: var(--text); }
 
-    /* Nav */
+    /* Nav: sentence-case Sans Medium labels */
     nav {
       display: flex;
       align-items: center;
@@ -110,7 +131,7 @@
       transition: color 0.15s;
     }
 
-    nav a:hover { color: var(--purple); }
+    nav a:hover { color: var(--text); }
 
     nav a.external::after {
       content: " ↗";
@@ -148,9 +169,18 @@
     .content h4,
     .content h5,
     .content h6 {
-      color: var(--navy);
-      font-weight: 700;
+      color: var(--text);
+      font-weight: 500;
       line-height: 1.3;
+    }
+
+    /* Headlines: expressive Bureau Serif Book */
+    .content h1,
+    .content h2,
+    .content h3 {
+      font-family: var(--font-serif);
+      font-weight: 400;
+      letter-spacing: -0.01em;
     }
 
     /* Heading anchor links */
@@ -176,7 +206,7 @@
     }
 
     .content .heading-anchor:hover {
-      color: var(--purple);
+      color: var(--accent);
       text-decoration: none;
     }
 
@@ -224,28 +254,36 @@
       margin-bottom: 0.3rem;
     }
 
-    /* Links */
+    /* Links: Ink text with a Pink underline. Pink text on Cream is ~3:1,
+       below WCAG AA for body copy, so Pink carries the emphasis as the rule. */
     .content a {
-      color: var(--purple);
-      text-decoration: none;
+      color: var(--text);
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-decoration-thickness: 1.5px;
+      text-underline-offset: 0.2em;
+      transition: text-decoration-thickness 0.15s;
     }
 
-    .content a:hover { text-decoration: underline; }
+    .content a:hover { text-decoration-thickness: 3px; }
+
+    /* Image-only links (badges) don't need the underline */
+    .content a:has(> img) { text-decoration: none; }
 
     /* Inline code */
     .content code {
-      background: var(--code-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: 4px;
       padding: 0.15em 0.4em;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-family: var(--font-mono);
       font-size: 0.875em;
-      color: var(--navy);
+      color: var(--text);
     }
 
     /* Code blocks */
     .content pre {
-      background: var(--code-bg);
+      background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
       padding: 1rem 1.25rem;
@@ -263,7 +301,7 @@
 
     /* Blockquote */
     .content blockquote {
-      border-left: 3px solid var(--purple);
+      border-left: 3px solid var(--accent);
       margin: 0 0 1rem;
       padding: 0.5rem 0 0.5rem 1rem;
       color: var(--text-muted);
@@ -303,8 +341,8 @@
       z-index: 100;
       display: none;
       overflow: hidden;
-      background: var(--code-bg);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+      background: var(--surface);
+      box-shadow: 0 2px 6px rgba(24, 18, 16, 0.08);
     }
 
     .sticky-thead table {
@@ -316,9 +354,13 @@
     }
 
     .sticky-thead th {
-      background: var(--code-bg);
-      font-weight: 600;
-      color: var(--navy);
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
       border: 1px solid var(--border);
       padding: 0.5rem 0.75rem;
       text-align: left;
@@ -335,13 +377,20 @@
       text-align: left;
     }
 
+    /* Table headers read as metadata: uppercase Mono */
     .content th {
-      background: var(--code-bg);
-      font-weight: 600;
-      color: var(--navy);
+      background: var(--surface);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
     }
 
-    .content tr:nth-child(even) td { background: #fafbfc; }
+    .content td { background: #fff; }
+
+    .content tr:nth-child(even) td { background: var(--surface-alt); }
 
     /* Horizontal rule */
     .content hr {
@@ -361,9 +410,9 @@
     }
 
     /* ── Syntax highlighting (Rouge / GitHub style) ───────────────────────── */
-    .highlight .c,  .highlight .cd { color: #6a737d; font-style: italic }
-    .highlight .cm { color: #6a737d; font-style: italic }
-    .highlight .c1 { color: #6a737d; font-style: italic }
+    .highlight .c,  .highlight .cd { color: var(--text-muted); font-style: italic }
+    .highlight .cm { color: var(--text-muted); font-style: italic }
+    .highlight .c1 { color: var(--text-muted); font-style: italic }
     .highlight .cp { color: #999999; font-weight: bold }
     .highlight .cs { color: #999999; font-weight: bold; font-style: italic }
     .highlight .err { color: #a61717; background-color: #e3d2d2 }
@@ -414,16 +463,23 @@
       border-top: 1px solid var(--border);
       padding: 1.5rem 2rem;
       text-align: center;
-      font-size: 0.8rem;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
       color: var(--text-muted);
     }
 
     footer a {
-      color: var(--purple);
+      color: var(--text);
       text-decoration: none;
     }
 
-    footer a:hover { text-decoration: underline; }
+    footer a:hover {
+      text-decoration: underline;
+      text-decoration-color: var(--accent);
+      text-underline-offset: 0.2em;
+    }
 
     footer .sep { margin: 0 0.5rem; opacity: 0.4; }
 
@@ -465,10 +521,10 @@
       <a href="/" class="logo">
         <!-- Rasa wordmark (left half of docs-logo.svg, viewBox crops out "docs") -->
         <svg class="logo-icon" height="22" viewBox="0 0 16600 8286" fill="none" xmlns="http://www.w3.org/2000/svg" aria-label="Rasa">
-          <path fill-rule="evenodd" clip-rule="evenodd" d="M15601.1 5569.8h-1405.8v1422.92L11364.2 5569.8H789.573V1262.83H15601.1V5569.8Zm789.6-5109.82H0v5913.87h11180.9L14986 8285.41V6373.85h1404.7V459.98ZM3343.35 3741.86l902.37-333.92 42.88-17.32V1893.63H1409.95v2986.8h695.58v-681.59l528.73-194.73 796.04 876.32h870.64l-957.59-1138.57Zm-1233.71-305.84v-825.56h1473.99v279.57l-1473.99 545.99ZM4934.81 4887V1893.63h2937.41v2986.8h-704.98v-896.04H5639.79V4887h-704.98Zm704.98-1619.44h1527.45v-657.1H5639.79v657.1Zm5757.31 268.81v1344.06H8518.46V4163.6h2173.64v-418.15H8518.46V1893.63h2878.64v716.83H9223.43v418.16h2173.67v507.75Zm646.2-1642.74V4887h705v-902.61h1527.5v896.04h704.9v-2986.8h-2937.4Zm2232.5 1373.93h-1527.5v-657.1h1527.5v657.1Z" fill="#32415b"/>
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M15601.1 5569.8h-1405.8v1422.92L11364.2 5569.8H789.573V1262.83H15601.1V5569.8Zm789.6-5109.82H0v5913.87h11180.9L14986 8285.41V6373.85h1404.7V459.98ZM3343.35 3741.86l902.37-333.92 42.88-17.32V1893.63H1409.95v2986.8h695.58v-681.59l528.73-194.73 796.04 876.32h870.64l-957.59-1138.57Zm-1233.71-305.84v-825.56h1473.99v279.57l-1473.99 545.99ZM4934.81 4887V1893.63h2937.41v2986.8h-704.98v-896.04H5639.79V4887h-704.98Zm704.98-1619.44h1527.45v-657.1H5639.79v657.1Zm5757.31 268.81v1344.06H8518.46V4163.6h2173.64v-418.15H8518.46V1893.63h2878.64v716.83H9223.43v418.16h2173.67v507.75Zm646.2-1642.74V4887h705v-902.61h1527.5v896.04h704.9v-2986.8h-2937.4Zm2232.5 1373.93h-1527.5v-657.1h1527.5v657.1Z" fill="currentColor"/>
         </svg>
         <span class="logo-wordmark">
-          <span class="logo-divider">|</span>
+          <span class="logo-divider">/</span>
           <span class="logo-product">Helm Charts</span>
         </span>
       </a>

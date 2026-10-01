@@ -6,7 +6,8 @@ metadata:
   namespace: {{ .Release.Namespace }}
 spec:
   podSelector:
-    matchLabels: {}
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
   policyTypes:
   - Ingress
   - Egress

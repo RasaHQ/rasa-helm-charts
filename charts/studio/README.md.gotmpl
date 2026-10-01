@@ -179,13 +179,12 @@ app:
   ingress:
     hostName: studio.example.com         # Studio app
 rasa:
-  rasa:
-    ingress:
-      hosts:
-        - host: models.example.com       # model service
-          paths:
-            - path: /modelservice
-              pathType: Prefix
+  ingress:
+    hosts:
+      - host: models.example.com         # model service
+        paths:
+          - path: /modelservice
+            pathType: Prefix
 ```
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise

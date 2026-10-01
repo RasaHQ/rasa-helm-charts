@@ -84,8 +84,14 @@ unset class. A fresh install refuses to render:
 
 ```
 rasa:
-- at '/persistence': missing property 'storageClassName'
+- at '/persistence/storageClassName': got null, want string
 ```
+
+(The Rasa Pro chart used on its own reports `missing property 'storageClassName'`
+instead. Helm drops a null that comes from a chart's own `values.yaml`, but this
+chart declares `rasa.persistence.storageClassName` explicitly, and a null set by
+the parent survives the merge into the subchart. Same cause, different wording —
+worth knowing if you are grepping logs.)
 
 ```yaml
 rasa:

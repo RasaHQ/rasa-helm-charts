@@ -407,8 +407,6 @@ mounts it at `/app/working-data`.
 | `rasa.persistence.create` | `false` | Create the claim and mount it. |
 | `rasa.persistence.storageClassName` | _unset_ | **Required when `create` is true** — the schema rejects an unset value. Use `""` to bind a classless PersistentVolume. |
 | `rasa.persistence.storageRequests` | `1Gi` | Size requested by the claim. |
-| `rasa.persistence.storageCapacity` | `1Gi` | Capacity of the hostPath PersistentVolume. Only read when `hostPath.enabled` is true. |
-| `rasa.persistence.hostPath.enabled` | `false` | Also create a `hostPath` PersistentVolume for the claim to bind. Single-node development clusters only. |
 | `rasa.podSecurityContext.fsGroup` | `1001` | Group that owns the mounted volume. Must match the image's uid or the model service cannot write. |
 
 Constraints worth knowing before you enable it:

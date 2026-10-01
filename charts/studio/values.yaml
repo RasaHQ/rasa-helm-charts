@@ -935,7 +935,6 @@ rasa:
     # with a `Recreate` strategy. Either turn this on, or send models to object
     # storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README.
     create: false
-    # -- Capacity of the hostPath PersistentVolume. Only read when `hostPath.enabled` is true.
     storageCapacity: 1Gi
     # -- Size requested by the PersistentVolumeClaim. Only read when `create` is true.
     storageRequests: 1Gi
@@ -944,11 +943,9 @@ rasa:
     # (`kubectl get storageclass`). An unset value used to be replaced silently
     # by the cluster default at admission, which Kubernetes then treats as an
     # immutable field and refuses to reconcile on every later `helm upgrade`.
-    # Use "" to bind a classless PersistentVolume, such as one `hostPath` creates.
+    # Use "" to bind a classless PersistentVolume.
     storageClassName:
     hostPath:
-      # -- Also create a hostPath PersistentVolume for the claim to bind.
-      # Single-node development clusters only.
       enabled: false
 
   podSecurityContext:

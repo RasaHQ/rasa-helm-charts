@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.57](https://img.shields.io/badge/Version-3.0.0--rc.57-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.58](https://img.shields.io/badge/Version-3.0.0--rc.58-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.57
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.58
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.57
+$ helm install my-release rasa/studio --version 3.0.0-rc.58
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.57
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.58
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.57
+$ helm pull rasa/studio --version 3.0.0-rc.58
 ```
 
 ## General Configuration
@@ -406,8 +406,6 @@ mounts it at `/app/working-data`.
 | `rasa.persistence.create` | `false` | Create the claim and mount it. |
 | `rasa.persistence.storageClassName` | _unset_ | **Required when `create` is true** — the schema rejects an unset value. Use `""` to bind a classless PersistentVolume. |
 | `rasa.persistence.storageRequests` | `1Gi` | Size requested by the claim. |
-| `rasa.persistence.storageCapacity` | `1Gi` | Capacity of the hostPath PersistentVolume. Only read when `hostPath.enabled` is true. |
-| `rasa.persistence.hostPath.enabled` | `false` | Also create a `hostPath` PersistentVolume for the claim to bind. Single-node development clusters only. |
 | `rasa.podSecurityContext.fsGroup` | `1001` | Group that owns the mounted volume. Must match the image's uid or the model service cannot write. |
 
 Constraints worth knowing before you enable it:
@@ -1098,9 +1096,9 @@ changes need work outside your values file.
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
 | rasa.persistence.create | bool | Mount a PersistentVolumeClaim at `/app/working-data`, where the model service writes trained models. Off by default. With no volume the models sit on the container filesystem and are lost on every pod restart, including every `helm upgrade` — the model service runs a single replica with a `Recreate` strategy. Either turn this on, or send models to object storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README. | `false` |
-| rasa.persistence.hostPath.enabled | bool | Also create a hostPath PersistentVolume for the claim to bind. Single-node development clusters only. | `false` |
-| rasa.persistence.storageCapacity | string | Capacity of the hostPath PersistentVolume. Only read when `hostPath.enabled` is true. | `"1Gi"` |
-| rasa.persistence.storageClassName | string | Required once `create` is true — the subchart schema rejects an unset value. The chart cannot guess it: the class is a property of your cluster (`kubectl get storageclass`). An unset value used to be replaced silently by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume, such as one `hostPath` creates. | `nil` |
+| rasa.persistence.hostPath.enabled | bool |  | `false` |
+| rasa.persistence.storageCapacity | string |  | `"1Gi"` |
+| rasa.persistence.storageClassName | string | Required once `create` is true — the subchart schema rejects an unset value. The chart cannot guess it: the class is a property of your cluster (`kubectl get storageclass`). An unset value used to be replaced silently by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume. | `nil` |
 | rasa.persistence.storageRequests | string | Size requested by the PersistentVolumeClaim. Only read when `create` is true. | `"1Gi"` |
 | rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume. | `1001` |
 | rasa.rasa.mountDefaultConfigmap | bool | Studio supplies no endpoints or integrations, so render no ConfigMap. | `false` |

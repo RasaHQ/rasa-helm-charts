@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.56](https://img.shields.io/badge/Version-3.0.0--rc.56-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.60](https://img.shields.io/badge/Version-3.0.0--rc.60-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.60
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.56
+$ helm install my-release rasa/studio --version 3.0.0-rc.60
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.56
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.60
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.56
+$ helm pull rasa/studio --version 3.0.0-rc.60
 ```
 
 ## General Configuration
@@ -157,6 +157,34 @@ $ helm pull rasa/studio --version 3.0.0-rc.56
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+## Initial Admin User
+
+A fresh install has no users, and every later account is invited by an admin — so
+the first admin comes from the chart:
+
+```yaml
+app:
+  initialAdmin:
+    email: "admin@example.com"
+```
+
+That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
+key of `studio-secrets`; add it when you
+[create the Secret](#2-create-the-studio-secrets-secret). Override
+`app.initialAdmin.password` to read from a different Secret.
+
+Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
+container only.
+
+- **The password is a bootstrap value.** The admin must choose a new one on first
+  login; rotate or remove the Secret key afterwards.
+- **`email` is the switch.** Empty (the default) renders neither variable, so the
+  Secret key need not exist. Leave it empty on an install that already has an
+  admin; set it on a fresh one, or nobody can log in.
+- The account is created only if absent, and is marked in the database, so changing
+  its email later does not spawn a second one.
+- An email without an `@` is rejected at install time.
 
 ## Ingress Host Configuration
 
@@ -179,13 +207,12 @@ app:
   ingress:
     hostName: studio.example.com         # Studio app
 rasa:
-  rasa:
-    ingress:
-      hosts:
-        - host: models.example.com       # model service
-          paths:
-            - path: /modelservice
-              pathType: Prefix
+  ingress:
+    hosts:
+      - host: models.example.com         # model service
+        paths:
+          - path: /modelservice
+            pathType: Prefix
 ```
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
@@ -316,7 +343,7 @@ The following environment variables can be configured on the Rasa Pro model serv
 |----------|-------------|---------|
 | `MAX_PARALLEL_TRAININGS` | Maximum number of parallel model trainings the model service will run simultaneously | `10` |
 | `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
-| `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded (e.g. `aws`, `gcs`, `azure`). Leave unset to disable remote storage. | `None` |
+| `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded — `aws`, `gcs` or `azure`. Unset means models stay on local disk. See [Model Storage](#model-storage). | `None` |
 
 `rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence and `OPENAI_API_KEY` into the model service — so re-declare both alongside your additions. Omitting them is refused at install time.
 
@@ -369,33 +396,249 @@ app:
       value: "600000"
 ```
 
-## Initial Admin User
+## Model Storage
 
-A fresh install has no users, and every later account is invited by an admin — so
-the first admin comes from the chart:
+The model service writes trained models to `/app/working-data` inside its
+container. By default the chart provides **no** storage for that path, so models
+live on the container filesystem and are lost whenever the pod restarts — which
+includes every `helm upgrade`, because the model service runs a single replica
+with a `Recreate` strategy.
+
+Pick one of the two options below before going to production:
+
+| Option | Survives restart | Survives node loss | Good for |
+|--------|------------------|--------------------|----------|
+| Nothing (default) | ❌ | ❌ | Trying Studio out; retraining is cheap |
+| `rasa.persistence` — a PersistentVolumeClaim | ✅ | depends on the StorageClass | Single-cluster installs |
+| `RASA_REMOTE_STORAGE` — object storage | ✅ | ✅ | Production, multi-cluster, disaster recovery |
+
+The two are not exclusive. Remote storage alone is enough; a PVC on top only
+saves a re-download.
+
+### Option 1 — PersistentVolumeClaim
 
 ```yaml
-app:
-  initialAdmin:
-    email: "admin@example.com"
+rasa:
+  persistence:
+    create: true
+    storageClassName: "gp3"   # required once create is true
+    storageRequests: 5Gi
 ```
 
-That is the only value needed. The password comes from the `INITIAL_ADMIN_PASSWORD`
-key of `studio-secrets`; add it when you
-[create the Secret](#2-create-the-studio-secrets-secret). Override
-`app.initialAdmin.password` to read from a different Secret.
+This creates a `ReadWriteOnce` PVC named `rasa-pro-data-pvc-<namespace>` and
+mounts it at `/app/working-data`.
 
-Renders `INITIAL_ADMIN_EMAIL` and `INITIAL_ADMIN_PASSWORD` on the Studio App
-container only.
+| Value | Default | Description |
+|-------|---------|-------------|
+| `rasa.persistence.create` | `false` | Create the claim and mount it. |
+| `rasa.persistence.storageClassName` | _unset_ | **Required when `create` is true** — the schema rejects an unset value. Use `""` to bind a classless PersistentVolume. |
+| `rasa.persistence.storageRequests` | `1Gi` | Size requested by the claim. |
+| `rasa.podSecurityContext.fsGroup` | `1001` | Group that owns the mounted volume. Must match the image's uid or the model service cannot write. |
 
-- **The password is a bootstrap value.** The admin must choose a new one on first
-  login; rotate or remove the Secret key afterwards.
-- **`email` is the switch.** Empty (the default) renders neither variable, so the
-  Secret key need not exist. Leave it empty on an install that already has an
-  admin; set it on a fresh one, or nobody can log in.
-- The account is created only if absent, and is marked in the database, so changing
-  its email later does not spawn a second one.
-- An email without an `@` is rejected at install time.
+Constraints worth knowing before you enable it:
+
+- **Always name the StorageClass.** Leaving it unset makes Kubernetes substitute
+  the cluster default at admission. The chart then renders the field as empty on
+  the next upgrade, Kubernetes treats it as an immutable field, and **every later
+  `helm upgrade` fails**. Installs still work, which is what makes this one hard
+  to spot.
+- **One release per namespace.** The PVC name is derived from the namespace, not
+  the release, so two Studio releases in one namespace collide.
+- **`ReadWriteOnce` only.** The claim cannot be shared, which is consistent with
+  the single-replica `Recreate` strategy. Do not raise `rasa.replicaCount` while
+  using a PVC unless your StorageClass supports `ReadWriteMany`.
+- **Changing the mount path.** Set `RASA_MODEL_SERVER_BASE_DIRECTORY` on the
+  model service container to move the working directory off `working-data`. The
+  chart mounts `/app/working-data`, so changing one without the other detaches
+  the volume from where models are written.
+
+### Option 2 — Remote storage
+
+Set `RASA_REMOTE_STORAGE` to `aws`, `gcs` or `azure` and the model service
+uploads every trained model to that bucket and downloads it back on demand.
+
+> **All of these go in `rasa.overrideEnv`, not `rasa.extraEnv`.** That list
+> *replaces* the chart's generated environment, and the generated list is the
+> only thing wiring `RASA_LICENSE` and `OPENAI_API_KEY` into the model service —
+> so re-declare both in every example below. See
+> [Rasa Pro Model Service Environment Variables](#rasa-pro-model-service-environment-variables).
+
+> **Never use `value:` for a credential.** Anything inlined there is stored in
+> the Helm release history, where every past revision keeps its own copy. Use
+> `valueFrom.secretKeyRef` and add the key to `studio-secrets`.
+
+#### Amazon S3
+
+| Variable | Description |
+|----------|-------------|
+| `RASA_REMOTE_STORAGE` | `aws` |
+| `BUCKET_NAME` | Target S3 bucket. |
+| `AWS_DEFAULT_REGION` | Region the bucket lives in. |
+
+The bucket policy needs `s3:PutObject`, `s3:GetObject` and `s3:ListBucket` on
+both `arn:aws:s3:::<bucket>` and `arn:aws:s3:::<bucket>/*`.
+
+Then pick **one** authentication mode.
+
+**Mode A — IAM Roles for Service Accounts (recommended on EKS).** Annotate the
+model service's ServiceAccount; no AWS credentials go anywhere near the chart:
+
+```yaml
+rasa:
+  serviceAccount:
+    create: true
+    annotations:
+      eks.amazonaws.com/role-arn: "arn:aws:iam::<account-id>:role/<role-name>"
+  overrideEnv:
+    - name: RASA_LICENSE
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: RASA_PRO_LICENSE_SECRET_KEY
+    - name: OPENAI_API_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: OPENAI_API_KEY_SECRET_KEY
+    - name: RASA_REMOTE_STORAGE
+      value: "aws"
+    - name: BUCKET_NAME
+      value: "my-studio-models"
+    - name: AWS_DEFAULT_REGION
+      value: "eu-central-1"
+```
+
+The EKS pod identity webhook sees that annotation and injects `AWS_ROLE_ARN`,
+`AWS_WEB_IDENTITY_TOKEN_FILE` and `AWS_STS_REGIONAL_ENDPOINTS` into the
+container, along with the projected token volume. **Do not set those three
+yourself** — the webhook owns them.
+
+> **Note:** the subchart sets `automountServiceAccountToken: false`. That does
+> not break IRSA. The webhook mounts its own `aws-iam-token` projected volume,
+> which is independent of the Kubernetes API token.
+
+Set the three variables by hand only where that webhook does not run (a
+self-managed cluster with an external OIDC provider, for example):
+
+```yaml
+    - name: AWS_ROLE_ARN
+      value: "arn:aws:iam::<account-id>:role/<role-name>"
+    - name: AWS_WEB_IDENTITY_TOKEN_FILE
+      value: "/var/run/secrets/eks.amazonaws.com/serviceaccount/token"
+    - name: AWS_STS_REGIONAL_ENDPOINTS
+      value: "regional"
+```
+
+**Mode B — static access keys.** Use this only where IRSA is unavailable; the
+credentials are long-lived and must be rotated by hand.
+
+```yaml
+rasa:
+  overrideEnv:
+    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    - name: RASA_REMOTE_STORAGE
+      value: "aws"
+    - name: BUCKET_NAME
+      value: "my-studio-models"
+    - name: AWS_DEFAULT_REGION
+      value: "eu-central-1"
+    - name: AWS_ACCESS_KEY_ID
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: AWS_ACCESS_KEY_ID
+    - name: AWS_SECRET_ACCESS_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: AWS_SECRET_ACCESS_KEY
+```
+
+#### Google Cloud Storage
+
+| Variable | Description |
+|----------|-------------|
+| `RASA_REMOTE_STORAGE` | `gcs` |
+| `BUCKET_NAME` | Target GCS bucket. |
+| `GOOGLE_APPLICATION_CREDENTIALS` | **Path to a service account key file**, not the key itself. Omit it when using Workload Identity. |
+
+**On GKE with Workload Identity**, bind the Google service account to the
+Kubernetes one and set no credentials at all:
+
+```yaml
+rasa:
+  serviceAccount:
+    create: true
+    annotations:
+      iam.gke.io/gcp-service-account: "studio-models@<project>.iam.gserviceaccount.com"
+  overrideEnv:
+    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    - name: RASA_REMOTE_STORAGE
+      value: "gcs"
+    - name: BUCKET_NAME
+      value: "my-studio-models"
+```
+
+**Anywhere else**, `GOOGLE_APPLICATION_CREDENTIALS` names a file, so the key has
+to be mounted into the container first:
+
+```console
+$ kubectl create secret generic studio-gcs-key --from-file=key.json=./sa-key.json
+```
+
+```yaml
+rasa:
+  extraVolumes:
+    - name: gcs-key
+      secret:
+        secretName: studio-gcs-key
+  extraVolumeMounts:
+    - name: gcs-key
+      mountPath: /var/secrets/gcs
+      readOnly: true
+  overrideEnv:
+    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    - name: RASA_REMOTE_STORAGE
+      value: "gcs"
+    - name: BUCKET_NAME
+      value: "my-studio-models"
+    - name: GOOGLE_APPLICATION_CREDENTIALS
+      value: "/var/secrets/gcs/key.json"
+```
+
+#### Azure Blob Storage
+
+| Variable | Description |
+|----------|-------------|
+| `RASA_REMOTE_STORAGE` | `azure` |
+| `AZURE_CONTAINER` | Target blob container. |
+| `AZURE_ACCOUNT_NAME` | Storage account name. |
+| `AZURE_ACCOUNT_KEY` | Storage account key — a credential, so read it from a Secret. |
+
+```yaml
+rasa:
+  overrideEnv:
+    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    - name: RASA_REMOTE_STORAGE
+      value: "azure"
+    - name: AZURE_CONTAINER
+      value: "studio-models"
+    - name: AZURE_ACCOUNT_NAME
+      value: "mystudiostorage"
+    - name: AZURE_ACCOUNT_KEY
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: AZURE_ACCOUNT_KEY
+```
+
+### Further reading
+
+- [Model Storage](https://rasa.com/docs/reference/integrations/model-storage) —
+  the full list of supported backends, their environment variables, and how to
+  write a custom `Persistor`.
+- [Studio Architecture — Model Storage](https://rasa.com/docs/reference/architecture/studio#model-storage) —
+  where the model service keeps models and how `RASA_REMOTE_STORAGE` fits in.
 
 ## GitHub App Integration (optional)
 
@@ -851,11 +1094,11 @@ changes need work outside your values file.
 | rasa.overrideEnv[1].name | string |  | `"OPENAI_API_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
-| rasa.persistence.create | bool |  | `true` |
+| rasa.persistence.create | bool | Mount a PersistentVolumeClaim at `/app/working-data`, where the model service writes trained models. Off by default. With no volume the models sit on the container filesystem and are lost on every pod restart, including every `helm upgrade` — the model service runs a single replica with a `Recreate` strategy. Either turn this on, or send models to object storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README. | `false` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |
-| rasa.persistence.storageClassName | string | Required, because `create` above is true. The chart cannot guess it — the class is a property of your cluster (`kubectl get storageclass`). An unset value is rejected by the schema: it used to be silently replaced by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume, such as one `hostPath` creates. | `nil` |
-| rasa.persistence.storageRequests | string |  | `"1Gi"` |
+| rasa.persistence.storageClassName | string | Required once `create` is true — the subchart schema rejects an unset value. The chart cannot guess it: the class is a property of your cluster (`kubectl get storageclass`). An unset value used to be replaced silently by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume. | `nil` |
+| rasa.persistence.storageRequests | string | Size requested by the PersistentVolumeClaim. Only read when `create` is true. | `"1Gi"` |
 | rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume. | `1001` |
 | rasa.rasa.mountDefaultConfigmap | bool | Studio supplies no endpoints or integrations, so render no ConfigMap. | `false` |
 | rasa.rasa.port | int | The model service listens on 8000, not the chart default 5005. | `8000` |

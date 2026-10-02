@@ -96,17 +96,95 @@ jobs:
         with:
           version: v3.22.0
 
-      # Required: kube-linter renders the chart itself, but without the vendored
-      # subchart it silently skips the subchart's objects (studio drops 38 -> 27).
-      - name: Update dependencies
-        run: helm dependency build ./charts/${{ matrix.charts }}
+      # kube-linter renders charts itself, but only ever with default values --
+      # it takes no values file. Two things follow from that, and rendering here
+      # instead fixes both:
+      #
+      #  1. charts/studio has no default database host, so a directory scan of
+      #     the chart fails schema validation, finds zero objects, and still
+      #     exits 0.
+      #  2. Under defaults the optional templates emit nothing, so the linter
+      #     never saw the Ingress, NetworkPolicy, HPA, PodDisruptionBudget or
+      #     the sibling ingestion Deployment at all.
+      #
+      # render-all.sh also runs `helm dependency build`, which is required or
+      # the vendored subchart's objects are silently absent (studio 38 -> 27).
+      - name: Render every case for this chart
+        run: .github/scripts/render-all.sh rendered ${{ matrix.charts }}
 
-      - name: Scan chart with kube-linter
+      # Scans every file in the directory, so the defaults and the full case are
+      # both linted and a finding names the file it came from.
+      - name: Scan rendered manifests with kube-linter
         uses: stackrox/kube-linter-action@87802a2f4e01abebb3ee3c67a3002fea71f6eae5 # v1.0.7
         with:
-          directory: charts/${{ matrix.charts }}
+          directory: rendered
           config: .kube-linter.yaml
           # renovate: datasource=github-releases depName=stackrox/kube-linter
           version: v0.8.3
+
+  # Nothing in this repo ran a bare `helm template` before this job. That
+  # mattered because `helm lint` reports a template `fail` action as level=INFO
+  # and exits 0, so a chart that could not render with its own values shipped
+  # green through CI and was caught by hand instead.
+  #
+  # Both Helm majors, because the charts are required to render under each and
+  # lint-helm4 only covers linting.
+  render:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
+    runs-on: ubuntu-26.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        helm: ["v3.22.0", "v4.3.0"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Helm ${{ matrix.helm }}
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: ${{ matrix.helm }}
+
+      - name: Render every chart and case
+        run: .github/scripts/render-all.sh rendered
+
+  # Asserts the restricted Pod Security Standard against the rendered charts.
+  # op-kits is absent on purpose: it emits operator CRs and no pods, so Kyverno
+  # reports pass 0 / fail 0 for it, which is indistinguishable from a policy
+  # that silently did nothing.
+  pod-security:
+    if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
+    runs-on: ubuntu-26.04
+
+    strategy:
+      fail-fast: false
+      matrix:
+        charts: ["studio", "rasa"]
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Install Helm 3
+        uses: azure/setup-helm@9bc31f4ebc9c6b171d7bfbaa5d006ae7abdb4310 # v5.0.1
+        with:
+          version: v3.22.0
+
+      - name: Install Kyverno CLI
+        uses: kyverno/action-install-cli@fcee92fca5c883169ef9927acf543e0b5fc58289 # v0.2.0
+        with:
+          # renovate: datasource=github-releases depName=kyverno/kyverno
+          release: v1.19.1
+
+      - name: Render every case for this chart
+        run: .github/scripts/render-all.sh rendered ${{ matrix.charts }}
+
+      - name: Check the restricted Pod Security Standard
+        run: |
+          for manifest in rendered/*.yaml; do
+            .github/scripts/pod-security-scan.sh "$manifest"
+          done
 
       

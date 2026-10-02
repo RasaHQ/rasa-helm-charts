@@ -1,0 +1,54 @@
+# Restricted Pod Security Standard, asserted against the rendered charts in CI.
+#
+# WHY kyverno.io/v1 ClusterPolicy AND NOT policies.kyverno.io/v1 ValidatingPolicy
+#
+# `validate.podSecurity` is the thing that expresses "this pod satisfies the
+# restricted PSS" in one line, and it is a ClusterPolicy feature. Kyverno 1.19
+# deprecates ClusterPolicy in favour of CEL-based ValidatingPolicy and warns on
+# every run, but there is no `podSecurity` equivalent on the new type.
+#
+# Measured with Kyverno CLI 1.19.1:
+#
+#   ValidatingPolicy + spec.podSecurity  -> "Applying 0 policy rule(s)", exit 0,
+#                                           no error. The field does not exist
+#                                           and is dropped in silence.
+#   ValidatingPolicy + spec.validations  -> works (CEL control case).
+#   ClusterPolicy + validate.podSecurity -> works. Autogen expands to 3 rules,
+#                                           exit 1 on failure, exit 0 on pass.
+#
+# Hand-writing the restricted level as CEL was rejected: it is a large ruleset
+# that upstream maintains, and the silent-drop behaviour above means a subtly
+# wrong hand-written policy is indistinguishable from a correct one in CI
+# output. The deprecation is a warning with no removal version named, so the
+# cost of this choice is bounded rework later.
+#
+# The job that runs this asserts rules-applied > 0 and pass > 0 for that exact
+# reason — a dropped or unparsable policy must fail loudly, not quietly.
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: restricted-pod-security-standard
+  annotations:
+    policies.kyverno.io/title: Restricted Pod Security Standard
+    policies.kyverno.io/category: Pod Security Standards (Restricted)
+    policies.kyverno.io/subject: Pod
+    policies.kyverno.io/description: >-
+      Requires every pod rendered by these charts to satisfy the restricted Pod
+      Security Standard. Enforced in CI only; nothing installs this policy into
+      a cluster.
+spec:
+  # Required for the CLI to evaluate the policy against a static manifest rather
+  # than only at admission.
+  background: true
+  rules:
+    - name: restricted
+      match:
+        any:
+          - resources:
+              kinds:
+                - Pod
+      validate:
+        failureAction: Enforce
+        podSecurity:
+          level: restricted
+          version: latest

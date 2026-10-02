@@ -1,0 +1,51 @@
+# Render case: rasa, every optional component on.
+#
+# Lives outside charts/ for the same reason as studio-full.yaml: keeping
+# charts/** out of a CI-only diff.
+#
+# The chart refuses to render a PodDisruptionBudget for a release that runs at
+# most one replica, because a budget over a single replica makes the node
+# undrainable. With autoscaling on, the effective minimum comes from
+# autoscaling.minReplicas and NOT from replicaCount, so both have to be above 1
+# here or the render fails.
+replicaCount: 2
+
+rasa:
+  # The chart refuses to render an unauthenticated API unless this is set, and
+  # the CI render supplies no authToken or jwtSecret.
+  allowUnauthenticatedApi: true
+
+ingress:
+  enabled: true
+  className: nginx
+  # hosts is empty by default, so an enabled ingress must describe itself fully.
+  hosts:
+    - host: rasa.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+
+podDisruptionBudget:
+  enabled: true
+
+persistence:
+  create: true
+  # Required when create is true — the schema rejects an unset value.
+  storageClassName: standard
+
+autoscaling:
+  enabled: true
+  # See the replicaCount note above: this is what the PodDisruptionBudget guard
+  # actually reads once autoscaling is enabled.
+  minReplicas: 2
+
+networkPolicy:
+  enabled: true
+  denyAll: true
+  nodeCIDR:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx

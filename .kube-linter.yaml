@@ -1,9 +1,17 @@
 # kube-linter configuration
 #
-# Replaces the previous Snyk IaC scan. kube-linter reads the chart directories
-# directly (it renders them itself), so no `helm template` step is needed - but
-# `helm dependency build` IS required for charts with subcharts, otherwise the
-# subchart's objects are silently skipped (studio drops from 38 to 27 objects).
+# Replaces the previous Snyk IaC scan. kube-linter can read a chart directory
+# and render it itself, but only with default values - it takes no values file.
+# CI therefore renders each chart first (.github/scripts/render-all.sh) and
+# points kube-linter at the output, because a directory scan of charts/studio
+# fails schema validation, finds zero objects, and still exits 0. The render
+# includes `helm dependency build`, which is required for charts with subcharts
+# or the subchart's objects are silently skipped (studio drops 38 to 27).
+#
+# NOTE: this file is repo-root, and CI lints every chart from whichever branch
+# is under test. Each release branch carries a different mix of chart versions,
+# so an exclusion change that is correct for one branch can break another. Lint
+# from the branch CI will actually run on before changing anything here.
 #
 # Every exclusion below is a deliberate design decision in these charts, not a
 # finding waiting to be fixed. Everything else stays enabled, including
@@ -21,11 +29,6 @@ checks:
     # component's securityContext rather than enabled by default, because several
     # images write to their root filesystem at runtime.
     - no-read-only-root-fs
-
-    # runAsNonRoot is set where the image supports it. The remaining objects
-    # (the bundled rasa subchart and the helm test hook pods) intentionally leave
-    # it unset.
-    - run-as-non-root
 
     # Probes target ports that are not declared as containerPort. This is
     # intentional - the ports are reachable, they are simply not enumerated in

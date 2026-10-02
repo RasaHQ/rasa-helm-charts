@@ -1,0 +1,48 @@
+# Render case: studio, every optional component on.
+#
+# Lives outside charts/ on purpose. A file under charts/studio/ci/ would put
+# charts/** in the diff of any PR that touches it, which re-arms check-rc and
+# the ct version-increment gate for a CI-only change.
+#
+# Under defaults this chart emits no Ingress, no sibling ingestion Deployment,
+# no HPA and no NetworkPolicy, so a defaults-only render proves far less than
+# the object count suggests. Everything switched on here exists to make one of
+# those templates render.
+config:
+  database:
+    host: postgres.example.com
+
+global:
+  # app.ingress has no `hosts` key; the host comes from here.
+  ingressHost: studio.example.com
+
+app:
+  ingress:
+    enabled: true
+    className: nginx
+  migration:
+    # Adds the waitForIt init container to the migration Job.
+    waitForIt: true
+  autoscaling:
+    enabled: true
+
+eventIngestion:
+  # Emits the sibling {release}-app-ingestion Deployment instead of running the
+  # consumers on the app pod.
+  mode: separate
+
+networkPolicy:
+  enabled: true
+  denyAll: true
+  # Required with denyAll: without a node CIDR the kubelet cannot reach the
+  # probes, and without an ingress peer nothing can reach the app port.
+  nodeCIDR:
+    - ipBlock:
+        cidr: 10.0.0.0/8
+  allowIngressFrom:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: ingress-nginx
+
+rasa:
+  enabled: true

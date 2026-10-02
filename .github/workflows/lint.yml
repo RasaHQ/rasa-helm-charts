@@ -84,6 +84,10 @@ jobs:
     runs-on: ubuntu-26.04
 
     strategy:
+      # Without this, the first chart to fail cancels the others mid-scan and
+      # their results never appear -- so a run reports one broken chart when
+      # three are broken.
+      fail-fast: false
       matrix:
         charts: ["studio", "rasa", "op-kits"]
 

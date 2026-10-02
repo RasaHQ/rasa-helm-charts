@@ -113,10 +113,28 @@ runs:
         ACCESS_TOKEN: ${{ steps.google-auth.outputs.access_token }}
         CHART_PATH: ${{ inputs.chart-path }}
         CHART_URI: oci://${{ inputs.gar-location }}-docker.pkg.dev/${{ inputs.gcp-project-id }}/${{ inputs.gar-repository }}
+        CHART_NAME: ${{ steps.get-chart-name.outputs.name }}
+        CHART_VERSION: ${{ steps.get-chart-version.outputs.version }}
         CHART_TAR: ${{ steps.get-chart-name.outputs.name }}-${{ steps.get-chart-version.outputs.version }}.tgz
         REGISTRY_URL: https://${{ inputs.gar-location }}-docker.pkg.dev
       run: |
         echo "${ACCESS_TOKEN}" | helm registry login -u oauth2accesstoken --password-stdin "${REGISTRY_URL}"
+
+        # Refuse to overwrite a version that is already in the registry.
+        #
+        # Two published versions have ambiguous content today -- rasa
+        # 3.0.0-rc.11 and studio 3.0.0-rc.37 -- each pushed twice from a
+        # different branch, so neither can be pinned to a known tree. The
+        # bump check in .github/workflows/chart-version-bump.yaml would not
+        # have caught either: both pushes carried a version that was new to
+        # their own branch but already taken in GAR. Only the registry knows.
+        if helm show chart "${CHART_URI}/${CHART_NAME}" --version "${CHART_VERSION}" >/dev/null 2>&1; then
+          echo "::error::${CHART_NAME} ${CHART_VERSION} is already published at ${CHART_URI}."
+          echo "::error::Pushing would replace it, leaving one version with two different trees."
+          echo "::error::Increment version in ${CHART_PATH}/Chart.yaml and push again."
+          exit 1
+        fi
+
         helm dependency update "${CHART_PATH}"
         helm package "${CHART_PATH}"
         helm push "${CHART_TAR}" "${CHART_URI}"

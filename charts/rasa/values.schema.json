@@ -227,6 +227,7 @@
         "enabled": { "type": "boolean" },
         "minAvailable": { "type": ["integer", "string", "null"] },
         "maxUnavailable": { "type": ["integer", "string", "null"] },
+        "unhealthyPodEvictionPolicy": { "type": ["string", "null"], "enum": ["AlwaysAllow", "IfHealthyBudget", null] },
         "annotations": { "type": "object" }
       }
     },

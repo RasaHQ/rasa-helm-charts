@@ -30,6 +30,16 @@ spec:
   */}}
   maxUnavailable: 1
   {{- end }}
+  {{- /*
+  Guarded like the budget fields above, for a different reason: a bare
+  `unhealthyPodEvictionPolicy:` key would be owned by Helm, so every upgrade
+  would revert whatever the API server had defaulted. An explicit null has to
+  omit the field outright, which also leaves this chart installable on a
+  cluster that predates the field.
+  */}}
+  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.unhealthyPodEvictionPolicy) }}
+  unhealthyPodEvictionPolicy: {{ .Values.podDisruptionBudget.unhealthyPodEvictionPolicy }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "rasa.selectorLabels" . | nindent 6 }}

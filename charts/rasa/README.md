@@ -2,11 +2,11 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.22](https://img.shields.io/badge/Version-3.0.0--rc.22-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
+![Version: 3.0.0-rc.23](https://img.shields.io/badge/Version-3.0.0--rc.23-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
 
 ## Prerequisites
 
-- Kubernetes 1.30+
+- Kubernetes 1.31+
 - Helm 3.8.0+
 - A valid Rasa Pro license key
 
@@ -82,7 +82,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.22
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.23
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -97,7 +97,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 3.0.0-rc.22
+helm install my-release rasa/rasa --version 3.0.0-rc.23
 ```
 
 ## Upgrading the Chart
@@ -120,8 +120,8 @@ helm upgrade my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-cha
 ### Upgrading to 3.0.0
 
 3.0.0 is a breaking release: the chart deploys the Rasa Pro server only, the
-values are flattened, and the licence key moved. Three changes need work
-outside your values file.
+values are flattened, the licence key moved, and the Kubernetes floor rises to
+1.31. Four changes need work outside your values file.
 
 **See [MIGRATION.md](MIGRATION.md) for the full guide.**
 
@@ -334,7 +334,7 @@ lifecycle:
 terminationGracePeriodSeconds: 60
 ```
 
-The native `sleep` handler needs no shell or `sleep` binary in the image, which matters for images you do not build yourself. It has been enabled by default since Kubernetes 1.30, the minimum this chart supports, so no feature gate is required. The equivalent `exec` form remains available if you would rather run a real drain command than simply wait:
+The native `sleep` handler needs no shell or `sleep` binary in the image, which matters for images you do not build yourself. It has been enabled by default since Kubernetes 1.30, below the 1.31 minimum this chart supports, so no feature gate is required. The equivalent `exec` form remains available if you would rather run a real drain command than simply wait:
 
 ```yaml
 lifecycle:
@@ -395,7 +395,7 @@ See the [integrations.yml reference](https://mantle.rasa.com/reference/integrati
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 3.0.0-rc.22 \
+  --version 3.0.0-rc.23 \
   --set-file rasa.integrationsRaw=./integrations.yml \
   --set-file rasa.endpointsRaw=./endpoints.yml
 ```
@@ -407,7 +407,7 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 3.0.0-rc.22
+      targetRevision: 3.0.0-rc.23
       helm:
         fileParameters:
           - name: rasa.integrationsRaw
@@ -849,11 +849,12 @@ The following table lists all configurable parameters for this chart and their d
 | overrideEnv | list | Replaces the generated environment wholesale, including RASA_LICENSE. Empty keeps it. Use extraEnv to add. | `[]` |
 | persistence | object | PersistentVolumeClaim for model data at /app/working-data. | `{"create":false,"hostPath":{"enabled":false},"storageCapacity":"1Gi","storageClassName":null,"storageRequests":"1Gi"}` |
 | podAnnotations | object | Pod annotations. | `{}` |
-| podDisruptionBudget | object | PodDisruptionBudget for the Rasa Pro pods. Off by default. Requires more than one replica: the chart refuses to render a budget for a single-replica Deployment, because it would make the node undrainable. | `{"annotations":{},"enabled":false,"maxUnavailable":null,"minAvailable":null}` |
+| podDisruptionBudget | object | PodDisruptionBudget for the Rasa Pro pods. Off by default. Requires more than one replica: the chart refuses to render a budget for a single-replica Deployment, because it would make the node undrainable. | `{"annotations":{},"enabled":false,"maxUnavailable":null,"minAvailable":null,"unhealthyPodEvictionPolicy":"AlwaysAllow"}` |
 | podDisruptionBudget.annotations | object | Annotations for the PodDisruptionBudget. | `{}` |
 | podDisruptionBudget.enabled | bool | Create the PodDisruptionBudget. | `false` |
 | podDisruptionBudget.maxUnavailable | string | Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable. Both unset by default; the chart then uses maxUnavailable: 1. | `nil` |
 | podDisruptionBudget.minAvailable | string | Minimum pods that must stay available. Mutually exclusive with maxUnavailable. Both unset by default; the chart then uses maxUnavailable: 1. | `nil` |
+| podDisruptionBudget.unhealthyPodEvictionPolicy | string | How pods that are Running but not yet Ready are treated by the eviction API. AlwaysAllow lets a node drain evict them even when the budget is exhausted, so a crash-looping release cannot pin a node indefinitely. IfHealthyBudget protects them instead, which suits a slow start-up — Rasa loads its model before it reports Ready — at the cost of blocking drains on an already-degraded release. Unset omits the field, leaving the cluster default (IfHealthyBudget). Requires Kubernetes 1.31 or later. | `"AlwaysAllow"` |
 | podLabels | object | Labels on all Rasa pods. | `{}` |
 | podSecurityContext | object | Pod-level security context. | `{"enabled":true}` |
 | rasa.allowUnauthenticatedApi | bool | Accept an unauthenticated API: silences the install warning and the render refusal. | `false` |

@@ -2,11 +2,10 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "Scope is deliberately limited to CI: action pins in .github/workflows and .github/actions, plus the tool versions those actions install (annotated with '# renovate:' comments, which the github-actions manager reads natively as depType 'uses-with').",
-    "Helm charts are managed separately: enabling the helmv3/helm-values managers would raise PRs that change charts/** without bumping Chart.yaml, which ct lint rejects.",
+    "Only Chart.yaml appVersion is tracked under charts/**. Containment comes from enabledManagers plus each custom manager's fileMatch, not from ignorePaths -- enabling helmv3 or helm-values would expose values.yaml and Chart.lock as well.",
+    "An appVersion PR deliberately fails ct's version-increment gate until a reviewer picks the Chart.yaml version bump: app patch -> chart patch, app minor -> chart minor. That call is left to a human because a new app minor often needs chart changes too, such as new values to expose, and the reviewer has to read the release notes either way.",
+    "appVersion tags are 'X.Y.Z-latest' -- a mutable tag republished when the image is rebuilt, so the version is pinned while rebuilds float. The regex versioning captures 'latest' as compatibility, which confines comparisons to that tag family and excludes plain X.Y.Z along with the .devN, aN and rcN variants. allowedVersions caps at 10.0.0 to exclude the 90.90.90 sentinel tag that exists in the rasa-pro repo, while still letting a real major be proposed as its own PR.",
     "Label is 'dependencies', NOT 'automated'. The lint, lint-helm4 and kube-linter jobs all skip on a PR carrying 'automated', so these PRs used to merge with every check skipped -- including the kube-linter and Kyverno version bumps that Renovate itself raises, whose only validation is the job that was being skipped. 'automated' is reserved for the helm-index PR in chart-release-github-pages.yml, which edits charts/index.yaml and genuinely needs the chart gates bypassed."
-  ],
-  "ignorePaths": [
-    "charts/**"
   ],
   "extends": [
     "config:recommended",
@@ -113,6 +112,32 @@
       "semanticCommitType": "chore",
       "semanticCommitScope": "ci",
       "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Rasa Pro appVersion. Listed after the custom.regex rules above so it overrides their grouping and 'ci' scope: each chart needs its own PR, because each needs its own Chart.yaml version bump.",
+      "matchPackageNames": [
+        "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"
+      ],
+      "groupName": "rasa-pro appVersion",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "rasa",
+      "allowedVersions": "<10.0.0",
+      "addLabels": [
+        "rasa"
+      ]
+    },
+    {
+      "description": "Studio appVersion. Note the chart major and the app major are decoupled: studio chart 3.x tracks the Studio 2.x app, so the cap here is a rail against junk tags and not a pin to the 2.x line.",
+      "matchPackageNames": [
+        "europe-west3-docker.pkg.dev/rasa-releases/studio/studio"
+      ],
+      "groupName": "studio appVersion",
+      "semanticCommitType": "chore",
+      "semanticCommitScope": "studio",
+      "allowedVersions": "<10.0.0",
+      "addLabels": [
+        "studio"
+      ]
     }
   ],
   "customManagers": [
@@ -127,6 +152,32 @@
         "# renovate: datasource=(?<datasource>\\S+) depName=(?<depName>\\S+)(?: versioning=(?<versioning>\\S+))?\\s+[\\w-]+: [\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
       ],
       "versioningTemplate": "{{#if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
+    },
+    {
+      "customType": "regex",
+      "description": "Rasa Pro appVersion in charts/rasa/Chart.yaml. No '# renovate:' annotation, so that adding this needs no charts/** edit -- which would arm check-rc and ct's version-increment gate on a CI-only PR. The image name lives here instead.",
+      "fileMatch": [
+        "^charts/rasa/Chart\\.yaml$"
+      ],
+      "matchStrings": [
+        "appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "depNameTemplate": "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>latest)$"
+    },
+    {
+      "customType": "regex",
+      "description": "Studio appVersion in charts/studio/Chart.yaml. Inert until a stable 'X.Y.Z-latest' tag is published; the repo holds only .devN tags at the time of writing.",
+      "fileMatch": [
+        "^charts/studio/Chart\\.yaml$"
+      ],
+      "matchStrings": [
+        "appVersion:\\s*[\"']?(?<currentValue>[^\"'\\s]+)[\"']?"
+      ],
+      "depNameTemplate": "europe-west3-docker.pkg.dev/rasa-releases/studio/studio",
+      "datasourceTemplate": "docker",
+      "versioningTemplate": "regex:^(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<compatibility>latest)$"
     }
   ]
 }

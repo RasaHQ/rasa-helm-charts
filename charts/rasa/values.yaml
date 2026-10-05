@@ -387,6 +387,8 @@ podDisruptionBudget:
   minAvailable:
   # -- Maximum pods that may be unavailable at once. Mutually exclusive with minAvailable. Both unset by default; the chart then uses maxUnavailable: 1.
   maxUnavailable:
+  # -- How pods that are Running but not yet Ready are treated by the eviction API. AlwaysAllow lets a node drain evict them even when the budget is exhausted, so a crash-looping release cannot pin a node indefinitely. IfHealthyBudget protects them instead, which suits a slow start-up — Rasa loads its model before it reports Ready — at the cost of blocking drains on an already-degraded release. Unset omits the field, leaving the cluster default (IfHealthyBudget). Requires Kubernetes 1.31 or later.
+  unhealthyPodEvictionPolicy: AlwaysAllow
   # -- Annotations for the PodDisruptionBudget.
   annotations: {}
 

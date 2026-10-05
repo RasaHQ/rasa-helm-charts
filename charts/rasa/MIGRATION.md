@@ -5,7 +5,9 @@ Upgrade notes for breaking chart releases. For everything else see
 
 ## Upgrading to 3.0.0
 
-Three changes need work **outside** your values file. Everything else is a values edit or a changed default.
+**Check your cluster version first.** 3.0.0 raises the chart's floor to Kubernetes **1.31**, up from the 1.23 that 2.x enforced. The PodDisruptionBudget's `unhealthyPodEvictionPolicy` is stable only from 1.31. On an older cluster `helm upgrade` refuses to run and nothing below this line applies — upgrade the cluster, or stay on 2.x.
+
+Four changes need work **outside** your values file. Everything else is a values edit or a changed default.
 
 ### 1. Delete the Deployment first — the selector is immutable
 

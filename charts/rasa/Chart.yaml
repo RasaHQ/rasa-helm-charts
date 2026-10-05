@@ -2,15 +2,11 @@ apiVersion: v2
 name: rasa
 description: A Rasa Pro Helm chart for Kubernetes
 type: application
-# Minimum Kubernetes version. Set by the PodDisruptionBudget's
-# unhealthyPodEvictionPolicy (templates/poddisruptionbudget.yaml), stable from
-# 1.31 -- autoscaling/v2 in templates/hpa.yaml only needs 1.23. The `-0` suffix
-# lets pre-release cluster versions satisfy the constraint.
-#
-# Helm enforces this for the chart a user installs directly and NOT for a chart
-# vendored as a subchart, so charts/studio declares the same floor.
+# Minimum Kubernetes version. Set by unhealthyPodEvictionPolicy in
+# templates/poddisruptionbudget.yaml, stable from 1.31. The `-0` suffix lets
+# pre-release cluster versions satisfy the constraint.
 kubeVersion: ">=1.31.0-0"
-version: 3.0.0-rc.23
+version: 3.0.0-rc.24
 appVersion: "3.20.0-latest"
 home: https://rasa.com
 sources:

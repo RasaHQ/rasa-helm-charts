@@ -11,7 +11,14 @@ running the unified `studio` image, replaces bundled Keycloak with Better Auth
 served at `/api/auth/*`, and moves the bundled Rasa Pro subchart to its own
 3.0.0. It **requires Studio ≥ 2.0.0**.
 
-Four things need work **outside** your values file. Everything else is a values
+**Check your cluster version first.** 3.0.0 raises the chart's floor to
+Kubernetes **1.31**, up from the 1.23 that 2.x enforced. The bundled Rasa Pro
+subchart sets `unhealthyPodEvictionPolicy` on its PodDisruptionBudget, which is
+stable only from 1.31, and Helm does not enforce a subchart's own floor — so
+this chart declares it. On an older cluster `helm upgrade` refuses to run and
+nothing below this line applies: upgrade the cluster, or stay on 2.x.
+
+Five things need work **outside** your values file. Everything else is a values
 edit or a changed default.
 
 ### 1. Delete the old topology — Helm will not

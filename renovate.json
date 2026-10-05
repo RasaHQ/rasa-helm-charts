@@ -2,7 +2,8 @@
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
   "description": [
     "Scope is deliberately limited to CI: action pins in .github/workflows and .github/actions, plus the tool versions those actions install (annotated with '# renovate:' comments, which the github-actions manager reads natively as depType 'uses-with').",
-    "Helm charts are managed separately: enabling the helmv3/helm-values managers would raise PRs that change charts/** without bumping Chart.yaml, which ct lint rejects."
+    "Helm charts are managed separately: enabling the helmv3/helm-values managers would raise PRs that change charts/** without bumping Chart.yaml, which ct lint rejects.",
+    "Label is 'dependencies', NOT 'automated'. The lint, lint-helm4 and kube-linter jobs all skip on a PR carrying 'automated', so these PRs used to merge with every check skipped -- including the kube-linter and Kyverno version bumps that Renovate itself raises, whose only validation is the job that was being skipped. 'automated' is reserved for the helm-index PR in chart-release-github-pages.yml, which edits charts/index.yaml and genuinely needs the chart gates bypassed."
   ],
   "ignorePaths": [
     "charts/**"
@@ -17,7 +18,7 @@
     "before 6am on monday"
   ],
   "labels": [
-    "automated"
+    "dependencies"
   ],
   "enabledManagers": [
     "github-actions",

@@ -1,0 +1,36 @@
+name: Chart Version Bump
+run-name: Check chart version bump on ${{ github.ref_name }}
+
+# On push, not on pull_request. ct's check-version-increment compares against
+# main (ct.yaml sets target-branch: main), so once a release/* branch is ahead
+# of main every later commit passes without a bump -- and each one republishes
+# the same chart version with different content. A PR-time check cannot see
+# those intermediate commits; only a push-time check can.
+#
+# Scoped to release/* because those are the branches that publish: the
+# *-release-candidate.yml workflows trigger on push to release/* and push to
+# GAR, so an unbumped push there is an overwrite of a released version.
+on:
+  push:
+    branches:
+      - release/*
+    paths:
+      - charts/**
+
+jobs:
+  check-version-bump:
+    name: Check chart version bump
+    runs-on: ubuntu-26.04
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # The check diffs two revisions, so a shallow clone is not enough.
+          fetch-depth: 0
+
+      - name: Check each changed chart carries a version bump
+        env:
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.event.after }}
+        run: .github/scripts/check-chart-version-bump.sh "$BEFORE_SHA" "$AFTER_SHA"

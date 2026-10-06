@@ -5,9 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>{% if page.title %}{{ page.title }} | {{ site.title }}{% else %}{{ site.title }}{% endif %}</title>
   <meta name="description" content="{{ page.description | default: site.description }}">
+  <link rel="preconnect" href="https://cdn.rasa.ai" crossorigin>
+  <link rel="preload" href="https://cdn.rasa.ai/fonts/STKBureauSans-Book.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="https://cdn.rasa.ai/fonts/STKBureauSerif-Book.woff2" as="font" type="font/woff2" crossorigin>
   <style>
     /* ── Reset ──────────────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* ── Fonts (STK Bureau, licensed; hosted on cdn.rasa.ai) ─────────────── */
+    @font-face {
+      font-family: "STK Bureau Serif";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSerif-Book.woff2") format("woff2");
+      font-weight: 350;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "STK Bureau Sans";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSans-Book.woff2") format("woff2");
+      font-weight: 350;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "STK Bureau Sans";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSans-Italic.woff2") format("woff2");
+      font-weight: 400;
+      font-style: italic;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "STK Bureau Sans";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSans-Medium.woff2") format("woff2");
+      font-weight: 500;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "STK Bureau Sans";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSans-SemiBold.woff2") format("woff2");
+      font-weight: 600;
+      font-style: normal;
+      font-display: swap;
+    }
+
+    @font-face {
+      font-family: "STK Bureau Sans Mono";
+      src: url("https://cdn.rasa.ai/fonts/STKBureauSansMono-Regular.woff2") format("woff2");
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
 
     /* ── Brand tokens (Rasa Visual Identity) ─────────────────────────────── */
     :root {
@@ -37,15 +89,15 @@
       --radius:       6px;
 
       /* Typography: STK Bureau family, with system fallbacks */
-      --font-serif: "STK Bureau Serif", "STK Bureau Serif Book", Georgia, "Times New Roman", serif;
-      --font-sans:  "STK Bureau Sans", "STK Bureau Sans Book", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      --font-serif: "STK Bureau Serif", Georgia, "Times New Roman", serif;
+      --font-sans:  "STK Bureau Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
       --font-mono:  "STK Bureau Sans Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
     }
 
     /* ── Base ────────────────────────────────────────────────────────────── */
     body {
       font-family: var(--font-sans);
-      font-weight: 400;
+      font-weight: 350; /* Book */
       font-size: 16px;
       line-height: 1.65;
       color: var(--text);
@@ -179,7 +231,7 @@
     .content h2,
     .content h3 {
       font-family: var(--font-serif);
-      font-weight: 400;
+      font-weight: 350; /* Book */
       letter-spacing: -0.01em;
     }
 

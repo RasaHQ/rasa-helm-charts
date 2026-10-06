@@ -8,27 +8,92 @@ By installing and using this software, you agree to be bound by the terms and co
 
 1. Get Rasa application URL by running these commands:
 
-{{- if .Values.rasa.ingress.enabled }}
-{{- range $host := .Values.rasa.ingress.hosts }}
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
   {{- range .paths }}
-  http{{ if $.Values.rasa.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
   {{- end }}
 {{- end }}
 
-{{- else if contains "NodePort" .Values.rasa.service.type }}
+{{- else if contains "NodePort" .Values.service.type }}
   export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "rasa.fullname" . }})
   export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
   echo http://$NODE_IP:$NODE_PORT
 
-{{- else if contains "LoadBalancer" .Values.rasa.service.type }}
+{{- else if contains "LoadBalancer" .Values.service.type }}
      NOTE: It may take a few minutes for the LoadBalancer IP to be available.
            You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "rasa.fullname" . }}'
   export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "rasa.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
-  echo http://$SERVICE_IP:{{ .Values.rasa.service.port }}
+  echo http://$SERVICE_IP:{{ .Values.service.port }}
 
-{{- else if contains "ClusterIP" .Values.rasa.service.type }}
-  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "rasa.fullname" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "rasa.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
   export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
   echo "Visit http://127.0.0.1:8080 to use your application"
   kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+
+{{- if .Release.IsUpgrade }}
+{{- /*
+Only on upgrade. A fresh install has nothing to migrate, and printing the
+whole 3.0.0 block there buried the access instructions above it.
+*/}}
+2. Upgrading from 2.x? Three changes need action OUTSIDE your values file:
+
+   a) The Deployment selector changed, and Kubernetes will not let you edit it.
+      `helm upgrade` FAILS on an existing release. Delete first, accept downtime:
+        kubectl delete deployment <release>-rasa -n <namespace>
+        helm upgrade <release> ...
+      Do NOT use --cascade=orphan: the orphaned pods can never be adopted and
+      survive `helm uninstall`.
+
+   b) The licence Secret key default is now RASA_LICENSE, not rasaProLicense.
+      A chart cannot rename a key inside your Secret, so the pod will not start
+      until you rename it there, or pin the old name:
+        rasa: {license: {secretName: rasa-secrets, secretKey: rasaProLicense}}
+
+   c) Deployment settings moved from rasa.* to the chart ROOT. rasa.image,
+      rasa.resources, rasa.nodeSelector, rasa.service, rasa.ingress and the
+      rest are now top-level; rasa.* keeps only Rasa's own config (port,
+      enableApi, cors, endpoints, integrations, license, ...).
+      Old keys are IGNORED, not rejected, so a stale rasa.image silently falls
+      back to the chart default image. Also ignored: rasa.settings.*,
+      additional* (now extra*), volumes, volumeMounts, rasa.credentials,
+      useDefaultArgs, rasa.enabled, rasa.scheme, and the actionServer /
+      duckling / rasaProServices components.
+
+   Full migration guide, including every removed and renamed key:
+   https://github.com/RasaHQ/rasa-helm-charts/blob/main/charts/rasa/MIGRATION.md
+{{- end }}
+
+{{- if include "rasa.apiUnauthenticated" . }}
+
+   WARNING: the Rasa HTTP API is enabled and NOT authenticated.
+   No credential reaches the container, so anything that can reach the Service
+   can call the API, including the model-management endpoints. The chart warns
+   here and REFUSES to render if you route traffic to it - ingress.enabled, a
+   service.type other than ClusterIP, or hostNetwork. A ClusterIP Service is
+   not a boundary either, and a route added outside this chart is invisible.
+   Fix it:
+     --set rasa.authToken.secretName=rasa-secrets \
+     --set rasa.authToken.secretKey=AUTH_TOKEN    # the Secret must hold this key
+   Or --set rasa.enableApi=false (needs a model; rasa run exits without either).
+   Or --set rasa.allowUnauthenticatedApi=true to accept an open API.
+{{- end }}
+{{- /*
+Official Rasa Pro images, none of which warrant the custom-image warning.
+Docker Hub is what the public docs point people at, in both the short and the
+fully-qualified form, so warning there would tell a user following our own
+documentation that they are running something unofficial.
+*/}}
+{{- $officialRepos := list "europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro" "rasa/rasa-pro" "docker.io/rasa/rasa-pro" "index.docker.io/rasa/rasa-pro" }}
+{{- if and .Values.containerSecurityContext.enabled .Values.containerSecurityContext.runAsNonRoot (not (has .Values.image.repository $officialRepos)) }}
+
+   WARNING: custom image with runAsNonRoot: true.
+   {{ .Values.image.repository }}
+   The image USER must be a NUMERIC non-root uid (the stock image is 1001), or
+   the pod fails with CreateContainerConfigError. Check it:
+     docker image inspect --format '{{ "{{.Config.User}}" }}' {{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}
+   Opt out with --set containerSecurityContext.runAsNonRoot=false (the pod
+   then fails the restricted Pod Security Standard).
 {{- end }}

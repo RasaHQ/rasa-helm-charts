@@ -1,97 +1,37 @@
 {{/*
-Environment Variables for Studio between Keycloak and Backend
+Render a native EnvVar list, stringifying scalar values.
+Values often arrive as YAML/JSON booleans or numbers (Pulumi YAML coerces
+"true"/"false" config strings to booleans; `--set x=true` does the same),
+but Kubernetes requires EnvVar.value to be a string — so scalars are
+stringified and quoted here. valueFrom entries pass through verbatim.
 */}}
-{{- define "studio.shared.env" -}}
-- name: KEYCLOAK_ADMIN
-  value: {{ .Values.config.keycloak.adminUsername | quote }}
-- name: KEYCLOAK_ADMIN_USERNAME
-  value: {{ .Values.config.keycloak.adminUsername | quote }}
-# -- The password for the Keycloak admin user. This credential is used to manage users and clients in Keycloak.
-- name: KEYCLOAK_ADMIN_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.keycloak.adminPassword.secretName | quote }}
-      key: {{ .Values.config.keycloak.adminPassword.secretKey | quote }}
-{{- end -}}
-
-{{/*
-Environment Variables for Keycloak Containers
-*/}}
-{{- define "studio.keycloak.env" -}}
-- name: KC_DB_USERNAME
-  {{- if not (empty .Values.keycloak.database.username) }}
-    {{- if kindIs "map" .Values.keycloak.database.username }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.keycloak.database.username.secretName | quote }}
-      key: {{ .Values.keycloak.database.username.secretKey | quote }}
-    {{- else }}
-  value: {{ .Values.keycloak.database.username | quote }}
-    {{- end }}
-  {{- else }}
-    {{- if kindIs "map" .Values.config.database.username }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.database.username.secretName | quote }}
-      key: {{ .Values.config.database.username.secretKey | quote }}
-    {{- else }}
-  value: {{ .Values.config.database.username | quote }}
-    {{- end }}
+{{- define "studio.envList" -}}
+{{- range . }}
+- name: {{ .name }}
+  {{- if hasKey . "value" }}
+  value: {{ .value | toString | quote }}
   {{- end }}
-- name: KC_DB_PASSWORD
-  {{- if not (empty .Values.keycloak.database.password) }}
+  {{- with .valueFrom }}
   valueFrom:
-    secretKeyRef:
-      name: {{ .Values.keycloak.database.password.secretName | quote }}
-      key: {{ .Values.keycloak.database.password.secretKey | quote }}  
-  {{- else }}
-  valueFrom:
-    secretKeyRef:
-      name: {{ .Values.config.database.password.secretName | quote }}
-      key: {{ .Values.config.database.password.secretKey | quote }}
+    {{- toYaml . | nindent 4 }}
   {{- end }}
-- name: KC_DB_URL
-  value: "jdbc:postgresql://{{ default .Values.config.database.host .Values.keycloak.database.host }}:{{ default .Values.config.database.port .Values.keycloak.database.port }}/{{ default .Values.config.database.keycloakDatabaseName .Values.keycloak.database.databaseName }}"
-{{- end -}}
-
-{{/*
-Keycloak URL
-*/}}
-{{- define "studio.keycloak.url" -}}
-{{- if not (empty .Values.config.keycloak.url ) -}}
-- name: KEYCLOAK_URL
-  value: {{ .Values.config.keycloak.url }}
-{{- else -}}
-- name: KEYCLOAK_URL
-  value: "http://{{ include "studio.fullname" . }}-keycloak/auth"
-{{- end -}}
-{{- end -}}
-
-{{/*
-Backend Keycloak env
-*/}}
-{{- define "studio.backend.keycloak" -}}
-{{- with .Values.config.keycloak }}
-- name: KEYCLOAK_REALM
-  value: {{ .realm | quote }}
-- name: KEYCLOAK_CLIENT_ID
-  value: {{ .clientId | quote }}
-- name: KEYCLOAK_API_CLIENT_ID
-  value: {{ .apiClientId | quote }}
-- name: KEYCLOAK_API_USERNAME
-  value: {{ .apiUsername | quote }}
-- name: KEYCLOAK_API_PASSWORD
-  valueFrom:
-    secretKeyRef:
-      name: {{ .apiPassword.secretName | quote }}
-      key: {{ .apiPassword.secretKey | quote }}
 {{- end }}
 {{- end -}}
 
+
+
+
+
 {{/*
-Backend Database Environment Variables
+Database Environment Variables
+
+Included by all three database clients: the app Deployment, the standalone
+event-ingestion Deployment, and the migration Job. Event ingestion is a
+first-class client with its own connection pool, not a borrower of the app's
+— which is why config.database lives under config: rather than app:.
+Keep app-only env in studio.app.*.env helpers instead.
 */}}
-{{- define "studio.backend.env" -}}
+{{- define "studio.database.env" -}}
 {{- with .Values.config.database }}
 - name: DB_USER
   {{- if kindIs "map" .username }}
@@ -110,17 +50,24 @@ Backend Database Environment Variables
       key: {{ .password.secretKey | quote }}
 {{- end }}
 - name: DB_HOST
+  {{- if kindIs "map" .host }}
+  valueFrom:
+    secretKeyRef:
+      name: {{ .host.secretName | quote }}
+      key: {{ .host.secretKey | quote }}
+  {{- else }}
   value: {{ .host | quote }}
+  {{- end }}
 - name: DB_PORT
   value: {{ .port | quote }}
 - name: DB_NAME
-  {{- if kindIs "map" .backendDatabaseName }}
+  {{- if kindIs "map" .databaseName }}
   valueFrom:
     secretKeyRef:
-      name: {{ .backendDatabaseName.secretName | quote }}
-      key: {{ .backendDatabaseName.secretKey | quote }}
+      name: {{ .databaseName.secretName | quote }}
+      key: {{ .databaseName.secretKey | quote }}
   {{- else }}
-  value: {{ .backendDatabaseName | quote }}
+  value: {{ .databaseName | quote }}
   {{- end }}
 - name: DB_QUERY
   value: {{ .queryParams | quote }}
@@ -137,4 +84,50 @@ Backend Database Environment Variables
   value: "true"
 {{- end }}
 {{- end }}
+{{- end -}}
+
+
+{{/*
+Studio App Initial Admin Environment Variables
+
+Rendered only when `app.initialAdmin.email` is non-empty, so an install that
+already has an admin never needs the password Secret key to exist.
+App-only: the backend creates the account on startup.
+Context is the `app.initialAdmin` map, not the root.
+*/}}
+{{- define "studio.app.initialAdmin.env" -}}
+- name: INITIAL_ADMIN_EMAIL
+  value: {{ .email | quote }}
+- name: INITIAL_ADMIN_PASSWORD
+  valueFrom:
+    secretKeyRef:
+      name: {{ .password.secretName | quote }}
+      key: {{ .password.secretKey | quote }}
+{{- end -}}
+
+
+{{/*
+Studio App GitHub App Environment Variables
+
+Caller guards on a non-empty `app.github`; the schema enforces all-or-none, so
+every key is present here.
+App-only: the migration Job and event-ingestion deployment never read these.
+Context is the `app.github` map, not the root.
+*/}}
+{{- define "studio.app.github.env" -}}
+- name: GITHUB_APP_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .appId.secretName | quote }}
+      key: {{ .appId.secretKey | quote }}
+- name: GITHUB_APP_INSTALLATION_ID
+  valueFrom:
+    secretKeyRef:
+      name: {{ .installationId.secretName | quote }}
+      key: {{ .installationId.secretKey | quote }}
+- name: GITHUB_APP_PRIVATE_KEY
+  valueFrom:
+    secretKeyRef:
+      name: {{ .privateKey.secretName | quote }}
+      key: {{ .privateKey.secretKey | quote }}
 {{- end -}}

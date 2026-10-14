@@ -55,7 +55,7 @@ whole 3.0.0 block there buried the access instructions above it.
    c) Deployment settings moved from rasa.* to the chart ROOT. rasa.image,
       rasa.resources, rasa.nodeSelector, rasa.service, rasa.ingress and the
       rest are now top-level; rasa.* keeps only Rasa's own config (port,
-      enableApi, cors, endpoints, integrations, license, ...).
+      enableApi, cors, integrations, license, ...).
       Old keys are IGNORED, not rejected, so a stale rasa.image silently falls
       back to the chart default image. Also ignored: rasa.settings.*,
       additional* (now extra*), volumes, volumeMounts, rasa.credentials,

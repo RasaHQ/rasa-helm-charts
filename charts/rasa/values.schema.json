@@ -249,7 +249,6 @@
           "jwtSecret": { "oneOf": [{ "type": "null" }, { "$ref": "#/definitions/secretRef" }] },
           "allowUnauthenticatedApi": { "type": "boolean" },
           "integrationsRaw": { "type": ["string", "null"] },
-          "endpointsRaw": { "type": ["string", "null"] },
           "jwtMethod": { "type": "string" },
           "cors": { "type": ["string", "null"] },
           "mountDefaultConfigmap": { "type": "boolean" },
@@ -262,7 +261,6 @@
               "debug": { "type": "boolean" }
             }
           },
-          "endpoints": { "type": "object" },
           "environment": { "type": "string" },
           "logging": {
             "type": "object",

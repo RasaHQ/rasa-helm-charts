@@ -6,8 +6,8 @@ type: application
 # templates/poddisruptionbudget.yaml, stable from 1.31. The `-0` suffix lets
 # pre-release cluster versions satisfy the constraint.
 kubeVersion: ">=1.31.0-0"
-version: 3.0.0-rc.25
-appVersion: "3.20.0-latest"
+version: 3.0.0-rc.26
+appVersion: "3.21.0.dev10"
 home: https://rasa.com
 sources:
   - https://github.com/RasaHQ/rasa-helm-charts/tree/main/charts/rasa

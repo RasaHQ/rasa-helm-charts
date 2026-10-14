@@ -225,11 +225,11 @@ Merge a structured map with its raw-YAML counterpart, or return nothing when
 both are empty.
 
 configmap.yaml and both volume defines share this so they cannot disagree about
-whether there is configuration to ship — they once did, and endpointsRaw
+whether there is configuration to ship — they once did, and a raw value
 produced a ConfigMap that nothing mounted. fromYaml reports a parse failure as a
 map holding only an Error key, hence the length check.
 
-Usage: include "rasa.mergedConfig" (dict "structured" ... "raw" ... "field" "endpointsRaw")
+Usage: include "rasa.mergedConfig" (dict "structured" ... "raw" ... "field" "integrationsRaw")
 */}}
 {{- define "rasa.mergedConfig" -}}
 {{- $merged := dict -}}
@@ -249,13 +249,6 @@ Usage: include "rasa.mergedConfig" (dict "structured" ... "raw" ... "field" "end
 {{- if $merged -}}
 {{- toYaml $merged -}}
 {{- end -}}
-{{- end -}}
-
-{{/*
-Report whether the chart has any endpoints configuration to mount.
-*/}}
-{{- define "rasa.hasEndpoints" -}}
-{{- include "rasa.mergedConfig" (dict "structured" .Values.rasa.endpoints "raw" .Values.rasa.endpointsRaw "field" "endpointsRaw") -}}
 {{- end -}}
 
 {{/*

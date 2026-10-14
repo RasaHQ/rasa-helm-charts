@@ -35,19 +35,17 @@ rasa:
   jwtMethod: HS256
   # -- Allowed CORS origin. Restrict to specific domains in production.
   cors: '*'
-  # -- Render integrations and endpoints into a ConfigMap mounted at /app/integrations.yml and /app/endpoints.yml. Set false to supply them yourself.
+  # -- Render integrations into a ConfigMap mounted at /app/integrations.yml. Nothing is created or mounted while integrations and integrationsRaw are empty. Set false to supply the file yourself.
   mountDefaultConfigmap: true
-  ## See: https://mantle.rasa.com/reference/integrations-yml
-  # -- Rendered to /app/integrations.yml (Mantle: LLM, model groups, channels, MCP servers, tracing). Replaces the file in your trained project, so supply all of it.
+  ## See: https://mantle.rasa.com/reference/integrations-yml#integrations-yml
+  # -- Rendered to /app/integrations.yml (model groups, channels, MCP servers, tracker/lock/event stores, tracing). Replaces the file in your trained project, so supply all of it.
   integrations: {}
-    # llm:
-    #   model_group: orchestrator
-    # model_groups:
+    # model_groups:               # agent.yml names the group: orchestrator.model_group
     #   - id: orchestrator
     #     models:
     #       - provider: openai
     #         model: gpt-5.1
-    #         api_key_env: OPENAI_API_KEY
+    #         api_key: ${OPENAI_API_KEY}
     # channels:
     #   rest: { enabled: true }
 
@@ -61,44 +59,6 @@ rasa:
     enabled: true
     # -- Print telemetry payloads to stdout.
     debug: false
-
-  # Not all parameters are mandatory
-  ## See: https://rasa.com/docs/pro/build/configuring-assistant#endpoints
-  # -- DEPRECATED. Rendered to /app/endpoints.yml: tracker store, event broker, lock store, action endpoint, NLG server.
-  endpoints: {}
-    # action_endpoint:
-    #   url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
-    #   # or run actions in-process instead of over HTTP:
-    #   # actions_module: "actions"
-
-    # tracker_store:              # conversations are in memory unless set
-    #   type: redis
-    #   url: redis.data.svc.cluster.local
-    #   port: 6379
-    #   db: 0
-    #   password: <password>
-    #   use_ssl: false
-
-    # event_broker:               # stream conversation events out
-    #   type: kafka
-    #   url: kafka.data.svc.cluster.local:9092
-    #   security_protocol: SASL_PLAINTEXT
-    #   sasl_mechanism: SCRAM-SHA-512
-    #   sasl_username: rasa
-    #   sasl_password: <password>
-
-    # lock_store:                 # required for more than one replica
-    #   type: redis
-    #   url: redis.data.svc.cluster.local
-
-    # model_groups:               # moves to rasa.integrations under Mantle
-    #   - id: openai-gpt-4o
-    #     models:
-    #       - provider: openai
-    #         model: gpt-4o-2024-11-20
-
-  # -- DEPRECATED. Raw endpoints.yml as a string, deep-merged with endpoints, which wins. Malformed YAML fails the render.
-  endpointsRaw: ""
 
   # -- Rasa runtime environment. 'production' disables development-only defaults.
   environment: development

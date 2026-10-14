@@ -1,20 +1,12 @@
 {{- define "rasa.containers.volumes" -}}
 {{- if .Values.rasa.mountDefaultConfigmap -}}
-{{- $hasEndpoints := include "rasa.hasEndpoints" . }}
-{{- $hasIntegrations := include "rasa.hasIntegrations" . }}
-{{- if or $hasEndpoints $hasIntegrations }}
+{{- if include "rasa.hasIntegrations" . }}
 - name: "rasa-configuration"
   configMap:
     name: {{ include "rasa.fullname" . }}-configmap
     items:
-{{- if $hasEndpoints }}
-      - key: "endpoints"
-        path: "endpoints.yml"
-{{- end }}
-{{- if $hasIntegrations }}
       - key: "integrations"
         path: "integrations.yml"
-{{- end }}
 {{- end }}
 {{- end }}
 {{ if .Values.mountModelsVolume -}}
@@ -45,15 +37,7 @@ itself needs no write access, so it is deliberately not mounted over.
 
 {{- define "rasa.containers.volumeMounts" -}}
 {{- if .Values.rasa.mountDefaultConfigmap -}}
-{{- $hasEndpoints := include "rasa.hasEndpoints" . }}
-{{- $hasIntegrations := include "rasa.hasIntegrations" . }}
-{{- if $hasEndpoints }}
-- mountPath: "/app/endpoints.yml"
-  subPath: "endpoints.yml"
-  name: "rasa-configuration"
-  readOnly: true
-{{- end }}
-{{- if $hasIntegrations }}
+{{- if include "rasa.hasIntegrations" . }}
 - mountPath: "/app/integrations.yml"
   subPath: "integrations.yml"
   name: "rasa-configuration"

@@ -7,7 +7,7 @@ Upgrade notes for breaking chart releases. For everything else see
 
 **Check your cluster version first.** 3.0.0 raises the chart's floor to Kubernetes **1.31**, up from the 1.23 that 2.x enforced. The PodDisruptionBudget's `unhealthyPodEvictionPolicy` is stable only from 1.31. On an older cluster `helm upgrade` refuses to run and nothing below this line applies — upgrade the cluster, or stay on 2.x.
 
-Four changes need work **outside** your values file. Everything else is a values edit or a changed default.
+Five changes need work **outside** your values file. Everything else is a values edit or a changed default.
 
 ### 1. Delete the Deployment first — the selector is immutable
 
@@ -78,9 +78,30 @@ persistence:
 
 Set it to `""` to bind a classless PersistentVolume instead — that is what you want alongside `persistence.hostPath.enabled: true`, which creates exactly such a volume. `""` is an explicit empty string, not the same as leaving the key unset, and admission leaves it alone.
 
+### 5. `endpoints.yml` is gone — move every block into `rasa.integrations`
+
+The default image (the chart's `appVersion`) **fails startup** when an `endpoints.yml` exists at the project root, and reads everything it held from `integrations.yml`. The chart no longer renders or mounts one: `rasa.settings.endpoints` and `rasa.settings.endpointsRaw` have no 3.0.0 equivalent of the same name.
+
+They are **ignored, not rejected**. A leftover `tracker_store` is silently dropped and conversations stay in memory, lost on every restart. Move each block before upgrading:
+
+| `endpoints.yml` block | 3.0.0 |
+|---|---|
+| `tracker_store`, `lock_store`, `event_broker`, `timer_store`, `secrets_manager` | `rasa.integrations.<same key>` |
+| `tracing`, `metrics` | `rasa.integrations.<same key>` |
+| `models` (remote model server) | `rasa.integrations.rasa_model_server` |
+| `model_groups` | `rasa.integrations.model_groups`; name the orchestrator group in your project's `agent.yml` as `orchestrator.model_group` — an `llm:` section is rejected |
+| `recordings` | `rasa.integrations.recordings` |
+| `action_endpoint` | no equivalent — write `@tool` functions in your project, or declare `rasa.integrations.mcp_servers` |
+| `nlg` | no equivalent — set `metadata: rephrase: true` on the response variant in `responses.yml` |
+| raw file via `rasa.settings.endpointsRaw` | merge it into the file you pass as `rasa.integrationsRaw` |
+
+`rasa.integrations` **replaces** the `integrations.yml` in your trained project, so supply the whole file. With both `rasa.integrations` and `rasa.integrationsRaw` empty, or with `mountDefaultConfigmap: false`, the chart creates no ConfigMap and mounts nothing — you then supply `/app/integrations.yml` yourself, baked into the image or mounted through `extraVolumes`; see [Running without the chart's ConfigMap](README.md#mount-configuration-options). Remove any `endpoints.yml` you mount at `/app`.
+
+See [Keys this file does not accept](https://mantle.rasa.com/reference/integrations-yml#keys-this-file-does-not-accept) for the full list.
+
 ### Deployment settings moved to the chart root
 
-`rasa.*` now holds **only Rasa's own configuration** — `port`, `enableApi`, `cors`, `authToken`, `jwtSecret`, `license`, `endpoints`, `integrations`, `telemetry`, `logging`, `environment`, `debugMode`, `mountDefaultConfigmap`. Everything that describes the Kubernetes workload moved to the root.
+`rasa.*` now holds **only Rasa's own configuration** — `port`, `enableApi`, `cors`, `authToken`, `jwtSecret`, `license`, `integrations`, `telemetry`, `logging`, `environment`, `debugMode`, `mountDefaultConfigmap`. Everything that describes the Kubernetes workload moved to the root.
 
 The old split was arbitrary: `podLabels` was at the root while `podAnnotations` sat under `rasa`, `imagePullSecrets` at the root while `image` was nested, `networkPolicy` at the root while `service` and `ingress` were nested.
 
@@ -113,6 +134,7 @@ Old keys are **ignored, not rejected**, so anything left behind is silently drop
 | `volumes` / `volumeMounts` | `extraVolumes` / `extraVolumeMounts` |
 | `global.additionalDeploymentLabels` | `global.extraDeploymentLabels` |
 | `rasa.credentials` / `rasa.credentialsRaw` | `rasa.integrations` / `rasa.integrationsRaw` |
+| `rasa.settings.endpoints` / `rasa.settings.endpointsRaw` | `rasa.integrations` / `rasa.integrationsRaw` — see [5](#5-endpointsyml-is-gone--move-every-block-into-rasaintegrations) |
 | `useDefaultArgs: false` | `args: []` |
 | `rasa.enabled`, `rasa.scheme`, `rasa.ducklingHttpUrl` | removed |
 | `actionServer`, `duckling`, `rasaProServices` | removed |
@@ -142,7 +164,7 @@ at its default.
 
 | change | what to do |
 |---|---|
-| Action servers are bring-your-own | Deploy one, point `rasa.endpoints.action_endpoint.url` at it — **before** upgrading. The pod starts either way; the break surfaces on the first custom-action call. |
+| The action server is gone | `actionServer` is removed and `action_endpoint` has no equivalent — move custom actions to `@tool` functions or `mcp_servers` **before** upgrading. See [5](#5-endpointsyml-is-gone--move-every-block-into-rasaintegrations). |
 | `RASA_DUCKLING_HTTP_URL` no longer emitted | Set it through `extraEnv` if you run Duckling. |
 | NetworkPolicies are release-scoped | They previously selected *every* pod in the namespace. Set `dnsNamespace`, `egressPorts` and `allowIngressFrom` — see [Network Policies](README.md#network-policies). |
 | `ingress.hosts` is empty | Supply hosts, or enabling the ingress is refused at render time. |
@@ -151,6 +173,5 @@ at its default.
 | `appVersion` drives the image tag | `image.tag` defaults to `""` and follows `appVersion`, so **a chart upgrade moves the image**. Set an exact tag to pin. |
 | Ports follow `rasa.port`, not `service.port` | `service.targetPort` is empty by default and follows `rasa.port`. Set it only for a different or named port. |
 | `rasa.cors` is a plain string | The secret-reference form was never read and rendered `map[...]` into `--cors`. Remove it. |
-| `rasa.endpoints` is deprecated but works | `rasa run` still reads `/app/endpoints.yml`. Move `model_groups`, `mcp_servers` and `tracing` into `rasa.integrations`. |
 
 > **Custom images:** `runAsNonRoot: true` needs a numeric non-root `USER` (the stock image is `USER 1001`). An image running as root, or declaring `USER` by name, fails with `CreateContainerConfigError`. Check with `docker image inspect --format '{{.Config.User}}' <your-image>`, or opt out via `containerSecurityContext.runAsNonRoot: false`.

@@ -2,7 +2,7 @@
 
 A Rasa Pro Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.25](https://img.shields.io/badge/Version-3.0.0--rc.25-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.20.0-latest](https://img.shields.io/badge/AppVersion-3.20.0--latest-informational?style=flat-square)
+![Version: 3.0.0-rc.27](https://img.shields.io/badge/Version-3.0.0--rc.27-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square) ![AppVersion: 3.21.0.dev10](https://img.shields.io/badge/AppVersion-3.21.0.dev10-informational?style=flat-square)
 
 ## Prerequisites
 
@@ -82,7 +82,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.25
+helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa --version 3.0.0-rc.27
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -97,7 +97,7 @@ helm repo update
 Then install the chart:
 
 ```console
-helm install my-release rasa/rasa --version 3.0.0-rc.25
+helm install my-release rasa/rasa --version 3.0.0-rc.27
 ```
 
 ## Upgrading the Chart
@@ -200,14 +200,42 @@ extraEnv:
 
 **mountDefaultConfigmap:**
 
-By default, the chart renders a ConfigMap from `rasa.integrations` and `rasa.endpoints` and mounts it at `/app/integrations.yml` and `/app/endpoints.yml` — which is where `rasa run` looks for them, since the image sets `WORKDIR /app`. If you would rather supply those files from somewhere else, disable it:
+By default, the chart renders a ConfigMap from `rasa.integrations` and mounts it at `/app/integrations.yml` — which is where `rasa run` looks for it, since the image sets `WORKDIR /app`. Rasa reads `integrations.yml` from that directory at startup, not from the trained model archive, so one must exist there.
 
-```yaml
-rasa:
-  mountDefaultConfigmap: false
-```
+**Running without the chart's ConfigMap**
 
-When disabled, supply the files yourself — baked into the image, or mounted at `/app/integrations.yml` and `/app/endpoints.yml` through `rasa.extraVolumes` and `rasa.extraVolumeMounts`.
+The chart creates no ConfigMap, volume or mount when either of these is true:
+
+- `rasa.integrations` and `rasa.integrationsRaw` are both empty (the default), or
+- `rasa.mountDefaultConfigmap: false`, which skips the ConfigMap even when integrations are set.
+
+Then you supply `/app/integrations.yml` yourself, in one of two ways:
+
+1. **Bake it into a custom image** — `COPY integrations.yml /app/integrations.yml` on top of the Rasa Pro image. No chart values needed.
+2. **Mount your own ConfigMap or Secret** — useful when the file is managed outside this release, for example by External Secrets or another GitOps app:
+
+   ```console
+   kubectl create secret generic my-integrations \
+     --from-file=integrations.yml=./integrations.yml
+   ```
+
+   ```yaml
+   rasa:
+     mountDefaultConfigmap: false
+   extraVolumes:
+     - name: integrations
+       secret:
+         secretName: my-integrations
+   extraVolumeMounts:
+     - name: integrations
+       mountPath: /app/integrations.yml
+       subPath: integrations.yml
+       readOnly: true
+   ```
+
+   A `subPath` mount does not pick up later edits to the Secret; restart the pod after changing it.
+
+Either way, keep credentials out of the file as `${VAR}` placeholders and inject the variables through `extraEnv` or `envFrom`. Do not put an `endpoints.yml` in `/app`: Rasa fails startup when one exists at the project root.
 
 **mountModelsVolume:**
 
@@ -361,29 +389,30 @@ lifecycle:
 
 > **Note:** The hook applies to the component's main container only. Containers you supply through `initContainers` or `extraContainers` can carry their own `lifecycle` block directly.
 
-### Configuring Integrations and Endpoints via ConfigMap
+### Configuring Integrations via ConfigMap
 
-With `rasa.mountDefaultConfigmap: true` (the default), the chart renders a ConfigMap and mounts it at `/app/integrations.yml` and `/app/endpoints.yml`.
+With `rasa.mountDefaultConfigmap: true` (the default), the chart renders `rasa.integrations` into a ConfigMap and mounts it at `/app/integrations.yml`. When `rasa.integrations` and `rasa.integrationsRaw` are both empty, no ConfigMap is created and nothing is mounted — see [Running without the chart's ConfigMap](#mount-configuration-options).
+
+Rasa reads only `integrations.yml`. An `endpoints.yml` at the project root fails startup, so the chart does not render one — every block it used to hold now lives in `rasa.integrations`.
 
 #### Configuring Integrations
 
-`rasa.integrations` renders `/app/integrations.yml` — the LLM, its model groups, channels, MCP servers and tracing. Mantle reads channels from here and ignores `credentials.yml` entirely.
+`rasa.integrations` renders `/app/integrations.yml` — model groups, channels, MCP servers, tracker / lock / event stores and tracing. Mantle reads channels from here and ignores `credentials.yml` entirely. Which model group runs the agent is set in your project's `agent.yml` (`orchestrator.model_group`), not here.
 
 ```yaml
 rasa:
   integrations:
-    llm:
-      model_group: main
     model_groups:
       - id: main
         models:
           - provider: openai
             model: gpt-4o
+            api_key: ${OPENAI_API_KEY}
     channels:
       - name: rest
 ```
 
-> **Warning:** this mount **replaces** the `integrations.yml` inside your trained project. Supply the whole file, `llm.model_group` included, or the server fails validation at startup.
+> **Warning:** this mount **replaces** the `integrations.yml` inside your trained project. Supply the whole file, including the group `agent.yml` names in `orchestrator.model_group`, or the server fails validation at startup.
 
 > **Note:** a project counts as Mantle only when `integrations.yml` **and** at least one `skills/*/skill.md` exist under the project root. The skills come from the trained artifact, so this key alone does not switch a project to Mantle — and if the artifact unpacks its skills elsewhere, channels fall back to `credentials.yml`, which the chart no longer provides.
 
@@ -391,13 +420,12 @@ See the [integrations.yml reference](https://mantle.rasa.com/reference/integrati
 
 #### Sourcing Files from Raw YAML
 
-`rasa.integrationsRaw` and `rasa.endpointsRaw` take the **raw contents** of an `integrations.yml` / `endpoints.yml` file, so the file a developer already uses locally flows straight into the ConfigMap. Each is deep-merged with its structured counterpart, and **the structured value wins on key conflicts** — so infrastructure-owned blocks like `tracker_store` stay authoritative. Malformed YAML fails the render. `${VAR}` placeholders pass through verbatim.
+`rasa.integrationsRaw` takes the **raw contents** of an `integrations.yml` file, so the file a developer already uses locally flows straight into the ConfigMap. It is deep-merged with `rasa.integrations`, and **the structured value wins on key conflicts** — so infrastructure-owned blocks like `tracker_store` stay authoritative. Malformed YAML fails the render. `${VAR}` placeholders pass through verbatim.
 
 ```console
 helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/rasa \
-  --version 3.0.0-rc.25 \
-  --set-file rasa.integrationsRaw=./integrations.yml \
-  --set-file rasa.endpointsRaw=./endpoints.yml
+  --version 3.0.0-rc.27 \
+  --set-file rasa.integrationsRaw=./integrations.yml
 ```
 
 ArgoCD multi-source `Application`:
@@ -407,56 +435,31 @@ spec:
   sources:
     - repoURL: https://github.com/RasaHQ/rasa-helm-charts
       chart: rasa
-      targetRevision: 3.0.0-rc.25
+      targetRevision: 3.0.0-rc.27
       helm:
         fileParameters:
           - name: rasa.integrationsRaw
             path: $values/integrations.yml
-          - name: rasa.endpointsRaw
-            path: $values/endpoints.yml
     - repoURL: https://github.com/your-org/your-app-repo
       targetRevision: main
       ref: values
 ```
 
-#### Configuring Endpoints
+#### Stores, Event Broker and Model Server
 
-The `rasa.endpoints` section allows you to configure various endpoints and integrations. These endpoints are written to the `endpoints.yml` file in the ConfigMap.
-
-**Action Server Endpoint:**
-
-This chart does not deploy an action server. Run one yourself and point `action_endpoint.url` at it as a full HTTP URL:
-
-```yaml
-rasa:
-  endpoints:
-    action_endpoint:
-      url: "http://my-action-server.actions.svc.cluster.local:5055/webhook"
-```
-
-Alternatively, run your actions in-process by setting `actions_module` instead of `url`.
-
-**Model Storage:**
-
-```yaml
-rasa:
-  endpoints:
-    models:
-      url: http://my-server.com/models/default_core@latest
-      wait_time_between_pulls: 10
-```
+Credentials belong in environment variables, referenced as `${VAR}`. A literal `password` warns at `rasa train`. Inject the variables through `extraEnv` or `envFrom` from a Kubernetes Secret.
 
 **Tracker Store (Redis example):**
 
 ```yaml
 rasa:
-  endpoints:
+  integrations:
     tracker_store:
       type: redis
       url: <host of the redis instance>
       port: 6379
       db: 0
-      password: <password>
+      password: ${REDIS_PASSWORD}
       use_ssl: false
 ```
 
@@ -464,36 +467,56 @@ rasa:
 
 ```yaml
 rasa:
-  endpoints:
+  integrations:
     tracker_store:
       type: sql
       dialect: postgresql
       url: <hostname>
       db: <database>
       username: <username>
-      password: <password>
+      password: ${DB_PASSWORD}
       port: 5432
+```
+
+**Lock Store** — required for more than one replica:
+
+```yaml
+rasa:
+  integrations:
+    lock_store:
+      type: redis
+      host: <host of the redis instance>
+      port: 6379
+      password: ${REDIS_PASSWORD}
 ```
 
 **Event Broker (Kafka example):**
 
 ```yaml
 rasa:
-  endpoints:
+  integrations:
     event_broker:
       type: kafka
-      url: localhost:9095
+      url: kafka.data.svc.cluster.local:9092
       sasl_mechanism: SCRAM-SHA-512
       security_protocol: SASL_PLAINTEXT
-      sasl_username: testuser
-      sasl_password: testpass123
+      sasl_username: rasa
+      sasl_password: ${KAFKA_PASSWORD}
       partition_by_sender: true
       client_id: rasa-broker
 ```
 
-**Model Groups:**
+**Remote Model Server** — formerly `models:` in `endpoints.yml`:
 
-Model groups require an LLM provider API key. Inject it as an environment variable from a Kubernetes Secret:
+```yaml
+rasa:
+  integrations:
+    rasa_model_server:
+      url: http://my-server.com/models/default_core@latest
+      wait_time_between_pulls: 10
+```
+
+**Model Group API keys:**
 
 ```console
 kubectl create secret generic openai-secret \
@@ -507,18 +530,9 @@ extraEnv:
       secretKeyRef:
         name: openai-secret
         key: apiKey
-rasa:
-  endpoints:
-    model_groups:
-      - id: openai-gpt-4o
-        models:
-          - provider: openai
-            model: gpt-4o-2024-11-20
-            request_timeout: 7
-            max_tokens: 256
 ```
 
-See the [Rasa endpoints documentation](https://rasa.com/docs/pro/build/configuring-assistant#endpoints) for complete endpoint configuration options.
+**Custom actions:** Mantle has no `action_endpoint`. Write `@tool` functions in your project, or declare [`mcp_servers`](https://mantle.rasa.com/reference/integrations-yml#mcp_servers) to call an external service. This chart does not deploy an action server.
 
 ### Environment Variables
 
@@ -862,17 +876,15 @@ The following table lists all configurable parameters for this chart and their d
 | rasa.cors | string | Allowed CORS origin. Restrict to specific domains in production. | `"*"` |
 | rasa.debugMode | bool |  | `false` |
 | rasa.enableApi | bool | Serve the Rasa HTTP API. On by default because rasa run exits when it has neither a model nor the API. The API is unauthenticated until you set authToken or jwtSecret. | `true` |
-| rasa.endpoints | object | DEPRECATED. Rendered to /app/endpoints.yml: tracker store, event broker, lock store, action endpoint, NLG server. | `{}` |
-| rasa.endpointsRaw | string | DEPRECATED. Raw endpoints.yml as a string, deep-merged with endpoints, which wins. Malformed YAML fails the render. | `""` |
 | rasa.environment | string | Rasa runtime environment. 'production' disables development-only defaults. | `"development"` |
-| rasa.integrations | object | Rendered to /app/integrations.yml (Mantle: LLM, model groups, channels, MCP servers, tracing). Replaces the file in your trained project, so supply all of it. | `{}` |
+| rasa.integrations | object | Rendered to /app/integrations.yml (model groups, channels, MCP servers, tracker/lock/event stores, tracing). Replaces the file in your trained project, so supply all of it. | `{}` |
 | rasa.integrationsRaw | string |  | `""` |
 | rasa.jwtMethod | string | JWT algorithm. | `"HS256"` |
 | rasa.jwtSecret | string | Secret holding the JWT signing secret for API requests. Unset by default; pair with jwtMethod. | `nil` |
 | rasa.license | object | Secret holding the Rasa Pro licence. Required. Passed to the container as RASA_LICENSE. | `{"secretKey":"RASA_LICENSE","secretName":"rasa-secrets"}` |
 | rasa.logging | object | Logging settings. | `{"logLevel":"info"}` |
 | rasa.logging.logLevel | string | Rasa log level. | `"info"` |
-| rasa.mountDefaultConfigmap | bool | Render integrations and endpoints into a ConfigMap mounted at /app/integrations.yml and /app/endpoints.yml. Set false to supply them yourself. | `true` |
+| rasa.mountDefaultConfigmap | bool | Render integrations into a ConfigMap mounted at /app/integrations.yml. Nothing is created or mounted while integrations and integrationsRaw are empty. Set false to supply the file yourself. | `true` |
 | rasa.port | int | Port Rasa binds. The container port, Service targetPort and probes all follow it. | `5005` |
 | rasa.telemetry | object | Telemetry settings. | `{"debug":false,"enabled":true}` |
 | rasa.telemetry.debug | bool | Print telemetry payloads to stdout. | `false` |

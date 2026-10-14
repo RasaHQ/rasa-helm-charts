@@ -1,0 +1,24 @@
+{{- if and .Values.networkPolicy.enabled .Values.networkPolicy.egressPorts }}
+{{- /*
+Gated on the list being non-empty: an egress rule with no ports and no `to`
+matches all ports to all destinations, so an empty egressPorts would invert
+this policy into allow-all-egress.
+*/}}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "rasa.fullname" . }}-allow-egress
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
+  policyTypes:
+  - Egress
+  egress:
+  - ports:
+    {{- range .Values.networkPolicy.egressPorts }}
+    - protocol: {{ .protocol | default "TCP" }}
+      port: {{ .port }}
+    {{- end }}
+{{- end }}

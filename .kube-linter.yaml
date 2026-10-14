@@ -17,9 +17,12 @@ checks:
     - unset-cpu-requirements
     - unset-memory-requirements
 
-    # readOnlyRootFilesystem is offered as a commented-out option in each
-    # component's securityContext rather than enabled by default, because several
-    # images write to their root filesystem at runtime.
+    # readOnlyRootFilesystem is offered as a commented-out option on the rasa
+    # component rather than enabled by default. The image sets HOME=/app and
+    # WORKDIR /app, so Rasa writes $HOME/.config and $HOME/.cache, and /tmp is
+    # declared as a Dockerfile VOLUME which Kubernetes ignores. Turning the flag
+    # on makes the chart mount emptyDirs at those three paths; leaving it off by
+    # default keeps the pod spec minimal for anyone who does not want it.
     - no-read-only-root-fs
 
     # runAsNonRoot is set where the image supports it. The remaining objects

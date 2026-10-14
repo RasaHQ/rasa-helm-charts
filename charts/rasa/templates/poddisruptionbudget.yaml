@@ -1,0 +1,46 @@
+{{- include "rasa.validatePodDisruptionBudget" . -}}
+{{- if .Values.podDisruptionBudget.enabled }}
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: {{ include "rasa.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "rasa.labels" . | nindent 4 }}
+  {{- with .Values.podDisruptionBudget.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  {{- /*
+  Tested for being absent, not falsy: maxUnavailable: 0 is a valid budget that
+  forbids every voluntary eviction, and `with` would drop it, leaving a spec
+  with no budget field at all. This matches how the validator decides whether
+  a field is set.
+  */}}
+  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.minAvailable) }}
+  minAvailable: {{ .Values.podDisruptionBudget.minAvailable }}
+  {{- else if not (kindIs "invalid" .Values.podDisruptionBudget.maxUnavailable) }}
+  maxUnavailable: {{ .Values.podDisruptionBudget.maxUnavailable }}
+  {{- else }}
+  {{- /*
+  Neither field is set, so pick one. If maxUnavailable carried a chart default
+  instead, Helm would merge it under a user who set only minAvailable and the
+  render would fail as "both set" -- for a field they never touched.
+  */}}
+  maxUnavailable: 1
+  {{- end }}
+  {{- /*
+  Guarded like the budget fields above, for a different reason: a bare
+  `unhealthyPodEvictionPolicy:` key would be owned by Helm, so every upgrade
+  would revert whatever the API server had defaulted. An explicit null has to
+  omit the field outright, which also leaves this chart installable on a
+  cluster that predates the field.
+  */}}
+  {{- if not (kindIs "invalid" .Values.podDisruptionBudget.unhealthyPodEvictionPolicy) }}
+  unhealthyPodEvictionPolicy: {{ .Values.podDisruptionBudget.unhealthyPodEvictionPolicy }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "rasa.selectorLabels" . | nindent 6 }}
+{{- end }}

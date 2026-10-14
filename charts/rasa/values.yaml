@@ -37,7 +37,7 @@ rasa:
   cors: '*'
   # -- Render integrations into a ConfigMap mounted at /app/integrations.yml. Nothing is created or mounted while integrations and integrationsRaw are empty. Set false to supply the file yourself.
   mountDefaultConfigmap: true
-  ## See: https://mantle.rasa.com/reference/integrations-yml
+  ## See: https://mantle.rasa.com/reference/integrations-yml#integrations-yml
   # -- Rendered to /app/integrations.yml (model groups, channels, MCP servers, tracker/lock/event stores, tracing). Replaces the file in your trained project, so supply all of it.
   integrations: {}
     # model_groups:               # agent.yml names the group: orchestrator.model_group
@@ -48,26 +48,6 @@ rasa:
     #         api_key: ${OPENAI_API_KEY}
     # channels:
     #   rest: { enabled: true }
-
-    # tracker_store:              # conversations are in memory unless set
-    #   type: redis
-    #   url: redis.data.svc.cluster.local
-    #   port: 6379
-    #   db: 0
-    #   password: ${REDIS_PASSWORD}
-    #   use_ssl: false
-
-    # event_broker:               # stream conversation events out
-    #   type: kafka
-    #   url: kafka.data.svc.cluster.local:9092
-    #   security_protocol: SASL_PLAINTEXT
-    #   sasl_mechanism: SCRAM-SHA-512
-    #   sasl_username: rasa
-    #   sasl_password: ${KAFKA_PASSWORD}
-
-    # lock_store:                 # required for more than one replica
-    #   type: redis
-    #   host: redis.data.svc.cluster.local
 
   # -- Raw integrations.yml as a string, deep-merged with integrations, which wins. For --set-file or ArgoCD fileParameters.
   integrationsRaw: ""

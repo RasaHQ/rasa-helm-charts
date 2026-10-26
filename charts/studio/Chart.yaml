@@ -6,7 +6,7 @@ type: application
 # enforce a subchart's kubeVersion, so it has to be repeated here. The `-0`
 # suffix lets pre-release cluster versions satisfy the constraint.
 kubeVersion: ">=1.31.0-0"
-version: 3.0.0-rc.63
+version: 3.0.0-rc.64
 appVersion: "2.0.0-latest"
 home: https://helm.rasa.com
 sources:

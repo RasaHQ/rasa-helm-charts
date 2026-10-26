@@ -698,6 +698,43 @@ app:
 > `DELETE_CONVERSATIONS_CRON_EXPRESSION`, `STUDIO_TELEMETRY_ENABLED`, and
 > `STUDIO_USER_ID_TELEMETRY_ENABLED`) when overriding.
 
+### AI tagging
+
+AI tagging is off by default. Two switches turn it on, and both are needed.
+`FEATURE_FLAG_AI_TAGGING` on `app.env` enables it in the backend.
+`FEATURE_FLAG_AI_TAGGING` on `app.webClient.config` lets the browser see it.
+Set `AI_TAGGING_PRO_URL` to the Rasa Pro tagging endpoint. When it is empty,
+AI tagging is not configured.
+
+```yaml
+app:
+  env:
+    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
+      value: "0 * * * *"
+    - name: STUDIO_TELEMETRY_ENABLED
+      value: "true"
+    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
+      value: "true"
+    - name: FEATURE_FLAG_AI_TAGGING
+      value: "true"
+    - name: AI_TAGGING_PRO_URL
+      value: "https://rasa-pro.example.com"
+  webClient:
+    config:
+      FEATURE_FLAG_AI_TAGGING: "true"
+```
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `FEATURE_FLAG_AI_TAGGING` | Turns AI tagging on in the backend. Set the same key to `"true"` in `app.webClient.config` too. | `"false"` |
+| `AI_TAGGING_PRO_URL` | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
+| `AI_TAGGING_MAX_ATTEMPTS` | Tries per batch, including the first. An invalid value logs a warning and the default is used. | `"3"` |
+| `AI_TAGGING_LIVE_MAX_WAIT_SECONDS` | Seconds a partial live batch waits before it is sent. An invalid value logs a warning and the default is used. | `"600"` |
+
+> **Note:** A custom `app.env` list replaces the chart default list wholesale.
+> Keep the default entries you still need (including
+> `FEATURE_FLAG_AI_TAGGING`) when overriding.
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:

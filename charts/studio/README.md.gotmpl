@@ -728,8 +728,8 @@ app:
 |----------|-------------|---------|
 | `FEATURE_FLAG_AI_TAGGING` | Turns AI tagging on in the backend. Set the same key to `"true"` in `app.webClient.config` too. | `"false"` |
 | `AI_TAGGING_PRO_URL` | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
-| `AI_TAGGING_MAX_ATTEMPTS` | Tries per batch, including the first. An invalid value logs a warning and the default is used. | `"3"` |
-| `AI_TAGGING_LIVE_MAX_WAIT_SECONDS` | Seconds a partial live batch waits before it is sent. An invalid value logs a warning and the default is used. | `"600"` |
+| `AI_TAGGING_MAX_ATTEMPTS` | Tries per batch, including the first. Must be a positive integer. | `"3"` |
+| `AI_TAGGING_LIVE_MAX_WAIT_SECONDS` | Seconds a partial live batch waits before it is sent. Must be a positive integer. | `"600"` |
 
 > **Note:** A custom `app.env` list replaces the chart default list wholesale.
 > Keep the default entries you still need (including

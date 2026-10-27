@@ -181,6 +181,14 @@ app:
       secretName: "studio-secrets"
       secretKey: "INITIAL_ADMIN_PASSWORD"
 
+  # -- AI tagging of conversations in Conversation Review. One switch turns it on
+  # in the backend and in the browser.
+  aiTagging:
+    # -- Turns on AI tagging in Conversation Review, in the backend and the browser.
+    enabled: false
+    # -- Rasa Pro tagging endpoint. Empty means AI tagging is not configured.
+    proUrl: ""
+
   # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
   # repositories. Three secret references — `appId`, `installationId`, `privateKey`
   # — each a `secretName` + `secretKey` pair, so they may live in one Secret or
@@ -222,22 +230,6 @@ app:
     # banking requirements); events then use a shared constant identity instead.
     - name: STUDIO_USER_ID_TELEMETRY_ENABLED
       value: "true"
-    # FEATURE_FLAG_AI_TAGGING: turns AI tagging of conversations on for the
-    # backend. Default "false". Turning it on also needs
-    # app.webClient.config FEATURE_FLAG_AI_TAGGING: "true" so the browser sees it.
-    - name: FEATURE_FLAG_AI_TAGGING
-      value: "false"
-    # AI_TAGGING_PRO_URL: URL of the Rasa Pro tagging endpoint. Empty means AI
-    # tagging is not configured.
-    # - name: AI_TAGGING_PRO_URL
-    #   value: "https://rasa-pro.example.com"
-    # AI_TAGGING_MAX_ATTEMPTS: tries per batch, including the first. Default "3".
-    # - name: AI_TAGGING_MAX_ATTEMPTS
-    #   value: "3"
-    # AI_TAGGING_LIVE_MAX_WAIT_SECONDS: how long a partial live batch waits
-    # before it is sent. Default "600".
-    # - name: AI_TAGGING_LIVE_MAX_WAIT_SECONDS
-    #   value: "600"
 
   # -- Additional environment variables from ConfigMap or Secret.
   # These will be mounted as environment variables in the container.

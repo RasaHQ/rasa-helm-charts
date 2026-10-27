@@ -700,40 +700,25 @@ app:
 
 ### AI tagging
 
-AI tagging is off by default. Two switches turn it on, and both are needed.
-`FEATURE_FLAG_AI_TAGGING` on `app.env` enables it in the backend.
-`FEATURE_FLAG_AI_TAGGING` on `app.webClient.config` lets the browser see it.
-Set `AI_TAGGING_PRO_URL` to the Rasa Pro tagging endpoint. When it is empty,
-AI tagging is not configured.
+AI tagging is off by default. One switch, `app.aiTagging.enabled`, turns it on
+in the backend and in the browser. Set `app.aiTagging.proUrl` to the Rasa Pro
+tagging endpoint. When it is empty, AI tagging is not configured.
+
+An `app.env` entry with the same name (`FEATURE_FLAG_AI_TAGGING` or
+`AI_TAGGING_PRO_URL`) overrides the value for the backend.
+`app.webClient.config.FEATURE_FLAG_AI_TAGGING` overrides it for the browser only.
 
 ```yaml
 app:
-  env:
-    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
-      value: "0 * * * *"
-    - name: STUDIO_TELEMETRY_ENABLED
-      value: "true"
-    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
-      value: "true"
-    - name: FEATURE_FLAG_AI_TAGGING
-      value: "true"
-    - name: AI_TAGGING_PRO_URL
-      value: "https://rasa-pro.example.com"
-  webClient:
-    config:
-      FEATURE_FLAG_AI_TAGGING: "true"
+  aiTagging:
+    enabled: true
+    proUrl: "https://rasa-pro.example.com"
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `FEATURE_FLAG_AI_TAGGING` | Turns AI tagging on in the backend. Set the same key to `"true"` in `app.webClient.config` too. | `"false"` |
-| `AI_TAGGING_PRO_URL` | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
-| `AI_TAGGING_MAX_ATTEMPTS` | Tries per batch, including the first. Must be a positive integer. | `"3"` |
-| `AI_TAGGING_LIVE_MAX_WAIT_SECONDS` | Seconds a partial live batch waits before it is sent. Must be a positive integer. | `"600"` |
-
-> **Note:** A custom `app.env` list replaces the chart default list wholesale.
-> Keep the default entries you still need (including
-> `FEATURE_FLAG_AI_TAGGING`) when overriding.
+The tuning settings have backend defaults and are not chart values. If you ever
+need them, set them through `app.env`: `AI_TAGGING_MAX_ATTEMPTS` (default `3`,
+tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
+(default `600`, how long a partial live batch waits before it is sent).
 
 ## URL Scheme (`connectionType`)
 

@@ -699,40 +699,25 @@ app:
 
 ### AI tagging
 
-AI tagging is off by default. Two switches turn it on, and both are needed.
-`FEATURE_FLAG_AI_TAGGING` on `app.env` enables it in the backend.
-`FEATURE_FLAG_AI_TAGGING` on `app.webClient.config` lets the browser see it.
-Set `AI_TAGGING_PRO_URL` to the Rasa Pro tagging endpoint. When it is empty,
-AI tagging is not configured.
+AI tagging is off by default. One switch, `app.aiTagging.enabled`, turns it on
+in the backend and in the browser. Set `app.aiTagging.proUrl` to the Rasa Pro
+tagging endpoint. When it is empty, AI tagging is not configured.
+
+An `app.env` entry with the same name (`FEATURE_FLAG_AI_TAGGING` or
+`AI_TAGGING_PRO_URL`) overrides the value for the backend.
+`app.webClient.config.FEATURE_FLAG_AI_TAGGING` overrides it for the browser only.
 
 ```yaml
 app:
-  env:
-    - name: DELETE_CONVERSATIONS_CRON_EXPRESSION
-      value: "0 * * * *"
-    - name: STUDIO_TELEMETRY_ENABLED
-      value: "true"
-    - name: STUDIO_USER_ID_TELEMETRY_ENABLED
-      value: "true"
-    - name: FEATURE_FLAG_AI_TAGGING
-      value: "true"
-    - name: AI_TAGGING_PRO_URL
-      value: "https://rasa-pro.example.com"
-  webClient:
-    config:
-      FEATURE_FLAG_AI_TAGGING: "true"
+  aiTagging:
+    enabled: true
+    proUrl: "https://rasa-pro.example.com"
 ```
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `FEATURE_FLAG_AI_TAGGING` | Turns AI tagging on in the backend. Set the same key to `"true"` in `app.webClient.config` too. | `"false"` |
-| `AI_TAGGING_PRO_URL` | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
-| `AI_TAGGING_MAX_ATTEMPTS` | Tries per batch, including the first. Must be a positive integer. | `"3"` |
-| `AI_TAGGING_LIVE_MAX_WAIT_SECONDS` | Seconds a partial live batch waits before it is sent. Must be a positive integer. | `"600"` |
-
-> **Note:** A custom `app.env` list replaces the chart default list wholesale.
-> Keep the default entries you still need (including
-> `FEATURE_FLAG_AI_TAGGING`) when overriding.
+The tuning settings have backend defaults and are not chart values. If you ever
+need them, set them through `app.env`: `AI_TAGGING_MAX_ATTEMPTS` (default `3`,
+tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
+(default `600`, how long a partial live batch waits before it is sent).
 
 ## URL Scheme (`connectionType`)
 
@@ -919,6 +904,9 @@ changes need work outside your values file.
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | app.affinity | object | Affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| app.aiTagging | object | AI tagging of conversations in Conversation Review. One switch turns it on in the backend and in the browser. | `{"enabled":false,"proUrl":""}` |
+| app.aiTagging.enabled | bool | Turns on AI tagging in Conversation Review, in the backend and the browser. | `false` |
+| app.aiTagging.proUrl | string | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
 | app.annotations | object | Annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.authSecret | object | Secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
 | app.automountServiceAccountToken | bool | Whether the app pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Studio never calls the Kubernetes API, so the token is left out; set it to true if you add a sidecar that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |
@@ -927,7 +915,7 @@ changes need work outside your values file.
 | app.autoscaling.maxReplicas | int | Maximum number of replicas. | `100` |
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
-| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"},{"name":"FEATURE_FLAG_AI_TAGGING","value":"false"}]` |
+| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |

@@ -131,3 +131,30 @@ Context is the `app.github` map, not the root.
       name: {{ .privateKey.secretName | quote }}
       key: {{ .privateKey.secretKey | quote }}
 {{- end -}}
+
+
+{{/*
+Studio App AI Tagging Environment Variables
+
+FEATURE_FLAG_AI_TAGGING is rendered so the flag is explicit in the pod spec.
+AI_TAGGING_PRO_URL is rendered only when `proUrl` is non-empty. A variable
+whose name is also set in `app.env` is skipped here, so the pod never gets a
+duplicate name and the `app.env` entry wins.
+App-only: the backend reads these; the browser flag comes from the configmap.
+Context is a dict: `aiTagging` is the `app.aiTagging` map, `env` is the
+`app.env` list.
+*/}}
+{{- define "studio.app.aiTagging.env" -}}
+{{- $names := list }}
+{{- range .env }}
+{{- $names = append $names .name }}
+{{- end }}
+{{- if not (has "FEATURE_FLAG_AI_TAGGING" $names) }}
+- name: FEATURE_FLAG_AI_TAGGING
+  value: {{ .aiTagging.enabled | toString | quote }}
+{{- end }}
+{{- if and .aiTagging.proUrl (not (has "AI_TAGGING_PRO_URL" $names)) }}
+- name: AI_TAGGING_PRO_URL
+  value: {{ .aiTagging.proUrl | quote }}
+{{- end }}
+{{- end -}}

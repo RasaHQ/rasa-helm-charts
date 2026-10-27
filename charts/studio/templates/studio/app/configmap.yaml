@@ -18,6 +18,9 @@ data:
     {{- else }}
     window.MS_API_URL = "";
     {{- end }}
+    {{- if not (hasKey (.Values.app.webClient.config | default dict) "FEATURE_FLAG_AI_TAGGING") }}
+    window.FEATURE_FLAG_AI_TAGGING = {{ .Values.app.aiTagging.enabled | toString | quote }};
+    {{- end }}
     {{- range $key, $value := .Values.app.webClient.config }}
     {{- if hasPrefix "FEATURE_FLAG_" $key }}
     window.{{ $key }} = {{ $value | quote }};

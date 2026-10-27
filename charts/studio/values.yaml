@@ -181,6 +181,14 @@ app:
       secretName: "studio-secrets"
       secretKey: "INITIAL_ADMIN_PASSWORD"
 
+  # -- AI tagging of conversations in Conversation Review. One switch turns it on
+  # in the backend and in the browser.
+  aiTagging:
+    # -- Turns on AI tagging in Conversation Review, in the backend and the browser.
+    enabled: false
+    # -- Rasa Pro tagging endpoint. Empty means AI tagging is not configured.
+    proUrl: ""
+
   # -- Optional GitHub App credentials, letting Studio connect projects to GitHub
   # repositories. Three secret references — `appId`, `installationId`, `privateKey`
   # — each a `secretName` + `secretKey` pair, so they may live in one Secret or

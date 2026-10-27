@@ -339,6 +339,23 @@
           },
           "additionalProperties": false
         },
+        "aiTagging": {
+          "description": "AI tagging of conversations in Conversation Review. One switch turns it on in the backend and in the browser.",
+          "type": "object",
+          "properties": {
+            "enabled": {
+              "description": "Turns on AI tagging in Conversation Review, in the backend and the browser. Accepts a boolean or the strings \"true\" and \"false\".",
+              "type": ["boolean", "string"],
+              "enum": [true, false, "true", "false"]
+            },
+            "proUrl": {
+              "description": "Rasa Pro tagging endpoint. Empty means AI tagging is not configured.",
+              "type": "string",
+              "pattern": "^$|^https?://"
+            }
+          },
+          "additionalProperties": false
+        },
         "github": {
           "description": "Optional GitHub App credentials letting Studio connect projects to GitHub repositories. All three keys must be set together, or the block left empty.",
           "type": "object",

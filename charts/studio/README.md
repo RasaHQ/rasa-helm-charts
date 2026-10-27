@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.63](https://img.shields.io/badge/Version-3.0.0--rc.63-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.64](https://img.shields.io/badge/Version-3.0.0--rc.64-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.63
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.64
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.63
+$ helm install my-release rasa/studio --version 3.0.0-rc.64
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.63
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.64
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.63
+$ helm pull rasa/studio --version 3.0.0-rc.64
 ```
 
 ## General Configuration
@@ -697,6 +697,28 @@ app:
 > `DELETE_CONVERSATIONS_CRON_EXPRESSION`, `STUDIO_TELEMETRY_ENABLED`, and
 > `STUDIO_USER_ID_TELEMETRY_ENABLED`) when overriding.
 
+### AI tagging
+
+AI tagging is off by default. One switch, `app.aiTagging.enabled`, turns it on
+in the backend and in the browser. Set `app.aiTagging.proUrl` to the Rasa Pro
+tagging endpoint. When it is empty, AI tagging is not configured.
+
+An `app.env` entry with the same name (`FEATURE_FLAG_AI_TAGGING` or
+`AI_TAGGING_PRO_URL`) overrides the value for the backend.
+`app.webClient.config.FEATURE_FLAG_AI_TAGGING` overrides it for the browser only.
+
+```yaml
+app:
+  aiTagging:
+    enabled: true
+    proUrl: "https://rasa-pro.example.com"
+```
+
+The tuning settings have backend defaults and are not chart values. If you ever
+need them, set them through `app.env`: `AI_TAGGING_MAX_ATTEMPTS` (default `3`,
+tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
+(default `600`, how long a partial live batch waits before it is sent).
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:
@@ -882,6 +904,9 @@ changes need work outside your values file.
 | Key | Type | Description | Default |
 |-----|------|-------------|---------|
 | app.affinity | object | Affinity rules for the app pods. This controls where the pods can be scheduled. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/#affinity-and-anti-affinity | `{}` |
+| app.aiTagging | object | AI tagging of conversations in Conversation Review. One switch turns it on in the backend and in the browser. | `{"enabled":false,"proUrl":""}` |
+| app.aiTagging.enabled | bool | Turns on AI tagging in Conversation Review, in the backend and the browser. | `false` |
+| app.aiTagging.proUrl | string | Rasa Pro tagging endpoint. Empty means AI tagging is not configured. | `""` |
 | app.annotations | object | Annotations to add to all Studio App resources. These annotations will be merged with deploymentAnnotations (deploymentAnnotations take precedence if keys conflict). Example:   custom.annotation/key: value Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.authSecret | object | Secret used by the app to sign sessions and tokens. Must be at least 32 characters long. Stored in a Kubernetes secret. Required. | `{"secretKey":"AUTH_SECRET","secretName":"studio-secrets"}` |
 | app.automountServiceAccountToken | bool | Whether the app pod is given a Kubernetes API token at /var/run/secrets/kubernetes.io/serviceaccount. Studio never calls the Kubernetes API, so the token is left out; set it to true if you add a sidecar that needs one. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-service-account/ | `false` |

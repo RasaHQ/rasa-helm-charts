@@ -90,6 +90,7 @@ spec:
             {{- with .Values.app.github }}
             {{- include "studio.app.github.env" . | nindent 12 }}
             {{- end }}
+            {{- include "studio.app.aiTagging.env" (dict "aiTagging" .Values.app.aiTagging "env" (.Values.app.env | default list)) | nindent 12 }}
             - name: BETTER_AUTH_BASE_URL
               value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
             - name: STUDIO_ROLE

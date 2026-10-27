@@ -698,6 +698,28 @@ app:
 > `DELETE_CONVERSATIONS_CRON_EXPRESSION`, `STUDIO_TELEMETRY_ENABLED`, and
 > `STUDIO_USER_ID_TELEMETRY_ENABLED`) when overriding.
 
+### AI tagging
+
+AI tagging is off by default. One switch, `app.aiTagging.enabled`, turns it on
+in the backend and in the browser. Set `app.aiTagging.proUrl` to the Rasa Pro
+tagging endpoint. When it is empty, AI tagging is not configured.
+
+An `app.env` entry with the same name (`FEATURE_FLAG_AI_TAGGING` or
+`AI_TAGGING_PRO_URL`) overrides the value for the backend.
+`app.webClient.config.FEATURE_FLAG_AI_TAGGING` overrides it for the browser only.
+
+```yaml
+app:
+  aiTagging:
+    enabled: true
+    proUrl: "https://rasa-pro.example.com"
+```
+
+The tuning settings have backend defaults and are not chart values. If you ever
+need them, set them through `app.env`: `AI_TAGGING_MAX_ATTEMPTS` (default `3`,
+tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
+(default `600`, how long a partial live batch waits before it is sent).
+
 ## URL Scheme (`connectionType`)
 
 `config.connectionType` sets the URL **scheme** (`http` or `https`) for all externally visible URLs the chart derives from the ingress host:

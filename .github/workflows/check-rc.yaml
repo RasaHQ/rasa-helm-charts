@@ -61,4 +61,6 @@ jobs:
         uses: ./.github/actions/check-chart-rc
         with:
           chart-path: charts/${{ matrix.chart }}
-          fail-if-rc: 'true'
+          # -rc is required on release branches and forbidden on main.
+          fail-if-rc: ${{ github.base_ref == 'main' }}
+          fail-if-not-rc: ${{ startsWith(github.base_ref, 'release/') }}

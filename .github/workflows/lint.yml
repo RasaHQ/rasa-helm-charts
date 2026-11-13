@@ -79,6 +79,9 @@ jobs:
         helm lint --strict charts/rasa
         helm lint --strict charts/op-kits
 
+    - name: Studio render tests
+      run: charts/studio/ci/test-render.sh
+
   kube-linter:
     if: ${{ !contains(github.event.pull_request.labels.*.name, 'automated') }}
     runs-on: ubuntu-26.04

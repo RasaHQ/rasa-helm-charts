@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.64](https://img.shields.io/badge/Version-3.0.0--rc.64-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.65](https://img.shields.io/badge/Version-3.0.0--rc.65-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.64
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.64
+$ helm install my-release rasa/studio --version 3.0.0-rc.65
 ```
 
 ## Quick Start
@@ -143,13 +143,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.64
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.64
+$ helm pull rasa/studio --version 3.0.0-rc.65
 ```
 
 ## General Configuration
@@ -218,8 +218,11 @@ rasa:
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
 `rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema — an install without any host renders empty
-(match-all) ingress rules and relative browser URLs.
+is enforced by the schema. With `rasa.enabled: true` the render fails when
+neither `global.ingressHost` nor `app.ingress.hostName` is set, because the
+model service's `STUDIO_TOKEN_ISSUER` derives from the Studio app host. With
+`rasa.enabled: false`, an install without any host renders empty (match-all)
+ingress rules and relative browser URLs.
 
 ## Database Configuration
 
@@ -314,6 +317,7 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
+- Inject `STUDIO_TOKEN_ISSUER`, `STUDIO_JWKS_URL` and `STUDIO_TOKEN_AUDIENCE` via the same ConfigMap, so the model service accepts the access tokens that Studio issues (see [Studio access tokens](#studio-access-tokens))
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
@@ -369,6 +373,28 @@ rasa:
       value: "20"
     - name: RASA_REMOTE_STORAGE
       value: "aws"
+```
+
+### Studio access tokens
+
+The model service verifies the access tokens that Studio issues. The `shared-environment` ConfigMap sets these defaults for the Studio of the same release:
+
+| Variable | Default |
+|----------|---------|
+| `STUDIO_TOKEN_ISSUER` | `<config.connectionType>://<Studio app host>/api/auth` (equals Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`) |
+| `STUDIO_JWKS_URL` | `http://<release>-studio-app:<app.service.port>/api/auth/jwks` (in-cluster) |
+| `STUDIO_TOKEN_AUDIENCE` | `urn:rasa:model-service` |
+
+To use other values, for example when Studio sits behind a different public URL, set them in `rasa.overrideEnv`. Kubernetes gives `env` priority over `envFrom`, so these entries replace the ConfigMap values. Keep the chart defaults in the list, as described above:
+
+```yaml
+rasa:
+  overrideEnv:
+    # ...chart defaults (RASA_LICENSE, OPENAI_API_KEY)...
+    - name: STUDIO_TOKEN_ISSUER
+      value: "https://studio.example.com/api/auth"
+    - name: STUDIO_JWKS_URL
+      value: "http://my-studio-app.studio.svc:80/api/auth/jwks"
 ```
 
 > **Note:** `rasa.extraEnv` does not work here. The subchart reads `extraEnv` only when `overrideEnv` is unset, and this chart sets `overrideEnv` by default. `rasa.rasa.overrideEnv` does nothing either — `overrideEnv` sits at the subchart root, so it is `rasa.overrideEnv`.
@@ -830,6 +856,8 @@ All policies are named after the release and select only its pods.
 | `kubelet-access` | `nodeCIDR` set | probe traffic from the nodes to the app pods |
 | `allow-egress` | `egressPorts` non-empty | outbound to the listed ports |
 | `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
+| `allow-ingress-from-rasa` | `rasa.enabled` and any of `denyAll`, `nodeCIDR`, `allowIngressFrom` | inbound to the app port from the bundled Rasa Pro pods (session and token checks) |
+| `allow-egress-from-rasa` | `rasa.enabled` and `rasa.networkPolicy.enabled` | outbound from the bundled Rasa Pro pods to the app port |
 
 With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
 

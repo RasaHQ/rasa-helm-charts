@@ -1,4 +1,5 @@
 {{- if .Values.rasa.enabled }}
+{{- $appHost := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required when rasa.enabled is true: the model service verifies Studio tokens against STUDIO_TOKEN_ISSUER, which must equal Studio's BETTER_AUTH_BASE_URL + /api/auth, and both derive from this host" }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -8,4 +9,7 @@ data:
   RASA_MODEL_SERVER_BASE_URL: "{{ include "studio.modelServiceUrl" . }}"
   CORS_ORIGINS: "{{ include "studio.webClientUrl" . }}"
   STUDIO_AUTH_URL: "http://{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}"
+  STUDIO_TOKEN_ISSUER: "{{ .Values.config.connectionType }}://{{ $appHost }}/api/auth"
+  STUDIO_JWKS_URL: "http://{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}/api/auth/jwks"
+  STUDIO_TOKEN_AUDIENCE: "urn:rasa:model-service"
 {{- end }}

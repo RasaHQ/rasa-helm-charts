@@ -1,0 +1,57 @@
+{{- if .Values.rasa.enabled }}
+{{- $np := .Values.networkPolicy }}
+{{- $rasaName := default "rasa" .Values.rasa.nameOverride | trunc 63 | trimSuffix "-" }}
+{{- /*
+The model service calls the app for STUDIO_AUTH_URL and STUDIO_JWKS_URL.
+Each half renders only when its side is already isolated: selecting a pod
+with an Ingress or Egress policy isolates it, so rendering unconditionally
+would block traffic that was open before.
+*/}}
+{{- if and $np.enabled (or $np.denyAll $np.allowIngressFrom $np.nodeCIDR) }}
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "studio.fullname" . }}-allow-ingress-from-rasa
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      {{- include "studio.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: studio-app
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector:
+        matchLabels:
+          app.kubernetes.io/name: {{ $rasaName }}
+          app.kubernetes.io/instance: {{ .Release.Name }}
+    ports:
+    - protocol: TCP
+      port: {{ .Values.app.service.targetPort }}
+{{- end }}
+{{- if (.Values.rasa.networkPolicy | default dict).enabled }}
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: {{ include "studio.fullname" . }}-allow-egress-from-rasa
+  namespace: {{ .Release.Namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app.kubernetes.io/name: {{ $rasaName }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  policyTypes:
+  - Egress
+  egress:
+  - to:
+    - podSelector:
+        matchLabels:
+          {{- include "studio.selectorLabels" . | nindent 10 }}
+          app.kubernetes.io/component: studio-app
+    ports:
+    - protocol: TCP
+      port: {{ .Values.app.service.targetPort }}
+{{- end }}
+{{- end }}

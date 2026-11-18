@@ -1092,7 +1092,7 @@ changes need work outside your values file.
 | rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.image.tag | string |  | `"3.17.11-latest"` |
+| rasa.image.tag | string |  | `"3.22.0rc1"` |
 | rasa.ingress.annotations | object |  | `{}` |
 | rasa.ingress.enabled | bool |  | `true` |
 | rasa.ingress.hosts[0].host | string |  | `""` |

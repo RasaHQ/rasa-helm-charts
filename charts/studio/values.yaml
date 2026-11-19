@@ -600,9 +600,9 @@ app:
 # Studio Event Ingestion component specific configuration
 eventIngestion:
   # -- Event-ingestion topology.
-  # colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment.
+  # disabled (default): no Kafka consumer and no KAFKA_* env. Mantle agents send events to /api/events over HTTP.
+  # colocated: ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment.
   # separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false.
-  # disabled: neither co-located nor separate consumers.
   # Breaking: replaces eventIngestion.enabled. Do not set both semantics.
   #
   # Applicability:
@@ -612,7 +612,7 @@ eventIngestion:
   #   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment.
   # - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when
   #   colocated, and to the sibling Deployment when separate.
-  mode: colocated
+  mode: disabled
   # -- Number of replicas for the Event Ingestion deployment.
   # Applies only when eventIngestion.mode is separate.
   replicaCount: 1
@@ -871,7 +871,7 @@ rasa:
   replicaCount: 1
   image:
     repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
-    tag: "3.17.11-latest"
+    tag: "3.22.0rc1"
 
   strategy:
     type: Recreate

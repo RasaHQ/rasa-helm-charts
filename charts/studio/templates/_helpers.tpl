@@ -360,7 +360,7 @@ Validate event-ingestion topology configuration.
 {{- if hasKey .Values.eventIngestion "enabled" -}}
 {{- fail "eventIngestion.enabled was removed; use eventIngestion.mode: colocated|separate|disabled" -}}
 {{- end -}}
-{{- $mode := .Values.eventIngestion.mode | default "colocated" -}}
+{{- $mode := .Values.eventIngestion.mode | default "disabled" -}}
 {{- if not (has $mode (list "colocated" "separate" "disabled")) -}}
 {{- fail (printf "eventIngestion.mode must be one of colocated|separate|disabled, got %q" $mode) -}}
 {{- end -}}
@@ -375,7 +375,7 @@ Validate event-ingestion topology configuration.
 Return the event-ingestion mode.
 */}}
 {{- define "studio.eventIngestion.mode" -}}
-{{- .Values.eventIngestion.mode | default "colocated" -}}
+{{- .Values.eventIngestion.mode | default "disabled" -}}
 {{- end -}}
 
 {{/*

@@ -1,0 +1,6 @@
+# Minimum values for linting. charts/studio has no default database host — the
+# chart cannot be installed without one, so the schema rejects an unset value.
+# `helm lint`/`ct lint` render against defaults, so they need this file supplied.
+config:
+  database:
+    host: "postgres.example.com"

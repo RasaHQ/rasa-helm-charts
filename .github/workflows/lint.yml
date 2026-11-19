@@ -75,7 +75,7 @@ jobs:
 
     - name: Lint charts (strict)
       run: |
-        helm lint --strict charts/studio
+        helm lint --strict charts/studio -f charts/studio/ci/lint-values.yaml
         helm lint --strict charts/rasa
         helm lint --strict charts/op-kits
 
@@ -96,15 +96,31 @@ jobs:
         with:
           version: v3.22.0
 
-      # Required: kube-linter renders the chart itself, but without the vendored
-      # subchart it silently skips the subchart's objects (studio drops 38 -> 27).
+      # Required: the render must include the vendored subchart, or the subchart's
+      # objects are missing from the scan (studio drops 38 -> 27).
       - name: Update dependencies
         run: helm dependency build ./charts/${{ matrix.charts }}
+
+      # kube-linter renders charts itself, but with default values only -- it takes
+      # no values file. charts/studio has no default database host (the chart is not
+      # installable without one), so a directory scan fails schema validation, finds
+      # zero objects, and still exits 0. Rendering here instead means a render
+      # failure fails this step outright, and each chart's optional
+      # ci/lint-values.yaml supplies whatever its defaults cannot.
+      - name: Render chart
+        run: |
+          chart="charts/${{ matrix.charts }}"
+          if [ -f "$chart/ci/lint-values.yaml" ]; then
+            helm template ${{ matrix.charts }} "$chart" -f "$chart/ci/lint-values.yaml" > rendered.yaml
+          else
+            helm template ${{ matrix.charts }} "$chart" > rendered.yaml
+          fi
+          test -s rendered.yaml
 
       - name: Scan chart with kube-linter
         uses: stackrox/kube-linter-action@87802a2f4e01abebb3ee3c67a3002fea71f6eae5 # v1.0.7
         with:
-          directory: charts/${{ matrix.charts }}
+          directory: rendered.yaml
           config: .kube-linter.yaml
           # renovate: datasource=github-releases depName=stackrox/kube-linter
           version: v0.8.3

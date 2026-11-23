@@ -203,6 +203,8 @@ app:
   # service. Set MS_API_URL here for an external model service, and
   # COPILOT_API_URL to turn on Copilot — the chart does not deploy the builder.
   # Studio forwards browser calls to both through /api/rasa/.
+  # A literal BETTER_AUTH_BASE_URL here replaces the host-derived one, and the
+  # model service's STUDIO_TOKEN_ISSUER follows it.
   # Example:
   #   - name: MY_VAR
   #     value: "my-value"

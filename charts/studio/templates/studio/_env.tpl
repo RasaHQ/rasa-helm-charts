@@ -172,10 +172,62 @@ the pod never gets a duplicate and the `app.env` entry wins.
 {{- end -}}
 
 {{/*
+Names in `app.env` that carry a value (a non-empty `value`, or `valueFrom`),
+as a JSON array. A config.js flag turns on only for these, so an empty URL
+turns its feature off.
+*/}}
+{{- define "studio.app.envSetNames" -}}
+{{- $names := list }}
+{{- range .Values.app.env }}
+{{- if or .value .valueFrom }}
+{{- $names = append $names .name }}
+{{- end }}
+{{- end }}
+{{- toJson $names }}
+{{- end -}}
+
+{{/*
+Name of the bundled rasa Service. Mirrors the subchart's own rasa.fullname,
+because a parent template cannot call into the subchart's context.
+*/}}
+{{- define "studio.rasaFullname" -}}
+{{- if .Values.rasa.fullnameOverride -}}
+{{- .Values.rasa.fullnameOverride | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- $name := default "rasa" .Values.rasa.nameOverride -}}
+{{- if contains $name .Release.Name -}}
+{{- .Release.Name | trunc 63 | trimSuffix "-" -}}
+{{- else -}}
+{{- printf "%s-%s" .Release.Name $name | trunc 63 | trimSuffix "-" -}}
+{{- end -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 In-cluster origin of the bundled model service. Empty when rasa is disabled.
 */}}
 {{- define "studio.app.msApiUrl" -}}
 {{- if .Values.rasa.enabled -}}
-http://{{ .Values.rasa.fullnameOverride }}:{{ .Values.rasa.service.port }}
+http://{{ include "studio.rasaFullname" . }}:{{ .Values.rasa.service.port }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Studio's public origin, BETTER_AUTH_BASE_URL. A literal `app.env` value wins,
+so the model service's STUDIO_TOKEN_ISSUER always matches the issuer the app
+signs with.
+*/}}
+{{- define "studio.app.authBaseUrl" -}}
+{{- $override := "" -}}
+{{- range .Values.app.env -}}
+{{- if and (eq .name "BETTER_AUTH_BASE_URL") .value -}}
+{{- $override = .value | toString | trimSuffix "/" -}}
+{{- end -}}
+{{- end -}}
+{{- if $override -}}
+{{- $override -}}
+{{- else -}}
+{{- $host := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required: Studio's BETTER_AUTH_BASE_URL and the model service's STUDIO_TOKEN_ISSUER derive from this host. Set one of them, or set BETTER_AUTH_BASE_URL in app.env" -}}
+{{- printf "%s://%s" .Values.config.connectionType $host -}}
 {{- end -}}
 {{- end -}}

@@ -31,7 +31,7 @@ whole block there buried the access instructions above it.
 
    b) Delete the Rasa Deployment. The rasa subchart changed a selector label,
       which Kubernetes treats as immutable, so `helm upgrade` fails without it:
-        kubectl delete deployment {{ .Values.rasa.fullnameOverride | default "rasapro" }} -n {{ .Release.Namespace }}
+        kubectl delete deployment {{ include "studio.rasaFullname" . }} -n {{ .Release.Namespace }}
 {{- end }}
 
    c) Keycloak is gone. Better Auth serves login at /api/auth/*. Confirm your

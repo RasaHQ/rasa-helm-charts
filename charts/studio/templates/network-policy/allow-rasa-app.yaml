@@ -81,7 +81,7 @@ spec:
     - protocol: TCP
       port: {{ $rasaPort }}
 {{- end }}
-{{- if and $rasaNp.enabled (or $rasaNp.denyAll $rasaNp.nodeCIDR) }}
+{{- if and $rasaNp.enabled (or $rasaNp.denyAll $rasaNp.allowIngressFrom $rasaNp.nodeCIDR) }}
 ---
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy

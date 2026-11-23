@@ -6,7 +6,7 @@ chart="$(cd "$(dirname "$0")/.." && pwd)"
 failures=0
 
 render() {
-  helm template s "$chart" --kube-version 1.31.0 -f "$chart/ci/lint-values.yaml" "$@"
+  helm template s "$chart" --kube-version 1.37.0 -f "$chart/ci/lint-values.yaml" "$@"
 }
 
 check() {
@@ -28,8 +28,24 @@ check "app.ingress.hostName alone sets the issuer" \
 
 check "empty host fails the render with a clear message" \
   '! err=$(render --set global.ingressHost= 2>&1) && grep -q "global.ingressHost or app.ingress.hostName is required" <<<"$err"'
-check "empty host renders when rasa is disabled" \
-  'render --set global.ingressHost= --set rasa.enabled=false >/dev/null'
+check "empty host fails the render when rasa is disabled" \
+  '! render --set global.ingressHost= --set rasa.enabled=false >/dev/null 2>&1'
+check "empty host renders when app.env sets BETTER_AUTH_BASE_URL" \
+  'render --set global.ingressHost= --set "app.env[0].name=BETTER_AUTH_BASE_URL,app.env[0].value=https://pub.example.com" >/dev/null'
+
+out=$(render --set "app.env[0].name=BETTER_AUTH_BASE_URL,app.env[0].value=https://pub.example.com/")
+check "app.env BETTER_AUTH_BASE_URL is set once and sets the issuer" \
+  '[ "$(grep -c "name: BETTER_AUTH_BASE_URL" <<<"$out")" -eq 1 ] && grep -qx "  STUDIO_TOKEN_ISSUER: \"https://pub.example.com/api/auth\"" <<<"$out"'
+
+out=$(render \
+  --set "rasa.overrideEnv[0].name=RASA_LICENSE,rasa.overrideEnv[0].value=x" \
+  --set "rasa.overrideEnv[1].name=OPENAI_API_KEY,rasa.overrideEnv[1].value=x" \
+  --set "rasa.overrideEnv[2].name=STUDIO_TOKEN_ISSUER,rasa.overrideEnv[2].value=https://i.example.com/api/auth" \
+  --set "rasa.overrideEnv[3].name=STUDIO_JWKS_URL,rasa.overrideEnv[3].value=http://j.example.com/jwks" \
+  --set "rasa.overrideEnv[4].name=STUDIO_TOKEN_AUDIENCE,rasa.overrideEnv[4].value=urn:x")
+rasapro=$(awk '/^# Source: studio\/charts\/rasa\/templates\/deployment.yaml/,/^---/' <<<"$out")
+check "rasa.overrideEnv token settings sit in env, which wins over the envFrom ConfigMap" \
+  '[ "$(grep -cE "name: STUDIO_(TOKEN_ISSUER|JWKS_URL|TOKEN_AUDIENCE)$" <<<"$rasapro")" -eq 3 ] && grep -q "name: shared-environment" <<<"$rasapro"'
 
 out=$(render --set networkPolicy.enabled=true --set networkPolicy.denyAll=true --set rasa.networkPolicy.enabled=true)
 check "network policies admit rasa to the app port" \
@@ -72,5 +88,22 @@ check "network policies admit the app to rasa port 8000" \
 out=$(render --set networkPolicy.enabled=true --set rasa.networkPolicy.enabled=true)
 check "no rasa ingress policy while rasa ingress is open" \
   '! grep -q "allow-ingress-to-rasa" <<<"$out"'
+
+out=$(render --set networkPolicy.enabled=true --set rasa.networkPolicy.enabled=true \
+  --set "rasa.networkPolicy.allowIngressFrom[0].namespaceSelector.matchLabels.x=y")
+check "rasa allowIngressFrom alone still admits the app to rasa" \
+  'grep -q "name: s-studio-allow-ingress-to-rasa" <<<"$out"'
+
+out=$(render --set rasa.fullnameOverride=)
+check "empty rasa.fullnameOverride points MS_API_URL at the subchart service" \
+  'grep -A1 "name: MS_API_URL" <<<"$out" | grep -q "http://s-rasa:80" && grep -A3 "^kind: Service$" <<<"$out" | grep -qx "  name: s-rasa"'
+
+out=$(render --set "app.env[0].name=COPILOT_API_URL,app.env[0].value=" --set "app.env[1].name=MS_API_URL,app.env[1].value=")
+check "empty app.env URLs turn both flags off" \
+  'grep -qx "    window.MODEL_SERVICE_ENABLED = \"false\";" <<<"$out" && grep -qx "    window.COPILOT_ENABLED = \"false\";" <<<"$out" && [ "$(grep -c "name: MS_API_URL" <<<"$out")" -eq 1 ]'
+
+out=$(render --set "app.env[0].name=COPILOT_API_URL,app.env[0].valueFrom.secretKeyRef.name=s,app.env[0].valueFrom.secretKeyRef.key=k")
+check "a valueFrom URL turns its flag on" \
+  'grep -qx "    window.COPILOT_ENABLED = \"true\";" <<<"$out"'
 
 [ "$failures" -eq 0 ] || { echo "$failures check(s) failed"; exit 1; }

@@ -91,9 +91,12 @@ spec:
             {{- include "studio.app.github.env" . | nindent 12 }}
             {{- end }}
             {{- include "studio.app.aiTagging.env" (dict "aiTagging" .Values.app.aiTagging "env" (.Values.app.env | default list)) | nindent 12 }}
+            {{- $envNames := include "studio.app.envNames" . | fromJsonArray }}
+            {{- if not (has "BETTER_AUTH_BASE_URL" $envNames) }}
             - name: BETTER_AUTH_BASE_URL
-              value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
-            {{- if and (include "studio.app.msApiUrl" .) (not (has "MS_API_URL" (include "studio.app.envNames" . | fromJsonArray))) }}
+              value: {{ include "studio.app.authBaseUrl" . | quote }}
+            {{- end }}
+            {{- if and (include "studio.app.msApiUrl" .) (not (has "MS_API_URL" $envNames)) }}
             - name: MS_API_URL
               value: {{ include "studio.app.msApiUrl" . | quote }}
             {{- end }}

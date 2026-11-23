@@ -19,7 +19,9 @@ data:
     window.MS_API_URL = "";
     {{- end }}
     {{- $envNames := include "studio.app.envNames" . | fromJsonArray }}
-    {{- $enabled := dict "MODEL_SERVICE_ENABLED" (or (ne (include "studio.app.msApiUrl" .) "") (has "MS_API_URL" $envNames)) "COPILOT_ENABLED" (has "COPILOT_API_URL" $envNames) }}
+    {{- $envSet := include "studio.app.envSetNames" . | fromJsonArray }}
+    {{- $msDefault := and (ne (include "studio.app.msApiUrl" .) "") (not (has "MS_API_URL" $envNames)) }}
+    {{- $enabled := dict "MODEL_SERVICE_ENABLED" (or $msDefault (has "MS_API_URL" $envSet)) "COPILOT_ENABLED" (has "COPILOT_API_URL" $envSet) }}
     {{- range $key, $value := $enabled }}
     window.{{ $key }} = {{ dig $key $value ($.Values.app.webClient.config | default dict) | toString | quote }};
     {{- end }}

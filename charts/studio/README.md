@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.66](https://img.shields.io/badge/Version-3.0.0--rc.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.67](https://img.shields.io/badge/Version-3.0.0--rc.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.66
+$ helm install my-release rasa/studio --version 3.0.0-rc.67
 ```
 
 ## Quick Start
@@ -138,13 +138,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.66
+$ helm pull rasa/studio --version 3.0.0-rc.67
 ```
 
 ## General Configuration
@@ -213,11 +213,32 @@ rasa:
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
 `rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema. With `rasa.enabled: true` the render fails when
-neither `global.ingressHost` nor `app.ingress.hostName` is set, because the
-model service's `STUDIO_TOKEN_ISSUER` derives from the Studio app host. With
-`rasa.enabled: false`, an install without any host renders empty (match-all)
-ingress rules and relative browser URLs.
+is enforced by the schema. The render fails when neither `global.ingressHost`
+nor `app.ingress.hostName` is set, because Studio's `BETTER_AUTH_BASE_URL` and
+the model service's `STUDIO_TOKEN_ISSUER` derive from the Studio app host. To
+install without a host, set `BETTER_AUTH_BASE_URL` in `app.env`. Then the
+ingress rules match all hosts and the browser uses relative URLs.
+
+### Ingress limits for uploads and Copilot
+
+The browser sends file uploads and Copilot streams through the Studio app
+ingress at `/api`. The ingress-nginx defaults are too low for this traffic:
+
+- The request body limit is 1 MB.
+- The read timeout is 60 seconds. The builder service can send no data for up
+  to 240 seconds.
+
+The chart sets no annotations for this, because the correct values depend on
+your ingress controller and your largest upload. For ingress-nginx, set:
+
+```yaml
+app:
+  ingress:
+    annotations:
+      nginx.ingress.kubernetes.io/proxy-body-size: "50m"     # your largest upload
+      nginx.ingress.kubernetes.io/proxy-read-timeout: "300"
+      nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+```
 
 ## Database Configuration
 
@@ -345,10 +366,34 @@ The browser calls the model service and Copilot through the Studio app, at `/api
 
 | Flag | `"true"` when |
 |------|---------------|
-| `window.MODEL_SERVICE_ENABLED` | `rasa.enabled` is true, or `app.env` sets `MS_API_URL` |
-| `window.COPILOT_ENABLED` | `app.env` sets `COPILOT_API_URL` |
+| `window.MODEL_SERVICE_ENABLED` | `rasa.enabled` is true, or `app.env` sets `MS_API_URL` to a value |
+| `window.COPILOT_ENABLED` | `app.env` sets `COPILOT_API_URL` to a value |
+
+A `valueFrom` entry counts as a value. An empty `value` turns the feature off: `MS_API_URL: ""` in `app.env` also removes the chart's in-cluster default.
 
 The chart does not deploy the builder service, so it never sets `COPILOT_API_URL`. If you set either variable through `app.envFrom`, the chart cannot see it. Then set the flag yourself in `app.webClient.config`, for example `COPILOT_ENABLED: "true"`.
+
+### External builder service (Copilot)
+
+To turn on Copilot, run the builder service outside this chart and connect it:
+
+1. Set `COPILOT_API_URL` in `app.env` to the builder service URL that the Studio app can reach.
+2. On the builder service, set `STUDIO_TOKEN_ISSUER` to Studio's public issuer, `<config.connectionType>://<Studio app host>/api/auth`. This value equals Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`.
+3. On the builder service, set `STUDIO_JWKS_URL` to a JWKS URL that the builder service can reach. In the same cluster, use `http://<release>-studio-app:<app.service.port>/api/auth/jwks`. Otherwise, use `<Studio public URL>/api/auth/jwks`.
+4. Keep the default `STUDIO_TOKEN_AUDIENCE` on the builder service, `urn:rasa:builder-service`.
+5. With `networkPolicy.enabled`, add the builder service port to `networkPolicy.egressPorts`. Otherwise the app pods cannot reach the builder service.
+
+```yaml
+app:
+  env:
+    # ...chart defaults...
+    - name: COPILOT_API_URL
+      value: "http://builder.copilot.svc:5050"
+networkPolicy:
+  egressPorts:
+    # ...your other ports...
+    - { port: 5050, protocol: TCP }
+```
 
 ### Rasa Pro Model Service Environment Variables
 
@@ -392,7 +437,7 @@ The model service verifies the access tokens that Studio issues. The `shared-env
 
 | Variable | Default |
 |----------|---------|
-| `STUDIO_TOKEN_ISSUER` | `<config.connectionType>://<Studio app host>/api/auth` (equals Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`) |
+| `STUDIO_TOKEN_ISSUER` | Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`. That is `<config.connectionType>://<Studio app host>/api/auth`, or the literal `BETTER_AUTH_BASE_URL` value from `app.env` |
 | `STUDIO_JWKS_URL` | `http://<release>-studio-app:<app.service.port>/api/auth/jwks` (in-cluster) |
 | `STUDIO_TOKEN_AUDIENCE` | `urn:rasa:model-service` |
 
@@ -407,6 +452,11 @@ rasa:
     - name: STUDIO_JWKS_URL
       value: "http://my-studio-app.studio.svc:80/api/auth/jwks"
 ```
+
+If `app.env` sets `BETTER_AUTH_BASE_URL` with `valueFrom`, the chart cannot read the value. Then set `STUDIO_TOKEN_ISSUER` in `rasa.overrideEnv` as shown above.
+
+> **Caution:** the model service reads the `shared-environment` ConfigMap only when its pod starts, and the subchart does not restart the pod when this ConfigMap changes. After an upgrade that changes the host, `config.connectionType`, `BETTER_AUTH_BASE_URL` or `app.service.port`, restart the model service, or it rejects every Studio token:
+> `kubectl rollout restart deployment/rasapro -n <namespace>`
 
 > **Note:** `rasa.extraEnv` does not work here. The subchart reads `extraEnv` only when `overrideEnv` is unset, and this chart sets `overrideEnv` by default. `rasa.rasa.overrideEnv` does nothing either — `overrideEnv` sits at the subchart root, so it is `rasa.overrideEnv`.
 
@@ -870,7 +920,7 @@ All policies are named after the release and select only its pods.
 | `allow-ingress-from-rasa` | `rasa.enabled` and any of `denyAll`, `nodeCIDR`, `allowIngressFrom` | inbound to the app port from the bundled Rasa Pro pods (session and token checks) |
 | `allow-egress-from-rasa` | `rasa.enabled` and `rasa.networkPolicy.enabled` | outbound from the bundled Rasa Pro pods to the app port |
 | `allow-egress-to-rasa` | `rasa.enabled` | outbound from the app pods to the Rasa Pro port `8000` (`MS_API_URL`) |
-| `allow-ingress-to-rasa` | `rasa.enabled`, `rasa.networkPolicy.enabled` and any of `rasa.networkPolicy.denyAll`, `rasa.networkPolicy.nodeCIDR` | inbound to the Rasa Pro port `8000` from the app pods |
+| `allow-ingress-to-rasa` | `rasa.enabled`, `rasa.networkPolicy.enabled` and any of `rasa.networkPolicy.denyAll`, `rasa.networkPolicy.nodeCIDR`, `rasa.networkPolicy.allowIngressFrom` | inbound to the Rasa Pro port `8000` from the app pods |
 
 With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
 
@@ -956,7 +1006,7 @@ changes need work outside your values file.
 | app.autoscaling.maxReplicas | int | Maximum number of replicas. | `100` |
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
-| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Set MS_API_URL here for an external model service, and COPILOT_API_URL to turn on Copilot — the chart does not deploy the builder. Studio forwards browser calls to both through /api/rasa/. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
+| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Set MS_API_URL here for an external model service, and COPILOT_API_URL to turn on Copilot — the chart does not deploy the builder. Studio forwards browser calls to both through /api/rasa/. A literal BETTER_AUTH_BASE_URL here replaces the host-derived one, and the model service's STUDIO_TOKEN_ISSUER follows it. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |

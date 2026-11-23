@@ -19,7 +19,7 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 - Kubernetes 1.31+
 - Helm 3.8.0+
 - A PostgreSQL instance (version 14+ recommended) accessible from the cluster
-- A Kafka broker (unless `eventIngestion.mode: disabled`) accessible from the cluster
+- A Kafka broker accessible from the cluster, only when `eventIngestion.mode` is `colocated` or `separate`
 - A Rasa Pro license key
 
 ## Before You Install
@@ -107,11 +107,6 @@ config:
 app:
   initialAdmin:
     email: "admin@example.com"
-
-# Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
-# See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
-eventIngestion:
-  mode: disabled
 ```
 
 ```console
@@ -828,7 +823,7 @@ eventIngestion:
 
 > **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
-Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
+Set `eventIngestion.mode` to `disabled` (default), `colocated`, or `separate`. `disabled` runs no Kafka consumer, and Mantle agents send events to Studio's `/api/events` over HTTP. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so.
 
 **Which keys apply when:**
 

@@ -19,7 +19,7 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 - Kubernetes 1.31+
 - Helm 3.8.0+
 - A PostgreSQL instance (version 14+ recommended) accessible from the cluster
-- A Kafka broker (unless `eventIngestion.mode: disabled`) accessible from the cluster
+- A Kafka broker accessible from the cluster, only when `eventIngestion.mode` is `colocated` or `separate`
 - A Rasa Pro license key
 
 ## Before You Install
@@ -107,11 +107,6 @@ config:
 app:
   initialAdmin:
     email: "admin@example.com"
-
-# Disable event ingestion for a minimal setup — requires Kafka in colocated or separate mode.
-# See the "Event Ingestion and Kafka" section to configure it once your broker is ready.
-eventIngestion:
-  mode: disabled
 ```
 
 ```console
@@ -827,7 +822,7 @@ eventIngestion:
 
 > **Note:** A user-supplied `env` list replaces the chart defaults wholesale — always carry over `KAFKA_TOPIC`, `KAFKA_DLQ_TOPIC`, `KAFKA_GROUP_ID`, `KAFKA_SASL_PASSWORD`.
 
-Set `eventIngestion.mode` to `colocated` (default), `separate`, or `disabled`. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so. To disable event ingestion entirely, use `eventIngestion.mode: disabled`.
+Set `eventIngestion.mode` to `disabled` (default), `colocated`, or `separate`. `disabled` runs no Kafka consumer, and Mantle agents send events to Studio's `/api/events` over HTTP. `colocated` runs the consumer in the app pod; `separate` deploys a dedicated workload. Do not run dual consumers—the chart fails validation when configuration would do so.
 
 **Which keys apply when:**
 
@@ -1080,7 +1075,7 @@ changes need work outside your values file.
 | eventIngestion.image | object | Container image settings for the event ingestion service. Applies only when eventIngestion.mode is separate. | `{"name":"studio","pullPolicy":"IfNotPresent"}` |
 | eventIngestion.image.name | string | Unified studio image for the separate ingestion Deployment. Applies only when eventIngestion.mode is separate. | `"studio"` |
 | eventIngestion.image.pullPolicy | string | Container image pull policy. Applies only when eventIngestion.mode is separate. | `"IfNotPresent"` |
-| eventIngestion.mode | string | Event-ingestion topology. colocated (default): ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. disabled: neither co-located nor separate consumers. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"colocated"` |
+| eventIngestion.mode | string | Event-ingestion topology. disabled (default): no Kafka consumer and no KAFKA_* env. Mantle agents send events to /api/events over HTTP. colocated: ENABLE_EVENT_INGESTION=true on the app pod; no sibling Deployment. separate: deploy {release}-app-ingestion with STUDIO_ROLE=ingestion; app sets ENABLE_EVENT_INGESTION=false. Breaking: replaces eventIngestion.enabled. Do not set both semantics.  Applicability: - Both colocated and separate: Kafka-related keys under eventIngestion.env   (colocated injects them into the app Deployment; separate injects them into the ingestion Deployment). - Only mode: separate: replicaCount, image, resources, serviceAccount, autoscaling/HPA,   scheduling (nodeSelector / affinity / tolerations) for the sibling Deployment. - volumes / volumeMounts / envFrom / extraContainers: applied to the app pod when   colocated, and to the sibling Deployment when separate. | `"disabled"` |
 | eventIngestion.nodeSelector | object | Which nodes the event ingestion pods can run on. Applies only when eventIngestion.mode is separate. | `{}` |
 | eventIngestion.podAnnotations | object | Annotations to add to the event ingestion pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app-ingestion: runtime/default | `{}` |
 | eventIngestion.podSecurityContext | object | Security settings for the entire pod. | `{"enabled":true}` |
@@ -1125,7 +1120,7 @@ changes need work outside your values file.
 | rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
-| rasa.image.tag | string |  | `"3.17.11-latest"` |
+| rasa.image.tag | string |  | `"3.22.0rc1"` |
 | rasa.ingress.annotations | object |  | `{}` |
 | rasa.ingress.enabled | bool |  | `true` |
 | rasa.ingress.hosts[0].host | string |  | `""` |

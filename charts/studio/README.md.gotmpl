@@ -49,6 +49,7 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=STUDIO_ENCRYPTION_KEY="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d =)" \
     --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
@@ -56,6 +57,8 @@ $ kubectl create secret generic studio-secrets \
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `STUDIO_ENCRYPTION_KEY` is required. See [Studio encryption key](#studio-encryption-key).
 
 > **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a fresh install — see ["Initial Admin User"](#initial-admin-user).
 
@@ -152,6 +155,25 @@ $ helm pull rasa/{{ template "chart.name" . }} --version {{ template "chart.vers
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+## Studio encryption key
+
+Studio encrypts the secrets that it stores in its database with `STUDIO_ENCRYPTION_KEY`. These secrets are the model provider keys and the client secret that Studio uses to get its own access tokens. The chart reads the key from `app.encryptionKey`, by default the `STUDIO_ENCRYPTION_KEY` key of the `studio-secrets` Secret. The key is not optional: without it, the app pod does not start.
+
+The key is 32 random bytes, encoded as base64url without padding (43 characters). To make one:
+
+```console
+$ openssl rand -base64 32 | tr '+/' '-_' | tr -d =
+```
+
+> **Warning:** do not change or lose the key after the first start. Every replica needs the same key. Studio stores a fingerprint of the key and refuses to use a different key. If you lose the key, Studio cannot read the secrets that it stored. Keep a backup of the key outside the cluster.
+
+```yaml
+app:
+  encryptionKey:
+    secretName: studio-secrets
+    secretKey: STUDIO_ENCRYPTION_KEY
+```
 
 ## Initial Admin User
 
@@ -981,12 +1003,14 @@ $ helm upgrade my-release rasa/{{ template "chart.name" . }} --version <new-vers
 
 Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
 
+> **Caution:** before you upgrade to a chart that sets `app.encryptionKey`, add the `STUDIO_ENCRYPTION_KEY` key to the Secret. The app container reads it through a non-optional `secretKeyRef`, so without it the new pod does not start. See [Studio encryption key](#studio-encryption-key).
+
 ### Upgrading to chart 3.0.0
 
 3.0.0 is a breaking release: the `backend`, `web-client` and standalone
 `event-ingestion` Deployments collapse into one `app` Deployment on the unified
 `studio` image, bundled Keycloak is replaced by Better Auth, and the bundled
-Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Four
+Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Six
 changes need work outside your values file.
 
 **See [MIGRATION.md](MIGRATION.md) for the full guide.**

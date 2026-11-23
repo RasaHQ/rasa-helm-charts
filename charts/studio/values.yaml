@@ -168,6 +168,14 @@ app:
     secretName: "studio-secrets"
     secretKey: "AUTH_SECRET"
 
+  # -- Key that encrypts the secrets Studio stores, such as model provider keys
+  # and its own OAuth client secret. 32 bytes, base64url, no padding (43 characters).
+  # Every replica needs the same key, and it must never change. Stored in a
+  # Kubernetes secret. Required.
+  encryptionKey:
+    secretName: "studio-secrets"
+    secretKey: "STUDIO_ENCRYPTION_KEY"
+
   # -- Initial admin user. A fresh install has no users and every later account is
   # invited by an admin, so the first one comes from here. Created by the backend
   # on startup, ignored once it exists.

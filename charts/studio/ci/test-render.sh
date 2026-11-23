@@ -106,4 +106,8 @@ out=$(render --set "app.env[0].name=COPILOT_API_URL,app.env[0].valueFrom.secretK
 check "a valueFrom URL turns its flag on" \
   'grep -qx "    window.COPILOT_ENABLED = \"true\";" <<<"$out"'
 
+out=$(render --set app.encryptionKey.secretName=my-secrets --set app.encryptionKey.secretKey=KEK)
+check "app container reads STUDIO_ENCRYPTION_KEY from the configured Secret" \
+  'grep -A4 "name: STUDIO_ENCRYPTION_KEY" <<<"$out" | tr -d " " | tr "\n" "|" | grep -q "secretKeyRef:|name:\"my-secrets\"|key:\"KEK\"" && [ "$(grep -c "name: STUDIO_ENCRYPTION_KEY" <<<"$out")" -eq 1 ]'
+
 [ "$failures" -eq 0 ] || { echo "$failures check(s) failed"; exit 1; }

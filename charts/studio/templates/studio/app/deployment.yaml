@@ -84,6 +84,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.authSecret.secretName | quote }}
                   key: {{ .Values.app.authSecret.secretKey | quote }}
+            - name: STUDIO_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.encryptionKey.secretName | quote }}
+                  key: {{ .Values.app.encryptionKey.secretKey | quote }}
             {{- if .Values.app.initialAdmin.email }}
             {{- include "studio.app.initialAdmin.env" .Values.app.initialAdmin | nindent 12 }}
             {{- end }}

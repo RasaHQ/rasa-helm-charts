@@ -49,6 +49,7 @@ Or create it imperatively:
 $ kubectl create secret generic studio-secrets \
     --from-literal=DATABASE_PASSWORD="<db-password>" \
     --from-literal=AUTH_SECRET="<random-string-min-32-chars>" \
+    --from-literal=STUDIO_ENCRYPTION_KEY="$(openssl rand -base64 32 | tr '+/' '-_' | tr -d =)" \
     --from-literal=INITIAL_ADMIN_PASSWORD="<initial-admin-password>" \
     --from-literal=RASA_PRO_LICENSE_SECRET_KEY="<rasa-pro-license>" \
     --from-literal=OPENAI_API_KEY_SECRET_KEY="<openai-api-key>" \
@@ -56,6 +57,8 @@ $ kubectl create secret generic studio-secrets \
 ```
 
 > **Note:** `AUTH_SECRET` must be at least 32 characters long.
+
+> **Note:** `STUDIO_ENCRYPTION_KEY` is required. See [Studio encryption key](#studio-encryption-key).
 
 > **Note:** `INITIAL_ADMIN_PASSWORD` is only needed on a fresh install — see ["Initial Admin User"](#initial-admin-user).
 
@@ -152,6 +155,25 @@ $ helm pull rasa/studio --version 3.0.0-rc.67
 - **imagePullSecrets**: If you're using a private Docker registry, provide the necessary credentials in this section.
 
 > **Note:** For application specific settings, please refer to our [documentation](https://rasa.com/docs/) and bellow you can find the full list of values.
+
+## Studio encryption key
+
+Studio encrypts the secrets that it stores in its database with `STUDIO_ENCRYPTION_KEY`. These secrets are the model provider keys and the client secret that Studio uses to get its own access tokens. The chart reads the key from `app.encryptionKey`, by default the `STUDIO_ENCRYPTION_KEY` key of the `studio-secrets` Secret. The key is not optional: without it, the app pod does not start.
+
+The key is 32 random bytes, encoded as base64url without padding (43 characters). To make one:
+
+```console
+$ openssl rand -base64 32 | tr '+/' '-_' | tr -d =
+```
+
+> **Warning:** do not change or lose the key after the first start. Every replica needs the same key. Studio stores a fingerprint of the key and refuses to use a different key. If you lose the key, Studio cannot read the secrets that it stored. Keep a backup of the key outside the cluster.
+
+```yaml
+app:
+  encryptionKey:
+    secretName: studio-secrets
+    secretKey: STUDIO_ENCRYPTION_KEY
+```
 
 ## Initial Admin User
 
@@ -980,12 +1002,14 @@ $ helm upgrade my-release rasa/studio --version <new-version> -f values.yaml
 
 Check the [chart changelog](https://github.com/RasaHQ/rasa-helm-charts/releases) for breaking changes before upgrading major versions.
 
+> **Caution:** before you upgrade to a chart that sets `app.encryptionKey`, add the `STUDIO_ENCRYPTION_KEY` key to the Secret. The app container reads it through a non-optional `secretKeyRef`, so without it the new pod does not start. See [Studio encryption key](#studio-encryption-key).
+
 ### Upgrading to chart 3.0.0
 
 3.0.0 is a breaking release: the `backend`, `web-client` and standalone
 `event-ingestion` Deployments collapse into one `app` Deployment on the unified
 `studio` image, bundled Keycloak is replaced by Better Auth, and the bundled
-Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Four
+Rasa Pro subchart moves to its own 3.0.0. It requires Studio >= 2.0.0. Six
 changes need work outside your values file.
 
 **See [MIGRATION.md](MIGRATION.md) for the full guide.**
@@ -1006,6 +1030,7 @@ changes need work outside your values file.
 | app.autoscaling.maxReplicas | int | Maximum number of replicas. | `100` |
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
+| app.encryptionKey | object | Key that encrypts the secrets Studio stores, such as model provider keys and its own OAuth client secret. 32 bytes, base64url, no padding (43 characters). Every replica needs the same key, and it must never change. Stored in a Kubernetes secret. Required. | `{"secretKey":"STUDIO_ENCRYPTION_KEY","secretName":"studio-secrets"}` |
 | app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Set MS_API_URL here for an external model service, and COPILOT_API_URL to turn on Copilot — the chart does not deploy the builder. Studio forwards browser calls to both through /api/rasa/. A literal BETTER_AUTH_BASE_URL here replaces the host-derived one, and the model service's STUDIO_TOKEN_ISSUER follows it. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |

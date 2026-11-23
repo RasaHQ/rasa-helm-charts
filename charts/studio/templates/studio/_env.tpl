@@ -158,3 +158,24 @@ Context is a dict: `aiTagging` is the `app.aiTagging` map, `env` is the
   value: {{ .aiTagging.proUrl | quote }}
 {{- end }}
 {{- end -}}
+
+{{/*
+Names set in `app.env`, as a JSON array. Chart defaults skip these names so
+the pod never gets a duplicate and the `app.env` entry wins.
+*/}}
+{{- define "studio.app.envNames" -}}
+{{- $names := list }}
+{{- range .Values.app.env }}
+{{- $names = append $names .name }}
+{{- end }}
+{{- toJson $names }}
+{{- end -}}
+
+{{/*
+In-cluster origin of the bundled model service. Empty when rasa is disabled.
+*/}}
+{{- define "studio.app.msApiUrl" -}}
+{{- if .Values.rasa.enabled -}}
+http://{{ .Values.rasa.fullnameOverride }}:{{ .Values.rasa.service.port }}
+{{- end -}}
+{{- end -}}

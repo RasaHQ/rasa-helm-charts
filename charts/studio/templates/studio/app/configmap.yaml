@@ -18,6 +18,11 @@ data:
     {{- else }}
     window.MS_API_URL = "";
     {{- end }}
+    {{- $envNames := include "studio.app.envNames" . | fromJsonArray }}
+    {{- $enabled := dict "MODEL_SERVICE_ENABLED" (or (ne (include "studio.app.msApiUrl" .) "") (has "MS_API_URL" $envNames)) "COPILOT_ENABLED" (has "COPILOT_API_URL" $envNames) }}
+    {{- range $key, $value := $enabled }}
+    window.{{ $key }} = {{ dig $key $value ($.Values.app.webClient.config | default dict) | toString | quote }};
+    {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "FEATURE_FLAG_AI_TAGGING") }}
     window.FEATURE_FLAG_AI_TAGGING = {{ .Values.app.aiTagging.enabled | toString | quote }};
     {{- end }}

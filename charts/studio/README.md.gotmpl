@@ -313,7 +313,8 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Inject `STUDIO_TOKEN_ISSUER`, `STUDIO_JWKS_URL` and `STUDIO_TOKEN_AUDIENCE` via the same ConfigMap, so the model service accepts the access tokens that Studio issues (see [Studio access tokens](#studio-access-tokens))
-- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
+- Set `MS_API_URL` on the Studio app container to the in-cluster model service (`http://rasapro:80`). Studio forwards the browser's model service calls through `/api/rasa/model-service`
+- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix). Only the agent preview uses it
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
@@ -325,14 +326,29 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
 
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
+When `rasa.enabled: false`, set the model service URL for the Studio app in `app.env`, and the browser URL for the agent preview in `app.webClient.config`:
 
 ```yaml
 app:
+  env:
+    # ...chart defaults...
+    - name: MS_API_URL
+      value: "http://models.example.svc:80"
   webClient:
     config:
       MS_API_URL: "https://models.example.com"
 ```
+
+### Model service and Copilot in the browser
+
+The browser calls the model service and Copilot through the Studio app, at `/api/rasa/model-service` and `/api/rasa/builder-service`. The Studio app forwards these calls to `MS_API_URL` and `COPILOT_API_URL`. The chart writes two flags into `config.js`:
+
+| Flag | `"true"` when |
+|------|---------------|
+| `window.MODEL_SERVICE_ENABLED` | `rasa.enabled` is true, or `app.env` sets `MS_API_URL` |
+| `window.COPILOT_ENABLED` | `app.env` sets `COPILOT_API_URL` |
+
+The chart does not deploy the builder service, so it never sets `COPILOT_API_URL`. If you set either variable through `app.envFrom`, the chart cannot see it. Then set the flag yourself in `app.webClient.config`, for example `COPILOT_ENABLED: "true"`.
 
 
 ### Rasa Pro Model Service Environment Variables
@@ -854,6 +870,8 @@ All policies are named after the release and select only its pods.
 | `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
 | `allow-ingress-from-rasa` | `rasa.enabled` and any of `denyAll`, `nodeCIDR`, `allowIngressFrom` | inbound to the app port from the bundled Rasa Pro pods (session and token checks) |
 | `allow-egress-from-rasa` | `rasa.enabled` and `rasa.networkPolicy.enabled` | outbound from the bundled Rasa Pro pods to the app port |
+| `allow-egress-to-rasa` | `rasa.enabled` | outbound from the app pods to the Rasa Pro port `8000` (`MS_API_URL`) |
+| `allow-ingress-to-rasa` | `rasa.enabled`, `rasa.networkPolicy.enabled` and any of `rasa.networkPolicy.denyAll`, `rasa.networkPolicy.nodeCIDR` | inbound to the Rasa Pro port `8000` from the app pods |
 
 With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
 

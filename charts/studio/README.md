@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.65](https://img.shields.io/badge/Version-3.0.0--rc.65-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.66](https://img.shields.io/badge/Version-3.0.0--rc.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.65
+$ helm install my-release rasa/studio --version 3.0.0-rc.66
 ```
 
 ## Quick Start
@@ -138,13 +138,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.65
+$ helm pull rasa/studio --version 3.0.0-rc.66
 ```
 
 ## General Configuration
@@ -313,7 +313,8 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Inject `STUDIO_TOKEN_ISSUER`, `STUDIO_JWKS_URL` and `STUDIO_TOKEN_AUDIENCE` via the same ConfigMap, so the model service accepts the access tokens that Studio issues (see [Studio access tokens](#studio-access-tokens))
-- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
+- Set `MS_API_URL` on the Studio app container to the in-cluster model service (`http://rasapro:80`). Studio forwards the browser's model service calls through `/api/rasa/model-service`
+- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix). Only the agent preview uses it
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
@@ -325,14 +326,29 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
 
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
+When `rasa.enabled: false`, set the model service URL for the Studio app in `app.env`, and the browser URL for the agent preview in `app.webClient.config`:
 
 ```yaml
 app:
+  env:
+    # ...chart defaults...
+    - name: MS_API_URL
+      value: "http://models.example.svc:80"
   webClient:
     config:
       MS_API_URL: "https://models.example.com"
 ```
+
+### Model service and Copilot in the browser
+
+The browser calls the model service and Copilot through the Studio app, at `/api/rasa/model-service` and `/api/rasa/builder-service`. The Studio app forwards these calls to `MS_API_URL` and `COPILOT_API_URL`. The chart writes two flags into `config.js`:
+
+| Flag | `"true"` when |
+|------|---------------|
+| `window.MODEL_SERVICE_ENABLED` | `rasa.enabled` is true, or `app.env` sets `MS_API_URL` |
+| `window.COPILOT_ENABLED` | `app.env` sets `COPILOT_API_URL` |
+
+The chart does not deploy the builder service, so it never sets `COPILOT_API_URL`. If you set either variable through `app.envFrom`, the chart cannot see it. Then set the flag yourself in `app.webClient.config`, for example `COPILOT_ENABLED: "true"`.
 
 ### Rasa Pro Model Service Environment Variables
 
@@ -853,6 +869,8 @@ All policies are named after the release and select only its pods.
 | `allow-ingress` | `allowIngressFrom` non-empty | inbound from the listed peers |
 | `allow-ingress-from-rasa` | `rasa.enabled` and any of `denyAll`, `nodeCIDR`, `allowIngressFrom` | inbound to the app port from the bundled Rasa Pro pods (session and token checks) |
 | `allow-egress-from-rasa` | `rasa.enabled` and `rasa.networkPolicy.enabled` | outbound from the bundled Rasa Pro pods to the app port |
+| `allow-egress-to-rasa` | `rasa.enabled` | outbound from the app pods to the Rasa Pro port `8000` (`MS_API_URL`) |
+| `allow-ingress-to-rasa` | `rasa.enabled`, `rasa.networkPolicy.enabled` and any of `rasa.networkPolicy.denyAll`, `rasa.networkPolicy.nodeCIDR` | inbound to the Rasa Pro port `8000` from the app pods |
 
 With `denyAll: true` you **must** set the last three, or Studio cannot reach its database and nothing can reach Studio:
 
@@ -938,7 +956,7 @@ changes need work outside your values file.
 | app.autoscaling.maxReplicas | int | Maximum number of replicas. | `100` |
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
-| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: Do not set MS_API_URL here — the Studio API process does not read it. Override the browser model-service URL via app.webClient.config.MS_API_URL. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
+| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Set MS_API_URL here for an external model service, and COPILOT_API_URL to turn on Copilot — the chart does not deploy the builder. Studio forwards browser calls to both through /api/rasa/. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |
@@ -1040,7 +1058,7 @@ changes need work outside your values file.
 | app.serviceAccount.name | string | Name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
 | app.tolerations | list | Tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | app.webClient | object | Browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"config":{}}` |
-| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
+| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), MODEL_SERVICE_ENABLED, COPILOT_ENABLED, CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":null,"iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |

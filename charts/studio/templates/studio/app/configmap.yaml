@@ -4,13 +4,7 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    {{- /* With no host configured anywhere, fall back to same-origin relative
-           URLs instead of emitting malformed absolutes like "http:///api". */}}
-    {{- if include "studio.appHost" . }}
-    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}/api";
-    {{- else }}
-    window.API_ENDPOINT = "/api";
-    {{- end }}
+    window.API_ENDPOINT = "{{ include "studio.authBaseUrl" . }}/api";
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "MODEL_SERVICE_ENABLED") }}
     window.MODEL_SERVICE_ENABLED = {{ .Values.rasa.enabled | toString | quote }};
     {{- end }}

@@ -215,9 +215,10 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema — an install without any host renders empty
-(match-all) ingress rules and relative browser URLs.
+`rasa.ingress.hosts[0].host`). The Studio app needs a host: without
+`global.ingressHost` or `app.ingress.hostName` the render fails, because
+`BETTER_AUTH_BASE_URL`, `WEB_CLIENT_URL` and the browser `API_ENDPOINT` derive
+from it.
 
 ## Database Configuration
 
@@ -322,6 +323,15 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > existing release also needs the Rasa Deployment deleted first, because its selector
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
+
+When `rasa.enabled: false`, point Studio at the external model service with `MS_API_URL` on the app container. Use the base URL without `/modelservice`: Studio forwards browser calls from `/api/rasa/model-service/` to `${MS_API_URL}/modelservice/`.
+
+```yaml
+app:
+  env:
+    - name: MS_API_URL
+      value: "https://models.example.com"
+```
 
 
 ### Rasa Pro Model Service Environment Variables

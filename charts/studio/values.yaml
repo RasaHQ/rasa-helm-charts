@@ -208,6 +208,8 @@ app:
   # merge lists) — copy the default entries you want to keep.
   # NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model
   # service. Studio forwards browser calls to it through /api/rasa/model-service/.
+  # With rasa.enabled: false, set MS_API_URL here to the external model service
+  # base URL, without /modelservice.
   # Example:
   #   - name: MY_VAR
   #     value: "my-value"

@@ -215,9 +215,10 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema — an install without any host renders empty
-(match-all) ingress rules and relative browser URLs.
+`rasa.ingress.hosts[0].host`). The Studio app needs a host: without
+`global.ingressHost` or `app.ingress.hostName` the render fails, because
+`BETTER_AUTH_BASE_URL`, `WEB_CLIENT_URL` and the browser `API_ENDPOINT` derive
+from it.
 
 ## Database Configuration
 
@@ -322,6 +323,15 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > existing release also needs the Rasa Deployment deleted first, because its selector
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
+
+When `rasa.enabled: false`, point Studio at the external model service with `MS_API_URL` on the app container. Use the base URL without `/modelservice`: Studio forwards browser calls from `/api/rasa/model-service/` to `${MS_API_URL}/modelservice/`.
+
+```yaml
+app:
+  env:
+    - name: MS_API_URL
+      value: "https://models.example.com"
+```
 
 ### Rasa Pro Model Service Environment Variables
 
@@ -921,7 +931,7 @@ changes need work outside your values file.
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
 | app.encryptionKey | object | Key that encrypts the secrets Studio stores, such as model provider keys and its own OAuth client secret. 32 bytes, base64url, no padding. Every replica needs the same key, and it must never change. Stored in a Kubernetes secret. Required. | `{"secretKey":"STUDIO_ENCRYPTION_KEY","secretName":"studio-secrets"}` |
-| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Studio forwards browser calls to it through /api/rasa/model-service/. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
+| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Studio forwards browser calls to it through /api/rasa/model-service/. With rasa.enabled: false, set MS_API_URL here to the external model service base URL, without /modelservice. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |

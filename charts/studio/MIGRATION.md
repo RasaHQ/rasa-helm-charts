@@ -223,7 +223,9 @@ app:
 
 `config.js` no longer carries `MS_API_URL`. The browser reaches the model
 service only through Studio at `/api/rasa/model-service/`, and the chart sets
-`MS_API_URL` on the app container. `app.webClient.config.MS_API_URL` is ignored.
+`MS_API_URL` on the app container. The render fails if
+`app.webClient.config.MS_API_URL` is set. With `rasa.enabled: false`, move the
+value to `app.env` (see [Chart Dependencies — Rasa Pro](README.md#chart-dependencies--rasa-pro)).
 
 ### Ingress host configuration
 

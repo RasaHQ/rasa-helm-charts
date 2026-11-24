@@ -324,6 +324,9 @@ fully successful install with a broken release.
 {{- if and (ne ($db.useAwsIamAuth | toString) "true") (not $db.password) -}}
 {{- fail "config.database.password is required unless config.database.useAwsIamAuth is \"true\" — set config.database.password.secretName and .secretKey, or enable IAM auth" -}}
 {{- end -}}
+{{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" -}}
+{{- fail "app.webClient.config.MS_API_URL was removed: the browser reaches the model service through Studio at /api/rasa/model-service/. For an external Rasa Pro (rasa.enabled: false), set MS_API_URL in app.env to its base URL, without /modelservice" -}}
+{{- end -}}
 {{- if .Values.rasa.enabled -}}
 {{- $declared := list -}}
 {{- range (.Values.rasa.overrideEnv | default list) -}}

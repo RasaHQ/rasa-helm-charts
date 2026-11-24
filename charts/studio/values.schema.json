@@ -323,6 +323,10 @@
           "description": "Secret used by the app to sign sessions and tokens (min 32 chars) — secret reference. Required.",
           "$ref": "#/definitions/secretRef"
         },
+        "encryptionKey": {
+          "description": "Key that encrypts the secrets Studio stores (32 bytes, base64url, no padding) — secret reference. Required. Never change it after the first start.",
+          "$ref": "#/definitions/secretRef"
+        },
         "initialAdmin": {
           "description": "Initial admin user created by the backend on first startup. Ignored once the account exists.",
           "type": "object",

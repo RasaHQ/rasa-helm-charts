@@ -18,11 +18,17 @@ data:
     {{- else }}
     window.MS_API_URL = "";
     {{- end }}
+    {{- if not (hasKey (.Values.app.webClient.config | default dict) "MODEL_SERVICE_ENABLED") }}
+    window.MODEL_SERVICE_ENABLED = {{ .Values.rasa.enabled | toString | quote }};
+    {{- end }}
+    {{- if not (hasKey (.Values.app.webClient.config | default dict) "COPILOT_ENABLED") }}
+    window.COPILOT_ENABLED = "false";
+    {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "FEATURE_FLAG_AI_TAGGING") }}
     window.FEATURE_FLAG_AI_TAGGING = {{ .Values.app.aiTagging.enabled | toString | quote }};
     {{- end }}
     {{- range $key, $value := .Values.app.webClient.config }}
-    {{- if hasPrefix "FEATURE_FLAG_" $key }}
+    {{- if or (hasPrefix "FEATURE_FLAG_" $key) (has $key (list "MODEL_SERVICE_ENABLED" "COPILOT_ENABLED")) }}
     window.{{ $key }} = {{ $value | quote }};
     {{- end }}
     {{- end }}

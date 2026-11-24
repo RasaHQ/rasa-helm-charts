@@ -84,6 +84,11 @@ spec:
                 secretKeyRef:
                   name: {{ .Values.app.authSecret.secretName | quote }}
                   key: {{ .Values.app.authSecret.secretKey | quote }}
+            - name: STUDIO_ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Values.app.encryptionKey.secretName | quote }}
+                  key: {{ .Values.app.encryptionKey.secretKey | quote }}
             {{- if .Values.app.initialAdmin.email }}
             {{- include "studio.app.initialAdmin.env" .Values.app.initialAdmin | nindent 12 }}
             {{- end }}
@@ -92,7 +97,11 @@ spec:
             {{- end }}
             {{- include "studio.app.aiTagging.env" (dict "aiTagging" .Values.app.aiTagging "env" (.Values.app.env | default list)) | nindent 12 }}
             - name: BETTER_AUTH_BASE_URL
-              value: "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}"
+              value: {{ include "studio.authBaseUrl" . | quote }}
+            {{- if .Values.rasa.enabled }}
+            - name: MS_API_URL
+              value: "http://{{ .Values.rasa.fullnameOverride | default "rasapro" }}:{{ .Values.rasa.service.port }}"
+            {{- end }}
             - name: STUDIO_ROLE
               value: "app"
             - name: ENABLE_EVENT_INGESTION

@@ -9,6 +9,4 @@ data:
   CORS_ORIGINS: "{{ include "studio.webClientUrl" . }}"
   STUDIO_AUTH_URL: "http://{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}"
   STUDIO_TOKEN_ISSUER: "{{ include "studio.app.authBaseUrl" . }}/api/auth"
-  STUDIO_JWKS_URL: "http://{{ include "studio.fullname" . }}-app:{{ .Values.app.service.port }}/api/auth/jwks"
-  STUDIO_TOKEN_AUDIENCE: "urn:rasa:model-service"
 {{- end }}

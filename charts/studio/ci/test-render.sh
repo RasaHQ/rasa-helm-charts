@@ -17,10 +17,10 @@ out=$(render --set config.connectionType=https)
 base=$(awk '/name: BETTER_AUTH_BASE_URL/ { getline; print $2 }' <<<"$out" | tr -d '"')
 check "token issuer equals BETTER_AUTH_BASE_URL + /api/auth" \
   'grep -qx "  STUDIO_TOKEN_ISSUER: \"${base}/api/auth\"" <<<"$out" && [ "$base" = https://studio.example.com ]'
-check "JWKS URL points at the in-cluster app service" \
-  'grep -qx "  STUDIO_JWKS_URL: \"http://s-studio-app:80/api/auth/jwks\"" <<<"$out"'
-check "token audience is the model service" \
-  'grep -qx "  STUDIO_TOKEN_AUDIENCE: \"urn:rasa:model-service\"" <<<"$out"'
+check "auth URL points at the in-cluster app service" \
+  'grep -qx "  STUDIO_AUTH_URL: \"http://s-studio-app:80\"" <<<"$out"'
+check "JWKS URL and audience are left to the model service's defaults" \
+  '! grep -qE "STUDIO_(JWKS_URL|TOKEN_AUDIENCE)" <<<"$out"'
 
 out=$(render --set global.ingressHost= --set app.ingress.hostName=studio.split.example.com)
 check "app.ingress.hostName alone sets the issuer" \
@@ -41,11 +41,10 @@ out=$(render \
   --set "rasa.overrideEnv[0].name=RASA_LICENSE,rasa.overrideEnv[0].value=x" \
   --set "rasa.overrideEnv[1].name=OPENAI_API_KEY,rasa.overrideEnv[1].value=x" \
   --set "rasa.overrideEnv[2].name=STUDIO_TOKEN_ISSUER,rasa.overrideEnv[2].value=https://i.example.com/api/auth" \
-  --set "rasa.overrideEnv[3].name=STUDIO_JWKS_URL,rasa.overrideEnv[3].value=http://j.example.com/jwks" \
-  --set "rasa.overrideEnv[4].name=STUDIO_TOKEN_AUDIENCE,rasa.overrideEnv[4].value=urn:x")
+  --set "rasa.overrideEnv[3].name=STUDIO_AUTH_URL,rasa.overrideEnv[3].value=http://a.example.com")
 rasapro=$(awk '/^# Source: studio\/charts\/rasa\/templates\/deployment.yaml/,/^---/' <<<"$out")
 check "rasa.overrideEnv token settings sit in env, which wins over the envFrom ConfigMap" \
-  '[ "$(grep -cE "name: STUDIO_(TOKEN_ISSUER|JWKS_URL|TOKEN_AUDIENCE)$" <<<"$rasapro")" -eq 3 ] && grep -q "name: shared-environment" <<<"$rasapro"'
+  '[ "$(grep -cE "name: STUDIO_(TOKEN_ISSUER|AUTH_URL)$" <<<"$rasapro")" -eq 2 ] && grep -q "name: shared-environment" <<<"$rasapro"'
 
 out=$(render --set networkPolicy.enabled=true --set networkPolicy.denyAll=true --set rasa.networkPolicy.enabled=true)
 check "network policies admit rasa to the app port" \

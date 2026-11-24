@@ -4,7 +4,7 @@
 {{- $rasaNp := .Values.rasa.networkPolicy | default dict }}
 {{- $rasaPort := .Values.rasa.service.targetPort | default 8000 }}
 {{- /*
-The model service calls the app for STUDIO_AUTH_URL and STUDIO_JWKS_URL, and
+The model service calls the app at STUDIO_AUTH_URL, and
 the app calls the model service at MS_API_URL. Each policy renders only when
 its side is already isolated: selecting a pod with an Ingress or Egress policy
 isolates it, so rendering unconditionally would block traffic that was open

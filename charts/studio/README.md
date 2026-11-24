@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.67](https://img.shields.io/badge/Version-3.0.0--rc.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.68](https://img.shields.io/badge/Version-3.0.0--rc.68-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -73,7 +73,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -88,7 +88,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.67
+$ helm install my-release rasa/studio --version 3.0.0-rc.68
 ```
 
 ## Quick Start
@@ -141,13 +141,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.67
+$ helm pull rasa/studio --version 3.0.0-rc.68
 ```
 
 ## General Configuration
@@ -355,7 +355,7 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
-- Inject `STUDIO_TOKEN_ISSUER`, `STUDIO_JWKS_URL` and `STUDIO_TOKEN_AUDIENCE` via the same ConfigMap, so the model service accepts the access tokens that Studio issues (see [Studio access tokens](#studio-access-tokens))
+- Inject `STUDIO_TOKEN_ISSUER` via the same ConfigMap, so the model service accepts the access tokens that Studio issues. The model service derives the JWKS URL from `STUDIO_AUTH_URL` (see [Studio access tokens](#studio-access-tokens))
 - Set `MS_API_URL` on the Studio app container to the in-cluster model service (`http://rasapro:80`). Studio forwards the browser's model service calls through `/api/rasa/model-service`
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix). Only the agent preview uses it
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
@@ -400,10 +400,9 @@ The chart does not deploy the builder service, so it never sets `COPILOT_API_URL
 To turn on Copilot, run the builder service outside this chart and connect it:
 
 1. Set `COPILOT_API_URL` in `app.env` to the builder service URL that the Studio app can reach.
-2. On the builder service, set `STUDIO_TOKEN_ISSUER` to Studio's public issuer, `<config.connectionType>://<Studio app host>/api/auth`. This value equals Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`.
-3. On the builder service, set `STUDIO_JWKS_URL` to a JWKS URL that the builder service can reach. In the same cluster, use `http://<release>-studio-app:<app.service.port>/api/auth/jwks`. Otherwise, use `<Studio public URL>/api/auth/jwks`.
-4. Keep the default `STUDIO_TOKEN_AUDIENCE` on the builder service, `urn:rasa:builder-service`.
-5. With `networkPolicy.enabled`, add the builder service port to `networkPolicy.egressPorts`. Otherwise the app pods cannot reach the builder service.
+2. On the builder service, set `STUDIO_AUTH_URL` to a Studio URL that the builder service can reach. In the same cluster, use `http://<release>-studio-app:<app.service.port>`. Otherwise, use Studio's public URL. The builder service derives the token issuer and the JWKS URL from it.
+3. If the URL in step 2 is not Studio's public URL, also set `STUDIO_TOKEN_ISSUER` on the builder service to Studio's public issuer, `<config.connectionType>://<Studio app host>/api/auth`. This value equals Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`.
+4. With `networkPolicy.enabled`, add the builder service port to `networkPolicy.egressPorts`. Otherwise the app pods cannot reach the builder service.
 
 ```yaml
 app:
@@ -459,9 +458,10 @@ The model service verifies the access tokens that Studio issues. The `shared-env
 
 | Variable | Default |
 |----------|---------|
-| `STUDIO_TOKEN_ISSUER` | Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`. That is `<config.connectionType>://<Studio app host>/api/auth`, or the literal `BETTER_AUTH_BASE_URL` value from `app.env` |
-| `STUDIO_JWKS_URL` | `http://<release>-studio-app:<app.service.port>/api/auth/jwks` (in-cluster) |
-| `STUDIO_TOKEN_AUDIENCE` | `urn:rasa:model-service` |
+| `STUDIO_AUTH_URL` | `http://<release>-studio-app:<app.service.port>` (in-cluster). The model service derives the JWKS URL from it |
+| `STUDIO_TOKEN_ISSUER` | Studio's `BETTER_AUTH_BASE_URL` + `/api/auth`. That is `<config.connectionType>://<Studio app host>/api/auth`, or the literal `BETTER_AUTH_BASE_URL` value from `app.env`. The chart sets it because the model service reaches Studio at the in-cluster URL, not at the public one |
+
+The model service keeps its default token audience, `urn:rasa:model-service`.
 
 To use other values, for example when Studio sits behind a different public URL, set them in `rasa.overrideEnv`. Kubernetes gives `env` priority over `envFrom`, so these entries replace the ConfigMap values. Keep the chart defaults in the list, as described above:
 
@@ -471,8 +471,6 @@ rasa:
     # ...chart defaults (RASA_LICENSE, OPENAI_API_KEY)...
     - name: STUDIO_TOKEN_ISSUER
       value: "https://studio.example.com/api/auth"
-    - name: STUDIO_JWKS_URL
-      value: "http://my-studio-app.studio.svc:80/api/auth/jwks"
 ```
 
 If `app.env` sets `BETTER_AUTH_BASE_URL` with `valueFrom`, the chart cannot read the value. Then set `STUDIO_TOKEN_ISSUER` in `rasa.overrideEnv` as shown above.

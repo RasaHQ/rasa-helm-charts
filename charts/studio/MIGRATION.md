@@ -18,7 +18,7 @@ stable only from 1.31, and Helm does not enforce a subchart's own floor — so
 this chart declares it. On an older cluster `helm upgrade` refuses to run and
 nothing below this line applies: upgrade the cluster, or stay on 2.x.
 
-Five things need work **outside** your values file. Everything else is a values
+Six things need work **outside** your values file. Everything else is a values
 edit or a changed default.
 
 ### 1. Delete the old topology — Helm will not
@@ -128,6 +128,22 @@ $ kubectl get pvc rasa-pro-data-pvc-<namespace> -n <namespace> \
 ```
 
 Full detail in the Rasa Pro chart's [migration guide](../rasa/MIGRATION.md).
+
+### 6. Add `STUDIO_ENCRYPTION_KEY` to the Secret before you upgrade
+
+The app container reads `STUDIO_ENCRYPTION_KEY` from `app.encryptionKey`
+(default: the `STUDIO_ENCRYPTION_KEY` key of `studio-secrets`) through a
+non-optional `secretKeyRef`. If the key is missing, the new pod does not start.
+Add it before `helm upgrade`:
+
+```console
+$ kubectl patch secret studio-secrets -n <namespace> --type merge \
+    -p "{\"stringData\":{\"STUDIO_ENCRYPTION_KEY\":\"$(openssl rand -base64 32 | tr '+/' '-_' | tr -d =)\"}}"
+```
+
+Keep a backup of the key outside the cluster. Do not change it later: Studio
+stores its fingerprint and cannot read its stored secrets with a different key.
+See step 2 of [Before You Install](README.md#2-create-the-studio-secrets-secret).
 
 ### Renamed and removed keys
 

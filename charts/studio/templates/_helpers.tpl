@@ -292,13 +292,6 @@ Model service ingress path prefix
 {{- end -}}
 
 {{/*
-Model service base URL (no ingress path) for window.MS_API_URL
-*/}}
-{{- define "studio.modelServiceBaseUrl" -}}
-{{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
-{{- end -}}
-
-{{/*
 Model service URL for RASA_MODEL_SERVER_BASE_URL (scheme + host + ingress path)
 */}}
 {{- define "studio.modelServiceUrl" -}}

@@ -212,17 +212,18 @@ values always render as quoted strings.
 # Before
 webClient:
   environmentVariables:
-    MS_API_URL: "https://studio.example.com"
+    FEATURE_FLAG_EXAMPLE: "true"
 
 # After
 app:
   webClient:
     config:
-      MS_API_URL: "https://studio.example.com"
+      FEATURE_FLAG_EXAMPLE: "true"
 ```
 
-Setting `MS_API_URL` on `app.env` has no effect on `window.MS_API_URL` — only
-`app.webClient.config.MS_API_URL` does.
+`config.js` no longer carries `MS_API_URL`. The browser reaches the model
+service only through Studio at `/api/rasa/model-service/`, and the chart sets
+`MS_API_URL` on the app container. `app.webClient.config.MS_API_URL` is ignored.
 
 ### Ingress host configuration
 
@@ -230,8 +231,8 @@ The `&dns_hostname` YAML anchor and `config.ingressHost` are removed, and a
 value left there is silently ignored — move it before upgrading.
 
 - **Single host:** set `global.ingressHost` once. The app ingress, the Rasa Pro
-  model-service ingress, and every derived URL (`window.MS_API_URL`,
-  `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
+  model-service ingress, and every derived URL
+  (`RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
 - **Split host:** leave `global.ingressHost` **unset** and set
   `app.ingress.hostName` and `rasa.ingress.hosts[0].host`.
 

@@ -11,13 +11,6 @@ data:
     {{- else }}
     window.API_ENDPOINT = "/api";
     {{- end }}
-    {{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" }}
-    window.MS_API_URL = {{ .Values.app.webClient.config.MS_API_URL | quote }};
-    {{- else if and .Values.rasa.enabled (include "studio.modelServiceHost" .) }}
-    window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
-    {{- else }}
-    window.MS_API_URL = "";
-    {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "MODEL_SERVICE_ENABLED") }}
     window.MODEL_SERVICE_ENABLED = {{ .Values.rasa.enabled | toString | quote }};
     {{- end }}

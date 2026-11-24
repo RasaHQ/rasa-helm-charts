@@ -188,7 +188,7 @@ container only.
 
 **Single-host install (recommended):** set one value and the Studio app
 and Rasa Pro model-service ingresses — plus every derived URL
-(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
+(`RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
 resolve from it:
 
 ```yaml
@@ -312,7 +312,6 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
-- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
@@ -323,15 +322,6 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > existing release also needs the Rasa Deployment deleted first, because its selector
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
-
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
-
-```yaml
-app:
-  webClient:
-    config:
-      MS_API_URL: "https://models.example.com"
-```
 
 
 ### Rasa Pro Model Service Environment Variables
@@ -737,7 +727,7 @@ tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
 
 - app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
 - the app-served web client's `API_ENDPOINT`
-- the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
+- the model service `RASA_MODEL_SERVER_BASE_URL`
 - `CORS_ORIGINS`
 
 Set it to `"https"` when clients reach these hosts over TLS:

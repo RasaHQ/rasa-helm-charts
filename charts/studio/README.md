@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.65](https://img.shields.io/badge/Version-3.0.0--rc.65-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.66](https://img.shields.io/badge/Version-3.0.0--rc.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -12,7 +12,7 @@ The Studio chart deploys a unified Studio image. The app serves both the API and
 |-----------|-------------|--------------|--------|
 | **app** | Studio API server and web client — handles business logic and data persistence with Better Auth | `/api` and `/` | always on |
 | **event-ingestion** | Kafka consumer that writes conversation events to the database | internal | `eventIngestion.mode` (`colocated`, `separate`, or `disabled`) |
-| **rasa** | Rasa Pro model server (OCI subchart dependency) | `/modelservice` | `rasa.enabled` (default: `true`) |
+| **rasa** | Rasa Pro combined service: the model service and the builder that powers Copilot, in one pod (OCI subchart dependency) | `/modelservice` and `/builderservice` | `rasa.enabled` (default: `true`) |
 
 ## Prerequisites
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.65
+$ helm install my-release rasa/studio --version 3.0.0-rc.66
 ```
 
 ## Quick Start
@@ -138,13 +138,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.65
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.65
+$ helm pull rasa/studio --version 3.0.0-rc.66
 ```
 
 ## General Configuration
@@ -185,8 +185,8 @@ container only.
 
 **Single-host install (recommended):** set one value and the Studio app
 and Rasa Pro model-service ingresses — plus every derived URL
-(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
-resolve from it:
+(`window.MS_API_URL`, `window.COPILOT_API_URL`, `RASA_MODEL_SERVER_BASE_URL`,
+`WEB_CLIENT_URL`) — resolve from it:
 
 ```yaml
 global:
@@ -204,11 +204,16 @@ app:
 rasa:
   ingress:
     hosts:
-      - host: models.example.com         # model service
+      - host: models.example.com         # model service and builder
         paths:
           - path: /modelservice
             pathType: Prefix
+          - path: /builderservice        # keep it, or Copilot is hidden
+            pathType: Prefix
 ```
+
+A list in a values file replaces the chart's list, so a `hosts` entry has to
+repeat both paths. See [The builder](#the-builder).
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
@@ -300,17 +305,19 @@ Studio bundles the [Rasa Pro Helm chart](https://helm.rasa.com) as an optional O
 
 ```yaml
 rasa:
-  enabled: true  # set false to use an external Rasa Pro instance
+  enabled: true  # set false to run Studio without the model service and the builder
 ```
 
 When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
+- Start the combined service, `python -m rasa.combined_builder_service`: the model service and the builder in one process on port `8000`
 - Read the license and OpenAI API key from `studio-secrets`
-- Expose the model server at `/modelservice` on the shared ingress host
+- Expose the model server at `/modelservice` and the builder at `/builderservice` on the shared ingress host
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
-- Use a `Recreate` update strategy (no rolling updates — stateful model loading)
+- Set `window.COPILOT_API_URL` on the web client to the same host plus `/builderservice`
+- Run one replica with a `Recreate` update strategy. Both are required: the service keeps trainings, deployments, jobs and locks in memory, and the chart refuses any other value at install time
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
 > **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
@@ -328,7 +335,44 @@ app:
   webClient:
     config:
       MS_API_URL: "https://models.example.com"
+      COPILOT_API_URL: "https://models.example.com/builderservice"  # omit to hide Copilot
 ```
+
+### The builder
+
+The builder is the part of Rasa Pro that Copilot uses to create, train and
+evaluate agents. This chart does not deploy it on its own and has no separate
+switch for it: `rasa.enabled: true` runs the model service and the builder as
+one combined service, and `rasa.enabled: false` runs neither.
+
+> **The builder routes have no login check yet.** Anyone who can reach the model
+> service host can read and change every agent through `/builderservice`, and
+> use the model key. The builder also trusts the user id the browser sends. This
+> holds until Rasa Pro adds service authentication. Until then, limit who can
+> reach the host (private ingress, allow-list, VPN), or do not route the builder.
+
+- **Image.** The combined service needs a Rasa Pro image that contains
+  `rasa.combined_builder_service`, and it must be the full image
+  (`rasa-pro/rasa-pro`). The lite image does not ship the Copilot docs index yet.
+- **Web client.** `window.COPILOT_API_URL` is the model service host plus
+  `/builderservice`; the web client adds `/api` itself. Set
+  `app.webClient.config.COPILOT_API_URL` to override it. When it is empty the web
+  client hides Copilot.
+- **Do not route the builder.** Remove the `/builderservice` path from
+  `rasa.ingress.hosts[0].paths`. The chart then leaves `window.COPILOT_API_URL`
+  empty. The builder still runs inside the pod but cannot be reached from
+  outside the cluster.
+- **No catch-all path.** Never add `/` to the model service ingress. The
+  combined service also serves `/webhooks/...`, `/inspector.io` and
+  `/swagger...` at the root, with no login check.
+- **Storage.** The builder keeps one git repository per agent and the Copilot
+  history under `/app/working-data`. Without a volume a pod restart
+  loses them, so turn on `rasa.persistence` — see [Model Storage](#model-storage).
+- **Environment.** The builder has no settings of its own. It reads the licence
+  and model key the model service already has, and the browser calls it
+  directly, so `CORS_ORIGINS` from the `shared-environment` ConfigMap applies to
+  it too. Keep `STUDIO_AUTH_URL` set: without it every protected model service
+  route answers 503, and Copilot cannot train or deploy.
 
 ### Rasa Pro Model Service Environment Variables
 
@@ -1012,7 +1056,7 @@ changes need work outside your values file.
 | app.serviceAccount.name | string | Name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
 | app.tolerations | list | Tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | app.webClient | object | Browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"config":{}}` |
-| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
+| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), COPILOT_API_URL (window.COPILOT_API_URL, the builder URL), CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":null,"iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
@@ -1073,7 +1117,7 @@ changes need work outside your values file.
 | global.extraDeploymentLabels | object | Map organizational structures onto system objects. https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | global.ingressAnnotations | object | Annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.extraAnnotations, rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | global.ingressClassName | string | Ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.ingress.className) wins when set. | `""` |
-| global.ingressHost | string | Single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
+| global.ingressHost | string | Single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, window.COPILOT_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Whether the pod may use the node network namespace. | `false` |
 | imagePullSecrets | list | Repository pull secrets. | `[]` |
 | nameOverride | string | Override name of app. | `""` |
@@ -1087,8 +1131,8 @@ changes need work outside your values file.
 | rasa.args | list | `args: []` replaces the chart-generated arguments entirely, so the container runs `command` alone. This is what settings.useDefaultArgs: false used to do. | `[]` |
 | rasa.command[0] | string |  | `"python"` |
 | rasa.command[1] | string |  | `"-m"` |
-| rasa.command[2] | string |  | `"rasa.model_service"` |
-| rasa.enabled | bool | Deploy the Rasa Pro model server subchart. To run Studio without the model service set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
+| rasa.command[2] | string |  | `"rasa.combined_builder_service"` |
+| rasa.enabled | bool | Deploy the Rasa Pro subchart. It runs one combined service: the model service (`/modelservice`) and the builder that powers Copilot (`/builderservice`). This chart version does not run the model service without the builder. To run Studio without either, set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
 | rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
@@ -1098,6 +1142,8 @@ changes need work outside your values file.
 | rasa.ingress.hosts[0].host | string |  | `""` |
 | rasa.ingress.hosts[0].paths[0].path | string |  | `"/modelservice"` |
 | rasa.ingress.hosts[0].paths[0].pathType | string |  | `"Prefix"` |
+| rasa.ingress.hosts[0].paths[1].path | string |  | `"/builderservice"` |
+| rasa.ingress.hosts[0].paths[1].pathType | string |  | `"Prefix"` |
 | rasa.livenessProbe.enabled | bool |  | `true` |
 | rasa.livenessProbe.failureThreshold | int |  | `6` |
 | rasa.livenessProbe.httpGet.path | string |  | `"/modelservice/health"` |

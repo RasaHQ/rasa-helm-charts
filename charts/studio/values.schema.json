@@ -608,7 +608,7 @@
       "type": "object",
       "properties": {
         "enabled": {
-          "description": "Deploy the bundled Rasa Pro model server. Set false to use an external instance.",
+          "description": "Deploy the bundled Rasa Pro subchart, which runs the model service and the builder (Copilot) as one combined service. Set false to run Studio without either.",
           "type": "boolean"
         }
       }

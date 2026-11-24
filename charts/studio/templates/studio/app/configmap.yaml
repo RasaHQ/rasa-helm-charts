@@ -18,6 +18,15 @@ data:
     {{- else }}
     window.MS_API_URL = "";
     {{- end }}
+    {{- /* Where the builder is. Empty hides Copilot in the web client, which
+           appends /api itself. */}}
+    {{- if hasKey (.Values.app.webClient.config | default dict) "COPILOT_API_URL" }}
+    window.COPILOT_API_URL = {{ .Values.app.webClient.config.COPILOT_API_URL | quote }};
+    {{- else if and .Values.rasa.enabled (include "studio.builderServiceUrl" .) }}
+    window.COPILOT_API_URL = "{{ include "studio.builderServiceUrl" . }}";
+    {{- else }}
+    window.COPILOT_API_URL = "";
+    {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "FEATURE_FLAG_AI_TAGGING") }}
     window.FEATURE_FLAG_AI_TAGGING = {{ .Values.app.aiTagging.enabled | toString | quote }};
     {{- end }}

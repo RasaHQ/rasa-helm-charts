@@ -306,6 +306,36 @@ Model service URL for RASA_MODEL_SERVER_BASE_URL (scheme + host + ingress path)
 {{- end -}}
 
 {{/*
+Builder ingress path. Fixed in the combined service; it cannot be configured.
+*/}}
+{{- define "studio.builderServicePath" -}}
+/builderservice
+{{- end -}}
+
+{{/*
+Builder URL for window.COPILOT_API_URL (scheme + host + /builderservice). The
+web client appends /api itself.
+
+Empty unless the model service ingress host routes the builder path, so the web
+client is never pointed at a URL that is not served. An empty value hides
+Copilot. Only the first host is read, to match studio.modelServiceHost.
+*/}}
+{{- define "studio.builderServiceUrl" -}}
+{{- $builderPath := include "studio.builderServicePath" . -}}
+{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
+{{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
+{{- $routed := false -}}
+{{- range ($firstHost.paths | default list) -}}
+{{- if eq (trimSuffix "/" (.path | default "")) $builderPath -}}
+{{- $routed = true -}}
+{{- end -}}
+{{- end -}}
+{{- if and $routed (include "studio.modelServiceHost" .) -}}
+{{- printf "%s%s" (include "studio.modelServiceBaseUrl" .) $builderPath -}}
+{{- end -}}
+{{- end -}}
+
+{{/*
 Guard against `rasa: null`. Nulling the key deletes it, which breaks the
 subchart condition (rasa.enabled) and silently re-enables the Rasa Pro
 subchart with its default values. After coalescing, .Values.rasa is
@@ -332,6 +362,18 @@ fully successful install with a broken release.
 {{- fail "config.database.password is required unless config.database.useAwsIamAuth is \"true\" — set config.database.password.secretName and .secretKey, or enable IAM auth" -}}
 {{- end -}}
 {{- if .Values.rasa.enabled -}}
+{{- /* The model service and the builder keep trainings, deployments, jobs and
+       locks in memory, so a second pod -- even briefly, during a rolling
+       update -- serves requests from state the first one does not have. */ -}}
+{{- if ne (.Values.rasa.replicaCount | default 1 | int) 1 -}}
+{{- fail (printf "rasa.replicaCount must be 1, got %v. The model service and the builder keep their state in memory and cannot run more than one replica" .Values.rasa.replicaCount) -}}
+{{- end -}}
+{{- if dig "autoscaling" "enabled" false .Values.rasa -}}
+{{- fail "rasa.autoscaling.enabled must be false. The model service and the builder keep their state in memory and cannot run more than one replica" -}}
+{{- end -}}
+{{- if ne (dig "strategy" "type" "" .Values.rasa) "Recreate" -}}
+{{- fail "rasa.strategy.type must be Recreate. The model service and the builder keep their state in memory, so the old pod has to stop before the new one starts" -}}
+{{- end -}}
 {{- $declared := list -}}
 {{- range (.Values.rasa.overrideEnv | default list) -}}
 {{- $declared = append $declared .name -}}

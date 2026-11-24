@@ -278,17 +278,22 @@ Resolve the model service ingress host
 {{- end -}}
 
 {{/*
-Model service ingress path prefix
+Model service ingress path prefix: the first path of the first host that is not
+the builder path. The builder path is skipped so that the order of the two
+paths in rasa.ingress.hosts[0].paths does not matter.
 */}}
 {{- define "studio.modelServiceIngressPath" -}}
+{{- $builderPath := include "studio.builderServicePath" . -}}
 {{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
 {{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
-{{- $firstPath := dig "path" "" (($firstHost.paths | default list | first) | default dict) -}}
-{{- if $firstPath -}}
-{{- $firstPath -}}
-{{- else -}}
-/modelservice
+{{- $modelPath := "" -}}
+{{- range ($firstHost.paths | default list) -}}
+{{- $path := .path | default "" -}}
+{{- if and (not $modelPath) $path (not (hasPrefix $builderPath $path)) -}}
+{{- $modelPath = $path -}}
 {{- end -}}
+{{- end -}}
+{{- $modelPath | default "/modelservice" -}}
 {{- end -}}
 
 {{/*
@@ -316,9 +321,14 @@ Builder ingress path. Fixed in the combined service; it cannot be configured.
 Builder URL for window.COPILOT_API_URL (scheme + host + /builderservice). The
 web client appends /api itself.
 
-Empty unless the model service ingress host routes the builder path, so the web
-client is never pointed at a URL that is not served. An empty value hides
-Copilot. Only the first host is read, to match studio.modelServiceHost.
+Empty unless rasa.ingress.hosts[0].paths lists a path that starts with
+/builderservice (`/builderservice`, `/builderservice/*`, a regex form), and a
+host is set. An empty value hides Copilot. Only the first host is read, to match
+studio.modelServiceHost.
+
+The path list alone decides. rasa.ingress.enabled is not read, the same as for
+window.MS_API_URL, so an install that routes with its own gateway keeps the
+derived URL.
 */}}
 {{- define "studio.builderServiceUrl" -}}
 {{- $builderPath := include "studio.builderServicePath" . -}}
@@ -326,7 +336,7 @@ Copilot. Only the first host is read, to match studio.modelServiceHost.
 {{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
 {{- $routed := false -}}
 {{- range ($firstHost.paths | default list) -}}
-{{- if eq (trimSuffix "/" (.path | default "")) $builderPath -}}
+{{- if hasPrefix $builderPath (.path | default "") -}}
 {{- $routed = true -}}
 {{- end -}}
 {{- end -}}
@@ -365,14 +375,20 @@ fully successful install with a broken release.
 {{- /* The model service and the builder keep trainings, deployments, jobs and
        locks in memory, so a second pod -- even briefly, during a rolling
        update -- serves requests from state the first one does not have. */ -}}
-{{- if ne (.Values.rasa.replicaCount | default 1 | int) 1 -}}
-{{- fail (printf "rasa.replicaCount must be 1, got %v. The model service and the builder keep their state in memory and cannot run more than one replica" .Values.rasa.replicaCount) -}}
+{{- if gt (.Values.rasa.replicaCount | default 1 | int) 1 -}}
+{{- fail (printf "rasa.replicaCount must not be more than 1, got %v. The model service and the builder keep their state in memory and cannot run more than one replica" .Values.rasa.replicaCount) -}}
 {{- end -}}
 {{- if dig "autoscaling" "enabled" false .Values.rasa -}}
 {{- fail "rasa.autoscaling.enabled must be false. The model service and the builder keep their state in memory and cannot run more than one replica" -}}
 {{- end -}}
 {{- if ne (dig "strategy" "type" "" .Values.rasa) "Recreate" -}}
 {{- fail "rasa.strategy.type must be Recreate. The model service and the builder keep their state in memory, so the old pod has to stop before the new one starts" -}}
+{{- end -}}
+{{- /* This chart does not run the model service without the builder. With
+       another command the web client would still be sent to /builderservice,
+       where nothing answers. */ -}}
+{{- if not (contains "rasa.combined_builder_service" (join " " (.Values.rasa.command | default list))) -}}
+{{- fail "rasa.command must start rasa.combined_builder_service. This chart version runs the model service and the builder as one service; remove the rasa.command override, or set it to [\"python\", \"-m\", \"rasa.combined_builder_service\"]" -}}
 {{- end -}}
 {{- $declared := list -}}
 {{- range (.Values.rasa.overrideEnv | default list) -}}

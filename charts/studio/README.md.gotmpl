@@ -317,7 +317,7 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Set `window.COPILOT_API_URL` on the web client to the same host plus `/builderservice`
-- Run one replica with a `Recreate` update strategy. Both are required: the service keeps trainings, deployments, jobs and locks in memory, and the chart refuses any other value at install time
+- Run one replica with a `Recreate` update strategy. Both are required: the service keeps trainings, deployments, jobs and locks in memory, and the chart refuses more than one replica, autoscaling or another strategy at install time
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
 > **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
@@ -358,10 +358,20 @@ one combined service, and `rasa.enabled: false` runs neither.
   `/builderservice`; the web client adds `/api` itself. Set
   `app.webClient.config.COPILOT_API_URL` to override it. When it is empty the web
   client hides Copilot.
+- **A host is needed.** With neither `global.ingressHost` nor
+  `rasa.ingress.hosts[0].host` set, `window.COPILOT_API_URL` is empty and
+  Copilot is hidden, the same as for `window.MS_API_URL`.
+- **Path list.** The chart derives the URL when `rasa.ingress.hosts[0].paths`
+  lists a path that starts with `/builderservice`; a wildcard form such as
+  `/builderservice/*` counts, and the order of the paths does not matter. It
+  does not read `rasa.ingress.enabled`, so an install that routes with its own
+  gateway keeps the derived URL.
 - **Do not route the builder.** Remove the `/builderservice` path from
   `rasa.ingress.hosts[0].paths`. The chart then leaves `window.COPILOT_API_URL`
   empty. The builder still runs inside the pod but cannot be reached from
   outside the cluster.
+- **Command.** The chart refuses a `rasa.command` that does not start
+  `rasa.combined_builder_service`.
 - **No catch-all path.** Never add `/` to the model service ingress. The
   combined service also serves `/webhooks/...`, `/inspector.io` and
   `/swagger...` at the root, with no login check.

@@ -871,9 +871,10 @@ rasa:
   enabled: true
   fullnameOverride: rasapro
 
-  # One replica with the `Recreate` strategy is required, not a default to tune:
-  # the model service and the builder keep trainings, deployments, jobs and
-  # locks in memory. The chart refuses any other value at install time.
+  # At most one replica with the `Recreate` strategy is required, not a default
+  # to tune: the model service and the builder keep trainings, deployments, jobs
+  # and locks in memory. The chart refuses more than one replica, autoscaling
+  # and any other strategy at install time.
   replicaCount: 1
   image:
     # The combined service needs the full Rasa Pro image. The lite image does
@@ -886,7 +887,8 @@ rasa:
 
   # Starts the model service and the builder in one process, on one port. The
   # service works out the builder path, folders and model service address
-  # itself; there is no builder environment setting.
+  # itself; there is no builder environment setting. The chart refuses a
+  # command that does not start `rasa.combined_builder_service`.
   command: ["python", "-m", "rasa.combined_builder_service"]
 
   overrideEnv:
@@ -949,7 +951,8 @@ rasa:
           # can reach this host can read and change every agent. Remove this
           # path to keep the builder unreachable from outside the cluster; the
           # chart then leaves window.COPILOT_API_URL empty and the web client
-          # hides Copilot.
+          # hides Copilot. The order of the two paths does not matter, and a
+          # wildcard form such as `/builderservice/*` also counts as routed.
           # Never add a catch-all path (`/`) here: the combined service also
           # serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the
           # root, with no login check.

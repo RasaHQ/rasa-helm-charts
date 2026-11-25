@@ -292,13 +292,6 @@ Model service ingress path prefix
 {{- end -}}
 
 {{/*
-Model service base URL (no ingress path) for window.MS_API_URL
-*/}}
-{{- define "studio.modelServiceBaseUrl" -}}
-{{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
-{{- end -}}
-
-{{/*
 Model service URL for RASA_MODEL_SERVER_BASE_URL (scheme + host + ingress path)
 */}}
 {{- define "studio.modelServiceUrl" -}}
@@ -330,6 +323,9 @@ fully successful install with a broken release.
 {{- $db := .Values.config.database -}}
 {{- if and (ne ($db.useAwsIamAuth | toString) "true") (not $db.password) -}}
 {{- fail "config.database.password is required unless config.database.useAwsIamAuth is \"true\" — set config.database.password.secretName and .secretKey, or enable IAM auth" -}}
+{{- end -}}
+{{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" -}}
+{{- fail "app.webClient.config.MS_API_URL was removed: the browser reaches the model service through Studio at /api/rasa/model-service/. For an external Rasa Pro (rasa.enabled: false), set MS_API_URL in app.env to its base URL, without /modelservice" -}}
 {{- end -}}
 {{- if .Values.rasa.enabled -}}
 {{- $declared := list -}}
@@ -434,7 +430,7 @@ Resolve the Studio App ingress host.
 Studio's public origin, BETTER_AUTH_BASE_URL. The token issuer derives from it.
 */}}
 {{- define "studio.authBaseUrl" -}}
-{{- $host := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required: BETTER_AUTH_BASE_URL and STUDIO_TOKEN_ISSUER derive from it" -}}
+{{- $host := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required: BETTER_AUTH_BASE_URL, WEB_CLIENT_URL, API_ENDPOINT and STUDIO_TOKEN_ISSUER derive from it" -}}
 {{- printf "%s://%s" .Values.config.connectionType $host -}}
 {{- end -}}
 

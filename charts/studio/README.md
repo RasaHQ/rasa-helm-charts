@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.66](https://img.shields.io/badge/Version-3.0.0--rc.66-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.67](https://img.shields.io/badge/Version-3.0.0--rc.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -73,7 +73,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -88,7 +88,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.66
+$ helm install my-release rasa/studio --version 3.0.0-rc.67
 ```
 
 ## Quick Start
@@ -141,13 +141,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.66
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.66
+$ helm pull rasa/studio --version 3.0.0-rc.67
 ```
 
 ## General Configuration
@@ -188,7 +188,7 @@ container only.
 
 **Single-host install (recommended):** set one value and the Studio app
 and Rasa Pro model-service ingresses — plus every derived URL
-(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
+(`RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
 resolve from it:
 
 ```yaml
@@ -215,9 +215,11 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema — an install without any host renders empty
-(match-all) ingress rules and relative browser URLs.
+`rasa.ingress.hosts[0].host`). The Studio app needs a host: without
+`global.ingressHost` or `app.ingress.hostName` the render fails, because
+`BETTER_AUTH_BASE_URL`, `WEB_CLIENT_URL`, `API_ENDPOINT` and
+`STUDIO_TOKEN_ISSUER` derive from it. Both values take a bare hostname, without
+a scheme or a path.
 
 ## Database Configuration
 
@@ -312,7 +314,6 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
-- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
@@ -324,14 +325,16 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
 
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
+When `rasa.enabled: false`, point Studio at the external model service with `MS_API_URL` on the app container. Use the base URL without `/modelservice`: Studio forwards browser calls from `/api/rasa/model-service/` to `${MS_API_URL}/modelservice/`.
 
 ```yaml
 app:
-  webClient:
-    config:
-      MS_API_URL: "https://models.example.com"
+  env:
+    - name: MS_API_URL
+      value: "https://models.example.com"
 ```
+
+This entry also turns on the preview: `window.MODEL_SERVICE_ENABLED` becomes `"true"`.
 
 ### Rasa Pro Model Service Environment Variables
 
@@ -380,9 +383,9 @@ The model service accepts the access tokens that Studio issues. The chart writes
 | `STUDIO_AUTH_URL` | `http://<release>-studio-app:<app.service.port>`, the in-cluster app. The model service fetches the JWKS from it. |
 | `STUDIO_TOKEN_ISSUER` | `<connectionType>://<Studio host>/api/auth`, which is `BETTER_AUTH_BASE_URL` + `/api/auth` |
 
-The render fails when neither `global.ingressHost` nor `app.ingress.hostName` is set, because the issuer needs the host. To set your own values, add them to `rasa.overrideEnv`: Kubernetes gives `env` priority over `envFrom`.
+The issuer needs the app host (see [Ingress Host Configuration](#ingress-host-configuration)). To set your own values, add them to `rasa.overrideEnv`: Kubernetes gives `env` priority over `envFrom`.
 
-The browser reaches the model service only through Studio at `/api/rasa/model-service/`. With `rasa.enabled`, the chart sets `MS_API_URL` on the app container to the in-cluster model service and writes `window.MODEL_SERVICE_ENABLED = "true"` to `config.js`. `window.COPILOT_ENABLED` is `"false"`, because the chart does not deploy the builder service. Override either flag in `app.webClient.config`.
+The browser reaches the model service only through Studio at `/api/rasa/model-service/`. With `rasa.enabled`, the chart sets `MS_API_URL` on the app container to the in-cluster model service. `config.js` gets `window.MODEL_SERVICE_ENABLED = "true"` when `rasa.enabled` is true or `app.env` sets a non-empty `MS_API_URL`, else `"false"`. `window.COPILOT_ENABLED` is `"false"`, because the chart does not deploy the builder service. Override either flag in `app.webClient.config`.
 
 ### Studio App Model Service Environment Variables
 
@@ -736,7 +739,7 @@ tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
 
 - app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
 - the app-served web client's `API_ENDPOINT`
-- the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
+- the model service `RASA_MODEL_SERVER_BASE_URL`
 - `CORS_ORIGINS`
 
 Set it to `"https"` when clients reach these hosts over TLS:
@@ -931,7 +934,7 @@ changes need work outside your values file.
 | app.autoscaling.minReplicas | int | Minimum number of replicas. | `1` |
 | app.autoscaling.targetCPUUtilizationPercentage | int | Target CPU utilization percentage. The HPA will scale the deployment to maintain this CPU utilization. Ref: https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details | `80` |
 | app.encryptionKey | object | Key that encrypts the secrets Studio stores, such as model provider keys and its own OAuth client secret. 32 bytes, base64url, no padding. Every replica needs the same key, and it must never change. Stored in a Kubernetes secret. Required. | `{"secretKey":"STUDIO_ENCRYPTION_KEY","secretName":"studio-secrets"}` |
-| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Studio forwards browser calls to it through /api/rasa/model-service/. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
+| app.env | list | Extra environment variables for the Studio App container, in native Kubernetes EnvVar format (name + value or valueFrom). NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not merge lists) — copy the default entries you want to keep. NOTE: With rasa.enabled the chart sets MS_API_URL to the in-cluster model service. Studio forwards browser calls to it through /api/rasa/model-service/. With rasa.enabled: false, set MS_API_URL here to the external model service base URL, without /modelservice. Example:   - name: MY_VAR     value: "my-value"   - name: MY_SECRET_VAR     valueFrom:       secretKeyRef:         name: my-secret         key: MY_SECRET_KEY | `[{"name":"DELETE_CONVERSATIONS_CRON_EXPRESSION","value":"0 * * * *"},{"name":"STUDIO_TELEMETRY_ENABLED","value":"true"},{"name":"STUDIO_USER_ID_TELEMETRY_ENABLED","value":"true"}]` |
 | app.envFrom | list | Additional environment variables from ConfigMap or Secret. These will be mounted as environment variables in the container. Example: - configMapRef:     name: my-configmap - secretRef:     name: my-secret Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-pod-configmap/#configure-all-key-value-pairs-in-a-configmap-as-container-environment-variables | `[]` |
 | app.extraContainers | list | Additional containers to run alongside the main Studio App container. These containers will be part of the same pod and share the pod's network namespace. Example: - name: sidecar   image: busybox   command: ["sh", "-c", "while true; do echo 'Sidecar running'; sleep 30; done"] Ref: https://kubernetes.io/docs/concepts/workloads/pods/#how-pods-manage-multiple-containers | `[]` |
 | app.github | object | Optional GitHub App credentials, letting Studio connect projects to GitHub repositories. Three secret references — `appId`, `installationId`, `privateKey` — each a `secretName` + `secretKey` pair, so they may live in one Secret or three. All three or none; a partial block is rejected by the schema. | `{}` |
@@ -1033,7 +1036,7 @@ changes need work outside your values file.
 | app.serviceAccount.name | string | Name of the service account to use. If not set and create is true, a name is generated using the fullname template. | `""` |
 | app.tolerations | list | Tolerations for the app pods. This allows the pods to run on nodes with matching taints. Ref: https://kubernetes.io/docs/concepts/scheduling-eviction/taint-and-toleration/ | `[]` |
 | app.webClient | object | Browser runtime config for the unified app (no separate web-client Deployment). config.js is mounted into the app pod at /usr/src/app/webclient/config.js. | `{"config":{}}` |
-| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL), MODEL_SERVICE_ENABLED, COPILOT_ENABLED, CURRENT_VERSION_NUMBER, etc. | `{}` |
+| app.webClient.config | object | Feeds browser window.* globals rendered into the config.js ConfigMap mounted at /usr/src/app/webclient/config.js on the app pod. Plain scalar map (KEY: "value") — these are NOT container environment variables and cannot reference secrets (ConfigMap only). Used for feature flags (FEATURE_FLAG_*), MODEL_SERVICE_ENABLED, COPILOT_ENABLED, CURRENT_VERSION_NUMBER, etc. | `{}` |
 | config.affinity | object | Pod affinity and anti-affinity rules for all deployments. These settings can be overridden by component-specific configurations. | `{}` |
 | config.connectionType | string | Define the URL scheme (`http` or `https`) for externally derived URLs (ingress-based API_URL, WEB_CLIENT_URL, web client API_ENDPOINT, model-service public URLs, CORS_ORIGINS, etc.). Valid values: "http" or "https". Does not change in-cluster http:// service-to-service calls. | `"http"` |
 | config.database | object | The postgres database instance details for Studio to connect to. This section configures the database connection parameters for Studio. | `{"awsRegion":"","databaseName":"studio","host":null,"iamDbUsername":"","password":{"secretKey":"DATABASE_PASSWORD","secretName":"studio-secrets"},"port":"5432","preferSSL":"true","queryParams":"","rejectUnauthorized":"","useAwsIamAuth":"","username":""}` |
@@ -1094,7 +1097,7 @@ changes need work outside your values file.
 | global.extraDeploymentLabels | object | Map organizational structures onto system objects. https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/ | `{}` |
 | global.ingressAnnotations | object | Annotations added to the Studio app ingress and the Rasa Pro model-service ingress. Merged with per-ingress annotations (app.ingress.extraAnnotations, rasa.ingress.annotations), which win on key conflicts. Example:   cert-manager.io/cluster-issuer: letsencrypt-prod | `{}` |
 | global.ingressClassName | string | Ingress class for the Studio app ingress and the Rasa Pro model-service ingress. Acts as a fallback: a per-ingress className (app.ingress.className, rasa.ingress.className) wins when set. | `""` |
-| global.ingressHost | string | Single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
+| global.ingressHost | string | Single-host knob: set it once and the Studio app ingress and Rasa Pro model-service ingress and every derived URL (RASA_MODEL_SERVER_BASE_URL, WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently overrides per-component hosts, including rasa.ingress.hosts[0].host — leave it UNSET for split-host installs and use the per-ingress hosts (app.ingress.hostName, rasa.ingress.hosts[0].host) instead. | `nil` |
 | hostNetwork | bool | Whether the pod may use the node network namespace. | `false` |
 | imagePullSecrets | list | Repository pull secrets. | `[]` |
 | nameOverride | string | Override name of app. | `""` |

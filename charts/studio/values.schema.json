@@ -136,8 +136,9 @@
       "type": "object",
       "properties": {
         "hostName": {
-          "description": "Hostname for this ingress; global.ingressHost overrides it when set",
-          "type": ["string", "null"]
+          "description": "Hostname for this ingress, without scheme or path; global.ingressHost overrides it when set",
+          "type": ["string", "null"],
+          "pattern": "^[^/:\\s]*$"
         },
         "enabled": {
           "type": "boolean"
@@ -570,8 +571,9 @@
       "type": "object",
       "properties": {
         "ingressHost": {
-          "description": "Single-host knob: one hostname for the Studio app and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
-          "type": ["string", "null"]
+          "description": "Single-host knob: one hostname, without scheme or path, for the Studio app and Rasa Pro model-service ingresses and all derived URLs. Leave unset for split-host installs.",
+          "type": ["string", "null"],
+          "pattern": "^[^/:\\s]*$"
         },
         "ingressClassName": {
           "description": "Ingress class for the Studio app and Rasa Pro model-service ingresses. Fallback: a per-ingress className wins when set.",

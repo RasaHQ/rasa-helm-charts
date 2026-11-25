@@ -18,6 +18,10 @@ stable only from 1.31, and Helm does not enforce a subchart's own floor — so
 this chart declares it. On an older cluster `helm upgrade` refuses to run and
 nothing below this line applies: upgrade the cluster, or stay on 2.x.
 
+This chart needs the Studio release that contains SWI-2173
+([RasaHQ/studio#5353](https://github.com/RasaHQ/studio/pull/5353)). With an
+older Studio image, the agent preview cannot reach the model service.
+
 Six things need work **outside** your values file. Everything else is a values
 edit or a changed default.
 
@@ -212,17 +216,26 @@ values always render as quoted strings.
 # Before
 webClient:
   environmentVariables:
-    MS_API_URL: "https://studio.example.com"
+    FEATURE_FLAG_EXAMPLE: "true"
 
 # After
 app:
   webClient:
     config:
-      MS_API_URL: "https://studio.example.com"
+      FEATURE_FLAG_EXAMPLE: "true"
 ```
 
-Setting `MS_API_URL` on `app.env` has no effect on `window.MS_API_URL` — only
-`app.webClient.config.MS_API_URL` does.
+`config.js` no longer carries `MS_API_URL`. The browser reaches the model
+service only through Studio at `/api/rasa/model-service/`, and the chart sets
+`MS_API_URL` on the app container. The render fails if
+`app.webClient.config.MS_API_URL` is set. With `rasa.enabled: false`, move the
+value to `app.env` (see [Chart Dependencies — Rasa Pro](README.md#chart-dependencies--rasa-pro)).
+A non-empty `MS_API_URL` in `app.env` also sets `window.MODEL_SERVICE_ENABLED`
+to `"true"`.
+
+The preview socket now goes through the Studio app ingress, not the Rasa Pro
+ingress. Move any socket timeout or body-size annotations from
+`rasa.ingress.annotations` to `app.ingress.extraAnnotations`.
 
 ### Ingress host configuration
 
@@ -230,10 +243,13 @@ The `&dns_hostname` YAML anchor and `config.ingressHost` are removed, and a
 value left there is silently ignored — move it before upgrading.
 
 - **Single host:** set `global.ingressHost` once. The app ingress, the Rasa Pro
-  model-service ingress, and every derived URL (`window.MS_API_URL`,
-  `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
+  model-service ingress, and every derived URL
+  (`RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
 - **Split host:** leave `global.ingressHost` **unset** and set
   `app.ingress.hostName` and `rasa.ingress.hosts[0].host`.
+
+An app host is required: without `global.ingressHost` or `app.ingress.hostName`
+the render fails. Both take a bare hostname, without a scheme or a path.
 
 The two are mutually exclusive by design: `global.ingressHost` overrides the
 per-component hosts whenever it is set.

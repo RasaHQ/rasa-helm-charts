@@ -188,7 +188,7 @@ container only.
 
 **Single-host install (recommended):** set one value and the Studio app
 and Rasa Pro model-service ingresses — plus every derived URL
-(`window.MS_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
+(`RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`) —
 resolve from it:
 
 ```yaml
@@ -215,9 +215,11 @@ rasa:
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
-`rasa.ingress.hosts[0].host`). No host value
-is enforced by the schema — an install without any host renders empty
-(match-all) ingress rules and relative browser URLs.
+`rasa.ingress.hosts[0].host`). The Studio app needs a host: without
+`global.ingressHost` or `app.ingress.hostName` the render fails, because
+`BETTER_AUTH_BASE_URL`, `WEB_CLIENT_URL`, `API_ENDPOINT` and
+`STUDIO_TOKEN_ISSUER` derive from it. Both values take a bare hostname, without
+a scheme or a path.
 
 ## Database Configuration
 
@@ -312,7 +314,6 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
-- Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Use a `Recreate` update strategy (no rolling updates — stateful model loading)
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
@@ -324,14 +325,16 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
 
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
+When `rasa.enabled: false`, point Studio at the external model service with `MS_API_URL` on the app container. Use the base URL without `/modelservice`: Studio forwards browser calls from `/api/rasa/model-service/` to `${MS_API_URL}/modelservice/`.
 
 ```yaml
 app:
-  webClient:
-    config:
-      MS_API_URL: "https://models.example.com"
+  env:
+    - name: MS_API_URL
+      value: "https://models.example.com"
 ```
+
+This entry also turns on the preview: `window.MODEL_SERVICE_ENABLED` becomes `"true"`.
 
 
 ### Rasa Pro Model Service Environment Variables
@@ -381,9 +384,9 @@ The model service accepts the access tokens that Studio issues. The chart writes
 | `STUDIO_AUTH_URL` | `http://<release>-studio-app:<app.service.port>`, the in-cluster app. The model service fetches the JWKS from it. |
 | `STUDIO_TOKEN_ISSUER` | `<connectionType>://<Studio host>/api/auth`, which is `BETTER_AUTH_BASE_URL` + `/api/auth` |
 
-The render fails when neither `global.ingressHost` nor `app.ingress.hostName` is set, because the issuer needs the host. To set your own values, add them to `rasa.overrideEnv`: Kubernetes gives `env` priority over `envFrom`.
+The issuer needs the app host (see [Ingress Host Configuration](#ingress-host-configuration)). To set your own values, add them to `rasa.overrideEnv`: Kubernetes gives `env` priority over `envFrom`.
 
-The browser reaches the model service only through Studio at `/api/rasa/model-service/`. With `rasa.enabled`, the chart sets `MS_API_URL` on the app container to the in-cluster model service and writes `window.MODEL_SERVICE_ENABLED = "true"` to `config.js`. `window.COPILOT_ENABLED` is `"false"`, because the chart does not deploy the builder service. Override either flag in `app.webClient.config`.
+The browser reaches the model service only through Studio at `/api/rasa/model-service/`. With `rasa.enabled`, the chart sets `MS_API_URL` on the app container to the in-cluster model service. `config.js` gets `window.MODEL_SERVICE_ENABLED = "true"` when `rasa.enabled` is true or `app.env` sets a non-empty `MS_API_URL`, else `"false"`. `window.COPILOT_ENABLED` is `"false"`, because the chart does not deploy the builder service. Override either flag in `app.webClient.config`.
 
 ### Studio App Model Service Environment Variables
 
@@ -737,7 +740,7 @@ tries per batch including the first) and `AI_TAGGING_LIVE_MAX_WAIT_SECONDS`
 
 - app `API_URL`, `BETTER_AUTH_BASE_URL`, and `WEB_CLIENT_URL`
 - the app-served web client's `API_ENDPOINT`
-- the model service `RASA_MODEL_SERVER_BASE_URL` and `window.MS_API_URL`
+- the model service `RASA_MODEL_SERVER_BASE_URL`
 - `CORS_ORIGINS`
 
 Set it to `"https"` when clients reach these hosts over TLS:

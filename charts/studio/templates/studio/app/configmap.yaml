@@ -4,22 +4,15 @@ metadata:
   name: studio-web-client-configmap
 data:
   windowVariables: |
-    {{- /* With no host configured anywhere, fall back to same-origin relative
-           URLs instead of emitting malformed absolutes like "http:///api". */}}
-    {{- if include "studio.appHost" . }}
-    window.API_ENDPOINT = "{{ .Values.config.connectionType }}://{{ include "studio.appHost" . }}/api";
-    {{- else }}
-    window.API_ENDPOINT = "/api";
-    {{- end }}
-    {{- if hasKey (.Values.app.webClient.config | default dict) "MS_API_URL" }}
-    window.MS_API_URL = {{ .Values.app.webClient.config.MS_API_URL | quote }};
-    {{- else if and .Values.rasa.enabled (include "studio.modelServiceHost" .) }}
-    window.MS_API_URL = "{{ include "studio.modelServiceBaseUrl" . }}";
-    {{- else }}
-    window.MS_API_URL = "";
-    {{- end }}
+    window.API_ENDPOINT = "{{ include "studio.authBaseUrl" . }}/api";
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "MODEL_SERVICE_ENABLED") }}
-    window.MODEL_SERVICE_ENABLED = {{ .Values.rasa.enabled | toString | quote }};
+    {{- $externalModelService := false }}
+    {{- range (.Values.app.env | default list) }}
+    {{- if and (eq .name "MS_API_URL") (or .value .valueFrom) }}
+    {{- $externalModelService = true }}
+    {{- end }}
+    {{- end }}
+    window.MODEL_SERVICE_ENABLED = {{ or .Values.rasa.enabled $externalModelService | toString | quote }};
     {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "COPILOT_ENABLED") }}
     window.COPILOT_ENABLED = "false";

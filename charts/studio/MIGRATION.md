@@ -22,7 +22,7 @@ This chart needs the Studio release that contains SWI-2173
 ([RasaHQ/studio#5353](https://github.com/RasaHQ/studio/pull/5353)). With an
 older Studio image, the agent preview cannot reach the model service.
 
-Six things need work **outside** your values file. Everything else is a values
+Seven things need work **outside** your values file. Everything else is a values
 edit or a changed default.
 
 ### 1. Delete the old topology — Helm will not
@@ -148,6 +148,40 @@ $ kubectl patch secret studio-secrets -n <namespace> --type merge \
 Keep a backup of the key outside the cluster. Do not change it later: Studio
 stores its fingerprint and cannot read its stored secrets with a different key.
 See step 2 of [Before You Install](README.md#2-create-the-studio-secrets-secret).
+
+### 7. Give each Rasa Pro HTTP event broker a credential
+
+From this release Studio refuses event batches on `/api/events` that do not
+carry a valid token. There is no grace period and no flag to turn this off.
+This needs the Studio release with
+[RasaHQ/studio#5369](https://github.com/RasaHQ/studio/pull/5369) and a Rasa Pro
+with [RasaHQ/rasa-private#8223](https://github.com/RasaHQ/rasa-private/pull/8223).
+
+Each Rasa Pro (Mantle agent) that uses the `http` event broker needs a Pro
+credential from Studio. Put it in the `event_broker:` section of
+`integrations.yml`, with the values read from environment variables:
+
+```yaml
+event_broker:
+  type: http
+  url: https://studio.example.com/api/events
+  client_id: ${STUDIO_EVENTS_CLIENT_ID}
+  client_secret: ${STUDIO_EVENTS_CLIENT_SECRET}
+```
+
+Replace a secret in this order, so that no batch goes out without a valid
+token:
+
+1. Create a new credential in Studio.
+2. Deploy Rasa Pro with the new credential.
+3. Revoke the old credential.
+
+Kafka (CALM) users are not affected.
+
+Studio limits token requests to 20 a minute for each client address. Behind a
+load balancer, set `app.trustedProxies` to every hop in front of Studio: the
+cloud load balancer range and the ingress controller pod CIDR. Without it,
+Studio can count all Rasa Pro instances as one address.
 
 ### Renamed and removed keys
 

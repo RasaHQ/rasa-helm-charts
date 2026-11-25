@@ -96,6 +96,10 @@ spec:
             {{- include "studio.app.github.env" . | nindent 12 }}
             {{- end }}
             {{- include "studio.app.aiTagging.env" (dict "aiTagging" .Values.app.aiTagging "env" (.Values.app.env | default list)) | nindent 12 }}
+            {{- with .Values.app.trustedProxies }}
+            - name: AUTH_TRUSTED_PROXIES
+              value: {{ join "," . | quote }}
+            {{- end }}
             - name: BETTER_AUTH_BASE_URL
               value: {{ include "studio.authBaseUrl" . | quote }}
             {{- if .Values.rasa.enabled }}

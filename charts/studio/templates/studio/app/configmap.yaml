@@ -6,7 +6,13 @@ data:
   windowVariables: |
     window.API_ENDPOINT = "{{ include "studio.authBaseUrl" . }}/api";
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "MODEL_SERVICE_ENABLED") }}
-    window.MODEL_SERVICE_ENABLED = {{ .Values.rasa.enabled | toString | quote }};
+    {{- $externalModelService := false }}
+    {{- range (.Values.app.env | default list) }}
+    {{- if and (eq .name "MS_API_URL") (or .value .valueFrom) }}
+    {{- $externalModelService = true }}
+    {{- end }}
+    {{- end }}
+    window.MODEL_SERVICE_ENABLED = {{ or .Values.rasa.enabled $externalModelService | toString | quote }};
     {{- end }}
     {{- if not (hasKey (.Values.app.webClient.config | default dict) "COPILOT_ENABLED") }}
     window.COPILOT_ENABLED = "false";

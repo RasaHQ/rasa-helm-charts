@@ -430,7 +430,7 @@ Resolve the Studio App ingress host.
 Studio's public origin, BETTER_AUTH_BASE_URL. The token issuer derives from it.
 */}}
 {{- define "studio.authBaseUrl" -}}
-{{- $host := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required: BETTER_AUTH_BASE_URL and STUDIO_TOKEN_ISSUER derive from it" -}}
+{{- $host := include "studio.appHost" . | required "global.ingressHost or app.ingress.hostName is required: BETTER_AUTH_BASE_URL, WEB_CLIENT_URL, API_ENDPOINT and STUDIO_TOKEN_ISSUER derive from it" -}}
 {{- printf "%s://%s" .Values.config.connectionType $host -}}
 {{- end -}}
 

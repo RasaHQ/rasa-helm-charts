@@ -202,6 +202,17 @@ app:
   # three. All three or none; a partial block is rejected by the schema.
   github: {}
 
+  # -- IPs or CIDR ranges of the proxies in front of Studio, rendered as
+  # `AUTH_TRUSTED_PROXIES`. Studio removes these hops from the right of
+  # `X-Forwarded-For` to find the Rasa Pro address for the event token rate limit
+  # (20 requests a minute for each address). List every hop: the cloud load
+  # balancer range and the ingress controller pod CIDR. A missing hop can make
+  # all Rasa Pro instances share one limit. Empty (default) sets no variable.
+  # Example:
+  #   - 10.0.0.0/16
+  #   - 10.244.0.0/16
+  trustedProxies: []
+
   # -- Extra environment variables for the Studio App container,
   # in native Kubernetes EnvVar format (name + value or valueFrom).
   # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not

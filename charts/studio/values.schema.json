@@ -385,6 +385,11 @@
             "privateKey": ["appId", "installationId"]
           }
         },
+        "trustedProxies": {
+          "description": "IPs or CIDR ranges of every proxy hop in front of Studio, rendered as AUTH_TRUSTED_PROXIES",
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 }
+        },
         "env": {
           "description": "Extra environment variables for the Studio App container (native EnvVar list)",
           "type": "array",

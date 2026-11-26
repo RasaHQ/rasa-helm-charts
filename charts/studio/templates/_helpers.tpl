@@ -346,6 +346,22 @@ fully successful install with a broken release.
 {{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
 {{- end -}}
 {{- end -}}
+{{- $ref := include "studio.previewEvents.secretRef" . | fromJson -}}
+{{- $clientId := "" -}}
+{{- $secretKeyRef := dict -}}
+{{- range (.Values.rasa.overrideEnv | default list) -}}
+{{- if eq .name "STUDIO_EVENTS_CLIENT_ID" -}}
+{{- $clientId = .value | default "" | toString -}}
+{{- else if eq .name "STUDIO_EVENTS_CLIENT_SECRET" -}}
+{{- $secretKeyRef = dig "valueFrom" "secretKeyRef" (dict) . -}}
+{{- end -}}
+{{- end -}}
+{{- if ne $clientId "studio-preview" -}}
+{{- fail "rasa.overrideEnv needs STUDIO_EVENTS_CLIENT_ID with the value studio-preview, or preview bots cannot send events to Studio — re-declare the default entry from values.yaml" -}}
+{{- end -}}
+{{- if or (ne (get $secretKeyRef "name" | default "") $ref.secretName) (ne (get $secretKeyRef "key" | default "") $ref.secretKey) -}}
+{{- fail (printf "rasa.overrideEnv needs STUDIO_EVENTS_CLIENT_SECRET from secretKeyRef name %q, key %q, the secret that app.previewEventsSecret selects, or Studio refuses the events of preview bots" $ref.secretName $ref.secretKey) -}}
+{{- end -}}
 {{- end -}}
 {{- end -}}
 
@@ -440,4 +456,18 @@ Studio App external URL for CORS_ORIGINS.
 */}}
 {{- define "studio.webClientUrl" -}}
 {{- printf "%s://%s" .Values.config.connectionType (include "studio.appHost" .) -}}
+{{- end -}}
+
+{{/*
+The Secret that holds the preview event client secret, as JSON: either
+app.previewEventsSecret.existingSecret or the Secret the chart generates. The
+rasa subchart reads its env as static values, so the generated Secret has a
+fixed name that the default rasa.overrideEnv can refer to.
+*/}}
+{{- define "studio.previewEvents.secretRef" -}}
+{{- with .Values.app.previewEventsSecret.existingSecret -}}
+{{- dict "secretName" .secretName "secretKey" .secretKey | toJson -}}
+{{- else -}}
+{{- dict "secretName" "studio-preview-events" "secretKey" "STUDIO_EVENTS_CLIENT_SECRET" | toJson -}}
+{{- end -}}
 {{- end -}}

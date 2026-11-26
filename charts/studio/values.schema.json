@@ -390,6 +390,19 @@
           "type": "array",
           "items": { "type": "string", "minLength": 1 }
         },
+        "previewEventsSecret": {
+          "description": "Client secret that preview bots use to send events to Studio",
+          "type": "object",
+          "properties": {
+            "existingSecret": {
+              "description": "Secret to use instead of the generated studio-preview-events Secret — secret reference, or empty",
+              "anyOf": [
+                { "type": "object", "maxProperties": 0 },
+                { "$ref": "#/definitions/secretRef" }
+              ]
+            }
+          }
+        },
         "env": {
           "description": "Extra environment variables for the Studio App container (native EnvVar list)",
           "type": "array",

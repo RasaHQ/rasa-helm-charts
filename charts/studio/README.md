@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.68](https://img.shields.io/badge/Version-3.0.0--rc.68-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.69](https://img.shields.io/badge/Version-3.0.0--rc.69-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -73,7 +73,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.69
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -88,7 +88,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.68
+$ helm install my-release rasa/studio --version 3.0.0-rc.69
 ```
 
 ## Quick Start
@@ -141,13 +141,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.69
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.68
+$ helm pull rasa/studio --version 3.0.0-rc.69
 ```
 
 ## General Configuration
@@ -310,6 +310,7 @@ rasa:
 
 When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Read the license and OpenAI API key from `studio-secrets`
+- Read the preview event client secret from the Secret that `app.previewEventsSecret` selects, and set `STUDIO_EVENTS_CLIENT_ID=studio-preview`, so that preview bots can send events to Studio. See [Preview Event Secret](#preview-event-secret)
 - Expose the model server at `/modelservice` on the shared ingress host
 - Use `/modelservice` for liveness and readiness probes on port `8000`
 - Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
@@ -336,6 +337,46 @@ app:
 
 This entry also turns on the preview: `window.MODEL_SERVICE_ENABLED` becomes `"true"`.
 
+### Preview Event Secret
+
+Preview bots send their events to Studio with the client id `studio-preview` and
+the secret `STUDIO_EVENTS_CLIENT_SECRET`. On install the chart generates the
+secret (`rsc_` and 32 random bytes, base64url) in the Secret
+`studio-preview-events`. It keeps the value on upgrade, and `helm uninstall`
+leaves the Secret in place. Studio and the model service read the same Secret.
+
+`helm template` and Argo CD cannot read the existing Secret, so each render
+makes a new value. With these tools, create the secret yourself and set
+`app.previewEventsSecret.existingSecret`. Then the chart renders no Secret.
+Point the `STUDIO_EVENTS_CLIENT_SECRET` entry of `rasa.overrideEnv` at the same
+Secret, or the install is refused:
+
+```console
+$ kubectl patch secret studio-secrets -n <namespace> --type merge \
+    -p "{\"stringData\":{\"STUDIO_EVENTS_CLIENT_SECRET\":\"rsc_$(openssl rand -base64 32 | tr '+/' '-_' | tr -d =)\"}}"
+```
+
+```yaml
+app:
+  previewEventsSecret:
+    existingSecret:
+      secretName: "studio-secrets"
+      secretKey: "STUDIO_EVENTS_CLIENT_SECRET"
+rasa:
+  overrideEnv:
+    # ... RASA_LICENSE and OPENAI_API_KEY as in values.yaml ...
+    - name: STUDIO_EVENTS_CLIENT_ID
+      value: "studio-preview"
+    - name: STUDIO_EVENTS_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: studio-secrets
+          key: STUDIO_EVENTS_CLIENT_SECRET
+```
+
+When the secret changes, restart the Studio app and the model service. The
+chart restarts the app by itself only when it generates the secret.
+
 ### Rasa Pro Model Service Environment Variables
 
 The following environment variables can be configured on the Rasa Pro model server container via `rasa.overrideEnv`:
@@ -346,7 +387,7 @@ The following environment variables can be configured on the Rasa Pro model serv
 | `MAX_PARALLEL_BOT_RUNS` | Maximum number of parallel bot conversations the model service will handle simultaneously | `10` |
 | `RASA_REMOTE_STORAGE` | Cloud storage backend where trained models are uploaded — `aws`, `gcs` or `azure`. Unset means models stay on local disk. See [Model Storage](#model-storage). | `None` |
 
-`rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence and `OPENAI_API_KEY` into the model service — so re-declare both alongside your additions. Omitting them is refused at install time.
+`rasa.overrideEnv` **replaces** the chart's list rather than adding to it, and that list is the only thing wiring the licence, `OPENAI_API_KEY` and the preview event credential into the model service — so re-declare all four default entries alongside your additions. Omitting them is refused at install time.
 
 ```yaml
 rasa:
@@ -363,6 +404,13 @@ rasa:
         secretKeyRef:
           name: studio-secrets
           key: OPENAI_API_KEY_SECRET_KEY
+    - name: STUDIO_EVENTS_CLIENT_ID
+      value: "studio-preview"
+    - name: STUDIO_EVENTS_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: studio-preview-events
+          key: STUDIO_EVENTS_CLIENT_SECRET
     # Your additions:
     - name: MAX_PARALLEL_TRAININGS
       value: "5"
@@ -473,8 +521,9 @@ uploads every trained model to that bucket and downloads it back on demand.
 
 > **All of these go in `rasa.overrideEnv`, not `rasa.extraEnv`.** That list
 > *replaces* the chart's generated environment, and the generated list is the
-> only thing wiring `RASA_LICENSE` and `OPENAI_API_KEY` into the model service —
-> so re-declare both in every example below. See
+> only thing wiring `RASA_LICENSE`, `OPENAI_API_KEY`, `STUDIO_EVENTS_CLIENT_ID`
+> and `STUDIO_EVENTS_CLIENT_SECRET` into the model service — so re-declare all
+> four in every example below. See
 > [Rasa Pro Model Service Environment Variables](#rasa-pro-model-service-environment-variables).
 
 > **Never use `value:` for a credential.** Anything inlined there is stored in
@@ -514,6 +563,13 @@ rasa:
         secretKeyRef:
           name: studio-secrets
           key: OPENAI_API_KEY_SECRET_KEY
+    - name: STUDIO_EVENTS_CLIENT_ID
+      value: "studio-preview"
+    - name: STUDIO_EVENTS_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: studio-preview-events
+          key: STUDIO_EVENTS_CLIENT_SECRET
     - name: RASA_REMOTE_STORAGE
       value: "aws"
     - name: BUCKET_NAME
@@ -549,7 +605,7 @@ credentials are long-lived and must be rotated by hand.
 ```yaml
 rasa:
   overrideEnv:
-    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    # ... the four chart default entries as above ...
     - name: RASA_REMOTE_STORAGE
       value: "aws"
     - name: BUCKET_NAME
@@ -586,7 +642,7 @@ rasa:
     annotations:
       iam.gke.io/gcp-service-account: "studio-models@<project>.iam.gserviceaccount.com"
   overrideEnv:
-    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    # ... the four chart default entries as above ...
     - name: RASA_REMOTE_STORAGE
       value: "gcs"
     - name: BUCKET_NAME
@@ -611,7 +667,7 @@ rasa:
       mountPath: /var/secrets/gcs
       readOnly: true
   overrideEnv:
-    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    # ... the four chart default entries as above ...
     - name: RASA_REMOTE_STORAGE
       value: "gcs"
     - name: BUCKET_NAME
@@ -632,7 +688,7 @@ rasa:
 ```yaml
 rasa:
   overrideEnv:
-    # ... RASA_LICENSE and OPENAI_API_KEY as above ...
+    # ... the four chart default entries as above ...
     - name: RASA_REMOTE_STORAGE
       value: "azure"
     - name: AZURE_CONTAINER
@@ -1005,6 +1061,8 @@ changes need work outside your values file.
 | app.podAnnotations | object | Annotations to add to the app pod. Example:   container.apparmor.security.beta.kubernetes.io/studio-app: runtime/default Ref: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/ | `{}` |
 | app.podSecurityContext | object | Security settings for the entire pod. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/ | `{"enabled":true}` |
 | app.podSecurityContext.enabled | bool | Whether to enable the pod security context. | `true` |
+| app.previewEventsSecret | object | Client secret that preview bots use to send events to Studio, rendered as `STUDIO_EVENTS_CLIENT_SECRET` on the app and on the model service. By default the chart generates it in the Secret `studio-preview-events` on install and keeps it on upgrade and uninstall. | `{"existingSecret":{}}` |
+| app.previewEventsSecret.existingSecret | object | Use this Secret instead of the generated one. Required with `helm template` and Argo CD, where the chart cannot read the generated Secret and makes a new value on each render. The value is `rsc_` followed by at least 32 characters. Also point the `STUDIO_EVENTS_CLIENT_SECRET` entry of `rasa.overrideEnv` at it. Example:   secretName: "studio-secrets"   secretKey: "STUDIO_EVENTS_CLIENT_SECRET" | `{}` |
 | app.readinessProbe | object | Readiness probe configuration. This determines if the container is ready to receive traffic. Ref: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/ | `{"enabled":true,"failureThreshold":6,"httpGet":{"path":"/api/health","port":4000,"scheme":"HTTP"},"initialDelaySeconds":15,"periodSeconds":15,"successThreshold":1,"timeoutSeconds":5}` |
 | app.readinessProbe.enabled | bool | Whether to enable the readiness probe. | `true` |
 | app.readinessProbe.failureThreshold | int | Number of failures before the container is considered not ready. | `6` |
@@ -1139,6 +1197,11 @@ changes need work outside your values file.
 | rasa.overrideEnv[1].name | string |  | `"OPENAI_API_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
+| rasa.overrideEnv[2].name | string |  | `"STUDIO_EVENTS_CLIENT_ID"` |
+| rasa.overrideEnv[2].value | string |  | `"studio-preview"` |
+| rasa.overrideEnv[3].name | string |  | `"STUDIO_EVENTS_CLIENT_SECRET"` |
+| rasa.overrideEnv[3].valueFrom.secretKeyRef.key | string |  | `"STUDIO_EVENTS_CLIENT_SECRET"` |
+| rasa.overrideEnv[3].valueFrom.secretKeyRef.name | string |  | `"studio-preview-events"` |
 | rasa.persistence.create | bool | Mount a PersistentVolumeClaim at `/app/working-data`, where the model service writes trained models. Off by default. With no volume the models sit on the container filesystem and are lost on every pod restart, including every `helm upgrade` — the model service runs a single replica with a `Recreate` strategy. Either turn this on, or send models to object storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README. | `false` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |

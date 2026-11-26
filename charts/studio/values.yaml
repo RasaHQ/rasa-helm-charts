@@ -213,6 +213,20 @@ app:
   #   - 10.244.0.0/16
   trustedProxies: []
 
+  # -- Client secret that preview bots use to send events to Studio, rendered as
+  # `STUDIO_EVENTS_CLIENT_SECRET` on the app and on the model service. By default
+  # the chart generates it in the Secret `studio-preview-events` on install and
+  # keeps it on upgrade and uninstall.
+  previewEventsSecret:
+    # -- Use this Secret instead of the generated one. Required with `helm template`
+    # and Argo CD, where the chart cannot read the generated Secret and makes a new
+    # value on each render. The value is `rsc_` followed by at least 32 characters.
+    # Also point the `STUDIO_EVENTS_CLIENT_SECRET` entry of `rasa.overrideEnv` at it.
+    # Example:
+    #   secretName: "studio-secrets"
+    #   secretKey: "STUDIO_EVENTS_CLIENT_SECRET"
+    existingSecret: {}
+
   # -- Extra environment variables for the Studio App container,
   # in native Kubernetes EnvVar format (name + value or valueFrom).
   # NOTE: a user-supplied list REPLACES this default list wholesale (Helm does not
@@ -909,6 +923,13 @@ rasa:
         secretKeyRef:
           name: "studio-secrets"
           key: "OPENAI_API_KEY_SECRET_KEY"
+    - name: STUDIO_EVENTS_CLIENT_ID
+      value: "studio-preview"
+    - name: STUDIO_EVENTS_CLIENT_SECRET
+      valueFrom:
+        secretKeyRef:
+          name: "studio-preview-events"
+          key: "STUDIO_EVENTS_CLIENT_SECRET"
 
   envFrom:
     - configMapRef:

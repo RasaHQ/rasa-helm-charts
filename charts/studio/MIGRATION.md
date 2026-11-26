@@ -22,7 +22,7 @@ This chart needs the Studio release that contains SWI-2173
 ([RasaHQ/studio#5353](https://github.com/RasaHQ/studio/pull/5353)). With an
 older Studio image, the agent preview cannot reach the model service.
 
-Seven things need work **outside** your values file. Everything else is a values
+Eight things need work **outside** your values file. Everything else is a values
 edit or a changed default.
 
 ### 1. Delete the old topology — Helm will not
@@ -182,6 +182,39 @@ Studio limits token requests to 20 a minute for each client address. Behind a
 load balancer, set `app.trustedProxies` to every hop in front of Studio: the
 cloud load balancer range and the ingress controller pod CIDR. Without it,
 Studio can count all Rasa Pro instances as one address.
+
+### 8. GitOps installs: set `app.previewEventsSecret.existingSecret`
+
+Preview bots send their events to Studio with the secret
+`STUDIO_EVENTS_CLIENT_SECRET`, which the app and the model service both read.
+This needs the Studio release with
+[RasaHQ/studio#5381](https://github.com/RasaHQ/studio/pull/5381) and a Rasa Pro
+with [RasaHQ/rasa-private#8250](https://github.com/RasaHQ/rasa-private/pull/8250).
+
+With `helm install` and `helm upgrade` there is nothing to do. The chart
+generates the secret in the Secret `studio-preview-events` and keeps it on
+upgrade.
+
+With `helm template` or Argo CD, the chart cannot read that Secret and makes a
+new value on each render. Studio then accepts the new value only after it
+restarts, and the model service keeps the old value until it restarts too. Set
+your own secret instead:
+
+1. Add `STUDIO_EVENTS_CLIENT_SECRET` to `studio-secrets`. The value is `rsc_`
+   followed by at least 32 characters:
+
+   ```console
+   $ kubectl patch secret studio-secrets -n <namespace> --type merge \
+       -p "{\"stringData\":{\"STUDIO_EVENTS_CLIENT_SECRET\":\"rsc_$(openssl rand -base64 32 | tr '+/' '-_' | tr -d =)\"}}"
+   ```
+
+2. Set `app.previewEventsSecret.existingSecret` to that key.
+3. Point the `STUDIO_EVENTS_CLIENT_SECRET` entry of `rasa.overrideEnv` at the
+   same key. See [Preview Event Secret](README.md#preview-event-secret).
+
+If you replace `rasa.overrideEnv`, add the two new default entries,
+`STUDIO_EVENTS_CLIENT_ID` and `STUDIO_EVENTS_CLIENT_SECRET`. The chart refuses
+to render without them.
 
 ### Renamed and removed keys
 

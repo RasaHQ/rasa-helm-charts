@@ -208,6 +208,28 @@ app:
 Setting `MS_API_URL` on `app.env` has no effect on `window.MS_API_URL` — only
 `app.webClient.config.MS_API_URL` does.
 
+### Rasa Pro runs the combined builder service
+
+`rasa.enabled: true` starts `python -m rasa.combined_builder_service`. It serves
+`/modelservice` and the builder routes, which Copilot uses, under
+`/builderservice`.
+
+> **The builder has no login check yet.** Anyone who can reach the model service
+> host can read and change every agent through `/builderservice`, and use the
+> model key, until Rasa Pro adds service authentication. Limit who can reach
+> the host.
+
+What to check in your values:
+
+| if you set | then |
+|---|---|
+| `rasa.image.tag` | Use a Rasa Pro build that contains `rasa.combined_builder_service`, and the full image, not the lite one. An older image fails at start with `No module named rasa.combined_builder_service`. |
+| `rasa.ingress.hosts` (every split-host install) | List both `/modelservice` and `/builderservice`, unchanged. Your list replaces the chart's, and the chart builds the browser URLs from these fixed paths. Never add a catch-all `/` path: the service also serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the root with no login check. |
+| `rasa.persistence` | Turn it on if you use Copilot. The builder keeps agents and Copilot history under `/app/working-data`, and a pod restart loses them without a volume. |
+| `app.webClient.config.COPILOT_API_URL` | Rendered as `window.COPILOT_API_URL`. Unset, it is derived from the ingress host plus `/builderservice`. |
+
+Expect the pod to need about 2 GB of memory at rest, before any training.
+
 ### Ingress host configuration
 
 The `&dns_hostname` YAML anchor and `config.ingressHost` are removed, and a
@@ -215,7 +237,7 @@ value left there is silently ignored — move it before upgrading.
 
 - **Single host:** set `global.ingressHost` once. The app ingress, the Rasa Pro
   model-service ingress, and every derived URL (`window.MS_API_URL`,
-  `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
+  `window.COPILOT_API_URL`, `RASA_MODEL_SERVER_BASE_URL`, `WEB_CLIENT_URL`, `CORS_ORIGINS`) follow it.
 - **Split host:** leave `global.ingressHost` **unset** and set
   `app.ingress.hostName` and `rasa.ingress.hosts[0].host`.
 

@@ -23,7 +23,7 @@ tag: ""
 global:
   # -- Single-host knob: set it once and the Studio
   # app ingress and Rasa Pro model-service ingress and every
-  # derived URL (window.MS_API_URL, RASA_MODEL_SERVER_BASE_URL,
+  # derived URL (window.MS_API_URL, window.COPILOT_API_URL, RASA_MODEL_SERVER_BASE_URL,
   # WEB_CLIENT_URL, CORS) resolve from it. WARNING: when set it silently
   # overrides per-component hosts, including rasa.ingress.hosts[0].host —
   # leave it UNSET for split-host installs and use the per-ingress hosts
@@ -594,6 +594,7 @@ app:
     # pod. Plain scalar map (KEY: "value") — these are NOT container environment
     # variables and cannot reference secrets (ConfigMap only).
     # Used for feature flags (FEATURE_FLAG_*), MS_API_URL (window.MS_API_URL),
+    # COPILOT_API_URL (window.COPILOT_API_URL, the builder URL),
     # CURRENT_VERSION_NUMBER, etc.
     config: {}
 
@@ -860,23 +861,28 @@ podLabels: {}
 
 # Define the resources for the Rasa Pro model server
 rasa:
-  # -- Deploy the Rasa Pro model server subchart.
-  # To run Studio without the model service set this to false.
+  # -- Deploy the Rasa Pro subchart, which runs the combined builder service
+  # (`/modelservice` and `/builderservice`, which Copilot uses).
   # WARNING: never disable with `rasa: null` — deleting the key breaks the
   # subchart condition and re-enables the subchart with its default values
   # (the chart fails the render if it detects this).
   enabled: true
   fullnameOverride: rasapro
 
+  # Single replica, like every Studio pod.
   replicaCount: 1
   image:
+    # The combined service needs the full Rasa Pro image. The lite image does
+    # not ship the Copilot docs index yet.
     repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
     tag: "3.22.0rc1"
 
+  # Stop the old pod before starting the new one, so a ReadWriteOnce volume is
+  # free for it.
   strategy:
     type: Recreate
 
-  command: ["python", "-m", "rasa.model_service"]
+  command: ["python", "-m", "rasa.combined_builder_service"]
 
   overrideEnv:
     - name: "RASA_LICENSE"
@@ -931,16 +937,21 @@ rasa:
       # to pin an exact host. The model-service URL derivation follows:
       # global.ingressHost > this host.
       - host: ""
+        # Fixed paths: keep both as they are. The chart builds the model
+        # service and Copilot URLs from them. The builder routes have NO login
+        # check yet, so limit who can reach this host.
         paths:
           - path: /modelservice
             pathType: Prefix
+          - path: /builderservice
+            pathType: Prefix
 
   persistence:
-    # -- Mount a PersistentVolumeClaim at `/app/working-data`, where the model
-    # service writes trained models. Off by default. With no volume the models
-    # sit on the container filesystem and are lost on every pod restart,
-    # including every `helm upgrade` — the model service runs a single replica
-    # with a `Recreate` strategy. Either turn this on, or send models to object
+    # -- Mount a PersistentVolumeClaim at `/app/working-data`, where the
+    # combined builder service keeps trained models, agents and Copilot
+    # history. Off by default. With no volume they sit on the container
+    # filesystem and are lost on every pod restart, including every
+    # `helm upgrade`. Either turn this on, or send models to object
     # storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README.
     create: false
     storageCapacity: 1Gi
@@ -976,11 +987,11 @@ rasa:
   # -- `args: []` replaces the chart-generated arguments entirely, so the container
   # runs `command` alone. This is what settings.useDefaultArgs: false used to do.
   args: []
-  # -- The model service ships its own models; no chart-managed volume.
+  # -- The combined builder service ships its own models; no chart-managed volume.
   mountModelsVolume: false
 
   rasa:
-    # -- The model service listens on 8000, not the chart default 5005.
+    # -- The combined builder service listens on 8000, not the chart default 5005.
     port: 8000
     # -- Studio supplies no endpoints or integrations, so render no ConfigMap.
     mountDefaultConfigmap: false

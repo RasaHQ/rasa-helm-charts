@@ -278,31 +278,25 @@ Resolve the model service ingress host
 {{- end -}}
 
 {{/*
-Model service ingress path prefix
-*/}}
-{{- define "studio.modelServiceIngressPath" -}}
-{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
-{{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
-{{- $firstPath := dig "path" "" (($firstHost.paths | default list | first) | default dict) -}}
-{{- if $firstPath -}}
-{{- $firstPath -}}
-{{- else -}}
-/modelservice
-{{- end -}}
-{{- end -}}
-
-{{/*
-Model service base URL (no ingress path) for window.MS_API_URL
+Combined builder service base URL (scheme + host) for window.MS_API_URL. The
+ingress paths /modelservice and /builderservice are fixed.
 */}}
 {{- define "studio.modelServiceBaseUrl" -}}
 {{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
 {{- end -}}
 
 {{/*
-Model service URL for RASA_MODEL_SERVER_BASE_URL (scheme + host + ingress path)
+Model service URL for RASA_MODEL_SERVER_BASE_URL.
 */}}
 {{- define "studio.modelServiceUrl" -}}
-{{- printf "%s://%s%s" .Values.config.connectionType (include "studio.modelServiceHost" .) (include "studio.modelServiceIngressPath" .) -}}
+{{- printf "%s/modelservice" (include "studio.modelServiceBaseUrl" .) -}}
+{{- end -}}
+
+{{/*
+Builder URL for window.COPILOT_API_URL. The web client appends /api itself.
+*/}}
+{{- define "studio.builderServiceUrl" -}}
+{{- printf "%s/builderservice" (include "studio.modelServiceBaseUrl" .) -}}
 {{- end -}}
 
 {{/*
@@ -347,7 +341,7 @@ fully successful install with a broken release.
 {{- end -}}
 {{- end -}}
 {{- if not $found -}}
-{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
+{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the combined builder service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

@@ -216,16 +216,15 @@ Setting `MS_API_URL` on `app.env` has no effect on `window.MS_API_URL` — only
 
 > **The builder has no login check yet.** Anyone who can reach the model service
 > host can read and change every agent through `/builderservice`, and use the
-> model key. This is on by default in every installation of this chart version
-> until Rasa Pro adds service authentication. Limit who can reach the host, or
-> remove the `/builderservice` path as described below.
+> model key, until Rasa Pro adds service authentication. Limit who can reach
+> the host.
 
 What to check in your values:
 
 | if you set | then |
 |---|---|
 | `rasa.image.tag` | Use a Rasa Pro build that contains `rasa.combined_builder_service`, and the full image, not the lite one. An older image fails at start with `No module named rasa.combined_builder_service`. |
-| `rasa.ingress.hosts` (every split-host install) | Add `/builderservice` next to `/modelservice`. Your list replaces the chart's, so without it the builder is not routed, `window.COPILOT_API_URL` stays empty and the web client hides Copilot. Leaving it out is also the supported way to keep the builder unreachable. Never add a catch-all `/` path: the service also serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the root with no login check. |
+| `rasa.ingress.hosts` (every split-host install) | List both `/modelservice` and `/builderservice`, unchanged. Your list replaces the chart's, and the chart builds the browser URLs from these fixed paths. Never add a catch-all `/` path: the service also serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the root with no login check. |
 | `rasa.persistence` | Turn it on if you use Copilot. The builder keeps agents and Copilot history under `/app/working-data`, and a pod restart loses them without a volume. |
 | `app.webClient.config.COPILOT_API_URL` | Rendered as `window.COPILOT_API_URL`. Unset, it is derived from the ingress host plus `/builderservice`. |
 

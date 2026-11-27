@@ -278,71 +278,25 @@ Resolve the model service ingress host
 {{- end -}}
 
 {{/*
-Model service ingress path prefix: the first path of the first host that is not
-the builder path. The builder path is skipped so that the order of the two
-paths in rasa.ingress.hosts[0].paths does not matter.
-*/}}
-{{- define "studio.modelServiceIngressPath" -}}
-{{- $builderPath := include "studio.builderServicePath" . -}}
-{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
-{{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
-{{- $modelPath := "" -}}
-{{- range ($firstHost.paths | default list) -}}
-{{- $path := .path | default "" -}}
-{{- if and (not $modelPath) $path (not (hasPrefix $builderPath $path)) -}}
-{{- $modelPath = $path -}}
-{{- end -}}
-{{- end -}}
-{{- $modelPath | default "/modelservice" -}}
-{{- end -}}
-
-{{/*
-Model service base URL (no ingress path) for window.MS_API_URL
+Combined builder service base URL (scheme + host) for window.MS_API_URL. The
+ingress paths /modelservice and /builderservice are fixed.
 */}}
 {{- define "studio.modelServiceBaseUrl" -}}
 {{- printf "%s://%s" .Values.config.connectionType (include "studio.modelServiceHost" .) -}}
 {{- end -}}
 
 {{/*
-Model service URL for RASA_MODEL_SERVER_BASE_URL (scheme + host + ingress path)
+Model service URL for RASA_MODEL_SERVER_BASE_URL.
 */}}
 {{- define "studio.modelServiceUrl" -}}
-{{- printf "%s://%s%s" .Values.config.connectionType (include "studio.modelServiceHost" .) (include "studio.modelServiceIngressPath" .) -}}
+{{- printf "%s/modelservice" (include "studio.modelServiceBaseUrl" .) -}}
 {{- end -}}
 
 {{/*
-Builder ingress path. Fixed in the combined service; it cannot be configured.
-*/}}
-{{- define "studio.builderServicePath" -}}
-/builderservice
-{{- end -}}
-
-{{/*
-Builder URL for window.COPILOT_API_URL (scheme + host + /builderservice). The
-web client appends /api itself.
-
-Empty unless rasa.ingress.hosts[0].paths lists a path that starts with
-/builderservice (`/builderservice`, `/builderservice/*`, a regex form), and a
-host is set. An empty value hides Copilot. Only the first host is read, to match
-studio.modelServiceHost.
-
-The path list alone decides. rasa.ingress.enabled is not read, the same as for
-window.MS_API_URL, so an install that routes with its own gateway keeps the
-derived URL.
+Builder URL for window.COPILOT_API_URL. The web client appends /api itself.
 */}}
 {{- define "studio.builderServiceUrl" -}}
-{{- $builderPath := include "studio.builderServicePath" . -}}
-{{- $ingress := dig "ingress" (dict) (.Values.rasa | default dict) -}}
-{{- $firstHost := ($ingress.hosts | default list | first) | default dict -}}
-{{- $routed := false -}}
-{{- range ($firstHost.paths | default list) -}}
-{{- if hasPrefix $builderPath (.path | default "") -}}
-{{- $routed = true -}}
-{{- end -}}
-{{- end -}}
-{{- if and $routed (include "studio.modelServiceHost" .) -}}
-{{- printf "%s%s" (include "studio.modelServiceBaseUrl" .) $builderPath -}}
-{{- end -}}
+{{- printf "%s/builderservice" (include "studio.modelServiceBaseUrl" .) -}}
 {{- end -}}
 
 {{/*

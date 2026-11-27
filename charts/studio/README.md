@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.68](https://img.shields.io/badge/Version-3.0.0--rc.68-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.69](https://img.shields.io/badge/Version-3.0.0--rc.69-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.69
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.68
+$ helm install my-release rasa/studio --version 3.0.0-rc.69
 ```
 
 ## Quick Start
@@ -138,13 +138,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.69
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.68
+$ helm pull rasa/studio --version 3.0.0-rc.69
 ```
 
 ## General Configuration
@@ -208,12 +208,12 @@ rasa:
         paths:
           - path: /modelservice
             pathType: Prefix
-          - path: /builderservice        # keep it, or Copilot is hidden
+          - path: /builderservice
             pathType: Prefix
 ```
 
 A list in a values file replaces the chart's list, so a `hosts` entry has to
-repeat both paths. See [The builder](#the-builder).
+repeat both paths exactly as shown. The paths are fixed.
 
 Host resolution is two-level: `global.ingressHost` wins when set; otherwise
 each ingress uses its own host (`app.ingress.hostName`,
@@ -313,7 +313,7 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Read the license and OpenAI API key from `studio-secrets`
 - Expose the model server at `/modelservice` and the builder at `/builderservice` on the shared ingress host
 - Use `/modelservice` for liveness and readiness probes on port `8000`
-- Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and the model service ingress path
+- Inject `RASA_MODEL_SERVER_BASE_URL` and `CORS_ORIGINS` via the `shared-environment` ConfigMap, derived from `config.connectionType`, the ingress host, and `/modelservice`
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Set `window.COPILOT_API_URL` on the web client to the same host plus `/builderservice`
@@ -328,14 +328,14 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 > changed and Kubernetes treats that field as immutable:
 > `kubectl delete deployment rasapro -n <namespace>`.
 
-When `rasa.enabled: false`, override the **browser** model-service URL via the web client ConfigMap (the Studio API process does not read `MS_API_URL`):
+When `rasa.enabled: false` and the combined builder service runs elsewhere, set both **browser** URLs via the web client ConfigMap (the Studio API process does not read them):
 
 ```yaml
 app:
   webClient:
     config:
       MS_API_URL: "https://models.example.com"
-      COPILOT_API_URL: "https://models.example.com/builderservice"  # omit to hide Copilot
+      COPILOT_API_URL: "https://models.example.com/builderservice"
 ```
 
 ### The builder
@@ -348,27 +348,17 @@ and evaluate agents. They are served by the same combined builder service as
 > service host can read and change every agent through `/builderservice`, and
 > use the model key. The builder also trusts the user id the browser sends. This
 > holds until Rasa Pro adds service authentication. Until then, limit who can
-> reach the host (private ingress, allow-list, VPN), or do not route the builder.
+> reach the host (private ingress, allow-list, VPN).
 
 - **Image.** The combined service needs a Rasa Pro image that contains
   `rasa.combined_builder_service`, and it must be the full image
   (`rasa-pro/rasa-pro`). The lite image does not ship the Copilot docs index yet.
 - **Web client.** `window.COPILOT_API_URL` is the model service host plus
   `/builderservice`; the web client adds `/api` itself. Set
-  `app.webClient.config.COPILOT_API_URL` to override it. When it is empty the web
-  client hides Copilot.
+  `app.webClient.config.COPILOT_API_URL` to override it.
 - **A host is needed.** With neither `global.ingressHost` nor
-  `rasa.ingress.hosts[0].host` set, `window.COPILOT_API_URL` is empty and
-  Copilot is hidden, the same as for `window.MS_API_URL`.
-- **Path list.** The chart derives the URL when `rasa.ingress.hosts[0].paths`
-  lists a path that starts with `/builderservice`; a wildcard form such as
-  `/builderservice/*` counts, and the order of the paths does not matter. It
-  does not read `rasa.ingress.enabled`, so an install that routes with its own
-  gateway keeps the derived URL.
-- **Do not route the builder.** Remove the `/builderservice` path from
-  `rasa.ingress.hosts[0].paths`. The chart then leaves `window.COPILOT_API_URL`
-  empty. The builder still runs inside the pod but cannot be reached from
-  outside the cluster.
+  `rasa.ingress.hosts[0].host` set, `window.COPILOT_API_URL` and
+  `window.MS_API_URL` are both empty.
 - **No catch-all path.** Never add `/` to the model service ingress. The
   combined service also serves `/webhooks/...`, `/inspector.io` and
   `/swagger...` at the root, with no login check.

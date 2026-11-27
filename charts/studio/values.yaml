@@ -937,18 +937,12 @@ rasa:
       # to pin an exact host. The model-service URL derivation follows:
       # global.ingressHost > this host.
       - host: ""
+        # Fixed paths: keep both as they are. The chart builds the model
+        # service and Copilot URLs from them. The builder routes have NO login
+        # check yet, so limit who can reach this host.
         paths:
           - path: /modelservice
             pathType: Prefix
-          # Builder routes (Copilot). They have NO login check yet: anyone who
-          # can reach this host can read and change every agent. Remove this
-          # path to keep the builder unreachable from outside the cluster; the
-          # chart then leaves window.COPILOT_API_URL empty and the web client
-          # hides Copilot. The order of the two paths does not matter, and a
-          # wildcard form such as `/builderservice/*` also counts as routed.
-          # Never add a catch-all path (`/`) here: the combined service also
-          # serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the
-          # root, with no login check.
           - path: /builderservice
             pathType: Prefix
 

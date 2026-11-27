@@ -2,7 +2,7 @@
 
 A Rasa Studio Helm chart for Kubernetes
 
-![Version: 3.0.0-rc.67](https://img.shields.io/badge/Version-3.0.0--rc.67-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
+![Version: 3.0.0-rc.68](https://img.shields.io/badge/Version-3.0.0--rc.68-informational?style=flat-square) ![Type: application](https://img.shields.io/badge/Type-application-informational?style=flat-square)
 
 ## Architecture
 
@@ -70,7 +70,7 @@ You can install the chart from either the OCI registry or the GitHub Helm reposi
 To install the chart with the release name `my-release`:
 
 ```console
-$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
+$ helm install my-release oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
 ```
 
 ### Option 2: Install from GitHub Helm Repository
@@ -85,7 +85,7 @@ $ helm repo update
 Then install the chart:
 
 ```console
-$ helm install my-release rasa/studio --version 3.0.0-rc.67
+$ helm install my-release rasa/studio --version 3.0.0-rc.68
 ```
 
 ## Quick Start
@@ -138,13 +138,13 @@ You can pull the chart from either source:
 ### From OCI Registry:
 
 ```console
-$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.67
+$ helm pull oci://europe-west3-docker.pkg.dev/rasa-releases/helm-charts/studio --version 3.0.0-rc.68
 ```
 
 ### From GitHub Helm Repository:
 
 ```console
-$ helm pull rasa/studio --version 3.0.0-rc.67
+$ helm pull rasa/studio --version 3.0.0-rc.68
 ```
 
 ## General Configuration
@@ -305,11 +305,11 @@ Studio bundles the [Rasa Pro Helm chart](https://helm.rasa.com) as an optional O
 
 ```yaml
 rasa:
-  enabled: true  # set false to run Studio without the model service and the builder
+  enabled: true
 ```
 
 When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
-- Start the combined service, `python -m rasa.combined_builder_service`: the model service and the builder in one process on port `8000`
+- Start the combined builder service, `python -m rasa.combined_builder_service`, on port `8000`
 - Read the license and OpenAI API key from `studio-secrets`
 - Expose the model server at `/modelservice` and the builder at `/builderservice` on the shared ingress host
 - Use `/modelservice` for liveness and readiness probes on port `8000`
@@ -317,7 +317,7 @@ When `rasa.enabled: true`, the bundled Rasa Pro is pre-configured to:
 - Inject `STUDIO_AUTH_URL` (in-cluster Studio app service URL) via the same ConfigMap, so the model service can introspect Studio sessions for authentication
 - Set `window.MS_API_URL` on the web client to the model service external host (without the ingress path prefix)
 - Set `window.COPILOT_API_URL` on the web client to the same host plus `/builderservice`
-- Run one replica with a `Recreate` update strategy. Both are required: the service keeps trainings, deployments, jobs and locks in memory, and the chart refuses more than one replica, autoscaling or another strategy at install time
+- Run one replica with a `Recreate` update strategy
 - Use service name `rasapro` (hardcoded via `fullnameOverride`) — this is the hostname the app uses internally
 
 > **Note:** the subchart is `rasa` 3.0.0, which puts deployment settings at its own
@@ -340,10 +340,9 @@ app:
 
 ### The builder
 
-The builder is the part of Rasa Pro that Copilot uses to create, train and
-evaluate agents. This chart does not deploy it on its own and has no separate
-switch for it: `rasa.enabled: true` runs the model service and the builder as
-one combined service, and `rasa.enabled: false` runs neither.
+The builder routes (`/builderservice`) are what Copilot uses to create, train
+and evaluate agents. They are served by the same combined builder service as
+`/modelservice`.
 
 > **The builder routes have no login check yet.** Anyone who can reach the model
 > service host can read and change every agent through `/builderservice`, and
@@ -370,8 +369,6 @@ one combined service, and `rasa.enabled: false` runs neither.
   `rasa.ingress.hosts[0].paths`. The chart then leaves `window.COPILOT_API_URL`
   empty. The builder still runs inside the pod but cannot be reached from
   outside the cluster.
-- **Command.** The chart refuses a `rasa.command` that does not start
-  `rasa.combined_builder_service`.
 - **No catch-all path.** Never add `/` to the model service ingress. The
   combined service also serves `/webhooks/...`, `/inspector.io` and
   `/swagger...` at the root, with no login check.
@@ -450,8 +447,7 @@ app:
 The model service writes trained models to `/app/working-data` inside its
 container. By default the chart provides **no** storage for that path, so models
 live on the container filesystem and are lost whenever the pod restarts — which
-includes every `helm upgrade`, because the model service runs a single replica
-with a `Recreate` strategy.
+includes every `helm upgrade`.
 
 Pick one of the two options below before going to production:
 
@@ -493,9 +489,8 @@ Constraints worth knowing before you enable it:
   to spot.
 - **One release per namespace.** The PVC name is derived from the namespace, not
   the release, so two Studio releases in one namespace collide.
-- **`ReadWriteOnce` only.** The claim cannot be shared, which is consistent with
-  the single-replica `Recreate` strategy. Do not raise `rasa.replicaCount` while
-  using a PVC unless your StorageClass supports `ReadWriteMany`.
+- **`ReadWriteOnce` only.** The claim cannot be shared, which fits the
+  single-replica `Recreate` strategy.
 - **Changing the mount path.** Set `RASA_MODEL_SERVER_BASE_DIRECTORY` on the
   model service container to move the working directory off `working-data`. The
   chart mounts `/app/working-data`, so changing one without the other detaches
@@ -1142,7 +1137,7 @@ changes need work outside your values file.
 | rasa.command[0] | string |  | `"python"` |
 | rasa.command[1] | string |  | `"-m"` |
 | rasa.command[2] | string |  | `"rasa.combined_builder_service"` |
-| rasa.enabled | bool | Deploy the Rasa Pro subchart. It runs one combined service: the model service (`/modelservice`) and the builder that powers Copilot (`/builderservice`). This chart version does not run the model service without the builder. To run Studio without either, set this to false. WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
+| rasa.enabled | bool | Deploy the Rasa Pro subchart, which runs the combined builder service (`/modelservice` and `/builderservice`, which Copilot uses). WARNING: never disable with `rasa: null` — deleting the key breaks the subchart condition and re-enables the subchart with its default values (the chart fails the render if it detects this). | `true` |
 | rasa.envFrom[0].configMapRef.name | string |  | `"shared-environment"` |
 | rasa.fullnameOverride | string |  | `"rasapro"` |
 | rasa.image.repository | string |  | `"europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro"` |
@@ -1163,21 +1158,21 @@ changes need work outside your values file.
 | rasa.livenessProbe.periodSeconds | int |  | `15` |
 | rasa.livenessProbe.successThreshold | int |  | `1` |
 | rasa.livenessProbe.timeoutSeconds | int |  | `5` |
-| rasa.mountModelsVolume | bool | The model service ships its own models; no chart-managed volume. | `false` |
+| rasa.mountModelsVolume | bool | The combined builder service ships its own models; no chart-managed volume. | `false` |
 | rasa.overrideEnv[0].name | string |  | `"RASA_LICENSE"` |
 | rasa.overrideEnv[0].valueFrom.secretKeyRef.key | string |  | `"RASA_PRO_LICENSE_SECRET_KEY"` |
 | rasa.overrideEnv[0].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
 | rasa.overrideEnv[1].name | string |  | `"OPENAI_API_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.key | string |  | `"OPENAI_API_KEY_SECRET_KEY"` |
 | rasa.overrideEnv[1].valueFrom.secretKeyRef.name | string |  | `"studio-secrets"` |
-| rasa.persistence.create | bool | Mount a PersistentVolumeClaim at `/app/working-data`, where the model service writes trained models. Off by default. With no volume the models sit on the container filesystem and are lost on every pod restart, including every `helm upgrade` — the model service runs a single replica with a `Recreate` strategy. Either turn this on, or send models to object storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README. | `false` |
+| rasa.persistence.create | bool | Mount a PersistentVolumeClaim at `/app/working-data`, where the combined builder service keeps trained models, agents and Copilot history. Off by default. With no volume they sit on the container filesystem and are lost on every pod restart, including every `helm upgrade`. Either turn this on, or send models to object storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README. | `false` |
 | rasa.persistence.hostPath.enabled | bool |  | `false` |
 | rasa.persistence.storageCapacity | string |  | `"1Gi"` |
 | rasa.persistence.storageClassName | string | Required once `create` is true — the subchart schema rejects an unset value. The chart cannot guess it: the class is a property of your cluster (`kubectl get storageclass`). An unset value used to be replaced silently by the cluster default at admission, which Kubernetes then treats as an immutable field and refuses to reconcile on every later `helm upgrade`. Use "" to bind a classless PersistentVolume. | `nil` |
 | rasa.persistence.storageRequests | string | Size requested by the PersistentVolumeClaim. Only read when `create` is true. | `"1Gi"` |
 | rasa.podSecurityContext.fsGroup | int | User ID of the container to access the mounted volume. | `1001` |
 | rasa.rasa.mountDefaultConfigmap | bool | Studio supplies no endpoints or integrations, so render no ConfigMap. | `false` |
-| rasa.rasa.port | int | The model service listens on 8000, not the chart default 5005. | `8000` |
+| rasa.rasa.port | int | The combined builder service listens on 8000, not the chart default 5005. | `8000` |
 | rasa.readinessProbe.enabled | bool |  | `true` |
 | rasa.readinessProbe.failureThreshold | int |  | `6` |
 | rasa.readinessProbe.httpGet.path | string |  | `"/modelservice/health"` |

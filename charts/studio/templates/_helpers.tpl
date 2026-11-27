@@ -372,24 +372,6 @@ fully successful install with a broken release.
 {{- fail "config.database.password is required unless config.database.useAwsIamAuth is \"true\" — set config.database.password.secretName and .secretKey, or enable IAM auth" -}}
 {{- end -}}
 {{- if .Values.rasa.enabled -}}
-{{- /* The model service and the builder keep trainings, deployments, jobs and
-       locks in memory, so a second pod -- even briefly, during a rolling
-       update -- serves requests from state the first one does not have. */ -}}
-{{- if gt (.Values.rasa.replicaCount | default 1 | int) 1 -}}
-{{- fail (printf "rasa.replicaCount must not be more than 1, got %v. The model service and the builder keep their state in memory and cannot run more than one replica" .Values.rasa.replicaCount) -}}
-{{- end -}}
-{{- if dig "autoscaling" "enabled" false .Values.rasa -}}
-{{- fail "rasa.autoscaling.enabled must be false. The model service and the builder keep their state in memory and cannot run more than one replica" -}}
-{{- end -}}
-{{- if ne (dig "strategy" "type" "" .Values.rasa) "Recreate" -}}
-{{- fail "rasa.strategy.type must be Recreate. The model service and the builder keep their state in memory, so the old pod has to stop before the new one starts" -}}
-{{- end -}}
-{{- /* This chart does not run the model service without the builder. With
-       another command the web client would still be sent to /builderservice,
-       where nothing answers. */ -}}
-{{- if not (contains "rasa.combined_builder_service" (join " " (.Values.rasa.command | default list))) -}}
-{{- fail "rasa.command must start rasa.combined_builder_service. This chart version runs the model service and the builder as one service; remove the rasa.command override, or set it to [\"python\", \"-m\", \"rasa.combined_builder_service\"]" -}}
-{{- end -}}
 {{- $declared := list -}}
 {{- range (.Values.rasa.overrideEnv | default list) -}}
 {{- $declared = append $declared .name -}}
@@ -405,7 +387,7 @@ fully successful install with a broken release.
 {{- end -}}
 {{- end -}}
 {{- if not $found -}}
-{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the model service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
+{{- fail (printf "rasa.enabled is true but rasa.overrideEnv declares no %s entry. rasa.overrideEnv replaces the chart default list wholesale, which drops the combined builder service credentials — re-declare the defaults from values.yaml, or set rasa.enabled: false" (join " or " $accepted)) -}}
 {{- end -}}
 {{- end -}}
 {{- end -}}

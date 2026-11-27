@@ -208,13 +208,11 @@ app:
 Setting `MS_API_URL` on `app.env` has no effect on `window.MS_API_URL` — only
 `app.webClient.config.MS_API_URL` does.
 
-### The model service now also runs the builder
+### Rasa Pro runs the combined builder service
 
-`rasa.enabled: true` starts one combined service,
-`python -m rasa.combined_builder_service`. It serves the model service routes
-under `/modelservice` and the builder routes, which Copilot uses, under
-`/builderservice`. There is no separate switch: this chart version does not run
-the model service without the builder. `rasa.enabled: false` runs neither.
+`rasa.enabled: true` starts `python -m rasa.combined_builder_service`. It serves
+`/modelservice` and the builder routes, which Copilot uses, under
+`/builderservice`.
 
 > **The builder has no login check yet.** Anyone who can reach the model service
 > host can read and change every agent through `/builderservice`, and use the
@@ -227,14 +225,11 @@ What to check in your values:
 | if you set | then |
 |---|---|
 | `rasa.image.tag` | Use a Rasa Pro build that contains `rasa.combined_builder_service`, and the full image, not the lite one. An older image fails at start with `No module named rasa.combined_builder_service`. |
-| `rasa.command` | Drop the override, or set it to `["python", "-m", "rasa.combined_builder_service"]`. The chart refuses a command that does not start `rasa.combined_builder_service`, because `/builderservice` would answer 404 and Copilot would be broken. |
 | `rasa.ingress.hosts` (every split-host install) | Add `/builderservice` next to `/modelservice`. Your list replaces the chart's, so without it the builder is not routed, `window.COPILOT_API_URL` stays empty and the web client hides Copilot. Leaving it out is also the supported way to keep the builder unreachable. Never add a catch-all `/` path: the service also serves `/webhooks/...`, `/inspector.io` and `/swagger...` at the root with no login check. |
-| `rasa.replicaCount`, `rasa.autoscaling.enabled`, `rasa.strategy` | At most one replica, no autoscaling and `Recreate` are now enforced at install time. The service keeps its state in memory. |
 | `rasa.persistence` | Turn it on if you use Copilot. The builder keeps agents and Copilot history under `/app/working-data`, and a pod restart loses them without a volume. |
-| `app.webClient.config.COPILOT_API_URL` | Previously ignored by the chart, now rendered as `window.COPILOT_API_URL`. Unset, it is derived from the model service host plus `/builderservice`. |
+| `app.webClient.config.COPILOT_API_URL` | Rendered as `window.COPILOT_API_URL`. Unset, it is derived from the ingress host plus `/builderservice`. |
 
-Expect the pod to need more memory than the model service alone: about 2 GB at
-rest, before any training.
+Expect the pod to need about 2 GB of memory at rest, before any training.
 
 ### Ingress host configuration
 

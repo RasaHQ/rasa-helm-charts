@@ -861,20 +861,15 @@ podLabels: {}
 
 # Define the resources for the Rasa Pro model server
 rasa:
-  # -- Deploy the Rasa Pro subchart. It runs one combined service: the model
-  # service (`/modelservice`) and the builder that powers Copilot
-  # (`/builderservice`). This chart version does not run the model service
-  # without the builder. To run Studio without either, set this to false.
+  # -- Deploy the Rasa Pro subchart, which runs the combined builder service
+  # (`/modelservice` and `/builderservice`, which Copilot uses).
   # WARNING: never disable with `rasa: null` — deleting the key breaks the
   # subchart condition and re-enables the subchart with its default values
   # (the chart fails the render if it detects this).
   enabled: true
   fullnameOverride: rasapro
 
-  # At most one replica with the `Recreate` strategy is required, not a default
-  # to tune: the model service and the builder keep trainings, deployments, jobs
-  # and locks in memory. The chart refuses more than one replica, autoscaling
-  # and any other strategy at install time.
+  # Single replica, like every Studio pod.
   replicaCount: 1
   image:
     # The combined service needs the full Rasa Pro image. The lite image does
@@ -882,13 +877,11 @@ rasa:
     repository: europe-west3-docker.pkg.dev/rasa-releases/rasa-pro/rasa-pro
     tag: "3.22.0rc1"
 
+  # Stop the old pod before starting the new one, so a ReadWriteOnce volume is
+  # free for it.
   strategy:
     type: Recreate
 
-  # Starts the model service and the builder in one process, on one port. The
-  # service works out the builder path, folders and model service address
-  # itself; there is no builder environment setting. The chart refuses a
-  # command that does not start `rasa.combined_builder_service`.
   command: ["python", "-m", "rasa.combined_builder_service"]
 
   overrideEnv:
@@ -960,11 +953,11 @@ rasa:
             pathType: Prefix
 
   persistence:
-    # -- Mount a PersistentVolumeClaim at `/app/working-data`, where the model
-    # service writes trained models. Off by default. With no volume the models
-    # sit on the container filesystem and are lost on every pod restart,
-    # including every `helm upgrade` — the model service runs a single replica
-    # with a `Recreate` strategy. Either turn this on, or send models to object
+    # -- Mount a PersistentVolumeClaim at `/app/working-data`, where the
+    # combined builder service keeps trained models, agents and Copilot
+    # history. Off by default. With no volume they sit on the container
+    # filesystem and are lost on every pod restart, including every
+    # `helm upgrade`. Either turn this on, or send models to object
     # storage with `RASA_REMOTE_STORAGE`. See "Model Storage" in the chart README.
     create: false
     storageCapacity: 1Gi
@@ -1000,11 +993,11 @@ rasa:
   # -- `args: []` replaces the chart-generated arguments entirely, so the container
   # runs `command` alone. This is what settings.useDefaultArgs: false used to do.
   args: []
-  # -- The model service ships its own models; no chart-managed volume.
+  # -- The combined builder service ships its own models; no chart-managed volume.
   mountModelsVolume: false
 
   rasa:
-    # -- The model service listens on 8000, not the chart default 5005.
+    # -- The combined builder service listens on 8000, not the chart default 5005.
     port: 8000
     # -- Studio supplies no endpoints or integrations, so render no ConfigMap.
     mountDefaultConfigmap: false
